@@ -115,3 +115,11 @@ CREATE TABLE IF NOT EXISTS cms_shop_imageloaders (
   KEY (mtype),
   KEY (ufid)
 ) COMMENT 'Image loaders';
+
+
+CREATE TABLE IF NOT EXISTS cms_shop_blocks_material (
+  id int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'ID#',
+  cart_type int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Material type ID#',
+  PRIMARY KEY (id),
+  KEY cart_type (cart_type)
+) COMMENT='Cart blocks';

@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+use \RAAS\CMS\Block_Type;
 
 class Module extends \RAAS\Module
 {
@@ -28,10 +29,39 @@ class Module extends \RAAS\Module
                 $text = file_get_contents($this->stdImageLoaderInterfaceFile);
                 return $text;
                 break;
+            case 'stdCartInterfaceFile':
+                return $this->resourcesDir . '/cart_interface.php';
+                break;
+            case 'stdCartInterface':
+                $text = file_get_contents($this->stdCartInterfaceFile);
+                return $text;
+                break;
+            case 'stdCartViewFile':
+                return $this->resourcesDir . '/cart.tmp.php';
+                break;
+            case 'stdCartView':
+                $text = file_get_contents($this->stdCartViewFile);
+                return $text;
+                break;
             default:
                 return parent::__get($var);
                 break;
         }
     }
 
+
+    public function init()
+    {
+        parent::init();
+        // Block_Type::registerType('RAAS\\CMS\\Shop\\Block_Cart', 'RAAS\\CMS\\Shop\\ViewBlockCart', 'RAAS\\CMS\\Shop\\EditBlockCartForm');
+    }
+
+
+    public function install()
+    {
+        if (!$this->registryGet('installDate')) {
+            parent::install();
+            new Updater($this);
+        }
+    }
 }
