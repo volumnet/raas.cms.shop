@@ -1,7 +1,10 @@
 <?php
-namespace RAAS\CMS;
+namespace RAAS\CMS\Shop;
+use \RAAS\CMS\ViewBlock;
+use \RAAS\CMS\Page;
+use \RAAS\CMS\Location;
 
-class ViewBlockForm extends ViewBlock
+class ViewBlockCart extends ViewBlock
 {
     const blockListItemClass = 'cms-block-shop-cart';
 

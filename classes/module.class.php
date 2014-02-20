@@ -50,18 +50,8 @@ class Module extends \RAAS\Module
     }
 
 
-    public function init()
+    public function registerBlockTypes()
     {
-        parent::init();
-        // Block_Type::registerType('RAAS\\CMS\\Shop\\Block_Cart', 'RAAS\\CMS\\Shop\\ViewBlockCart', 'RAAS\\CMS\\Shop\\EditBlockCartForm');
-    }
-
-
-    public function install()
-    {
-        if (!$this->registryGet('installDate')) {
-            parent::install();
-            new Updater($this);
-        }
+        Block_Type::registerType('RAAS\\CMS\\Shop\\Block_Cart', 'RAAS\\CMS\\Shop\\ViewBlockCart', 'RAAS\\CMS\\Shop\\EditBlockCartForm');
     }
 }

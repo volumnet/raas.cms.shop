@@ -1,6 +1,9 @@
 CREATE TABLE IF NOT EXISTS cms_shop_cart_types (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID#',
   form_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Form ID#',
+  no_amount TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Single item of a type',
+  interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',
+  description TEXT NULL DEFAULT NULL COMMENT 'E-mail template',
 
   PRIMARY KEY (id),
   KEY (form_id)
@@ -117,9 +120,9 @@ CREATE TABLE IF NOT EXISTS cms_shop_imageloaders (
 ) COMMENT 'Image loaders';
 
 
-CREATE TABLE IF NOT EXISTS cms_shop_blocks_material (
+CREATE TABLE IF NOT EXISTS cms_shop_blocks_cart (
   id int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'ID#',
-  cart_type int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Material type ID#',
+  cart_type int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Cart type ID#',
   PRIMARY KEY (id),
   KEY cart_type (cart_type)
 ) COMMENT='Cart blocks';

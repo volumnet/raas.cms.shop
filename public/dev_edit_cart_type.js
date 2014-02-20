@@ -7,18 +7,16 @@ jQuery(function($) {
         }
     })
 
-    var checkInterface = function(first) {
-        $obj = $('.control-group:has(#description)');
-        $txt = $('#description');
-        if ((parseInt($('select#std_template').val()) > 0) || $('input#std_template:checkbox').attr('checked')) {
-            first === true ? $obj.hide() : $obj.fadeOut();
-            $txt.attr('disabled', 'disabled');
-        } else {
-            $txt.removeAttr('disabled', 'disabled');
-            first === true ? $obj.show() : $obj.fadeIn();
+    if ($('.code#description').length) {
+        if (parseInt($('select#interface_id').val()) > 0) {
+            $('.control-group:has(.code#description)').hide();
         }
+        $('#interface_id').change(function() {
+            if (parseInt($(this).val()) > 0) {
+                $('.control-group:has(.code#description)').fadeOut();
+            } else {
+                $('.control-group:has(.code#description)').fadeIn();
+            }
+        })
     }
-    
-    checkInterface(true);
-    $('#std_template').change(checkInterface);
 });

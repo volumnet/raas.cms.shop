@@ -119,7 +119,7 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
 
     private function stdDictionaryEdit(array $IN, $title, $showListAction, $contextMenuName)
     {
-        $this->path[] = array('name' => $this->_('DEVELOPMENT'), 'href' => \RAAS\CMS\ViewSub_Dev::i());
+        $this->path[] = array('name' => $this->_('DEVELOPMENT'), 'href' => \RAAS\CMS\ViewSub_Dev::i()->url);
         $this->path[] = array('name' => $this->_($title), 'href' => $this->url . '&action=' . $showListAction);
         $this->stdView->stdEdit($IN, $contextMenuName);
     }

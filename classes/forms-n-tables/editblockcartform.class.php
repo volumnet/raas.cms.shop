@@ -3,6 +3,7 @@ namespace RAAS\CMS\Shop;
 use \RAAS\Field as RAASField;
 use \RAAS\CMS\Form as CMSForm;
 use \RAAS\CMS\EditBlockForm;
+use \RAAS\CMS\Snippet;
 
 class EditBlockCartForm extends EditBlockForm
 {
@@ -36,7 +37,7 @@ class EditBlockCartForm extends EditBlockForm
     {
         $tab = parent::getCommonTab();
         $tab->children[] = new RAASField(array(
-            'type' => 'select', 'name' => 'form', 'caption' => $this->_view->_('CART'), 'children' => array('Set' => Cart_Type::getSet())
+            'type' => 'select', 'name' => 'cart_type', 'caption' => Module::i()->view->_('CART'), 'children' => array('Set' => Cart_Type::getSet())
         ));
         $tab->children[] = $this->getWidgetField();
         $tab->children[] = $this->getWidgetCodeField();

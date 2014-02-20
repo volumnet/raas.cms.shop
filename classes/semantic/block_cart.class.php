@@ -4,12 +4,12 @@ use \RAAS\CMS\Block;
 
 class Block_Cart extends Block
 {
-    protected static $tablename2 = 'cms_blocks_cart';
+    protected static $tablename2 = 'cms_shop_blocks_cart';
 
     protected static $references = array(
         'author' => array('FK' => 'author_id', 'classname' => 'RAAS\\User', 'cascade' => false),
         'editor' => array('FK' => 'editor_id', 'classname' => 'RAAS\\User', 'cascade' => false),
-        'Cart_Type' => array('FK' => 'cart_type', 'classname' => 'RAAS\\CMS\\Cart_Type', 'cascade' => true),
+        'Cart_Type' => array('FK' => 'cart_type', 'classname' => 'RAAS\\CMS\\Shop\\Cart_Type', 'cascade' => true),
     );
     
     public function __construct($import_data = null)

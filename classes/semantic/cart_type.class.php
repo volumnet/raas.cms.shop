@@ -3,10 +3,11 @@ namespace RAAS\CMS\Shop;
 
 class Cart_Type extends \SOME\SOME
 {
-    protected static $tablename = 'cms_shop_cart_typess';
+    protected static $tablename = 'cms_shop_cart_types';
     protected static $defaultOrderBy = "name";
     protected static $references = array(
         'Form' => array('FK' => 'form_id', 'classname' => 'RAAS\\CMS\\Form', 'cascade' => false),
+        'Interface' => array('FK' => 'interface_id', 'classname' => 'RAAS\\CMS\\Snippet', 'cascade' => false),
     );
     protected static $links = array(
         'material_types' => array('tablename' => 'cms_shop_cart_types_material_types_assoc', 'field_from' => 'ctype', 'field_to' => 'mtype', 'classname' => 'RAAS\\CMS\\Material_Type')
