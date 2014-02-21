@@ -53,10 +53,10 @@ CREATE TABLE IF NOT EXISTS cms_shop_orders (
 CREATE TABLE IF NOT EXISTS cms_shop_orders_goods (
   order_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Order ID#',
   material_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material ID#',
+  name VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'Name',
   meta VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'Meta data',
-  realprice DECIMAL(8,2) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Real price',
+  realprice DECIMAL(8,2) NOT NULL DEFAULT 0 COMMENT 'Real price',
   amount INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Amount',
-  total_sum DECIMAL(8,2) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Total sum',
 
   PRIMARY KEY (order_id, material_id, meta),
   KEY (order_id),

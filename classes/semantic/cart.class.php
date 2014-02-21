@@ -10,18 +10,12 @@ abstract class Cart
 
     public function __get($var)
     {
-        switch (variable) {
+        switch ($var) {
             case 'cartType':
                 return $this->cartType;
                 break;
-            case 'count':
-                $sum = 0;
-                foreach ($this->items as $item_id => $metas) {
-                    foreach ($metas as $meta => $c) {
-                        $sum += $c;
-                    }
-                }
-                return $sum;
+            case 'items':
+                return $this->items;
                 break;
             case 'count':
                 $sum = 0;
@@ -64,7 +58,7 @@ abstract class Cart
             $amount = min(1, $amount);
         }
         if ($amount > 0) {
-            if (in_array($Item->material_type->id, $this->cartType->material_types_ids)) {
+            if ($Item->id && in_array($Item->material_type->id, $this->cartType->material_types_ids)) {
                 $this->items[(int)$Item->id][(string)$meta] = $amount;
             }
         } else {
