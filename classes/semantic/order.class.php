@@ -5,6 +5,12 @@ use \RAAS\CMS\Feedback;
 class Order extends Feedback
 {
     protected static $tablename = 'cms_shop_orders';
+    protected static $references = array(
+        'user' => array('FK' => 'uid', 'classname' => 'RAAS\\CMS\\User', 'cascade' => true),
+        'parent' => array('FK' => 'pid', 'classname' => 'RAAS\\CMS\\Shop\\Cart_Type', 'cascade' => true),
+        'page' => array('FK' => 'page_id', 'classname' => 'RAAS\\CMS\\Page', 'cascade' => false),
+        'viewer' => array('FK' => 'vis', 'classname' => 'RAAS\\User', 'cascade' => false),
+    );
     protected static $links = array(
         'items' => array('tablename' => 'cms_shop_orders_goods', 'field_from' => 'order_id', 'field_to' => 'material_id', 'classname' => 'RAAS\\CMS\\Material')
     );
@@ -30,5 +36,27 @@ class Order extends Feedback
                 return parent::__get($var);
                 break;
         }
+    }
+
+
+    public function commit()
+    {
+        parent::commit();
+        if ($this->meta_items) {
+            $t = $this;
+            $SQL_query = "DELETE FROM " . static::_dbprefix() . self::$links['items']['tablename'] . " WHERE order_id = " . (int)$this->id;
+            $this->SQL->query($SQL_query);
+            $arr = array_map(function($x) use ($t) { return array_merge(array('order_id' => (int)$t->id), (array)$x); }, $this->meta_items);
+            $this->SQL->add(static::_dbprefix() . self::$links['items']['tablename'], $arr);
+            unset($this->meta_items);
+        }
+    }
+
+
+    public static function Order(self $Item)
+    {
+        $SQL_query = "DELETE FROM " . static::_dbprefix() . self::$links['items']['tablename'] . " WHERE order_id = " . (int)$Item->id;
+        $this->SQL->query($SQL_query);
+        parent::delete($Item);
     }
 }

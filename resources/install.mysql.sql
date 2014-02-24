@@ -2,8 +2,6 @@ CREATE TABLE IF NOT EXISTS cms_shop_cart_types (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID#',
   form_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Form ID#',
   no_amount TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Single item of a type',
-  interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',
-  description TEXT NULL DEFAULT NULL COMMENT 'E-mail template',
 
   PRIMARY KEY (id),
   KEY (form_id)

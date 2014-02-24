@@ -11,11 +11,8 @@ abstract class Cart
     public function __get($var)
     {
         switch ($var) {
-            case 'cartType':
-                return $this->cartType;
-                break;
-            case 'items':
-                return $this->items;
+            case 'cartType': case 'items':
+                return $this->$var;
                 break;
             case 'count':
                 $sum = 0;
@@ -86,6 +83,12 @@ abstract class Cart
     public function reduce(Material $Item, $amount = 1, $meta = '')
     {
         $this->set($Item, $this->count($Item) - $amount, $meta);
+    }
+
+
+    public function clear()
+    {
+        $this->items = array();
     }
 
 

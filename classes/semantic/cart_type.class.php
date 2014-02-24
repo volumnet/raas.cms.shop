@@ -5,9 +5,9 @@ class Cart_Type extends \SOME\SOME
 {
     protected static $tablename = 'cms_shop_cart_types';
     protected static $defaultOrderBy = "name";
+    protected static $cognizableVars = array('unreadOrders');
     protected static $references = array(
         'Form' => array('FK' => 'form_id', 'classname' => 'RAAS\\CMS\\Form', 'cascade' => false),
-        'Interface' => array('FK' => 'interface_id', 'classname' => 'RAAS\\CMS\\Snippet', 'cascade' => false),
     );
     protected static $links = array(
         'material_types' => array('tablename' => 'cms_shop_cart_types_material_types_assoc', 'field_from' => 'ctype', 'field_to' => 'mtype', 'classname' => 'RAAS\\CMS\\Material_Type')
@@ -40,5 +40,12 @@ class Cart_Type extends \SOME\SOME
         if ($arr) {
             self::$SQL->add(self::$links['material_types']['tablename'], $arr);
         }
+    }
+
+
+    protected function _unreadFeedbacks()
+    {
+        $SQL_query = "SELECT COUNT(*) FROM " . Order::_tablename() . " WHERE pid = " . (int)$this->id . " AND NOT vis";
+        return self::$SQL->getvalue($SQL_query);
     }
 }

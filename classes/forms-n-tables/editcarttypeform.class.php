@@ -53,30 +53,6 @@ class EditCartTypeForm extends \RAAS\Form
                 array('name' => 'urn', 'caption' => $view->_('URN')),
                 array('name' => 'name', 'caption' => $view->_('NAME'), 'required' => 'required'), 
                 array('type' => 'select', 'name' => 'form_id', 'caption' => $view->_('USE_FORM_FIELDS'), 'children' => $CONTENT['forms']),
-                array(
-                    'type' => 'select',
-                    'class' => 'input-xxlarge',
-                    'name' => 'interface_id', 
-                    'caption' => $view->_('INTERFACE'), 
-                    'placeholder' => $view->_('_NONE'), 
-                    'children' => $wf(new Snippet_Folder()),
-                    'default' => Snippet::importByURN('__RAAS_shop_order_notify')->id,
-                ),
-                array(
-                    'type' => 'codearea', 
-                    'name' => 'description', 
-                    'caption' => $view->_('TEMPLATE_CODE'), 
-                    'default' => Module::i()->stdFormTemplate,
-                    'import' => function($Field) { 
-                        return $Field->Form->Item->Interface->id ? $Field->Form->Item->Interface->description : $Field->importDefault(); 
-                    },
-                    'export' => function($Field) {
-                        $Field->Form->Item->description = '';
-                        if (!(isset($_POST['interface_id']) && (int)$_POST['interface_id']) && isset($_POST['description'])) {
-                            $Field->Form->Item->description = (string)$_POST['description'];
-                        }
-                    }, 
-                ),
                 array('type' => 'checkbox', 'name' => 'no_amount', 'caption' => $view->_('FAVORITES_MODE')),
 
                 new FieldSet(array(

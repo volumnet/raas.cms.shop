@@ -84,15 +84,37 @@ $emailField = function($field)
       }
       ?>
     </div>
-    <?php if ($Material && $Material->id) { ?>
-        <p>
-          <a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&sub=main&action=edit_material&id=' . $Material->id . '&pid=' . (in_array($Item->page->id, array_map(function($x) { return $x->id; }, (array)$Item->parent->Material_Type->affectedPages)) ? $Item->page->id : $Item->parent->Material_Type->affectedPages[0]->id))?>">
-            <?php echo VIEW?>
-          </a>
-        </p>
-    <?php } elseif ($Item->parent->create_feedback) { ?>
-        <p><a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&sub=feedback&action=view&id=' . $Item->id)?>"><?php echo VIEW?></a></p>
+    <?php if ($Item->items) { ?>
+      <table style="width: 100%" border="1">
+        <thead>
+          <tr>
+            <th><?php echo NAME?></th>
+            <th><?php echo ADDITIONAL_INFO?></th>
+            <th><?php echo PRICE?></th>
+            <th><?php echo AMOUNT?></th>
+            <th><?php echo SUM?></th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php foreach ($Item->items as $row) { $sum = 0; ?>
+            <td>
+              <a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&sub=main&action=edit_material&id=' . $row->id . '&pid=' . ($row->material_type->affectedPages[0]->id))?>">
+                <?php echo htmlspecialchars($row->name)?>
+              </a>
+            </td>
+            <td><?php echo htmlspecialchars($row->meta)?></td>
+            <td><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
+            <td><?php echo (int)$row->amount?></td>
+            <td><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+          <?php $sum += $row->amount * $row->realprice; } ?>
+          <tr>
+            <th colspan="4" style="text-align: right"><?php echo TOTAL_SUM?></th>
+            <th><?php echo number_format($sum, 2, '.', ' ')?></th>
+          </tr>
+        </tbody>
+      </table>
     <?php } ?>
+    <p><a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&m=shop&sub=orders&action=view&id=' . $Item->id)?>"><?php echo VIEW?></a></p>
     <p>
       <small>
         <?php echo IP_ADDRESS?>: <?php echo htmlspecialchars($Item->ip)?><br />
@@ -105,12 +127,8 @@ $emailField = function($field)
         <?php } ?>
         <a href="<?php echo htmlspecialchars($Item->domain . $Item->page->url)?>"><?php echo htmlspecialchars($Item->page->name)?></a>
         <br />
-        <?php echo FORM?>: 
-        <?php if ($Item->parent->create_feedback) { ?>
-            <a href="<?php echo htmlspecialchars($Item->domain . '/admin/?p=cms&sub=feedback&id=' . $Item->parent->id)?>"><?php echo htmlspecialchars($Item->parent->name)?></a>
-        <?php } else { ?>
-            <?php echo htmlspecialchars($Item->parent->name)?>
-        <?php } ?>
+        <?php echo CART_TYPE?>: 
+        <a href="<?php echo htmlspecialchars($Item->domain . '/admin/?p=cms&m=shop&sub=orders&id=' . $Item->parent->id)?>"><?php echo htmlspecialchars($Item->parent->name)?></a>
       </small>
     </p>
 <?php } ?>
