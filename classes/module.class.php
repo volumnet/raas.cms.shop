@@ -72,7 +72,7 @@ class Module extends \RAAS\Module
                        WHERE 1 ";
         if ($Parent->id) {
             $SQL_query .= " AND tOr.pid = " . (int)$Parent->id;
-            $col_where .= " AND pid = " . (int)$Parent->id;
+            $col_where .= " AND pid = " . (int)$Parent->Form->id;
         }
         if (isset($this->controller->nav['search_string']) && $this->controller->nav['search_string']) {
             $SQL_query .= " AND tD.value LIKE '%" . $this->SQL->escape_like($this->controller->nav['search_string']) . "%' ";
