@@ -43,7 +43,7 @@ class Cart_Type extends \SOME\SOME
     }
 
 
-    protected function _unreadFeedbacks()
+    protected function _unreadOrders()
     {
         $SQL_query = "SELECT COUNT(*) FROM " . Order::_tablename() . " WHERE pid = " . (int)$this->id . " AND NOT vis";
         return self::$SQL->getvalue($SQL_query);

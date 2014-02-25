@@ -85,6 +85,7 @@ $emailField = function($field)
       ?>
     </div>
     <?php if ($Item->items) { ?>
+      <br />
       <table style="width: 100%" border="1">
         <thead>
           <tr>
@@ -96,19 +97,21 @@ $emailField = function($field)
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($Item->items as $row) { $sum = 0; ?>
-            <td>
-              <a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&sub=main&action=edit_material&id=' . $row->id . '&pid=' . ($row->material_type->affectedPages[0]->id))?>">
-                <?php echo htmlspecialchars($row->name)?>
-              </a>
-            </td>
-            <td><?php echo htmlspecialchars($row->meta)?></td>
-            <td><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
-            <td><?php echo (int)$row->amount?></td>
-            <td><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+          <?php $sum = 0; foreach ($Item->items as $row) { ?>
+            <tr>
+              <td>
+                <a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&sub=main&action=edit_material&id=' . $row->id . '&pid=' . ($row->material_type->affectedPages[0]->id))?>">
+                  <?php echo htmlspecialchars($row->name)?>
+                </a>
+              </td>
+              <td><?php echo htmlspecialchars($row->meta)?>&nbsp;</td>
+              <td><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
+              <td><?php echo (int)$row->amount?></td>
+              <td><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+            </tr>
           <?php $sum += $row->amount * $row->realprice; } ?>
           <tr>
-            <th colspan="4" style="text-align: right"><?php echo TOTAL_SUM?></th>
+            <th colspan="4" style="text-align: right"><?php echo TOTAL_SUM?>:</th>
             <th><?php echo number_format($sum, 2, '.', ' ')?></th>
           </tr>
         </tbody>

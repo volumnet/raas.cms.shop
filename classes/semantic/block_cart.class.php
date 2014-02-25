@@ -20,8 +20,8 @@ class Block_Cart extends Block
     
     public function commit()
     {
-        if (!$this->name && $this->Cart_Type->id) {
-            $this->name = $this->Cart_Type->name;
+        if (!$this->name) {
+            $this->name = Module::i()->view->_('CART');
         }
         parent::commit();
     }

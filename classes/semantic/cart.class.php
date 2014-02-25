@@ -2,6 +2,8 @@
 namespace RAAS\CMS\Shop;
 use \RAAS\CMS\Material;
 use \RAAS\CMS\Material_Field;
+use \RAAS\CMS\Material_Type;
+use \stdClass;
 
 abstract class Cart
 {
@@ -11,8 +13,27 @@ abstract class Cart
     public function __get($var)
     {
         switch ($var) {
-            case 'cartType': case 'items':
+            case 'cartType':
                 return $this->$var;
+                break;
+            case 'rawItems':
+                return $this->items;
+                break;
+            case 'items':
+                $temp = array();
+                foreach ($this->items as $item_id => $metas) {
+                    foreach ($metas as $meta => $c) {
+                        $m = new Material((int)$item_id);
+                        $row = new stdClass();
+                        $row->id = $m->id;
+                        $row->name = $m->name;
+                        $row->meta = $meta;
+                        $row->realprice = (int)$m->{$this->getPriceURN($m->material_type)};
+                        $row->amount = $c;
+                        $temp[] = $row;
+                    }
+                }
+                return $temp;
                 break;
             case 'count':
                 $sum = 0;
@@ -27,12 +48,11 @@ abstract class Cart
                 $sum = 0;
                 foreach ($this->items as $item_id => $metas) {
                     $Item = new Material((int)$item_id);
-                    $material_type_id = $Item->material_type->id;
-                    $field_id = array_shift(array_filter($this->cartType->material_types, function($x) use ($material_type_id) { return $x->id == $material_type_id; }));
-                    $Field = Material_Field((int)$field_id);
-                    $price = (float)$Item->{$Field->urn};
-                    foreach ($metas as $meta => $c) {
-                        $sum += $c * $price;
+                    if ($priceURN = $this->getPriceURN($Item->material_type)) {
+                        $price = (float)$Item->{$priceURN};
+                        foreach ($metas as $meta => $c) {
+                            $sum += $c * $price;
+                        }
                     }
                 }
                 return $sum;
@@ -41,9 +61,14 @@ abstract class Cart
     }
 
 
-    public function __construct(Cart_Type $CartType)
+    public function __construct(Cart_Type $CartType = null)
     {
-        $this->cartType = $CartType;
+        if ($Cart_Type) {
+            $this->cartType = $CartType;
+        } else {
+            $Set = Cart_Type::getSet();
+            $this->cartType = $Set[0];
+        }
         $this->load();
     }
 
@@ -89,6 +114,7 @@ abstract class Cart
     public function clear()
     {
         $this->items = array();
+        $this->save();
     }
 
 
@@ -96,4 +122,17 @@ abstract class Cart
 
 
     abstract protected function save();
+
+
+    public function getPriceURN(Material_Type $Material_Type)
+    {
+        foreach ($this->cartType->material_types as $row) {
+            if ($row->id == $Material_Type->id) {
+                $field_id = $row->price_id;
+                $Field = new Material_Field((int)$field_id);
+                return $Field->urn;
+            }
+        }
+        return 'price';
+    }
 }

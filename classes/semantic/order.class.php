@@ -45,18 +45,29 @@ class Order extends Feedback
         if ($this->meta_items) {
             $t = $this;
             $SQL_query = "DELETE FROM " . static::_dbprefix() . self::$links['items']['tablename'] . " WHERE order_id = " . (int)$this->id;
-            $this->SQL->query($SQL_query);
+            static::$SQL->query($SQL_query);
             $arr = array_map(function($x) use ($t) { return array_merge(array('order_id' => (int)$t->id), (array)$x); }, $this->meta_items);
-            $this->SQL->add(static::_dbprefix() . self::$links['items']['tablename'], $arr);
+            static::$SQL->add(static::_dbprefix() . self::$links['items']['tablename'], $arr);
             unset($this->meta_items);
         }
     }
 
 
+    protected function _fields()
+    {
+        $temp = $this->parent->Form->fields;
+        $arr = array();
+        foreach ($temp as $row) {
+            $row->Owner = $this;
+            $arr[$row->urn] = $row;
+        }
+        return $arr;
+    }
+
     public static function Order(self $Item)
     {
         $SQL_query = "DELETE FROM " . static::_dbprefix() . self::$links['items']['tablename'] . " WHERE order_id = " . (int)$Item->id;
-        $this->SQL->query($SQL_query);
+        static::$SQL->query($SQL_query);
         parent::delete($Item);
     }
 }

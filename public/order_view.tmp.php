@@ -53,26 +53,28 @@
         <thead>
           <tr>
             <th><?php echo NAME?></th>
-            <th><?php echo ADDITIONAL_INFO?></th>
-            <th><?php echo PRICE?></th>
-            <th><?php echo AMOUNT?></th>
-            <th><?php echo SUM?></th>
+            <th><?php echo CMS\Shop\ADDITIONAL_INFO?></th>
+            <th><?php echo CMS\Shop\PRICE?></th>
+            <th><?php echo CMS\Shop\AMOUNT?></th>
+            <th><?php echo CMS\Shop\SUM?></th>
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($Item->items as $row) { $sum = 0; ?>
-            <td>
-              <a href="?p=<?php echo $VIEW->packageName?>&sub=main&action=edit_material&id=<?php echo (int)$row->id?>&pid=<?php echo (int)$row->material_type->affectedPages[0]->id?>">
-                <?php echo htmlspecialchars($row->name)?>
-              </a>
-            </td>
-            <td><?php echo htmlspecialchars($row->meta)?></td>
-            <td><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
-            <td><?php echo (int)$row->amount?></td>
-            <td><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+          <?php $sum = 0; foreach ($Item->items as $row) { ?>
+            <tr>
+              <td>
+                <a href="?p=<?php echo $VIEW->packageName?>&sub=main&action=edit_material&id=<?php echo (int)$row->id?>&pid=<?php echo (int)$row->material_type->affectedPages[0]->id?>">
+                  <?php echo htmlspecialchars($row->name)?>
+                </a>
+              </td>
+              <td><?php echo htmlspecialchars($row->meta)?></td>
+              <td><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
+              <td><?php echo (int)$row->amount?></td>
+              <td><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+            </tr>
           <?php $sum += $row->amount * $row->realprice; } ?>
           <tr>
-            <th colspan="4" style="text-align: right"><?php echo TOTAL_SUM?></th>
+            <th colspan="4" style="text-align: right"><?php echo CMS\Shop\TOTAL_SUM?></th>
             <th><?php echo number_format($sum, 2, '.', ' ')?></th>
           </tr>
         </tbody>
@@ -89,7 +91,7 @@
       </div>
   <?php } ?>
   <div class="control-group">
-    <label class="control-label"><?php echo CMS\CART_TYPE?>:</label>
+    <label class="control-label"><?php echo CMS\Shop\CART_TYPE?>:</label>
     <div class="controls">
       <?php if ($APPLICATION->user->root) { ?>
           <a href="?p=<?php echo $VIEW->packageName?>&m=<?php echo $VIEW->moduleName?>&sub=dev&action=cart_types&id=<?php echo (int)$Item->pid?>"><?php echo htmlspecialchars($Item->parent->name)?></a>

@@ -62,12 +62,13 @@ class Module extends \RAAS\Module
     {
         $Parent = new Cart_Type(isset($this->controller->nav['id']) ? (int)$this->controller->nav['id'] : 0);
         $col_where = "classname = 'RAAS\\\\CMS\\\\Form' AND show_in_table";        
-        $SQL_query = "SELECT SQL_CALC_FOUND_ROWS tOr.*, COUNT(tOG.material_id) AS c, SUM(tOG.realprice * tOG.amount) AS total_sum
+        $SQL_query = "SELECT SQL_CALC_FOUND_ROWS tOr.*, 
+                             (SELECT SUM(tOG.amount) FROM " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG WHERE tOG.order_id = tOr.id) AS c, 
+                             (SELECT SUM(tOG.realprice * tOG.amount) FROM " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG WHERE tOG.order_id = tOr.id) AS total_sum
                         FROM " . Order::_tablename() .  " AS tOr
                    LEFT JOIN " . Cart_Type::_tablename() . " AS tCT ON tCT.id = tOr.pid 
                    LEFT JOIN " . Field::_tablename() .  " AS tFi ON tFi.pid = tCT.form_id AND tFi.classname = 'RAAS\\\\CMS\\\\Form'
                    LEFT JOIN " . Order::_dbprefix() . "cms_data AS tD ON tD.pid = tOr.id AND tD.fid = tFi.id
-                   LEFT JOIN " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.order_id = tOr.id
                        WHERE 1 ";
         if ($Parent->id) {
             $SQL_query .= " AND tOr.pid = " . (int)$Parent->id;

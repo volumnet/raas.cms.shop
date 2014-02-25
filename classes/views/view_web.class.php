@@ -23,9 +23,10 @@ class View_Web extends \RAAS\Module_View_Web
     public function shopMenu()
     {
         $submenu = array();
+        $c = Order::unreadFeedbacks();
         $menuItem = array(
             'href' => $this->url, 
-            'name' => $this->_('ORDERS'), 
+            'name' => $this->_('ORDERS') . ($c ? ' (' . $c . ')' : ''), 
             'submenu' => array()
         );
         foreach (Cart_Type::getSet() as $row) {
