@@ -43,7 +43,12 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
 
     public function order_statuses(array $IN = array())
     {
-        return $this->stdDictionaryShowlist($IN, 'ORDER_STATUSES', 'edit_order_status', 'getOrderStatusContextMenu', 'NO_ORDER_STATUSES_FOUND', 'ADD_ORDER_STATUS');
+        $IN['Table'] = new OrdersStatusesTable($IN);
+        $this->assignVars($IN);
+        $this->title = $IN['Table']->caption;
+        $this->path[] = array('name' => $this->_('DEVELOPMENT'), 'href' => $this->url);
+        $this->contextmenu = array(array('name' => $this->_('ADD_ORDER_STATUS'), 'href' => $this->url . '&action=edit_order_status', 'icon' => 'plus'));
+        $this->template = $IN['Table']->template;
     }
 
 
@@ -92,7 +97,7 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
     }
 
 
-    public function getOrderStatusContextMenu(Order_Status $Item, $i, $c) 
+    public function getOrderStatusContextMenu(Order_Status $Item, $i = 0, $c = 0) 
     {
         return $this->stdView->stdContextMenu($Item, $i, $c, 'edit_order_status', 'order_statuses', 'delete_order_status', 'move_up_order_status', 'move_down_order_status');
     }

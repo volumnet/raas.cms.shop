@@ -80,7 +80,13 @@ abstract class Cart
             $amount = min(1, $amount);
         }
         if ($amount > 0) {
-            if ($Item->id && in_array($Item->material_type->id, $this->cartType->material_types_ids)) {
+            $ids = (array)$this->cartType->material_types_ids;
+            foreach ((array)$this->cartType->material_types_ids as $id) {
+                $row = new Material_Type($id);
+                $ids = array_merge($ids, $row->parents_ids);
+            }
+            $ids = array_values(array_unique($ids));
+            if ($Item->id && in_array($Item->material_type->id, $ids)) {
                 $this->items[(int)$Item->id][(string)$meta] = $amount;
             }
         } else {
@@ -126,12 +132,16 @@ abstract class Cart
 
     public function getPriceURN(Material_Type $Material_Type)
     {
-        foreach ($this->cartType->material_types as $row) {
-            if ($row->id == $Material_Type->id) {
-                $field_id = $row->price_id;
-                $Field = new Material_Field((int)$field_id);
-                return $Field->urn;
+        $mt = $Material_Type;
+        while ($mt->id) {
+            foreach ($this->cartType->material_types as $row) {
+                if ($row->id == $Material_Type->id) {
+                    $field_id = $row->price_id;
+                    $Field = new Material_Field((int)$field_id);
+                    return $Field->urn;
+                }
             }
+            $mt = $mt->pid ? $mt->parent : new Material_Type();
         }
         return 'price';
     }

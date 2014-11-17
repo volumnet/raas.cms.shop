@@ -30,11 +30,13 @@ class View_Web extends \RAAS\Module_View_Web
             'submenu' => array()
         );
         foreach (Cart_Type::getSet() as $row) {
-            $menuItem['submenu'][] = array(
-                'name' => $row->name . ($row->unreadOrders ? ' (' . (int)$row->unreadOrders . ')' : ''), 
-                'href' => $this->url . '&id=' . (int)$row->id, 
-                'active' => ($row->id == $this->id)
-            );
+            if ($row->form_id) {
+                $menuItem['submenu'][] = array(
+                    'name' => $row->name . ($row->unreadOrders ? ' (' . (int)$row->unreadOrders . ')' : ''), 
+                    'href' => $this->url . '&id=' . (int)$row->id, 
+                    'active' => ($row->id == $this->id)
+                );
+            }
         }
         $submenu[] = $menuItem;
         return $submenu;

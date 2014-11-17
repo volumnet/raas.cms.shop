@@ -6,28 +6,18 @@ use \RAAS\CMS\Snippet_Folder;
 
 class Updater extends \RAAS\Updater
 {
-    public function __construct(IContext $Context)
+    public function preInstall()
     {
-        parent::__construct($Context);
-        $this->checkStdSnippets();
     }
 
-    protected function checkStdSnippets()
-    {
-        $Item = Snippet::importByURN('__RAAS_shop_cart_interface');
-        if (!$Item->id) {
-            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_cart_interface', 'locked' => 1));
-        }
-        $Item->name = $this->view->_('CART_STANDARD_INTERFACE');
-        $Item->description = $this->stdCartInterface;
-        $Item->commit();
 
-        $Item = Snippet::importByURN('__RAAS_shop_order_notify');
-        if (!$Item->id) {
-            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_order_notify', 'locked' => 1));
+    public function postInstall()
+    {
+        $w = new Webmaster();
+        $s = Snippet::importByURN('__RAAS_shop_cart_interface');
+        $w->checkStdSnippets();
+        if (!$s || !$s->id) {
+            $w->createWidgets();
         }
-        $Item->name = $this->view->_('ORDER_STANDARD_NOTIFICATION');
-        $Item->description = $this->stdFormTemplate;
-        $Item->commit();
     }
 }

@@ -19,7 +19,7 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
         <tbody>
           <?php foreach ((array)$CONTENT['material_types'] as $mtype) { ?>
               <tr>
-                <td><?php echo htmlspecialchars($mtype->name)?></td>
+                <td style="padding-left: <?php echo ($mtype->level * 30)?>px"><?php echo htmlspecialchars($mtype->name)?></td>
                 <td>
                   <select name="price_id[<?php echo (int)$mtype->id?>]" class="span2" data-role="price_id">
                     <?php foreach ($CONTENT['fields'][(int)$mtype->id] as $row) { ?>

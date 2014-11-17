@@ -77,14 +77,7 @@ class Sub_Dev extends \RAAS\Abstract_Sub_Controller
     protected function edit_order_status()
     {
         $Item = new Order_Status((int)$this->id);
-        $Form = new RAASForm(array(
-            'Item' => $Item,
-            'caption' => $this->view->_('EDIT_ORDER_STATUS'),
-            'parentUrl' => $this->url . '&action=order_statuses',
-            'children' => array(
-                array('name' => 'name', 'caption' => $this->view->_('NAME'), 'required' => 'required'), 
-            )
-        ));
+        $Form = new EditOrderStatusForm(array('Item' => $Item));
         $this->view->{__FUNCTION__}($Form->process());
     }
 
@@ -92,100 +85,7 @@ class Sub_Dev extends \RAAS\Abstract_Sub_Controller
     protected function edit_priceloader()
     {
         $Item = new PriceLoader((int)$this->id);
-        $CONTENT = array();
-        $CONTENT['material_types'] = array('Set' => (array)Material_Type::getSet());
-        $CONTENT['fields'] = array(
-            array('value' => 'urn', 'caption' => $this->view->_('URN')),
-            array('value' => 'name', 'caption' => $this->view->_('NAME')),
-            array('value' => 'description', 'caption' => $this->view->_('DESCRIPTION')),
-        );
-        if ($Item->id) {
-            $Material_Type = $Item->Material_Type;
-        } elseif (isset($_POST['mtype'])) {
-            $Material_Type = new Material_Type($_POST['mtype']);
-        } else {
-            $Material_Type = $CONTENT['material_types']['Set'][0];
-        }
-        foreach ((array)$Material_Type->fields as $row) {
-            if (!($row->multiple || in_array($row->datatype, array('file', 'image')))) {
-                $CONTENT['fields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
-            }
-        }
-        $Form = new RAASForm(array(
-            'Item' => $Item,
-            'caption' => $this->view->_('EDIT_PRICELOADER'),
-            'parentUrl' => $this->url . '&action=priceloaders',
-            'meta' => array('CONTENT' => $CONTENT),
-            'children' => array(
-                array('name' => 'name', 'caption' => $this->view->_('NAME')), 
-                array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
-                array('type' => 'checkbox', 'name' => 'std_interface', 'caption' => $this->view->_('USE_STANDARD_INTERFACE'), 'default' => 1),
-                array(
-                    'type' => 'codearea', 
-                    'name' => 'description', 
-                    'default' => $this->model->stdPriceLoaderInterface,
-                    'import' => function($Field) { return $Field->Form->Item->std_interface ? $Field->default : $Field->Form->Item->description; },
-                    'export' => function($Field) {
-                        $Field->Form->Item->description = '';
-                        if (!(isset($_POST['std_interface']) && (int)$_POST['std_interface']) && isset($_POST['description'])) {
-                            $Field->Form->Item->description = (string)$_POST['description'];
-                        }
-                    }, 
-                ),
-                new FieldSet(array(
-                    'template' => 'dev_edit_priceloader.columns.php',
-                    'caption' => $this->view->_('COLUMNS'),
-                    'import' => function($FieldSet) {
-                        $DATA = array();
-                        if ($FieldSet->Form->Item->columns) {
-                            foreach ((array)$FieldSet->Form->Item->columns as $row) {
-                                $DATA['column_id'][] = (int)$row->id;
-                                $DATA['column_fid'][] = (string)$row->fid;
-                                $DATA['column_callback'][] = (string)$row->callback;
-                            }
-                        }
-                        $DATA['ufid'] = $FieldSet->Form->Item->ufid;
-                        return $DATA;
-                    },
-                    'oncommit' => function($FieldSet) {
-                        $todelete = $FieldSet->Form->Item->columns_ids;
-                        $Set = array();
-                        $temp = array();
-                        if (isset($_POST['column_id'])) {
-                            $i = 0;
-                            foreach ((array)$_POST['column_id'] as $key => $val) {
-                                $row = new PriceLoader_Column((int)$val);
-                                if ($row->id) {
-                                    $todelete = array_diff($todelete, array($row->id));
-                                } else {
-                                    $row->pid = (int)$FieldSet->Form->Item->id;
-                                }
-                                $row->fid = (string)$_POST['column_fid'][$key];
-                                $row->callback = (string)$_POST['column_callback'][$key];
-                                $row->priority = ++$i;
-                                $Set[] = $row;
-                            }
-                        }
-                        if ($todelete) {
-                            foreach ($todelete as $val) {
-                                PriceLoader::delete(new PriceLoader_Column((int)$val));
-                            }
-                        }
-                        if ($Set) {
-                            foreach ($Set as $row) {
-                                $row->commit();
-                            }
-                        }
-                    },
-                    'children' => array(
-                        'ufid' => array('type' => 'radio', 'name' => 'ufid'),
-                        'column_id' => array('type' => 'hidden', 'name' => 'column_id', 'multiple' => true),
-                        'column_fid' => array('type' => 'select', 'name' => 'column_fid', 'children' => $CONTENT['fields'], 'class' => 'span2', 'multiple' => true),
-                        'column_callback' => array('name' => 'price_callback', 'multiple' => true),
-                    )
-                ))
-            )
-        ));
+        $Form = new EditPriceLoaderForm(array('Item' => $Item));
         $this->view->{__FUNCTION__}($Form->process());
     }
 
@@ -193,50 +93,7 @@ class Sub_Dev extends \RAAS\Abstract_Sub_Controller
     protected function edit_imageloader()
     {
         $Item = new ImageLoader((int)$this->id);
-        $CONTENT = array();
-        $CONTENT['material_types'] = array('Set' => (array)Material_Type::getSet());
-        $CONTENT['fields'] = array(
-            array('value' => 'urn', 'caption' => $this->view->_('URN')),
-            array('value' => 'name', 'caption' => $this->view->_('NAME')),
-            array('value' => 'description', 'caption' => $this->view->_('DESCRIPTION')),
-        );
-        if ($Item->id) {
-            $Material_Type = $Item->Material_Type;
-        } elseif (isset($_POST['mtype'])) {
-            $Material_Type = new Material_Type($_POST['mtype']);
-        } else {
-            $Material_Type = $CONTENT['material_types']['Set'][0];
-        }
-        foreach ((array)$Material_Type->fields as $row) {
-            if (!($row->multiple || in_array($row->datatype, array('file', 'image')))) {
-                $CONTENT['fields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
-            }
-        }
-        $Form = new RAASForm(array(
-            'Item' => $Item,
-            'caption' => $this->view->_('EDIT_IMAGELOADER'),
-            'parentUrl' => $this->url . '&action=priceloaders',
-            'meta' => array('CONTENT' => $CONTENT),
-            'children' => array(
-                array('name' => 'name', 'caption' => $this->view->_('NAME')), 
-                array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
-                array('type' => 'select', 'name' => 'ufid', 'caption' => $this->view->_('UNIQUE_FIELD'), 'children' => $CONTENT['fields']),
-                array('name' => 'sep_string', 'caption' => $this->view->_('SEPARATOR'), 'class' => 'span1', 'default' => '.'), 
-                array('type' => 'checkbox', 'name' => 'std_interface', 'caption' => $this->view->_('USE_STANDARD_INTERFACE'), 'default' => 1),
-                array(
-                    'type' => 'codearea', 
-                    'name' => 'description', 
-                    'default' => $this->model->stdImageLoaderInterface,
-                    'import' => function($Field) { return $Field->Form->Item->std_interface ? $Field->default : $Field->Form->Item->description; },
-                    'export' => function($Field) {
-                        $Field->Form->Item->description = '';
-                        if (!(isset($_POST['std_interface']) && (int)$_POST['std_interface']) && isset($_POST['description'])) {
-                            $Field->Form->Item->description = (string)$_POST['description'];
-                        }
-                    }, 
-                ),
-            )
-        ));
+        $Form = new EditImageLoaderForm(array('Item' => $Item));
         $this->view->{__FUNCTION__}($Form->process());
     }
 }

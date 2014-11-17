@@ -11,13 +11,39 @@ use \RAAS\CMS\Snippet;
 
 class EditCartTypeForm extends \RAAS\Form
 {
+    public function __get($var)
+    {
+        switch ($var) {
+            case 'view':
+                return ViewSub_Dev::i();
+                break;
+            default:
+                return parent::__get($var);
+                break;
+        }
+    }
+
+
     public function __construct(array $params = array())
     {
-        $view = Module::i()->view;
+        $view = $this->view;
         $t = Module::i();
         $Item = isset($params['Item']) ? $params['Item'] : null;
         $CONTENT = array();
-        $CONTENT['material_types'] = (array)Material_Type::getSet();
+        $wf = function(Material_Type $x) use (&$wf) {
+            static $level = 0;
+            $temp = array();
+            foreach ($x->children as $row) {
+                $row->level = $level;
+                $temp[] = $row;
+                $level++;
+                $temp = array_merge($temp, $wf($row));
+                $level--;
+            }
+            return $temp;
+        };
+        $mt = new Material_Type();
+        $CONTENT['material_types'] = $wf($mt);
         $CONTENT['forms'] = array('Set' => array_merge(array(new CMSForm(array('id' => '', 'name' => $view->_('_NONE')))), CMSForm::getSet()));
         $CONTENT['fields'] = array('0' => new Material_Field(array('id' => 0, 'name' => $view->_('_NONE'))));
         foreach ($CONTENT['material_types'] as $row) {
@@ -30,28 +56,13 @@ class EditCartTypeForm extends \RAAS\Form
                 }
             }
         }
-        $wf = function(Snippet_Folder $x) use (&$wf) {
-            $temp = array();
-            foreach ($x->children as $row) {
-                if ($row->urn != '__RAAS_views') {
-                    $o = new Option(array('value' => '', 'caption' => $row->name, 'disabled' => 'disabled'));
-                    $o->children = $wf($row);
-                    $temp[] = $o;
-                }
-            }
-            foreach ($x->snippets as $row) {
-                $temp[] = new Option(array('value' => $row->id, 'caption' => $row->name));
-            }
-            return $temp;
-        };
-
         $defaultParams = array(
             'caption' => $Item->id ? $Item->name : $view->_('EDIT_CART_TYPE'),
             'parentUrl' => Sub_Dev::i()->url . '&action=cart_types',
             'meta' => array('CONTENT' => $CONTENT),
             'children' => array(
-                array('name' => 'urn', 'caption' => $view->_('URN')),
                 array('name' => 'name', 'caption' => $view->_('NAME'), 'required' => 'required'), 
+                array('name' => 'urn', 'caption' => $view->_('URN')),
                 array('type' => 'select', 'name' => 'form_id', 'caption' => $view->_('USE_FORM_FIELDS'), 'children' => $CONTENT['forms']),
                 array('type' => 'checkbox', 'name' => 'no_amount', 'caption' => $view->_('FAVORITES_MODE')),
 

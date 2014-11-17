@@ -29,7 +29,7 @@ class Cart_Type extends \SOME\SOME
                    . " WHERE " . self::$links['material_types']['field_from'] . " = " . (int)$this->id;
         self::$SQL->query($SQL_query);
         $arr = array();
-        foreach ($this->mtypes as $row) {
+        foreach ((array)$this->mtypes as $row) {
             $arr[] = array(
                 self::$links['material_types']['field_from'] => (int)$this->id,
                 self::$links['material_types']['field_to'] => (int)$row['id'],
