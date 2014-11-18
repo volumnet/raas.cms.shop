@@ -8,8 +8,26 @@ function formatPrice($price)
     $remainder = (float)$price - (float)(int)$price;
     return str_replace(' ', '&nbsp;', number_format((float)$price, ($remainder > 0) ? 2 : 0, ',', ' ' ));
 }
-?>
-<?php if ($success[(int)$Block->id]) { ?>
+if ($_GET['AJAX']) {
+    $temp = array();
+    $temp['count'] = (int)$Cart->count;
+    $temp['sum'] = $Cart->sum;
+    $temp['no_amount'] = (int)$Cart->no_amount;
+    foreach ($Cart->items as $row) {
+        $row2 = new Material($row->id);
+        $temp['items'][] = array(
+            'id' => $row->id,
+            'meta' => $row->meta,
+            'amount' => $row->amount,
+            'price' => $row->realprice,
+            'name' => $row->name,
+            'url' => $row2->url
+        );
+    }
+    echo json_encode($temp); 
+    exit;
+} elseif ($success[(int)$Block->id]) { 
+    ?>
     <div class="notifications">
       <div class="alert alert-success"><?php echo ORDER_SUCCESSFULLY_SENT?></div>
     </div>
