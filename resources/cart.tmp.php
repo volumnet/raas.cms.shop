@@ -46,7 +46,7 @@ function formatPrice($price)
               </td>
               <?php if (!$Cart->cartType->no_amount) { ?>
                   <td class="span1"><input type="number" class="form-control" style="max-width: 8em" data-role="amount" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" /></td>
-                  <td class="span1" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span></td>
+                  <td class="span1" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> р.</td>
               <?php } ?>
               <td class="span1">
                 <a href="?action=delete&id=<?php echo (int)$row->id?>&meta=<?php echo htmlspecialchars($row->meta)?>&back=1" onclick="return confirm('<?php echo addslashes(CART_DELETE_CONFIRM)?>')">
