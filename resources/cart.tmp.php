@@ -39,7 +39,7 @@ function formatPrice($price)
               </td>
               <td><a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>><?php echo htmlspecialchars($row->name)?></a></td>
               <td data-role="price" data-price="<?php echo number_format($row->realprice, 2, '.', '')?>" class="span1">
-                <?php echo formatPrice($row->realprice)?>
+                <?php echo formatPrice($row->realprice)?> р.
                 <?php if ($Cart->cartType->no_amount) { ?>
                     <input type="hidden" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" />
                 <?php } ?>
