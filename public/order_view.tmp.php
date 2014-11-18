@@ -70,12 +70,12 @@
               <td><?php echo htmlspecialchars($row->meta)?></td>
               <td><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
               <td><?php echo (int)$row->amount?></td>
-              <td><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+              <td style="white-space: nowrap"><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
             </tr>
           <?php $sum += $row->amount * $row->realprice; } ?>
           <tr>
             <th colspan="4" style="text-align: right"><?php echo CMS\Shop\TOTAL_SUM?></th>
-            <th><?php echo number_format($sum, 2, '.', ' ')?></th>
+            <th style="white-space: nowrap"><?php echo number_format($sum, 2, '.', ' ')?></th>
           </tr>
         </tbody>
       </table>

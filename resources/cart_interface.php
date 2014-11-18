@@ -278,3 +278,4 @@ if (isset($_GET['back'])) {
 $OUT['Cart'] = $Cart;
 $OUT['Cart_Type'] = $Cart_Type;
 $OUT['convertMeta'] = $convertMeta;
+return $OUT;

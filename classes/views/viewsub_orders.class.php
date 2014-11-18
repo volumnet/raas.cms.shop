@@ -44,50 +44,7 @@ class ViewSub_Orders extends \RAAS\Abstract_Sub_View
     public function orders(array $IN = array())
     {
         $view = $this;
-        $columns = array();
-        $columns['post_date'] = array(
-            'caption' => $this->_('POST_DATE'),
-            'callback' => function($row) use ($view) { 
-                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . date(DATETIMEFORMAT, strtotime($row->post_date)) . '</a>';
-            }
-        );
-        if (!$IN['Item']->id) {
-            $columns['pid'] = array(
-                'caption' => $this->_('CART_TYPE'),
-                'callback' => function($row) use ($view) { 
-                    return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . htmlspecialchars($row->parent->name) . '</a>';
-                }
-            );
-        }
-        $columns['name'] = array(
-            'caption' => $this->_('PAGE'),
-            'callback' => function($row) use ($view) { 
-                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . htmlspecialchars($row->page->name) . '</a>';
-            }
-        );
-        $columns['ip'] = array(
-            'caption' => $this->_('IP_ADDRESS'),
-            'callback' => function($row) use ($view) { 
-                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '" title="' . htmlspecialchars($row->description) . '">' 
-                     .    htmlspecialchars($row->ip)
-                     . '</a>';
-            }
-        );
-        foreach ($IN['columns'] as $key => $col) {
-            $columns[$col->urn] = array(
-                'caption' => $col->name,
-                'callback' => function($row) use ($col) { $y = $row->fields[$col->urn]->doRich(); return $y ? $y : ''; }
-            );
-        }
-        $columns['c'] = array('caption' => $this->_('GOODS_COUNT'));
-        $columns['total_sum'] = array('caption' => $this->_('SUM'));
-        $columns[' '] = array('callback' => function ($row) use ($view) { return rowContextMenu($view->getOrderContextMenu($row)); });
-        $IN['Table'] = new Table(array(
-            'columns' => $columns, 
-            'Set' => $IN['Set'], 
-            'Pages' => $IN['Pages'],
-            'callback' => function($Row) { if (!$Row->source->vis) { $Row->class = 'info'; } },
-        ));
+        $IN['Table'] = new OrdersTable($IN);
         
         $this->assignVars($IN);
         if ($IN['Item']->id) {

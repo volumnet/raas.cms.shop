@@ -63,7 +63,7 @@ abstract class Cart
 
     public function __construct(Cart_Type $CartType = null)
     {
-        if ($Cart_Type) {
+        if ($CartType) {
             $this->cartType = $CartType;
         } else {
             $Set = Cart_Type::getSet();
@@ -83,7 +83,7 @@ abstract class Cart
             $ids = (array)$this->cartType->material_types_ids;
             foreach ((array)$this->cartType->material_types_ids as $id) {
                 $row = new Material_Type($id);
-                $ids = array_merge($ids, $row->parents_ids);
+                $ids = array_merge($ids, $row->all_children_ids);
             }
             $ids = array_values(array_unique($ids));
             if ($Item->id && in_array($Item->material_type->id, $ids)) {
@@ -99,7 +99,7 @@ abstract class Cart
     public function count(Material $Item, $meta = '')
     {
         if (isset($this->items[(int)$Item->id][(string)$meta])) {
-            return count($this->items[(int)$Item->id][(string)$meta]);
+            return (int)$this->items[(int)$Item->id][(string)$meta];
         }
         return 0;
     }
