@@ -34,40 +34,40 @@ if ($_GET['AJAX']) {
 <?php } elseif ($Cart->items) { ?>
     <section class="cart">
       <form action="#feedback" method="post" enctype="multipart/form-data">
-        <table class="table table-striped" data-role="cart-table">
+        <table class="table table-striped cart-table" data-role="cart-table">
           <thead>
             <tr>
-              <th class="span1"><?php echo IMAGE?></th>
-              <th class="span7"><?php echo NAME?></th>
-              <th class="span1"><?php echo PRICE?></th>
+              <th class="span1 cart-table__image-col"><?php echo IMAGE?></th>
+              <th class="span7 cart-table__name-col"><?php echo NAME?></th>
+              <th class="span1 cart-table__price-col"><?php echo PRICE?></th>
               <?php if (!$Cart->cartType->no_amount) { ?>
-                  <th class="span1"><?php echo AMOUNT?></th>
-                  <th class="span1"><?php echo SUM?></th>
+                  <th class="span1 cart-table__amount-col"><?php echo AMOUNT?></th>
+                  <th class="span1 cart-table__sum-col"><?php echo SUM?></th>
               <?php } ?>
-              <th class="span1"></th>
+              <th class="span1 cart-table__actions-col"></th>
             </tr>
           </thead>
           <tbody>
             <?php $sum = $am = 0; foreach ($Cart->items as $row) { $row2 = new Material((int)$row->id); ?>
               <tr data-role="cart-item">
-                <td class="text-center">
+                <td class="text-center image-col">
                   <?php if ($row2->visImages) { ?>
                       <a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>>
                         <img src="/<?php echo htmlspecialchars(addslashes($row2->visImages[0]->tnURL))?>" style="max-width: 48px" alt="<?php echo htmlspecialchars($row2->visImages[0]->name ?: $row->name)?>" /></a>
                   <?php } ?>
                 </td>
-                <td><a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>><?php echo htmlspecialchars($row->name)?></a></td>
-                <td data-role="price" data-price="<?php echo number_format($row->realprice, 2, '.', '')?>" class="span1" style="white-space: nowrap">
+                <td class="cart-table__name-col"><a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>><?php echo htmlspecialchars($row->name)?></a></td>
+                <td data-role="price" data-price="<?php echo number_format($row->realprice, 2, '.', '')?>" class="span1 cart-table__price-col" style="white-space: nowrap">
                   <?php echo formatPrice($row->realprice)?> <span class="fa fa-rub"></span>
                   <?php if ($Cart->cartType->no_amount) { ?>
                       <input type="hidden" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" />
                   <?php } ?>
                 </td>
                 <?php if (!$Cart->cartType->no_amount) { ?>
-                    <td class="span1"><input type="number" class="form-control" style="max-width: 8em" data-role="amount" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" /></td>
-                    <td class="span1" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
+                    <td class="span1 cart-table__amount-col"><input type="number" class="form-control" style="max-width: 8em" data-role="amount" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" /></td>
+                    <td class="span1 cart-table__sum-col" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
                 <?php } ?>
-                <td class="span1">
+                <td class="span1 cart-table__actions-col">
                   <a href="?action=delete&id=<?php echo (int)$row->id?>&meta=<?php echo htmlspecialchars($row->meta)?>&back=1" onclick="return confirm('<?php echo addslashes(CART_DELETE_CONFIRM)?>')">
                     <i class="icon icon-remove" title="<?php echo DELETE?>"></i>
                   </a>
@@ -77,10 +77,10 @@ if ($_GET['AJAX']) {
             <tr>
               <th colspan="<?php echo !$Cart->cartType->no_amount ? '3' : '2'?>"><?php echo TOTAL_SUM?>:</th>
               <?php if (!$Cart->cartType->no_amount) { ?>
-                  <th><span data-role="total-amount"><?php echo (int)$am; ?></span></td>
+                  <th class="cart-table__amount-col"><span data-role="total-amount"><?php echo (int)$am; ?></span></td>
               <?php } ?>
-              <th style="white-space: nowrap"><span data-role="total-sum"><?php echo formatPrice($sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
-              <th></th>
+              <th class="cart-table__sum-col" style="white-space: nowrap"><span data-role="total-sum"><?php echo formatPrice($sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
+              <th class="cart-table__actions-col"></th>
             </tr>
           </tbody>
         </table>
