@@ -11,7 +11,7 @@ function formatPrice($price)
 if ($_GET['AJAX']) {
     $temp = array();
     $temp['count'] = (int)$Cart->count;
-    $temp['sum'] = $Cart->sum;
+    $temp['sum'] = (float)$Cart->sum;
     $temp['no_amount'] = (int)$Cart->no_amount;
     foreach ($Cart->items as $row) {
         $row2 = new Material($row->id);
@@ -57,14 +57,14 @@ if ($_GET['AJAX']) {
               </td>
               <td><a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>><?php echo htmlspecialchars($row->name)?></a></td>
               <td data-role="price" data-price="<?php echo number_format($row->realprice, 2, '.', '')?>" class="span1" style="white-space: nowrap">
-                <?php echo formatPrice($row->realprice)?> р.
+                <?php echo formatPrice($row->realprice)?> <span class="fa fa-rub"></span>
                 <?php if ($Cart->cartType->no_amount) { ?>
                     <input type="hidden" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" />
                 <?php } ?>
               </td>
               <?php if (!$Cart->cartType->no_amount) { ?>
                   <td class="span1"><input type="number" class="form-control" style="max-width: 8em" data-role="amount" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" /></td>
-                  <td class="span1" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> р.</td>
+                  <td class="span1" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
               <?php } ?>
               <td class="span1">
                 <a href="?action=delete&id=<?php echo (int)$row->id?>&meta=<?php echo htmlspecialchars($row->meta)?>&back=1" onclick="return confirm('<?php echo addslashes(CART_DELETE_CONFIRM)?>')">
@@ -78,7 +78,7 @@ if ($_GET['AJAX']) {
             <?php if (!$Cart->cartType->no_amount) { ?>
                 <th><span data-role="total-amount"><?php echo (int)$am; ?></span></td>
             <?php } ?>
-            <th style="white-space: nowrap"><span data-role="total-sum"><?php echo formatPrice($sum)?></span>&nbsp;р.</th>
+            <th style="white-space: nowrap"><span data-role="total-sum"><?php echo formatPrice($sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
             <th></th>
           </tr>
         </tbody>
