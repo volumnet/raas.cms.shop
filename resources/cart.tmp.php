@@ -50,7 +50,7 @@ if ($_GET['AJAX']) {
           <tbody>
             <?php $sum = $am = 0; foreach ($Cart->items as $row) { $row2 = new Material((int)$row->id); ?>
               <tr data-role="cart-item">
-                <td class="text-center image-col">
+                <td class="text-center cart-table__image-col">
                   <?php if ($row2->visImages) { ?>
                       <a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>>
                         <img src="/<?php echo htmlspecialchars(addslashes($row2->visImages[0]->tnURL))?>" style="max-width: 48px" alt="<?php echo htmlspecialchars($row2->visImages[0]->name ?: $row->name)?>" /></a>
