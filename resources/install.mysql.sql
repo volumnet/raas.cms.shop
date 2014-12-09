@@ -131,9 +131,9 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_car
 ) COMMENT='Cart blocks';
 
 
-CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym (
+CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID#',
-  name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Shop name',
+  shop_name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Shop name',
   company VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Company name',
   agency VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Support company name',
   email VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Support e-mail',
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym 
 ) COMMENT='Yandex Market blocks';
 
 
-CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym_pages_assoc (
+CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_pages_assoc (
   id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Block ID#',
   page_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Page ID#',
 
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym_
 ) COMMENT='YM blocks to pages association';
 
 
-CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym_material_types_assoc (
+CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_material_types_assoc (
   id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Block ID#',
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
   type VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'YM type',
@@ -166,18 +166,18 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym_
 ) COMMENT='YM blocks to material types association';
 
 
-CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym_currencies (
+CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_currencies (
   id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Block ID#',
   currency_name VARCHAR(8) NOT NULL DEFAULT '' COMMENT 'Currency ID#',
   currency_rate VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Currency rate',
-  currency_plus INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Currency plus, %%',
+  currency_plus DECIMAL(8,2) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Currency plus, %%',
 
-  PRIMARY KEY (id),
+  PRIMARY KEY (id, currency_name),
   INDEX(currency_name)
 ) COMMENT='Currencies';
 
 
-CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym_fields (
+CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_fields (
   id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Block ID#',
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
   field_name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field name',
@@ -185,8 +185,9 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_ym_
   field_callback VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field callback',
   field_static_value VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field static value',
 
-  PRIMARY KEY (id, mtype),
+  PRIMARY KEY (id, mtype, field_name),
   KEY (id),
   KEY (mtype),
-  KEY (field_id)
+  KEY (field_id),
+  INDEX (field_name)
 ) COMMENT='YM blocks to material types fields';

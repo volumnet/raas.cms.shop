@@ -1,1 +1,4 @@
 .cms-block-shop-cart { background-color: #fc9; }
+.cms-block-shop-yml { background-color: white; color: red; }
+.cms-block-shop-yml a { color: red; }
+.cms-block-shop-yml span { color: red; }

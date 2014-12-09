@@ -51,13 +51,20 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $Item->description = $this->stdImageLoaderInterfaceFile;
         $Item->commit();
 
-
         $Item = Snippet::importByURN('__RAAS_shop_priceloader_interface');
         if (!$Item->id) {
             $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_priceloader_interface', 'locked' => 1));
         }
         $Item->name = $this->view->_('PRICELOADER_STANDARD_INTERFACE');
         $Item->description = $this->stdPriceLoaderInterfaceFile;
+        $Item->commit();
+
+        $Item = Snippet::importByURN('__RAAS_shop_yml_interface');
+        if (!$Item->id) {
+            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_yml_interface', 'locked' => 1));
+        }
+        $Item->name = $this->view->_('YML_STANDARD_INTERFACE');
+        $Item->description = file_get_contents($this->resourcesDir . '/yml_interface.php');
         $Item->commit();
     }
 
@@ -67,6 +74,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         // Добавим виджеты
         $snippets = array(
             'cart' => $this->view->_('CART'), 
+            'yml' => $this->view->_('YANDEX_MARKET'),
         );
         $VF = Snippet_Folder::importByURN('__RAAS_views');
         foreach ($snippets as $urn => $name) {

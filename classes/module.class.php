@@ -55,6 +55,7 @@ class Module extends \RAAS\Module
     public function registerBlockTypes()
     {
         Block_Type::registerType('RAAS\\CMS\\Shop\\Block_Cart', 'RAAS\\CMS\\Shop\\ViewBlockCart', 'RAAS\\CMS\\Shop\\EditBlockCartForm');
+        Block_Type::registerType('RAAS\\CMS\\Shop\\Block_YML', 'RAAS\\CMS\\Shop\\ViewBlockYML', 'RAAS\\CMS\\Shop\\EditBlockYMLForm');
     }
 
 
