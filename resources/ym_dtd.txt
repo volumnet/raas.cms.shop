@@ -1,0 +1,129 @@
+<!ATTLIST offer
+    id
+    group_id
+    type
+    available указывается статус доступности товара:
+    bid основная ставка товарного предложения
+    cbid ставка для карточки модели.
+>
+
+<!ELEMENT offer (
+    url? @@@@@
+    buyurl?, 
+    price @@@@@
+    wprice?, 
+    currencyId @@@@@
+    xCategory?, 
+    categoryId+ @@@@@, 
+    market_category?, 
+    picture* @@@@@
+    store? @@@@@
+    pickup? @@@@@
+    delivery? @@@@@
+    deliveryIncluded?, 
+    local_delivery_cost? @@@@@
+    orderingTime?,
+    (
+        (
+            typePrefix? @@@@@
+            vendor @@@@@
+            vendorCode? @@@@@
+            model @@@@@
+            (
+                provider, 
+                tarifplan?
+            )?
+        ) |
+        (
+            author? @@@@@, 
+            name @@@@@, 
+            publisher? @@@@@, 
+            series? @@@@@, 
+            year? @@@@@, 
+            ISBN? @@@@@, 
+            volume? @@@@@, 
+            part? @@@@@, 
+            language? @@@@@, 
+            binding? @@@@@, 
+            page_extent? @@@@@, 
+            table_of_contents? @@@@@
+        ) |
+        (
+            author? @@@@@, 
+            name @@@@@, 
+            publisher? @@@@@, 
+            series? @@@@@, 
+            year? @@@@@, 
+            ISBN? @@@@@, 
+            volume? @@@@@, 
+            part? @@@@@, 
+            language? @@@@@, 
+            table_of_contents? @@@@@,
+            performed_by? @@@@@, 
+            performance_type? @@@@@, 
+            storage? @@@@@, 
+            format? @@@@@, 
+            recording_length? @@@@@
+        ) |
+        (
+            artist? @@@@@, 
+            title @@@@@, 
+            year? @@@@@, 
+            media? @@@@@, 
+            starring? @@@@@, 
+            director? @@@@@, 
+            originalName? @@@@@, 
+            country? @@@@@
+        ) |
+        (
+            worldRegion? @@@@@, 
+            country? @@@@@, 
+            region? @@@@@, 
+            days @@@@@, 
+            dataTour* @@@@@, 
+            name @@@@@, 
+            hotel_stars? @@@@@, 
+            room? @@@@@, 
+            meal? @@@@@, 
+            included @@@@@, 
+            transport @@@@@, 
+            price_min?, 
+            price_max?, 
+            options?
+        ) |
+        (
+            name @@@@@, 
+            place @@@@@, 
+            hall @@@@@?, 
+            hall_part? @@@@@, 
+            date @@@@@, 
+            is_premiere? @@@@@, 
+            is_kids? @@@@@
+        ) |
+        (
+            name @@@@@, 
+            vendor? @@@@@, 
+            vendorCode? @@@@@
+        )
+    ),
+    aliases?, 
+    additional*, 
+    description? @@@@@
+    sales_notes? @@@@@
+    promo?,
+    manufacturer_warranty? @@@@@
+    seller_warranty? @@@@@ 
+    country_of_origin? @@@@@ 
+    downloadable? @@@@@ 
+    adult? @@@@@
+    age? @@@@@
+    barcode* @@@@@
+    cpa? @@@@@@
+    fee?,
+    rec? @@@@@
+    expiry? @@@@@
+    weight? @@@@@
+    dimensions? @@@@@
+    param* @@@@@
+    related_offer*
+)>

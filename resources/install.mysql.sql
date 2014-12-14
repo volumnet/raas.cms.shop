@@ -159,6 +159,8 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Block ID#',
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
   type VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'YM type',
+  param_exceptions TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Params from all fields except...',
+  params_callback VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Params callback',
 
   PRIMARY KEY (id, mtype),
   KEY (id),
@@ -191,3 +193,31 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   KEY (field_id),
   INDEX (field_name)
 ) COMMENT='YM blocks to material types fields';
+
+
+CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_params (
+  id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Block ID#',
+  mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
+  param_name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field name',
+  field_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field ID#',
+  field_callback VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field callback',
+  param_static_value VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field static value',
+
+  PRIMARY KEY (id, mtype, param_name),
+  KEY (id),
+  KEY (mtype),
+  KEY (field_id),
+  INDEX (param_name)
+) COMMENT='YM blocks to material types params';
+
+
+CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_ignored_fields (
+  id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Block ID#',
+  mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
+  field_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field ID#',
+  
+  PRIMARY KEY (id, mtype, field_id),
+  KEY (id),
+  KEY (mtype),
+  KEY (field_id)
+) COMMENT='YM blocks to material types params ignored fields';

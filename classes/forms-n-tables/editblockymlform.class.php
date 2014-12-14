@@ -7,6 +7,8 @@ use \RAAS\CMS\Snippet;
 use \RAAS\FormTab;
 use \RAAS\FieldCollection;
 use \RAAS\FieldSet;
+use \RAAS\CMS\Material_Type;
+use \RAAS\CMS\Page;
 
 class EditBlockYMLForm extends EditBlockForm
 {
@@ -30,6 +32,7 @@ class EditBlockYMLForm extends EditBlockForm
     public function __construct(array $params = array())
     {
         $this->view->js[] = $this->view->publicURL . '/edit_block_yml_currencies.js';
+        $this->view->js[] = $this->view->publicURL . '/edit_block_yml_material_types.js';
         parent::__construct($params);
         $this->children['catsTab'] = $this->getCatsTab();
         $this->children = new FieldCollection(array(
@@ -156,11 +159,18 @@ class EditBlockYMLForm extends EditBlockForm
                 )
             ));
         }
+        $mt = new Material_Type();
+        
         if ($this->Item->id) {
             $tab->children['material_types'] = new FieldSet(array(
                 'caption' => $this->view->_('MATERIAL_TYPES'),
                 'template' => 'cms/shop/edit_block_yml_material_types.inc.php',
-                'meta' => array('Table' => new EditBlockYMLMaterialTypesTable(array('Item' => $this->Item)))
+                'meta' => array('Table' => new EditBlockYMLMaterialTypesTable(array('Item' => $this->Item)), 'Page' => new Page((int)$_GET['pid'])),
+                'children' => array(
+                    'types_select' => new RAASField(array(
+                        'type' => 'select', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => array('Set' => $mt->children), 'id' => 'types_select'
+                    )),
+                )
             ));
         }
         $tab->children[] = $this->getWidgetField();

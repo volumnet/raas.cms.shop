@@ -13,7 +13,11 @@ abstract class Abstract_Controller extends \RAAS\Abstract_Module_Controller
                 parent::execute();
                 break;
             default:
-                Sub_Orders::i()->run();
+                if (in_array($this->action, array('edit_yml_type', 'delete_yml_type'))) {
+                    Sub_Main::i()->run();
+                } else {
+                    Sub_Orders::i()->run();
+                }
                 break;
         }
     }
