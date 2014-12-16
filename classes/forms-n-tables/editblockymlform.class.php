@@ -59,8 +59,8 @@ class EditBlockYMLForm extends EditBlockForm
         $t = $this;
         $tab->children['shop_name'] = new RAASField(array('name' => 'shop_name', 'caption' => $this->view->_('SHOP_NAME')));
         $tab->children['company'] = new RAASField(array('name' => 'company', 'caption' => $this->view->_('COMPANY_NAME')));
-        $tab->children['agency'] = new RAASField(array('name' => 'agency', 'caption' => $this->view->_('AGENCY_NAME')));
-        $tab->children['email'] = new RAASField(array('name' => 'email', 'caption' => $this->view->_('AGENCY_EMAIL')));
+        $tab->children['agency'] = new RAASField(array('name' => 'agency', 'caption' => $this->view->_('AGENCY_NAME'), 'default' => 'Volume Networks'));
+        $tab->children['email'] = new RAASField(array('name' => 'email', 'caption' => $this->view->_('AGENCY_EMAIL'), 'default' => 'info@volumnet.ru'));
         $tab->children['cpa'] = new RAASField(array('type' => 'checkbox', 'name' => 'cpa', 'caption' => $this->view->_('CPA')));
         $tab->children['local_delivery_cost'] = new RAASField(array(
             'type' => 'number', 'name' => 'local_delivery_cost', 'caption' => $this->view->_('LOCAL_DELIVERY_COST'), 'min' => 0, 'step' => 0.01
