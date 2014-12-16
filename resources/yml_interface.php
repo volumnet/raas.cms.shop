@@ -5,31 +5,34 @@ use \RAAS\CMS\Material;
 use \RAAS\CMS\Material_Field;
 
 ini_set('max_execution_time', 300);
+while (ob_get_level()) {
+    ob_end_clean();
+}
 
 $getValue = function(Material $Item, $key, array $settings = array()) {
-    $v = $f = null;
     if ($settings['field']->id) {
-        $v = $Item->fields[$settings['field']->urn]->doRich();
+        $x = $Item->fields[$settings['field']->urn]->doRich();
     } elseif ($settings['field_id']) {
-        $v = $Item->{$settings['field_id']};
+        $x = $Item->{$settings['field_id']};
     }
-    if (($v === null) && $settings['value']) {
-        $v = $settings['value'];
+    if (($x === null) && $settings['value']) {
+        $x = $settings['value'];
     }
     if (isset($settings['callback']) && $settings['callback']) {
-        $f = create_function('$x, $Field', $settings['callback']);
+        $f = $settings['callback'];
     } elseif (isset(Block_YML::$ymlFields[$key]['callback']) && Block_YML::$ymlFields[$key]['callback']) {
-        $f = create_function('$x, $Field', Block_YML::$ymlFields[$key]['callback']);
+        $f = Block_YML::$ymlFields[$key]['callback'];
     } elseif (isset(Block_YML::$ymlFields[$key]['type']) && (Block_YML::$ymlFields[$key]['type'] == 'number')) {
-        $f = create_function('$x, $Field', 'return str_replace(",", ".", $x);');
+        $f = 'return str_replace(",", ".", $x);';
     }
     if ($f) {
-        $v = $f($v, $settings['field']->id ? $settings['field'] : null);
+        $Field = $settings['field'];
+        $x = eval($f);
     }
-    $v = preg_replace('/\\t+/umi', ' ', $v);
-    $v = preg_replace('/ +/umi', ' ', $v);
-    $v = trim($v);
-    return $v;
+    $x = preg_replace('/\\t+/umi', ' ', $x);
+    $x = preg_replace('/ +/umi', ' ', $x);
+    $x = trim($x);
+    return $x;
 };
 
 
@@ -110,8 +113,8 @@ foreach ($Block->types as $mtype) {
     $ignoredFields = array_filter($ignoredFields);
     $ignoredFields = array_values($ignoredFields);
 
-    foreach ($SQL_result as $row) {
-        $row = new Material($row);
+    foreach ($SQL_result as $row2) {
+        $row = new Material($row2);
         $offerTxt = '';
         $offerAttrs = '';
         $temp = array_merge(Block_YML::$defaultFields[0], (array)Block_YML::$ymlTypes[$mtype->settings['type']], Block_YML::$defaultFields[1]);
@@ -148,6 +151,7 @@ foreach ($Block->types as $mtype) {
                                 $offerTxt .= '<' . $key . '>' . htmlspecialchars(trim($v)) . '</' . $key . '>';
                             }
                         }
+                        unset($v);
                     }
                     break;
             }
@@ -180,8 +184,8 @@ foreach ($Block->types as $mtype) {
                 }
             }
             foreach ($temp as $arr) {
+                $paramAttrs = $v = '';
                 if ($arr) {
-                    $paramAttrs = '';
                     $v = $getValue($row, $key, $arr);
                     if (trim($v) !== '') {
                         if ($arr['name']) {
@@ -205,8 +209,12 @@ foreach ($Block->types as $mtype) {
             
         }
         echo '<offer id="' . (int)$row->id . '" type="' . htmlspecialchars($mtype->settings['type']) . '"' . $offerAttrs . '>' . $offerTxt . '</offer>';
+        $row->rollback();
+        unset($row);
     }
 }
 echo '</offers>';
 echo '</shop>';
 echo '</yml_catalog>';
+echo '<!-- Memory used: ' . memory_get_usage() . ' -->';
+exit;
