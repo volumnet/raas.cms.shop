@@ -198,10 +198,11 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_params (
   id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Block ID#',
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
-  param_name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field name',
+  param_name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Param name',
   field_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field ID#',
   field_callback VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field callback',
-  param_static_value VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field static value',
+  param_unit VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Param unit',
+  param_static_value VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Param static value',
 
   PRIMARY KEY (id, mtype, param_name),
   KEY (id),

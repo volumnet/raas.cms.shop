@@ -16,7 +16,7 @@ class Block_YML extends Block
     protected static $cognizableVars = array('Location', 'currencies', 'types');
 
     public static $defaultFields = array(
-        array(/*'buyurl', */'price', /*'wprice', */'currencyId', /*'xCategory', 'market_category',*/ 'picture', 'store', 'pickup', 'delivery', /*'deliveryIncluded', */'local_delivery_cost', /*'orderingTime'*/),
+        array('available', 'bid', 'cbid', 'url', /*'buyurl', */'price', 'oldprice', /*'wprice', */'currencyId', /*'xCategory',*/ 'categoryId', /*'market_category',*/ 'picture', 'store', 'pickup', 'delivery', /*'deliveryIncluded', */'local_delivery_cost', /*'orderingTime'*/),
         array(/*'aliases', 'additional', */'description', 'sales_notes', /*'promo', */'manufacturer_warranty', 'seller_warranty', 'country_of_origin', 'downloadable', 'adult', 'age', 'barcode', 'cpa', /*'fee', */'rec', 'expiry', 'weight', 'dimensions', 'param', /*'related_offer'*/),
     );
 
@@ -47,7 +47,7 @@ class Block_YML extends Block
         'aliases' => array(),
         'artist' => array(),
         'author' => array(),
-        'available' => array('type' => 'checkbox', 'callback' => 'return (int)$x ? "true" : "false";'),
+        'available' => array('type' => 'checkbox', 'callback' => 'return (int)$x ? "true" : "false";', 'default' => true),
         'barcode' => array('multiple' => true, ),
         'bid' => array('type' => 'number', 'min' => 0),
         'binding' => array(),
@@ -67,7 +67,7 @@ class Block_YML extends Block
         'delivery' => array('type' => 'checkbox', 'callback' => 'return (int)$x ? "true" : "false";'),
         'deliveryIncluded' => array('type' => 'checkbox', 'callback' => 'return (int)$x ? "true" : "false";'),
         'description' => array('default' => 'description'),
-        'dimensions' => array('pattern' => '(\\d|\\.)\\/(\\d|\\.)\\/(\\d|\\.)'),
+        'dimensions' => array('pattern' => '(\\d|\\.)\\/(\\d|\\.)\\/(\\d|\\.)', 'callback' => '$y = str_replace("x", "/", $x); $y = str_replace(",", ".", $y); $y = str_replace(" ", "", $y); return $y;'),
         'director' => array(),
         'downloadable' => array('type' => 'checkbox', 'callback' => 'return (int)$x ? "true" : "false";'),
         'expiry' => array('callback' => 'return "P" . (int)$x . "Y";'),
@@ -77,7 +77,7 @@ class Block_YML extends Block
         'hall' => array('required' => true),
         'hall plan' => array('type' => 'url'),
         'hall_part' => array(),
-        'hotel_stars' => array('type' => 'number', 'min' => 0, 'callback' => 'return (int)$x . str_repeat("*", (int)$x));'),
+        'hotel_stars' => array('type' => 'number', 'min' => 0, 'callback' => 'return (int)$x . str_repeat("*", (int)$x);'),
         'included' => array('required' => true),
         'is_kids' => array('type' => 'checkbox'),
         'is_premiere' => array('type' => 'checkbox'),
@@ -92,6 +92,7 @@ class Block_YML extends Block
         'media' => array(),
         'model' => array(),
         'name' => array('required' => true, 'default' => 'name'),
+        'oldprice' => array('type' => 'number', 'min' => 0, 'step' => 0.01),
         'options' => array(),
         'orderingTime' => array('type' => 'datetime-local'),
         'originalName' => array(),
@@ -108,7 +109,7 @@ class Block_YML extends Block
         'promo' => array(),
         'provider' => array(),
         'publisher' => array(),
-        'rec' => array('type' => 'material', 'callback' => 'return implode(",", array_map(function($y) { return (int)$y->id }, (array)$x));'),
+        'rec' => array('type' => 'material', 'callback' => 'return implode(",", array_map(function($y) { return (int)$y->id; }, (array)$x));'),
         'recording_length' => array(),
         'region' => array(),
         'related_offer' => array('type' => 'material', 'callback' => 'return $x->id;', 'multiple' => true, ),
@@ -189,7 +190,7 @@ class Block_YML extends Block
         $arr = array();
         foreach ($params as $row) {
             $row2 = array('id' => $this->id, 'mtype' => (int)$MType->id);
-            foreach (array('param_name', 'field_id', 'field_callback', 'param_static_value') as $k) {
+            foreach (array('param_name', 'field_id', 'field_callback', 'param_static_value', 'param_unit') as $k) {
                 if (isset($row[$k])) {
                     $row2[$k] = trim($row[$k]);
                 }
@@ -279,7 +280,8 @@ class Block_YML extends Block
                         } else {
                             $mfarr['field_id'] = trim($row2['field_id']);
                         }
-                    } elseif ($row2['field_static_value']) {
+                    } 
+                    if ($row2['field_static_value']) {
                         $mfarr['value'] = trim($row2['field_static_value']);
                     }
                     if ($row2['field_callback']) {
@@ -303,11 +305,15 @@ class Block_YML extends Block
                         } else {
                             $mfarr['field_id'] = trim($row2['field_id']);
                         }
-                    } elseif ($row2['param_static_value']) {
+                    } 
+                    if ($row2['param_static_value']) {
                         $mfarr['value'] = trim($row2['param_static_value']);
                     }
                     if ($row2['field_callback']) {
                         $mfarr['callback'] = trim($row2['field_callback']);
+                    }
+                    if ($row2['param_unit']) {
+                        $mfarr['unit'] = trim($row2['param_unit']);
                     }
                     $mtarr['params'][] = $mfarr;
                 }

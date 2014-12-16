@@ -100,7 +100,8 @@ class EditYMLTypeForm extends \RAAS\Form
                             $row = array();
                             if (isset($_POST['field_id'][$key]) && trim($_POST['field_id'][$key])) {
                                 $row['field_id'] = trim($_POST['field_id'][$key]);
-                            } elseif (isset($_POST['field_value'][$key]) && trim($_POST['field_value'][$key])) {
+                            } 
+                            if (isset($_POST['field_value'][$key]) && trim($_POST['field_value'][$key])) {
                                 $row['field_static_value'] = trim($_POST['field_value'][$key]);
                             }
                             if (isset($_POST['field_callback'][$key]) && trim($_POST['field_callback'][$key])) {
@@ -123,11 +124,15 @@ class EditYMLTypeForm extends \RAAS\Form
                                 }
                                 if (isset($_POST['add_param_field'][$key]) && trim($_POST['add_param_field'][$key])) {
                                     $row['field_id'] = trim($_POST['add_param_field'][$key]);
-                                } elseif (isset($_POST['add_param_value'][$key]) && trim($_POST['add_param_value'][$key])) {
+                                } 
+                                if (isset($_POST['add_param_value'][$key]) && trim($_POST['add_param_value'][$key])) {
                                     $row['param_static_value'] = trim($_POST['add_param_value'][$key]);
                                 }
                                 if (isset($_POST['add_param_callback'][$key]) && trim($_POST['add_param_callback'][$key])) {
                                     $row['field_callback'] = trim($_POST['add_param_callback'][$key]);
+                                }
+                                if (isset($_POST['add_param_unit'][$key]) && trim($_POST['add_param_unit'][$key])) {
+                                    $row['param_unit'] = trim($_POST['add_param_unit'][$key]);
                                 }
                                 if ($row) {
                                     $params[] = $row;
@@ -306,6 +311,9 @@ class EditYMLTypeForm extends \RAAS\Form
                         }
                         if (isset($row['callback'])) {
                             $DATA['add_param_callback'][$key] = trim($row['callback']);
+                        }
+                        if (isset($row['unit'])) {
+                            $DATA['add_param_unit'][$key] = trim($row['unit']);
                         }
                         if (isset($row['value'])) {
                             $DATA['add_param_value'][$key] = trim($row['value']);
