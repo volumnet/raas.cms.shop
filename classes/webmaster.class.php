@@ -74,7 +74,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         // Добавим виджеты
         $snippets = array(
             'cart' => $this->view->_('CART'), 
-            'yml' => $this->view->_('YANDEX_MARKET'),
+            // 'yml' => $this->view->_('YANDEX_MARKET'),
         );
         $VF = Snippet_Folder::importByURN('__RAAS_views');
         foreach ($snippets as $urn => $name) {

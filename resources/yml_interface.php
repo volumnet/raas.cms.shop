@@ -32,59 +32,52 @@ $getValue = function(Material $Item, $key, array $settings = array()) {
     return $v;
 };
 
-$yml = new SimpleXMLElement('<' . '?xml version="1.0" encoding="UTF-8"?' . '><yml_catalog date="' . date('Y-m-d H:i') . '"></yml_catalog>');
-$shop = $yml->addChild('shop');
+
+header('Content-Type: application/xml');
+echo '<' . '?xml version="1.0" encoding="UTF-8"?' . '><yml_catalog date="' . date('Y-m-d H:i') . '">';
+echo '<shop>';
 foreach (array('name', 'company', 'url', 'platform', 'version', 'agency', 'email', 'currencies', 'categories', 'local_delivery_cost', 'cpa') as $key) {
     switch ($key) {
         case 'url':
-            $shop->addChild($key, 'http://' . $_SERVER['HTTP_HOST']);
+            echo '<' . $key . '>http://' . htmlspecialchars($_SERVER['HTTP_HOST']) . '</' . $key . '>';
             break;
         case 'platform':
-            $shop->addChild($key, 'RAAS.CMS');
+            echo '<' . $key . '>RAAS.CMS</' . $key . '>';
             break;
         case 'version':
-            $shop->addChild('version', '4.2');
+            echo '<' . $key . '>4.2</' . $key . '>';
             break;
         case 'currencies':
-            $currencies = $shop->addChild('currencies');
-            $currency = $currencies->addChild('currency');
-            $currency->addAttribute('id', $config['default_currency']);
-            $currency->addAttribute('rate', '1');
-
+            echo '<currencies><currency id="' . htmlspecialchars($config['default_currency']) . '" rate="1" />';
             foreach ((array)$Block->currencies as $key => $row) {
-                $currency = $currencies->addChild('currency');
-                $currency->addAttribute('id', $key);
-                $currency->addAttribute('rate', trim(str_replace(',', '.', $row['rate'])));
-                if (isset($row['plus'])) {
-                    $currency->addAttribute('plus', trim(number_format((float)$row['plus'], 2, '.', '')));
-                }
+                echo '<currency id="' . htmlspecialchars($key) . '" rate="' . htmlspecialchars(trim(str_replace(',', '.', $row['rate']))) . '"' . (isset($row['plus']) ? ' plus="' . htmlspecialchars(trim(number_format((float)$row['plus'], 2, '.', ''))) . '"' : '') . ' />';
             }
+            echo '</currencies>';
             break;
         case 'categories':
-            $categories = $shop->addChild('categories');
+            echo '<categories>';
             foreach ((array)$Block->catalog_cats as $row) {
-                $category = $categories->addChild('category', trim($row->name));
-                $category->addAttribute('id', (int)$row->id);
-                if ($row->pid && in_array($row->pid, $Block->catalog_cats_ids)) {
-                    $category->addAttribute('parentId', (int)$row->pid);
-                }
+                echo '<category id="' . (int)$row->id . '"' . (($row->pid && in_array($row->pid, $Block->catalog_cats_ids)) ? ' parentId="' . (int)$row->pid . '"' : '') . '>' . 
+                        htmlspecialchars(trim($row->name)) . 
+                     '</category>';
             }
+            echo '</categories>';
             break;
         case 'local_delivery_cost':
             if (isset($config[$k])) {
-                $v = $shop->addChild($key, str_replace(',', '.', trim($config[$key])));
+                echo '<' . $key . '>' .  htmlspecialchars(str_replace(',', '.', trim($config[$key]))) . '</' . $key . '>';
             }
             break;
         default:
             $k = (($key == 'name') ? 'shop_name' : $key);
             if (isset($config[$k])) {
-                $v = $shop->addChild($key, trim($config[$k]));
+                echo '<' . $key . '>' . htmlspecialchars(trim($config[$k])) . '</' . $key . '>';
             }
             break;
     }
 }
 
-$offers = $shop->addChild('offers');
+echo '<offers>';
 foreach ($Block->types as $mtype) {
     $SQL_query = "SELECT tM.* FROM " . Material::_tablename() . " AS tM ";
     if (!$mtype->global_type) {
@@ -119,24 +112,23 @@ foreach ($Block->types as $mtype) {
 
     foreach ($SQL_result as $row) {
         $row = new Material($row);
-        $offer = $offers->addChild('offer');
-        $offer->addAttribute('id', (int)$row->id);
-        $offer->addAttribute('type', $mtype->settings['type']);
+        $offerTxt = '';
+        $offerAttrs = '';
         $temp = array_merge(Block_YML::$defaultFields[0], (array)Block_YML::$ymlTypes[$mtype->settings['type']], Block_YML::$defaultFields[1]);
         foreach ($temp as $key) {
             switch ($key) {
                 case 'url':
-                    $offer->addChild('url', 'http://' . $_SERVER['HTTP_HOST'] . $row->url);
+                    $offerTxt .= '<' . $key . '>http://' . $_SERVER['HTTP_HOST'] . $row->url . '</' . $key . '>';
                     break;
                 case 'categoryId':
                     if ($mtype->global_type) {
                         $cats = array_intersect($row->parents_ids, $Block->catalog_cats_ids);
                         $val = array_shift($cats);
-                        $offer->addChild('categoryId', $val);
+                        $offerTxt .= '<' . $key . '>' . (int)$val . '</' . $key . '>';
                     } else {
                         $cats = array_intersect($row->pages_ids, $Block->catalog_cats_ids);
                         foreach ($cats as $val) {
-                            $offer->addChild('categoryId', $val);
+                            $offerTxt .= '<' . $key . '>' . (int)$val . '</' . $key . '>';
                         }
                     }
                     break;
@@ -151,9 +143,9 @@ foreach ($Block->types as $mtype) {
                         }
                         if (trim($v) !== '') {
                             if (in_array($key, array('available', 'bid', 'cbid'))) {
-                                $offer->addAttribute($key, trim($v));
+                                $offerAttrs .= ' ' . $key . '="' . htmlspecialchars(trim($v)) . '"';
                             } else {
-                                $offer->addChild($key, trim($v));
+                                $offerTxt .= '<' . $key . '>' . htmlspecialchars(trim($v)) . '</' . $key . '>';
                             }
                         }
                     }
@@ -189,31 +181,32 @@ foreach ($Block->types as $mtype) {
             }
             foreach ($temp as $arr) {
                 if ($arr) {
+                    $paramAttrs = '';
                     $v = $getValue($row, $key, $arr);
                     if (trim($v) !== '') {
-                        $param = $offer->addChild('param', $v);
                         if ($arr['name']) {
-                            $param->addAttribute('name', $arr['name']);
+                            $paramAttrs .= ' name="' . htmlspecialchars($arr['name']) . '"';
                         } elseif ($arr['field']->id) {
-                            $param->addAttribute('name', $arr['field']->name);
+                            $paramAttrs .= ' name="' . htmlspecialchars($arr['field']->name) . '"';
                         } elseif ($arr['field_id'] == 'name') {
-                            $param->addAttribute('name', NAME);
+                            $paramAttrs .= ' name="' . htmlspecialchars(NAME) . '"';
                         } elseif ($arr['field_id'] == 'description') {
-                            $param->addAttribute('name', DESCRIPTION);
+                            $paramAttrs .= ' name="' . htmlspecialchars(DESCRIPTION) . '"';
                         } else {
-                            $param->addAttribute('name', $arr['field_id']);
+                            $paramAttrs .= ' name="' . htmlspecialchars($arr['field_id']) . '"';
                         }
                         if ($arr['unit']) {
-                            $param->addAttribute('unit', $arr['unit']);
+                            $paramAttrs .= ' unit="' . htmlspecialchars($arr['unit']) . '"';
                         }
+                        $offerTxt .= '<param' . $paramAttrs . '>' . htmlspecialchars($v) . '</param>';
                     }
                 }
             }
             
         }
+        echo '<offer id="' . (int)$row->id . '" type="' . htmlspecialchars($mtype->settings['type']) . '"' . $offerAttrs . '>' . $offerTxt . '</offer>';
     }
-    
 }
-
-$OUT = array('yml' => $yml);
-return $OUT;
+echo '</offers>';
+echo '</shop>';
+echo '</yml_catalog>';

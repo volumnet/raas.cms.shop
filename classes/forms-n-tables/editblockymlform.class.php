@@ -173,7 +173,6 @@ class EditBlockYMLForm extends EditBlockForm
                 )
             ));
         }
-        $tab->children[] = $this->getWidgetField();
         return $tab;
     }
 
