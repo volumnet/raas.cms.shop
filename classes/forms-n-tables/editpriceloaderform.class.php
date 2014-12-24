@@ -89,6 +89,8 @@ class EditPriceLoaderForm extends \RAAS\Form
                 array('name' => 'name', 'caption' => $this->view->_('NAME')), 
                 array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
                 $this->getInterfaceField(),
+                array('type' => 'number', 'min' => 0, 'name' => 'rows', 'caption' => $this->view->_('OFFSET') . ', ' . $this->view->_('ROWS_FROM_TOP'), 'default' => 0),
+                array('type' => 'number', 'min' => 0, 'name' => 'cols', 'caption' => $this->view->_('OFFSET') . ', ' . $this->view->_('COLS_FROM_LEFT'), 'default' => 0),
                 new FieldSet(array(
                     'template' => 'dev_edit_priceloader.columns.php',
                     'caption' => $this->view->_('COLUMNS'),
@@ -99,6 +101,7 @@ class EditPriceLoaderForm extends \RAAS\Form
                                 $DATA['column_id'][] = (int)$row->id;
                                 $DATA['column_fid'][] = (string)$row->fid;
                                 $DATA['column_callback'][] = (string)$row->callback;
+                                $DATA['column_download_callback'][] = (string)$row->callback_download;
                             }
                         }
                         $DATA['ufid'] = $FieldSet->Form->Item->ufid;
@@ -119,6 +122,7 @@ class EditPriceLoaderForm extends \RAAS\Form
                                 }
                                 $row->fid = (string)$_POST['column_fid'][$key];
                                 $row->callback = (string)$_POST['column_callback'][$key];
+                                $row->callback_download = (string)$_POST['column_download_callback'][$key];
                                 $row->priority = ++$i;
                                 $Set[] = $row;
                             }
@@ -138,7 +142,8 @@ class EditPriceLoaderForm extends \RAAS\Form
                         'ufid' => array('type' => 'radio', 'name' => 'ufid'),
                         'column_id' => array('type' => 'hidden', 'name' => 'column_id', 'multiple' => true),
                         'column_fid' => array('type' => 'select', 'name' => 'column_fid', 'children' => $CONTENT['fields'], 'class' => 'span2', 'multiple' => true),
-                        'column_callback' => array('name' => 'price_callback', 'multiple' => true),
+                        'column_callback' => array('name' => 'column_callback', 'multiple' => true),
+                        'column_download_callback' => array('name' => 'column_download_callback', 'multiple' => true),
                     )
                 ))
             )

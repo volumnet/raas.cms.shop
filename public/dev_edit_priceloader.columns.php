@@ -28,7 +28,12 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
                     <?php } ?>
                   </select>
                 </td>
-                <td><input type="text" name="column_callback[]" value="<?php echo htmlspecialchars($DATA['column_callback'][$i])?>" /></td>
+                <td>
+                  <i class="icon icon-upload" title="<?php echo CMS\Shop\FOR_UPLOAD?>"></i>
+                  <input type="text" name="column_callback[]" value="<?php echo htmlspecialchars($DATA['column_callback'][$i])?>" placeholder="<?php echo CMS\Shop\FOR_UPLOAD?>" /><br />
+                  <i class="icon icon-download-alt" title="<?php echo CMS\Shop\FOR_DOWNLOAD?>"></i>
+                  <input type="text" name="column_download_callback[]" value="<?php echo htmlspecialchars($DATA['column_download_callback'][$i])?>" placeholder="<?php echo CMS\Shop\FOR_DOWNLOAD?>" />
+                </td>
                 <td><input type="radio" name="ufid" value="<?php echo htmlspecialchars($DATA['column_fid'][$i])?>" <?php echo $DATA['ufid'] == $DATA['column_fid'][$i] ? 'checked="checked"' : ''?> <?php echo !$DATA['column_fid'][$i] ? 'disabled="disabled"' : ''?> /></td>
                 <td><a href="#" class="close" data-role="raas-repo-del">&times;</a></td>
               </tr>
@@ -47,7 +52,12 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
                 <?php } ?>
               </select>
             </td>
-            <td><input type="text" name="column_callback[]" value="" disabled="disabled" /></td>
+            <td>
+              <i class="icon icon-upload" title="<?php echo CMS\Shop\FOR_UPLOAD?>"></i>
+              <input type="text" name="column_callback[]" value="" placeholder="<?php echo CMS\Shop\FOR_UPLOAD?>" /><br />
+              <i class="icon icon-download-alt" title="<?php echo CMS\Shop\FOR_DOWNLOAD?>"></i>
+              <input type="text" name="column_download_callback[]" value="" placeholder="<?php echo CMS\Shop\FOR_DOWNLOAD?>" />
+            </td>
             <td><input type="radio" name="ufid" value="" disabled="disabled" /></td>
             <td><a href="#" class="close" data-role="raas-repo-del">&times;</a></td>
           </tr>

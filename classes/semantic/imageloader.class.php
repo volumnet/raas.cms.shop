@@ -18,4 +18,18 @@ class ImageLoader extends \SOME\SOME
         }
         parent::commit();
     }
+
+
+    public function upload(array $files = null, $test = false, $clear = false)
+    {
+        $Loader = $this;
+        eval('?' . '>' . $this->Interface->description);
+    }
+
+
+    public function download()
+    {
+        $Loader = $this;
+        eval('?' . '>' . $this->Interface->description);
+    }
 }

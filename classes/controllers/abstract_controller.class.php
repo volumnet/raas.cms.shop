@@ -12,6 +12,12 @@ abstract class Abstract_Controller extends \RAAS\Abstract_Module_Controller
             case 'dev':
                 parent::execute();
                 break;
+            case 'priceloaders':
+                Sub_Priceloaders::i()->run();
+                break;
+            case 'imageloaders':
+                Sub_Imageloaders::i()->run();
+                break;
             default:
                 if (in_array($this->action, array('edit_yml_type', 'delete_yml_type'))) {
                     Sub_Main::i()->run();

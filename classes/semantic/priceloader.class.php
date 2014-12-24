@@ -21,4 +21,18 @@ class PriceLoader extends \SOME\SOME
         }
         parent::commit();
     }
+
+
+    public function upload(array $file = null, $test = false, $clear = false, $rows = 0, $cols = 0)
+    {
+        $Loader = $this;
+        eval('?' . '>' . $this->Interface->description);
+    }
+
+
+    public function download($rows = 0, $cols = 0)
+    {
+        $Loader = $this;
+        eval('?' . '>' . $this->Interface->description);
+    }
 }

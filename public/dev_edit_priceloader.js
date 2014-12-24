@@ -33,7 +33,7 @@ jQuery(document).ready(function($) {
         $('[data-role="field-id-column"]').RAAS_getSelect(
             'ajax.php?p=cms&m=shop&action=material_fields&id=' + $(this).val(), 
             {
-                before: function(data) { return data.Set; },
+                before: function(data) { data.Set.unshift({ text: '--', val: '' }); return data.Set; },
                 after: function() { $('tbody[data-role="raas-repo-container"]').empty(); }
             }
         );

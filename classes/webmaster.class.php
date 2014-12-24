@@ -48,7 +48,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_imageloader_interface', 'locked' => 1));
         }
         $Item->name = $this->view->_('IMAGELOADER_STANDARD_INTERFACE');
-        $Item->description = $this->stdImageLoaderInterfaceFile;
+        $Item->description = $this->stdImageLoaderInterface;
         $Item->commit();
 
         $Item = Snippet::importByURN('__RAAS_shop_priceloader_interface');
@@ -56,7 +56,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_priceloader_interface', 'locked' => 1));
         }
         $Item->name = $this->view->_('PRICELOADER_STANDARD_INTERFACE');
-        $Item->description = $this->stdPriceLoaderInterfaceFile;
+        $Item->description = $this->stdPriceLoaderInterface;
         $Item->commit();
 
         $Item = Snippet::importByURN('__RAAS_shop_yml_interface');

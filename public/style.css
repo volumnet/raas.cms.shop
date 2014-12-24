@@ -2,3 +2,6 @@
 .cms-block-shop-yml { background-color: white; color: red; }
 .cms-block-shop-yml a { color: red; }
 .cms-block-shop-yml span { color: red; }
+.cms-shop-headers-table { width: auto; border: 1px solid silver; }
+.cms-shop-headers-table th { border: 1px solid silver; }
+.cms-shop-headers-table .unique { background: #d9edf7; }

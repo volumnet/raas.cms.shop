@@ -27,7 +27,8 @@ class View_Web extends \RAAS\Module_View_Web
         $menuItem = array(
             'href' => $this->url, 
             'name' => $this->_('ORDERS') . ($c ? ' (' . $c . ')' : ''), 
-            'submenu' => array()
+            'submenu' => array(),
+            'active' => !$this->sub
         );
         foreach (Cart_Type::getSet() as $row) {
             if ($row->form_id) {
@@ -39,6 +40,8 @@ class View_Web extends \RAAS\Module_View_Web
             }
         }
         $submenu[] = $menuItem;
+        $submenu[] = array('href' => $this->url . '&sub=priceloaders', 'name' => $this->_('PRICELOADERS'));
+        $submenu[] = array('href' => $this->url . '&sub=imageloaders', 'name' => $this->_('IMAGELOADERS'));
         return $submenu;
     }
 }
