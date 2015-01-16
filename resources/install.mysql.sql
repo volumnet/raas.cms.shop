@@ -88,11 +88,13 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',
   rows INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Rows from top',
   cols INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Cols from left',
+  cat_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Root category ID#',
 
   PRIMARY KEY (id),
   KEY (mtype),
   KEY (ufid),
-  KEY (interface_id)
+  KEY (interface_id),
+  KEY (cat_id)
 ) COMMENT 'Price loaders';
 
 
@@ -114,7 +116,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloaders (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID#',
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
-  ufid INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Unique field ID#',
+  ufid VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Unique field ID#',
   name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Name',
   sep_string VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Separator string',
   interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',

@@ -8,6 +8,7 @@ use \RAAS\CMS\Form as CMSForm;
 use \RAAS\FieldSet;
 use \RAAS\CMS\Snippet_Folder;
 use \RAAS\CMS\Snippet;
+use \RAAS\CMS\Page;
 
 class EditPriceLoaderForm extends \RAAS\Form
 {
@@ -80,6 +81,8 @@ class EditPriceLoaderForm extends \RAAS\Form
                 $CONTENT['fields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
             }
         }
+        $p = new Page();
+        $CONTENT['pages'] = array('Set' => $p->children);
 
         $defaultParams = array(
             'caption' => $Item->id ? $Item->name : $view->_('EDIT_PRICELOADER'),
@@ -88,6 +91,7 @@ class EditPriceLoaderForm extends \RAAS\Form
             'children' => array(
                 array('name' => 'name', 'caption' => $this->view->_('NAME')), 
                 array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
+                array('type' => 'select', 'name' => 'cat_id', 'caption' => $this->view->_('ROOT_CATEGORY'), 'children' => $CONTENT['pages'], 'required' => true, ),
                 $this->getInterfaceField(),
                 array('type' => 'number', 'min' => 0, 'name' => 'rows', 'caption' => $this->view->_('OFFSET') . ', ' . $this->view->_('ROWS_FROM_TOP'), 'default' => 0),
                 array('type' => 'number', 'min' => 0, 'name' => 'cols', 'caption' => $this->view->_('OFFSET') . ', ' . $this->view->_('COLS_FROM_LEFT'), 'default' => 0),

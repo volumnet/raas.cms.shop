@@ -8,42 +8,20 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
     
     public function run()
     {
-        $OUT = array();
-        $OUT['CONTENT']['loaders'] = PriceLoader::getSet();
-        $DATA = array();
-        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $DATA = $_POST;
-            $Loader = new PriceLoader((int)$_POST['loader']);
-            if ($Loader->id) {
-                $file = null;
-                if (is_uploaded_file($_FILES['file']['tmp_name'])) {
-                    $file = $_FILES['file'];
-                }
-                $test = isset($_POST['test']);
-                $clear = isset($_POST['clear']);
-                $rows = isset($_POST['rows']) ? (int)$_POST['rows'] : 0;
-                $cols = isset($_POST['cols']) ? (int)$_POST['cols'] : 0;
-                $IN = $Loader->upload($file, $test, $clear, $rows, $cols);
-            }
-        } elseif ($this->action == 'download') {
+        $Form = new ProcessPriceLoaderForm();
+        $OUT = $Form->process();
+        if ($this->action == 'download') {
             $Loader = new PriceLoader((int)$_GET['loader']);
             if ($Loader->id) {
                 $rows = isset($_GET['rows']) ? (int)$_GET['rows'] : 0;
                 $cols = isset($_GET['cols']) ? (int)$_GET['cols'] : 0;
                 $IN = $Loader->download($rows, $cols);
             }
-            $DATA['rows'] = (int)$_GET['rows'];
-            $DATA['cols'] = (int)$_GET['cols'];
-            $DATA['show_log'] = (int)$_GET['show_log'];
+            $OUT['DATA']['rows'] = (int)$_GET['rows'];
+            $OUT['DATA']['cols'] = (int)$_GET['cols'];
+            $OUT['DATA']['show_log'] = (int)$_GET['show_log'];
         } else {
-            if ($OUT['CONTENT']['loaders']) {
-                $loader = $OUT['CONTENT']['loaders'][0];
-                $DATA['rows'] = (int)$loader->rows;
-                $DATA['cols'] = (int)$loader->cols;
-            }
-            $DATA['show_log'] = 1;
-        }
-        if (isset($IN)) {
+            $IN = isset($Form->meta['OUT']) ? (array)$Form->meta['OUT'] : array();
             if (isset($IN['localError'])) {
                 $OUT['localError'] = $IN['localError'];
             } elseif ($IN === false) {
@@ -72,9 +50,8 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
             if (isset($IN['data']) && $DATA['show_data']) {
                 $OUT['raw_data'] = (array)$IN['data'];
             }
+            $OUT['url'] = $this->url;
         }
-        $OUT['DATA'] = $DATA;
-        $OUT['url'] = $this->url;
         $this->view->main($OUT);
     }
 }

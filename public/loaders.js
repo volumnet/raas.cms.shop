@@ -25,6 +25,8 @@ jQuery(document).ready(function($) {
             $('[data-role="file-format__container"]').hide();
         }
 
+        $('[data-role="material-type-container"]').text($('#loader option:selected').attr('data-material-type'))
+
         checkDownloadUrl();
     }
 
@@ -33,6 +35,8 @@ jQuery(document).ready(function($) {
         rows = isNaN(rows) ? 0 : rows;
         var cols = parseInt($('#cols').val());
         cols = isNaN(cols) ? 0 : cols;
+        var cat_id = parseInt($('#cat_id').val());
+        cat_id = isNaN(cat_id) ? 0 : cat_id;
         
         var url = $('[data-role="loader-form"]').attr('action') + '&action=download';
         var loader_id = parseInt($('#loader').val());
@@ -44,8 +48,8 @@ jQuery(document).ready(function($) {
             if (rows) {
                 url += '&rows=' + rows;
             }
-            if ($('#show_log').is(':checked')) {
-                url += '&show_log=1';
+            if (cat_id) {
+                url += '&cat_id=' + cat_id;
             }
             $('[data-role="download-button"]').removeAttr('onclick').attr('href', url);
         } else {
@@ -59,9 +63,12 @@ jQuery(document).ready(function($) {
         rows = isNaN(rows) ? 0 : rows;
         var cols = parseInt($('#loader option:selected').attr('data-cols'));
         cols = isNaN(cols) ? 0 : cols;
+        var cat_id = parseInt($('#loader option:selected').attr('data-cat_id'));
+        cat_id = isNaN(cat_id) ? 0 : cat_id;
         
         $('#cols').val(cols);
         $('#rows').val(rows);
+        $('#cat_id').val(cat_id);
     }
 
     $('#loader').on('change', function() { checkColsRows(); checkLoader(); });

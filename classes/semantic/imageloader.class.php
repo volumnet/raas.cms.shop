@@ -23,13 +23,15 @@ class ImageLoader extends \SOME\SOME
     public function upload(array $files = null, $test = false, $clear = false)
     {
         $Loader = $this;
-        eval('?' . '>' . $this->Interface->description);
+        $OUT = eval('?' . '>' . $this->Interface->description);
+        return $OUT;
     }
 
 
     public function download()
     {
         $Loader = $this;
-        eval('?' . '>' . $this->Interface->description);
+        $OUT = eval('?' . '>' . $this->Interface->description);
+        return $OUT;
     }
 }

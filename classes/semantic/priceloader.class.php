@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+use \RAAS\CMS\Page;
 
 class PriceLoader extends \SOME\SOME
 {
@@ -9,6 +10,7 @@ class PriceLoader extends \SOME\SOME
         'Material_Type' => array('FK' => 'mtype', 'classname' => 'RAAS\\CMS\\Material_Type', 'cascade' => true),
         'Unique_Field' => array('FK' => 'ufid', 'classname' => 'RAAS\\CMS\\Material_Field', 'cascade' => false),
         'Interface' => array('FK' => 'interface_id', 'classname' => 'RAAS\\CMS\\Snippet', 'cascade' => true),
+        'Page' => array('FK' => 'cat_id', 'classname' => 'RAAS\\CMS\\Page', 'cascade' => false),
     );
     protected static $children = array(
         'columns' => array('classname' => 'RAAS\\CMS\\Shop\\PriceLoader_Column', 'FK' => 'pid')
@@ -23,16 +25,18 @@ class PriceLoader extends \SOME\SOME
     }
 
 
-    public function upload(array $file = null, $test = false, $clear = false, $rows = 0, $cols = 0)
+    public function upload(array $file = null, Page $Page = null, $test = false, $clear = false, $rows = 0, $cols = 0)
     {
         $Loader = $this;
-        eval('?' . '>' . $this->Interface->description);
+        $OUT = eval('?' . '>' . $this->Interface->description);
+        return $OUT;
     }
 
 
     public function download($rows = 0, $cols = 0)
     {
         $Loader = $this;
-        eval('?' . '>' . $this->Interface->description);
+        $OUT = eval('?' . '>' . $this->Interface->description);
+        return $OUT;
     }
 }
