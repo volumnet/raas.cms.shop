@@ -63,6 +63,7 @@ class EditImageLoaderForm extends \RAAS\Form
         $CONTENT = array();
         $mt = new Material_Type();
         $CONTENT['material_types'] = array('Set' => $mt->children);
+        $CONTENT['imageFields'] = array();
         $CONTENT['fields'] = array(
             array('value' => 'urn', 'caption' => $this->view->_('URN')),
             array('value' => 'name', 'caption' => $this->view->_('NAME')),
@@ -78,6 +79,8 @@ class EditImageLoaderForm extends \RAAS\Form
         foreach ((array)$Material_Type->fields as $row) {
             if (!($row->multiple || in_array($row->datatype, array('file', 'image')))) {
                 $CONTENT['fields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
+            } elseif (in_array($row->datatype, array('image'))) {
+                $CONTENT['imageFields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
             }
         }
 
@@ -89,6 +92,7 @@ class EditImageLoaderForm extends \RAAS\Form
                 array('name' => 'name', 'caption' => $this->view->_('NAME')), 
                 array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
                 array('type' => 'select', 'name' => 'ufid', 'caption' => $this->view->_('UNIQUE_FIELD'), 'children' => $CONTENT['fields']),
+                array('type' => 'select', 'name' => 'ifid', 'caption' => $this->view->_('IMAGE_FIELD'), 'children' => $CONTENT['imageFields']),
                 array('name' => 'sep_string', 'caption' => $this->view->_('SEPARATOR'), 'class' => 'span1', 'default' => '.'), 
                 $this->getInterfaceField(),
             )

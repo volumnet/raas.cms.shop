@@ -13,12 +13,16 @@
       <div class="row">
         <div class="span4"><?php echo $_RAASForm_Control($Form->children['loader'])?></div>
         <div class="span2">
-          <div class="btn-group pull-right" data-role="download-button" data-no-loader-hint="<?php echo CMS\Shop\NO_LOADER_HINT?>">
-            <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-              <i class="icon-white icon-download-alt"></i> <?php echo ($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) ? CMS\Shop\DOWNLOAD_PRICE : CMS\Shop\DOWNLOAD_IMAGES?> <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu"><?php echo showMenu((array)$downloadMenu)?></ul>
-          </div>
+          <?php if ($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) { ?>
+              <div class="btn-group" data-role="download-button" data-no-loader-hint="<?php echo CMS\Shop\NO_LOADER_HINT?>">
+                <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                  <i class="icon-white icon-download-alt"></i> <?php echo CMS\Shop\DOWNLOAD_PRICE?> <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu"><?php echo showMenu((array)$downloadMenu)?></ul>
+              </div>
+          <?php } else { ?>
+              <a data-href="<?php echo $url?>&action=download" data-role="download-button" class="btn btn-success"><i class="icon-white icon-download-alt"></i> <?php echo CMS\Shop\DOWNLOAD_IMAGES?></a>
+          <?php } ?>
         </div>
       </div>
     </div>
@@ -60,6 +64,10 @@
         </div>
       </div>
   <?php } elseif ($Form instanceof \RAAS\CMS\Shop\ProcessImageLoaderForm) { ?>
+      <div class="control-group" data-role="image-field__container" style="display: none">
+        <label class="control-label"><?php echo CMS\Shop\IMAGE_FIELD?>:</label> 
+        <div class="controls"><div class="row"><div class="span7" data-role="image-field"></div></div></div>
+      </div>
       <div class="control-group" data-role="file-format__container" style="display: none">
         <label class="control-label"><?php echo CMS\Shop\FILENAME_FORMAT?>:</label> 
         <div class="controls"><div class="row"><div class="span7" data-role="file-format"></div></div></div>

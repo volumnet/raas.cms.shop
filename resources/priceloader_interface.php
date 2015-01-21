@@ -9,13 +9,12 @@ use \PHPExcel_Style_NumberFormat;
 use \PHPExcel_Cell_DataType;
 
 ini_set('max_execution_time', 300);
-
+$st = microtime(true);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Загрузка прайса
 
 } else {
     // Выгрузка прайса
-    $st = microtime(true);
     $downloadPrice = function(Page $Page = null, $level = 0) use ($Loader, &$downloadPrice, $cols, $rows) {
         static $mtypes;
         if (!$mtypes) {
@@ -41,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (!$Loader->Material_Type->global_type) {
             $SQL_query .= " AND tMPA.pid = " . (int)$Page->id;
         }
+        $SQL_query .= " GROUP BY tM.id";
         $SQL_result = Material::_SQL()->get($SQL_query);
         if (($rows > 0) && !$level) {
             $temp = array();

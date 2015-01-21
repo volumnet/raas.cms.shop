@@ -25,6 +25,15 @@ jQuery(document).ready(function($) {
             $('[data-role="file-format__container"]').hide();
         }
 
+        var image_field = $('#loader option:selected').attr('data-image-field');
+        if (image_field) {
+            $('[data-role="image-field"]').text(image_field);
+            $('[data-role="image-field__container"]').show();
+        } else {
+            $('[data-role="image-field"]').text('');
+            $('[data-role="image-field__container"]').hide();
+        }
+
         $('[data-role="material-type-container"]').text($('#loader option:selected').attr('data-material-type'))
 
         checkDownloadUrl();
@@ -40,7 +49,7 @@ jQuery(document).ready(function($) {
         
         var loader_id = parseInt($('#loader').val());
         if ($.isNumeric(loader_id) && (loader_id > 0)) {
-            $('[data-role="download-button"] ul li a').each(function() {
+            $('[data-role="download-button"]' + ($('[data-role="download-button"] ul li a').length > 0 ? ' ul li a' : '')).each(function() {
                 var url = $(this).attr('data-href');
                 url += '&loader=' + loader_id;
                 if (cols) {
@@ -58,7 +67,7 @@ jQuery(document).ready(function($) {
         } else {
             var onclick = 'alert(\'' + $('[data-role="download-button"]').attr('data-no-loader-hint').replace(/'/, '\\\'') + '\'); return false;';
             $('[data-role="download-button"]').attr('onclick', onclick);
-            $('[data-role="download-button"] ul li a').attr('href', '#');
+            $('[data-role="download-button"]' + ($('[data-role="download-button"] ul li a').length > 0 ? ' ul li a' : '')).attr('href', '#');
         }
     }
 

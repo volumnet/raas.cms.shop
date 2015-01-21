@@ -43,7 +43,7 @@ class ProcessImageLoaderForm extends \RAAS\Form
                         'additional' => function($row) use ($view) { 
                             $arr = array();
                             if (is_numeric($row->ufid)) {
-                                $text = $row->Field->name;
+                                $text = $row->Unique_Field->name;
                             } elseif ($row->ufid == 'name') {
                                 $text = $view->_('NAME');
                             } elseif ($row->ufid == 'urn') {
@@ -55,6 +55,7 @@ class ProcessImageLoaderForm extends \RAAS\Form
                             }
                             $file_format = ($text ? '[' . $text . ']' . $row->sep_string : '') . '[' . $view->_('FILENAME') . '].(jpg|gif|png)';
                             $arr['data-material-type'] = $row->Material_Type->name;
+                            $arr['data-image-field'] = $row->Image_Field->name;
                             if ($file_format) {
                                 $arr['data-file-format'] = $file_format;
                             }

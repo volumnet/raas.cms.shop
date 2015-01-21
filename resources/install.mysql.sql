@@ -117,6 +117,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloade
   id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID#',
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
   ufid VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Unique field ID#',
+  ifid VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Image field ID#',
   name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Name',
   sep_string VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Separator string',
   interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',
@@ -124,6 +125,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloade
   PRIMARY KEY (id),
   KEY (mtype),
   KEY (ufid),
+  KEY (ifid),
   KEY (interface_id)
 ) COMMENT 'Image loaders';
 

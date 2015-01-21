@@ -26,36 +26,36 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
             $OUT['DATA']['show_log'] = (int)$_GET['show_log'];
         } else {
             $IN = isset($Form->meta['OUT']) ? (array)$Form->meta['OUT'] : array();
-            if (isset($IN['localError'])) {
-                $OUT['localError'] = $IN['localError'];
-            } elseif ($IN === false) {
-                $OUT['localError'] = array(
-                    array(
-                        'name' => 'INVALID', 
-                        'value' => 'file', 
-                        'description' => $this->view->_(
-                            ($_SERVER['REQUEST_METHOD'] == 'POST') ? 'ERR_SOME_ERROR_DUE_UPLOADING' : 'ERR_SOME_ERROR_DUE_DOWNLOADING'
-                        )
-                    )
-                );
-            }
-            if (isset($IN['localSuccess'])) {
-                $OUT['localSuccess'] = $IN['localSuccess'];
-            } elseif (isset($IN['ok']) || ($IN === true)) {
-                $OUT['localSuccess'] = array(
-                    'name' => 'SUCCESS', 
-                    'value' => 'file', 
-                    'description' => $this->view->_(($_SERVER['REQUEST_METHOD'] == 'POST') ? 'PRICE_SUCCESSFULLY_UPLOADED' : 'PRICE_SUCCESSFULLY_DOWNLOADED')
-                );
-            }
-            if (isset($IN['log']) && $OUT['DATA']['show_log']) {
-                $OUT['log'] = (array)$IN['log'];
-            }
-            if (isset($IN['data']) && $OUT['DATA']['show_data']) {
-                $OUT['raw_data'] = (array)$IN['data'];
-            }
-            $OUT['url'] = $this->url;
         }
+        if (isset($IN['localError'])) {
+            $OUT['localError'] = $IN['localError'];
+        } elseif ($IN === false) {
+            $OUT['localError'] = array(
+                array(
+                    'name' => 'INVALID', 
+                    'value' => 'file', 
+                    'description' => $this->view->_(
+                        ($_SERVER['REQUEST_METHOD'] == 'POST') ? 'ERR_SOME_ERROR_DUE_UPLOADING' : 'ERR_SOME_ERROR_DUE_DOWNLOADING'
+                    )
+                )
+            );
+        }
+        if (isset($IN['localSuccess'])) {
+            $OUT['localSuccess'] = $IN['localSuccess'];
+        } elseif (isset($IN['ok']) || ($IN === true)) {
+            $OUT['localSuccess'] = array(
+                'name' => 'SUCCESS', 
+                'value' => 'file', 
+                'description' => $this->view->_(($_SERVER['REQUEST_METHOD'] == 'POST') ? 'PRICE_SUCCESSFULLY_UPLOADED' : 'PRICE_SUCCESSFULLY_DOWNLOADED')
+            );
+        }
+        if (isset($IN['log']) && $OUT['DATA']['show_log']) {
+            $OUT['log'] = (array)$IN['log'];
+        }
+        if (isset($IN['data']) && $OUT['DATA']['show_data']) {
+            $OUT['raw_data'] = (array)$IN['data'];
+        }
+        $OUT['url'] = $this->url;
         $this->view->main($OUT);
     }
 }
