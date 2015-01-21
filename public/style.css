@@ -5,3 +5,4 @@
 .cms-shop-headers-table { width: auto; border: 1px solid silver; }
 .cms-shop-headers-table th { border: 1px solid silver; }
 .cms-shop-headers-table .unique { background: #d9edf7; }
+.cms-shop-log-container { max-height: 300px; overflow: auto; }

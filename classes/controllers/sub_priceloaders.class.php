@@ -1,6 +1,7 @@
 <?php
 namespace RAAS\CMS\Shop;
 use \RAAS\Redirector;
+use \RAAS\CMS\Page;
 
 class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
 {
@@ -15,7 +16,10 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
             if ($Loader->id) {
                 $rows = isset($_GET['rows']) ? (int)$_GET['rows'] : 0;
                 $cols = isset($_GET['cols']) ? (int)$_GET['cols'] : 0;
-                $IN = $Loader->download($rows, $cols);
+                $Page = isset($_GET['cat_id']) ? (new Page((int)$_GET['cat_id'])) : $Loader->Page;
+                $type = isset($_GET['type']) ? trim($_GET['type']) : '';
+                $encoding = isset($_GET['encoding']) ? trim($_GET['encoding']) : '';
+                $IN = $Loader->download($Page, $rows, $cols, $type, $encoding);
             }
             $OUT['DATA']['rows'] = (int)$_GET['rows'];
             $OUT['DATA']['cols'] = (int)$_GET['cols'];
@@ -44,10 +48,10 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
                     'description' => $this->view->_(($_SERVER['REQUEST_METHOD'] == 'POST') ? 'PRICE_SUCCESSFULLY_UPLOADED' : 'PRICE_SUCCESSFULLY_DOWNLOADED')
                 );
             }
-            if (isset($IN['log']) && $DATA['show_log']) {
+            if (isset($IN['log']) && $OUT['DATA']['show_log']) {
                 $OUT['log'] = (array)$IN['log'];
             }
-            if (isset($IN['data']) && $DATA['show_data']) {
+            if (isset($IN['data']) && $OUT['DATA']['show_data']) {
                 $OUT['raw_data'] = (array)$IN['data'];
             }
             $OUT['url'] = $this->url;

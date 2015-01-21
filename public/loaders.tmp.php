@@ -13,9 +13,12 @@
       <div class="row">
         <div class="span4"><?php echo $_RAASForm_Control($Form->children['loader'])?></div>
         <div class="span2">
-          <a href="#" class="btn btn-success" data-role="download-button" data-no-loader-hint="<?php echo CMS\Shop\NO_LOADER_HINT?>">
-            <i class="icon-white icon-download-alt"></i> <?php echo ($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) ? CMS\Shop\DOWNLOAD_PRICE : CMS\Shop\DOWNLOAD_IMAGES?>
-          </a>
+          <div class="btn-group pull-right" data-role="download-button" data-no-loader-hint="<?php echo CMS\Shop\NO_LOADER_HINT?>">
+            <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+              <i class="icon-white icon-download-alt"></i> <?php echo ($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) ? CMS\Shop\DOWNLOAD_PRICE : CMS\Shop\DOWNLOAD_IMAGES?> <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu"><?php echo showMenu((array)$downloadMenu)?></ul>
+          </div>
         </div>
       </div>
     </div>
@@ -113,7 +116,35 @@
       </div>
     </div>
   </div>
-  <?php if ($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) { ?>
+  <?php 
+  ?>
 
+  <script type="text/javascript">
+  <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && $raw_data) { ?>
+      var raw_data = <?php echo json_encode($raw_data)?>;
+  <?php } ?>
+  <?php if ($log) { ?>
+      var log = <?php echo json_encode($log)?>;
+  <?php } ?>
+  var timeName = '<?php echo addslashes(CMS\Shop\TIME_SEC)?>';
+  </script>
+  <?php if ($raw_data || $log) { ?>
+      <h2><?php echo CMS\Shop\LOADER_REPORT?></h2>
+      <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && $raw_data && $log) { ?>
+          <div role="tabpanel">
+            <ul class="nav nav-tabs" role="tablist">
+              <li role="presentation" class="active"><a href="#tab_log" role="tab" data-toggle="tab"><?php echo CMS\Shop\LOG?></a></li>
+              <li role="presentation"><a href="#tab_data" role="tab" data-toggle="tab"><?php echo CMS\Shop\DATA?></a></li>
+            </ul>
+            <div class="tab-content">
+              <div role="tabpanel" class="tab-pane active cms-shop-log-container" id="tab_log"></div>
+              <div role="tabpanel" class="tab-pane cms-shop-log-container" id="tab_data"></div>
+            </div>
+          </div>
+      <?php } elseif ($raw_data) { ?>
+          <div id="tab_data" class="cms-shop-log-container"></div>
+      <?php } elseif ($log) { ?>
+          <div id="tab_log" class="cms-shop-log-container"></div>
+      <?php } ?>
   <?php } ?>
 </form>

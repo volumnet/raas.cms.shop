@@ -129,6 +129,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                     $Form->meta['OUT'] = $IN;
                 }
             },
+            'oncommit' => 'is_null',
             'redirect' => 'is_null',
         );
         $arr = array_merge($defaultParams, $params);

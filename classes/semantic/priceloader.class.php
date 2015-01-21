@@ -33,7 +33,7 @@ class PriceLoader extends \SOME\SOME
     }
 
 
-    public function download($rows = 0, $cols = 0)
+    public function download(Page $Page, $rows = 0, $cols = 0, $type = null, $encoding = null)
     {
         $Loader = $this;
         $OUT = eval('?' . '>' . $this->Interface->description);
