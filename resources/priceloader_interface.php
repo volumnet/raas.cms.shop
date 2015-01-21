@@ -12,7 +12,12 @@ ini_set('max_execution_time', 300);
 $st = microtime(true);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Загрузка прайса
-
+    if (!$file) {
+        return array('localError' => array(array('name' => 'MISSING', 'value' => 'file', 'description' => Module::i()->view->_('UPLOAD_FILE_REQUIRED'))));
+    } elseif (!in_array(strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)), array('xls', 'xlsx', 'csv'))) {
+        return array('localError' => array(array('name' => 'INVALID', 'value' => 'file', 'description' => Module::i()->view->_('ALLOWED_FORMATS_CSV_XLS_XLSX'))));
+    }
+    return true;
 } else {
     // Выгрузка прайса
     $downloadPrice = function(Page $Page = null, $level = 0) use ($Loader, &$downloadPrice, $cols, $rows) {

@@ -6,7 +6,24 @@ ini_set('max_execution_time', 300);
 $st = microtime(true);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Загрузка картинок
-    
+    if (!$files) {
+        return array('localError' => array(array('name' => 'MISSING', 'value' => 'files', 'description' => Module::i()->view->_('UPLOAD_FILES_REQUIRED'))));
+    } else {
+        $proceedFiles = false;
+        foreach ($files as $file) {
+            switch (strtolower(pathinfo($file['name'], PATHINFO_EXTENSION))) {
+                case 'jpg': case 'jpeg': case 'png': case 'gif':
+                    $proceedFiles = true;
+                    break;
+                case 'zip':
+                    break;
+            }
+        }
+        if (!$proceedFiles) {
+            return array('localError' => array(array('name' => 'INVALID', 'value' => 'files', 'description' => Module::i()->view->_('ALLOWED_FORMATS_JPG_JPEG_PNG_GIF_ZIP'))));
+        }
+    }
+    return true;
 } else {
     // Выгрузка картинок
     $st = microtime(true);
@@ -65,10 +82,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             echo file_get_contents($tmpname);
             exit;
         } else {
-            return array('localError' => array(array('name' => 'INVALID', 'value' => 'file', 'description' => Module::i()->view->_('IMAGES_NOT_FOUND'))));
+            return array('localError' => array(array('name' => 'INVALID', 'value' => 'loader', 'description' => Module::i()->view->_('IMAGES_NOT_FOUND'))));
         }
 
     } else {
-        return array('localError' => array(array('name' => 'INVALID', 'value' => 'file', 'description' => Module::i()->view->_('LOADER_HAS_NO_IMAGE_FIELD'))));
+        return array('localError' => array(array('name' => 'INVALID', 'value' => 'loader', 'description' => Module::i()->view->_('LOADER_HAS_NO_IMAGE_FIELD'))));
     }
 }
