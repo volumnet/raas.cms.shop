@@ -136,7 +136,7 @@ jQuery(document).ready(function($) {
         var text = '<div>';
         var hint;
         for (var i = 0; i < log.length; i++) {
-            text += '<p><span class="muted">' + log[i].time + ':</span> ' + log[i].text + '</p>';
+            text += '<p><span class="muted">' + log[i].time + ':</span> ' + log[i].text + (log[i].row ? ' <span class="muted">:' + log[i].row + '</span>' : '') + '</p>';
         }
         text += '</div>';
         $('#tab_log').append(text);

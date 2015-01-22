@@ -1,7 +1,9 @@
 <?php
 namespace RAAS\CMS\Shop;
+use \Exception;
 use \RAAS\CMS\Page;
 use \RAAS\CMS\Material;
+use \RAAS\Application;
 use \PHPExcel;
 use \PHPExcel_Cell;
 use \PHPExcel_IOFactory;
@@ -10,6 +12,7 @@ use \PHPExcel_Cell_DataType;
 
 ini_set('max_execution_time', 300);
 $st = microtime(true);
+require_once Application::i()->includeDir . '/phpexcel/Classes/PHPExcel.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Загрузка прайса
     if (!$file) {
@@ -17,6 +20,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif (!in_array(strtolower(pathinfo($file['name'], PATHINFO_EXTENSION)), array('xls', 'xlsx', 'csv'))) {
         return array('localError' => array(array('name' => 'INVALID', 'value' => 'file', 'description' => Module::i()->view->_('ALLOWED_FORMATS_CSV_XLS_XLSX'))));
     }
+    $type = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    switch ($type) {
+        case 'xls': case 'xlsx':
+            switch ($type) {
+                case 'xls':
+                    $readerName = 'Excel5';
+                    break;
+                case 'xlsx':
+                    $readerName = 'Excel2007';
+                    break;
+            }
+            $objReader = PHPExcel_IOFactory::createReader($readerName);
+            try {
+                $x = $objReader->load($file['tmp_name']);
+                $DATA = array();
+                foreach ($x->getAllSheets() as $s) {
+                    $DATA = array_merge($DATA, $s->toArray());
+                }
+            } catch (Exception $e) {
+                return array('localError' => array(array('name' => 'INVALID', 'value' => 'file', 'description' => Module::i()->view->_('ERR_CANNOT_READ_FILE'))));
+            }
+            break;
+        case 'csv':
+            $text = file_get_contents($file['tmp_name']);
+            $encoding = mb_detect_encoding($text, 'UTF-8, Windows-1251');
+            if ($encoding != 'UTF-8') {
+                $text = iconv($encoding, 'UTF-8', $text);
+            }
+            $csv = new \SOME\CSV(trim($text));
+            $DATA = $csv->data;
+            unset($csv);
+            break;
+    }
+    if (!$DATA || ((count($DATA) == 1) && (count(array_filter($DATA[0])) == 1))) {
+        return array('localError' => array(array('name' => 'INVALID', 'value' => 'file', 'description' => Module::i()->view->_('ERR_EMPTY_FILE'))));
+    }
+    print_r ($DATA); exit;
     return true;
 } else {
     // Выгрузка прайса
@@ -148,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $text = $csv->csv;
             unset($csv);
             if ($encoding) {
-                $text = iconv('UTF-8', $encoding, $text);
+                $text = iconv('UTF-8', $encoding . '//IGNORE', $text);
             }
             header('Content-Type: text/csv; name="' . $filename . '"');
             break;

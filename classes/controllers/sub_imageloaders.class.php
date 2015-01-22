@@ -15,7 +15,7 @@ class Sub_Imageloaders extends \RAAS\Abstract_Sub_Controller
                 $IN = $Loader->download();
             }
         } else {
-            $IN = isset($Form->meta['OUT']) ? (array)$Form->meta['OUT'] : array();
+            $IN = isset($Form->meta['OUT']) ? $Form->meta['OUT'] : array();
         }
         if (isset($IN['localError'])) {
             $OUT['localError'] = $IN['localError'];

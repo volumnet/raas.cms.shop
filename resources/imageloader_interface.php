@@ -9,15 +9,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!$files) {
         return array('localError' => array(array('name' => 'MISSING', 'value' => 'files', 'description' => Module::i()->view->_('UPLOAD_FILES_REQUIRED'))));
     } else {
-        $proceedFiles = false;
-        foreach ($files as $file) {
-            switch (strtolower(pathinfo($file['name'], PATHINFO_EXTENSION))) {
+        $processFile = function($file) use (&$processFile) {
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $proceedFiles = false;
+            switch ($ext) {
                 case 'jpg': case 'jpeg': case 'png': case 'gif':
-                    $proceedFiles = true;
+                    if ($type = getimagesize($file['tmp_name'])) {
+                        if (($ext2 = image_type_to_extension($type[2])) != $ext) {
+                            $file['name'] = str_replace('.' . $ext, '.' . $ext2, $file['name']);
+                            $proceedFiles = true;
+                        }
+                    }
                     break;
                 case 'zip':
+                    $files = array();
+                    $z = new \SOME\ZipArchive();
+                    if ($z->open($file['tmp_name']) === true) {
+                        for ($i = 0; $i < $z->numFiles; $i++) {
+                            $tmpname = tempnam(sys_get_temp_dir(), '');
+                            file_put_contents($tmpname, $z->getFromIndex($i));
+                            $files[] = array('name' => $z->getNameIndex($i), 'tmp_name' => $tmpname);
+                        }
+                    }
+                    $z->close();
+                    foreach ($files as $f) {
+                        $proceedFiles |= $processFile($f);
+                    }
                     break;
             }
+            return $proceedFiles;
+        };
+
+        $proceedFiles = false;
+        foreach ($files as $file) {
+            $proceedFiles |= $processFile($file);
         }
         if (!$proceedFiles) {
             return array('localError' => array(array('name' => 'INVALID', 'value' => 'files', 'description' => Module::i()->view->_('ALLOWED_FORMATS_JPG_JPEG_PNG_GIF_ZIP'))));

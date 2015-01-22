@@ -25,7 +25,7 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
             $OUT['DATA']['cols'] = (int)$_GET['cols'];
             $OUT['DATA']['show_log'] = (int)$_GET['show_log'];
         } else {
-            $IN = isset($Form->meta['OUT']) ? (array)$Form->meta['OUT'] : array();
+            $IN = isset($Form->meta['OUT']) ? $Form->meta['OUT'] : array();
         }
         if (isset($IN['localError'])) {
             $OUT['localError'] = $IN['localError'];
