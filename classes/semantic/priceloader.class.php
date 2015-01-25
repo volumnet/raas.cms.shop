@@ -4,6 +4,10 @@ use \RAAS\CMS\Page;
 
 class PriceLoader extends \SOME\SOME
 {
+    const DELETE_PREVIOUS_MATERIALS_NONE = 0;
+    const DELETE_PREVIOUS_MATERIALS_MATERIALS_ONLY = 1;
+    const DELETE_PREVIOUS_MATERIALS_MATERIALS_AND_PAGES = 2;
+
     protected static $tablename = 'cms_shop_priceloaders';
     protected static $defaultOrderBy = "name";
     protected static $references = array(

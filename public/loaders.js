@@ -89,7 +89,7 @@ jQuery(document).ready(function($) {
     {
         try {
             var col_names = JSON.parse($('#loader option:selected').attr('data-col-names'));
-            var text = '<table class="table table-striped"><thead><tr>';
+            var text = '<table class="table table-striped cms-shop-table-raw-data"><thead><tr>';
             if (log && log.length) {
                 text += '<th>' + timeName + '</th>';
             }
@@ -100,6 +100,7 @@ jQuery(document).ready(function($) {
             }
             text += '</thead><tbody>';
             var hint;
+            var rx;
             for (var i = 0; i < data.length; i++) {
                 hint = '';
                 if (log && (log instanceof Array)) {
@@ -112,13 +113,22 @@ jQuery(document).ready(function($) {
                 if (log && log.length) {
                     text += '<th>';
                     if (hint != '') {
-                        text += '<a class="btn small-btn" data-toggle="tooltip" title="' + hint.text.replace(/<\/?[^>]+>/gi, '') + '">' + hint.time + '</a>';
+                        text += '<a class="btn small-btn" ';
+                        if (/href="(.*?)"/i.test(hint.text)) {
+                            rx = /href="(.*?)"/i.exec(hint.text);
+                            text += 'href="' + rx[1] + '" target="_blank"';
+                        }
+                        text += ' data-toggle="tooltip" title="' + hint.text.replace(/<\/?[^>]+>/gi, '') + '">' + hint.time + '</a>';
                     }
                     text += '</th>';
                 }
                 for (j = 0; j < col_names.length; j++) {
                     if (col_names[j].text) {
-                        text += '<td>' + data[i][j] + '</td>';
+                        text += '<td>';
+                        if (data[i][j]) {
+                            text += data[i][j];
+                        }
+                        text += '</td>';
                     }
                 }
                 text += '</tr>';
@@ -136,7 +146,11 @@ jQuery(document).ready(function($) {
         var text = '<div>';
         var hint;
         for (var i = 0; i < log.length; i++) {
-            text += '<p><span class="muted">' + log[i].time + ':</span> ' + log[i].text + (log[i].row ? ' <span class="muted">:' + log[i].row + '</span>' : '') + '</p>';
+            text += '<p><span class="muted">' + log[i].time + ':</span> ' + log[i].text;
+            if (log[i].realrow) {
+                text += ' <span class="muted">:' + (log[i].realrow + 1) + '</span>';
+            }
+            text += '</p>';
         }
         text += '</div>';
         $('#tab_log').append(text);
@@ -146,6 +160,7 @@ jQuery(document).ready(function($) {
     $('#loader').on('change', function() { checkColsRows(); checkLoader(); });
     $('#rows, #cols, #cat_id').on('change', checkDownloadUrl);
     $('#show_log').on('click', checkDownloadUrl);
+    $('#clear').val('0');
     checkLoader();
 
     if ((typeof raw_data !== 'undefined') && raw_data) {

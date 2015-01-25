@@ -89,6 +89,8 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   rows INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Rows from top',
   cols INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Cols from left',
   cat_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Root category ID#',
+  create_pages TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Allow to create pages',
+  catalog_offset INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Catalog offset',
 
   PRIMARY KEY (id),
   KEY (mtype),

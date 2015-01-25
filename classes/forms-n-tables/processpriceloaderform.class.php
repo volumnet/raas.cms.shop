@@ -100,7 +100,16 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                     'step' => 1
                 ),
                 'test' => array('type' => 'checkbox', 'name' => 'test', 'caption' => $this->view->_('TEST_MODE')),
-                'clear' => array('type' => 'checkbox', 'name' => 'clear', 'caption' => $this->view->_('DELETE_PREVIOUS_MATERIALS')),
+                'clear' => array(
+                    'type' => 'select', 
+                    'name' => 'clear', 
+                    'caption' => $this->view->_('DELETE_PREVIOUS_MATERIALS'),
+                    'children' => array(
+                        array('value' => PriceLoader::DELETE_PREVIOUS_MATERIALS_NONE, 'caption' => $this->view->_('DELETE_PREVIOUS_MATERIALS_NONE')),
+                        array('value' => PriceLoader::DELETE_PREVIOUS_MATERIALS_MATERIALS_ONLY, 'caption' => $this->view->_('DELETE_PREVIOUS_MATERIALS_MATERIALS_ONLY')),
+                        array('value' => PriceLoader::DELETE_PREVIOUS_MATERIALS_MATERIALS_AND_PAGES, 'caption' => $this->view->_('DELETE_PREVIOUS_MATERIALS_MATERIALS_AND_PAGES')),
+                    )
+                ),
                 'file' => array('type' => 'file', 'name' => 'file', 'caption' => $this->view->_('FILE_TO_UPLOAD'), 'class' => 'span3'),
                 'show_log' => array(
                     'type' => 'checkbox', 
@@ -121,7 +130,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                         $file = $_FILES['file'];
                     }
                     $test = isset($_POST['test']);
-                    $clear = isset($_POST['clear']);
+                    $clear = isset($_POST['clear']) ? (int)$_POST['clear'] : 0;
                     $Page = new Page(isset($_POST['cat_id']) ? (int)$_POST['cat_id'] : 0);
                     $rows = isset($_POST['rows']) ? (int)$_POST['rows'] : 0;
                     $cols = isset($_POST['cols']) ? (int)$_POST['cols'] : 0;

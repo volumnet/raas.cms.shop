@@ -52,8 +52,8 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
         if (isset($IN['log']) && $OUT['DATA']['show_log']) {
             $OUT['log'] = (array)$IN['log'];
         }
-        if (isset($IN['data']) && $OUT['DATA']['show_data']) {
-            $OUT['raw_data'] = (array)$IN['data'];
+        if (isset($IN['raw_data']) && $OUT['DATA']['show_data']) {
+            $OUT['raw_data'] = (array)$IN['raw_data'];
         }
         $OUT['url'] = $this->url;
         $this->view->main($OUT);

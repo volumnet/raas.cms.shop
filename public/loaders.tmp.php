@@ -130,8 +130,11 @@
   <script type="text/javascript">
   <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && $raw_data) { ?>
       var raw_data = <?php echo json_encode($raw_data)?>;
-  <?php } ?>
-  <?php if ($log) { ?>
+      <?php 
+  }
+  if ($log) { 
+      $log = array_map(function($x) { $y = $x; $y['time'] = number_format($y['time'], 3, '.', ' '); return $y; }, $log);
+      ?>
       var log = <?php echo json_encode($log)?>;
   <?php } ?>
   var timeName = '<?php echo addslashes(CMS\Shop\TIME_SEC)?>';

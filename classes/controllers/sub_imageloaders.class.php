@@ -42,9 +42,6 @@ class Sub_Imageloaders extends \RAAS\Abstract_Sub_Controller
         if (isset($IN['log']) && $DATA['show_log']) {
             $OUT['log'] = (array)$IN['log'];
         }
-        if (isset($IN['data']) && $DATA['show_data']) {
-            $OUT['raw_data'] = (array)$IN['data'];
-        }
         $OUT['url'] = $this->url;
         $this->view->main($OUT);
     }

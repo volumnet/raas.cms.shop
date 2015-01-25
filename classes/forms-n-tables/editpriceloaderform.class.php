@@ -12,6 +12,9 @@ use \RAAS\CMS\Page;
 
 class EditPriceLoaderForm extends \RAAS\Form
 {
+    const CATALOG_OFFSET_BY_CELLS = 0;
+    const CATALOG_OFFSET_BY_SPACES = 4;
+
     public function __get($var)
     {
         switch ($var) {
@@ -93,6 +96,16 @@ class EditPriceLoaderForm extends \RAAS\Form
                 array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
                 array('type' => 'select', 'name' => 'cat_id', 'caption' => $this->view->_('ROOT_CATEGORY'), 'children' => $CONTENT['pages'], 'required' => true, ),
                 $this->getInterfaceField(),
+                array('type' => 'checkbox', 'name' => 'create_pages', 'caption' => $this->view->_('ALLOW_TO_CREATE_PAGES')),
+                array(
+                    'type' => 'radio', 
+                    'name' => 'catalog_offset', 
+                    'caption' => $this->view->_('CATALOG_OFFSET'), 
+                    'children' => array(
+                        array('value' => static::CATALOG_OFFSET_BY_CELLS, 'caption' => $this->view->_('CATALOG_OFFSET_BY_CELLS')),
+                        array('value' => static::CATALOG_OFFSET_BY_SPACES, 'caption' => $this->view->_('CATALOG_OFFSET_BY_SPACES')),
+                    )
+                ),
                 array('type' => 'number', 'min' => 0, 'name' => 'rows', 'caption' => $this->view->_('OFFSET') . ', ' . $this->view->_('ROWS_FROM_TOP'), 'default' => 0),
                 array('type' => 'number', 'min' => 0, 'name' => 'cols', 'caption' => $this->view->_('OFFSET') . ', ' . $this->view->_('COLS_FROM_LEFT'), 'default' => 0),
                 new FieldSet(array(
