@@ -39,7 +39,7 @@ class Sub_Imageloaders extends \RAAS\Abstract_Sub_Controller
                 'description' => $this->view->_(($_SERVER['REQUEST_METHOD'] == 'POST') ? 'IMAGES_SUCCESSFULLY_UPLOADED' : 'IMAGES_SUCCESSFULLY_DOWNLOADED')
             );
         }
-        if (isset($IN['log']) && $DATA['show_log']) {
+        if (isset($IN['log']) && $OUT['DATA']['show_log']) {
             $OUT['log'] = (array)$IN['log'];
         }
         $OUT['url'] = $this->url;

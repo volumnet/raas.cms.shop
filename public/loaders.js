@@ -160,7 +160,8 @@ jQuery(document).ready(function($) {
     $('#loader').on('change', function() { checkColsRows(); checkLoader(); });
     $('#rows, #cols, #cat_id').on('change', checkDownloadUrl);
     $('#show_log').on('click', checkDownloadUrl);
-    $('#clear').val('0');
+    $('select#clear').val('0');
+    $('input:checkbox#clear').removeAttr('checked');
     checkLoader();
 
     if ((typeof raw_data !== 'undefined') && raw_data) {

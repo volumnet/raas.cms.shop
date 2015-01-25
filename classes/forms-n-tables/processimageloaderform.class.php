@@ -65,8 +65,8 @@ class ProcessImageLoaderForm extends \RAAS\Form
                     'required' => true, 
                     'default' => ($this->view->action == 'download') ? (isset($_GET['loader']) ? (int)$_GET['loader'] : 0) : (int)$loader->id
                 ),
-                'test' => array('type' => 'checkbox', 'name' => 'test', 'caption' => $this->view->_('TEST_MODE')),
-                'clear' => array('type' => 'checkbox', 'name' => 'clear', 'caption' => $this->view->_('DELETE_PREVIOUS_IMAGES')),
+                'test' => array('type' => 'checkbox', 'name' => 'test', 'caption' => $this->view->_('TEST_MODE'), 'default' => 1),
+                'clear' => array('type' => 'checkbox', 'name' => 'clear', 'caption' => $this->view->_('DELETE_PREVIOUS_IMAGES'), 'default' => 1),
                 'file' => array(
                     'type' => 'file', 
                     'name' => 'file', 

@@ -86,7 +86,7 @@
   <?php $f = $Form->children['file']?>
   <div class="control-group">
     <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label> 
-    <div class="controls"><div class="row"><div class="span4"><?php echo $_RAASForm_Control($f)?></div></div></div>
+    <div class="controls"><div class="row"><div class="span4"><input<?php echo $_RAASForm_Attrs($f, array())?> /></div></div></div>
   </div>
   <?php if ($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) { ?>
       <div class="control-group">

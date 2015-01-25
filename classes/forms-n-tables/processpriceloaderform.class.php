@@ -99,7 +99,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                     'min' => 0, 
                     'step' => 1
                 ),
-                'test' => array('type' => 'checkbox', 'name' => 'test', 'caption' => $this->view->_('TEST_MODE')),
+                'test' => array('type' => 'checkbox', 'name' => 'test', 'caption' => $this->view->_('TEST_MODE'), 'default' => 1),
                 'clear' => array(
                     'type' => 'select', 
                     'name' => 'clear', 

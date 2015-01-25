@@ -6,5 +6,5 @@
 .cms-shop-headers-table th { border: 1px solid silver; }
 .cms-shop-headers-table .unique { background: #d9edf7; }
 .cms-shop-log-container { max-height: 300px; overflow: auto; }
-.cms-shop-table-raw-data td { white-space: pre-wrap; font-size: 10px; }
+.cms-shop-table-raw-data td { white-space: pre-wrap; font-size: 10px; padding: 0px 3px; }
 .cms-shop-table-raw-data .btn { font-size: 10px; }
