@@ -118,7 +118,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                     'style' => 'margin: 0;', 
                     'default' => 1, 
                 ),
-                'show_data' => array('type' => 'checkbox', 'name' => 'show_data', 'caption' => $this->view->_('DATA'), 'style' => 'margin: 0;'),
+                'show_data' => array('type' => 'checkbox', 'name' => 'show_data', 'caption' => $this->view->_('DATA'), 'style' => 'margin: 0;', 'default' => 1),
             ),
             'template' => 'loaders.tmp.php',
             'commit' => function($Form) {
