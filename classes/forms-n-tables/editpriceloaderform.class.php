@@ -33,7 +33,7 @@ class EditPriceLoaderForm extends \RAAS\Form
         $wf = function(Snippet_Folder $x) use (&$wf) {
             $temp = array();
             foreach ($x->children as $row) {
-                if ($row->urn != '__RAAS_views') {
+                if (strtolower($row->urn) != '__raas_views') {
                     $o = new Option(array('value' => '', 'caption' => $row->name, 'disabled' => 'disabled'));
                     $o->__set('children', $wf($row));
                     $temp[] = $o;
@@ -44,7 +44,7 @@ class EditPriceLoaderForm extends \RAAS\Form
             }
             return $temp;
         };
-        $snippet = Snippet::importByURN('__RAAS_shop_priceloader_interface');
+        $snippet = Snippet::importByURN('__raas_shop_priceloader_interface');
         $field = new RAASField(array(
             'type' => 'select',
             'class' => 'input-xxlarge',

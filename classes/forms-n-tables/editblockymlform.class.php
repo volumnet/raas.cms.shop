@@ -47,7 +47,7 @@ class EditBlockYMLForm extends EditBlockForm
     protected function getInterfaceField()
     {
         $field = parent::getInterfaceField();
-        $snippet = Snippet::importByURN('__RAAS_shop_yml_interface');
+        $snippet = Snippet::importByURN('__raas_shop_yml_interface');
         $field->default = $snippet->id;
         return $field;
     }

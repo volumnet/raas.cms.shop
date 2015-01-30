@@ -27,41 +27,41 @@ class Webmaster extends \RAAS\CMS\Webmaster
      */
     public function checkStdSnippets()
     {
-        $Item = Snippet::importByURN('__RAAS_shop_cart_interface');
+        $Item = Snippet::importByURN('__raas_shop_cart_interface');
         if (!$Item->id) {
-            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_cart_interface', 'locked' => 1));
+            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__raas_interfaces')->id, 'urn' => '__raas_shop_cart_interface', 'locked' => 1));
         }
         $Item->name = $this->view->_('CART_STANDARD_INTERFACE');
         $Item->description = $this->stdCartInterface;
         $Item->commit();
 
-        $Item = Snippet::importByURN('__RAAS_shop_order_notify');
+        $Item = Snippet::importByURN('__raas_shop_order_notify');
         if (!$Item->id) {
-            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_order_notify', 'locked' => 1));
+            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__raas_interfaces')->id, 'urn' => '__raas_shop_order_notify', 'locked' => 1));
         }
         $Item->name = $this->view->_('ORDER_STANDARD_NOTIFICATION');
         $Item->description = $this->stdFormTemplate;
         $Item->commit();
 
-        $Item = Snippet::importByURN('__RAAS_shop_imageloader_interface');
+        $Item = Snippet::importByURN('__raas_shop_imageloader_interface');
         if (!$Item->id) {
-            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_imageloader_interface', 'locked' => 1));
+            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__raas_interfaces')->id, 'urn' => '__raas_shop_imageloader_interface', 'locked' => 1));
         }
         $Item->name = $this->view->_('IMAGELOADER_STANDARD_INTERFACE');
         $Item->description = $this->stdImageLoaderInterface;
         $Item->commit();
 
-        $Item = Snippet::importByURN('__RAAS_shop_priceloader_interface');
+        $Item = Snippet::importByURN('__raas_shop_priceloader_interface');
         if (!$Item->id) {
-            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_priceloader_interface', 'locked' => 1));
+            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__raas_interfaces')->id, 'urn' => '__raas_shop_priceloader_interface', 'locked' => 1));
         }
         $Item->name = $this->view->_('PRICELOADER_STANDARD_INTERFACE');
         $Item->description = $this->stdPriceLoaderInterface;
         $Item->commit();
 
-        $Item = Snippet::importByURN('__RAAS_shop_yml_interface');
+        $Item = Snippet::importByURN('__raas_shop_yml_interface');
         if (!$Item->id) {
-            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__RAAS_interfaces')->id, 'urn' => '__RAAS_shop_yml_interface', 'locked' => 1));
+            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__raas_interfaces')->id, 'urn' => '__raas_shop_yml_interface', 'locked' => 1));
         }
         $Item->name = $this->view->_('YML_STANDARD_INTERFACE');
         $Item->description = file_get_contents($this->resourcesDir . '/yml_interface.php');
@@ -76,7 +76,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
             'cart' => $this->view->_('CART'), 
             // 'yml' => $this->view->_('YANDEX_MARKET'),
         );
-        $VF = Snippet_Folder::importByURN('__RAAS_views');
+        $VF = Snippet_Folder::importByURN('__raas_views');
         foreach ($snippets as $urn => $name) {
             $temp = Snippet::importByURN($urn);
             if (!$temp->id) {
@@ -126,7 +126,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         }
 
 
-        $S = Snippet::importByURN('__RAAS_shop_order_notify');
+        $S = Snippet::importByURN('__raas_shop_order_notify');
         $FRM = new \RAAS\CMS\Form();
         $FRM->name = $this->view->_('ORDER_FORM');
         $FRM->signature = 0;
@@ -208,7 +208,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
 
         if (!Page::getSet(array('where' => array("pid = " . (int)$Site->id, "urn = 'cart'")))) {
             $cart = $this->createPage(array('name' => $this->view->_('CART'), 'urn' => 'cart', 'cache' => 0, 'response_code' => 200), $Site);
-            $I = Snippet::importByURN('__RAAS_shop_cart_interface');
+            $I = Snippet::importByURN('__raas_shop_cart_interface');
             $S = Snippet::importByURN('cart');
             $B = new Block_Cart();
             $B->location = 'content';
@@ -224,7 +224,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
 
         if (!Page::getSet(array('where' => array("pid = " . (int)$Site->id, "urn = 'favorites'")))) {
             $favorites = $this->createPage(array('name' => $this->view->_('FAVORITES'), 'urn' => 'favorites', 'cache' => 0, 'response_code' => 200), $Site);
-            $I = Snippet::importByURN('__RAAS_shop_cart_interface');
+            $I = Snippet::importByURN('__raas_shop_cart_interface');
             $S = Snippet::importByURN('cart');
             $B = new Block_Cart();
             $B->location = 'content';
@@ -243,14 +243,14 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $IL->ufid = $articleCol->id;
         $IL->name = $this->view->_('DEFAULT_IMAGELOADER');
         $IL->sep_string = '_';
-        $IL->interface_id = (int)Snippet::importByURN('__RAAS_shop_imageloader_interface')->id;
+        $IL->interface_id = (int)Snippet::importByURN('__raas_shop_imageloader_interface')->id;
         $IL->commit();
 
         $PL = new PriceLoader();
         $PL->mtype = $MT->id;
         $PL->ufid = $articleCol->id;
         $PL->name = $this->view->_('DEFAULT_PRICELOADER');
-        $PL->interface_id = (int)Snippet::importByURN('__RAAS_shop_priceloader_interface')->id;
+        $PL->interface_id = (int)Snippet::importByURN('__raas_shop_priceloader_interface')->id;
         $PL->commit();
     }
 }
