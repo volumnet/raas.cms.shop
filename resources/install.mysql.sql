@@ -43,11 +43,15 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders (
   vis INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Visited',
   ip VARCHAR(255) NOT NULL DEFAULT '0.0.0.0' COMMENT 'IP address',
   user_agent VARCHAR(255) NOT NULL DEFAULT '0.0.0.0' COMMENT 'User Agent',
+  status_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Status ID#',
+  paid TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Payment status',
   
   PRIMARY KEY (id),
   KEY (uid),
   KEY (pid),
-  KEY (page_id)
+  KEY (page_id),
+  KEY (status_id),
+  INDEX (paid)
 ) COMMENT 'Orders';
 
 
@@ -68,14 +72,18 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_goo
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_history (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'ID#',
+  uid INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Author ID#',
   order_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Order ID#',
   status_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Status ID#',
+  paid TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Payment status',
   post_date DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Status post date',
   description TEXT NULL DEFAULT NULL COMMENT 'Description',
 
   PRIMARY KEY (id),
+  KEY (uid),
   KEY (order_id),
   KEY (status_id),
+  INDEX (paid),
   KEY (post_date)
 ) COMMENT 'Orders history';
 
@@ -90,6 +98,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   cols INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Cols from left',
   cat_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Root category ID#',
   create_pages TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Allow to create pages',
+  create_materials TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Allow to create materials',
   catalog_offset INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Catalog offset',
 
   PRIMARY KEY (id),

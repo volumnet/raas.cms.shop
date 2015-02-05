@@ -100,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $SQL_result = Material::getSQLSet($SQL_query);
                 return $SQL_result;
             }
+            return array();
         };
 
 
@@ -129,6 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             if ($SQL_result) {
                 return $SQL_result;
             }
+            return array();
         };
 
 
@@ -181,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } else {
                     $itemSet = $getItemByEntireRow($dataRow);
                 }
-                if (!$itemSet) {
+                if (!$itemSet && $Loader->create_materials) {
                     $row = new Material();
                     $row->pid = $Loader->Material_Type->id;
                     $row->vis = 1;

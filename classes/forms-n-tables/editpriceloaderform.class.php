@@ -97,6 +97,7 @@ class EditPriceLoaderForm extends \RAAS\Form
                 array('type' => 'select', 'name' => 'cat_id', 'caption' => $this->view->_('ROOT_CATEGORY'), 'children' => $CONTENT['pages'], 'required' => true, ),
                 $this->getInterfaceField(),
                 array('type' => 'checkbox', 'name' => 'create_pages', 'caption' => $this->view->_('ALLOW_TO_CREATE_PAGES')),
+                array('type' => 'checkbox', 'name' => 'create_materials', 'caption' => $this->view->_('ALLOW_TO_CREATE_MATERIALS'), 'default' => 1),
                 array(
                     'type' => 'radio', 
                     'name' => 'catalog_offset', 
