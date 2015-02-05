@@ -220,7 +220,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         'row' => $i,
                         'realrow' => $i + $rows,
                     );
+                    $Item->rollback();
+                    unset($Item);
                 }
+                unset($itemSet);
             } elseif (count(array_filter($DATA[$i], 'trim')) == 1) {
                 // Категория
                 list($step, $name) = each(array_filter($DATA[$i], 'trim'));
