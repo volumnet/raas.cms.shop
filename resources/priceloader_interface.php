@@ -271,6 +271,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             $id = 0;
                             if (!$test) {
                                 $context->commit();
+                                $context->rollback();
                             }
                         }
                         $affectedPages[] = (int)$context->id;
