@@ -29,9 +29,18 @@ class PriceLoader extends \SOME\SOME
     }
 
 
-    public function upload(array $file = null, Page $Page = null, $test = false, $clear = false, $rows = 0, $cols = 0)
+    public function upload(array $file = null, Page $Page = null, $test = false, $clear = false, $rows = null, $cols = null)
     {
         $Loader = $this;
+        if ($Page === null) {
+            $Page = $Loader->Page;
+        }
+        if ($rows === null) {
+            $rows = $Loader->rows;
+        }
+        if ($cols === null) {
+            $cols = $Loader->cols;
+        }
         $OUT = eval('?' . '>' . $this->Interface->description);
         return $OUT;
     }
@@ -40,6 +49,15 @@ class PriceLoader extends \SOME\SOME
     public function download(Page $Page, $rows = 0, $cols = 0, $type = null, $encoding = null)
     {
         $Loader = $this;
+        if ($Page === null) {
+            $Page = $Loader->Page;
+        }
+        if ($rows === null) {
+            $rows = $Loader->rows;
+        }
+        if ($cols === null) {
+            $cols = $Loader->cols;
+        }
         $OUT = eval('?' . '>' . $this->Interface->description);
         return $OUT;
     }
