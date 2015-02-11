@@ -257,18 +257,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 'sitemaps_priority' => $context->sitemaps_priority ?: '0.5',
                                 'inherit_sitemaps_priority' => $context->inherit_sitemaps_priority,
                                 'nat' => $context->nat,
+                                'lang' => $context->inherit_lang ? $context->lang : Package::i()->view->language
                             );
                             foreach (array('title', 'keywords', 'description') as $key) {
                                 $arr['meta_' . $key] = $context->{'inherit_meta_' . $key} ? $context->{'meta_' . $key} : '';
                                 $arr['inherit_meta_' . $key] = $context->{'inherit_meta_' . $key};
                             }
-                            foreach (array('changefreq', 'cache', 'template', 'lang') as $key) {
-                                $arr[$key] = $context->{'inherit_' . $key};
+                            foreach (array('changefreq', 'cache', 'template') as $key) {
+                                $arr[$key] = $context->$key;
                                 $arr['inherit_' . $key] = $context->{'inherit_' . $key};
                             }
                             $context = new Page($arr);
                             $id = 0;
-                            $context->commit();
+                            if (!$test) {
+                                $context->commit();
+                            }
                         }
                         $affectedPages[] = (int)$context->id;
                         $backtrace[$step] = $context;
