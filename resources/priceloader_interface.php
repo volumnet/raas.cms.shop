@@ -206,8 +206,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         for ($j = 0; $j < count($dataRow); $j++) {
                             if (trim($dataRow[$j]) && (!$uniqueColumn || ($j != $uniqueColumn)) && $Loader->columns[$j]->Field->id) {
                                 $val = $Item->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($dataRow[$j]));
-                                $Item->fields[$Loader->columns[$j]->Field->urn]->deleteValues();
-                                $Item->fields[$Loader->columns[$j]->Field->urn]->addValue($val);
+                                if ($val != $Item->fields[$Loader->columns[$j]->Field->urn]->getValues()) {
+                                    $Item->fields[$Loader->columns[$j]->Field->urn]->deleteValues();
+                                    $Item->fields[$Loader->columns[$j]->Field->urn]->addValue($val);
+                                }
                             }
                         }
                     }
