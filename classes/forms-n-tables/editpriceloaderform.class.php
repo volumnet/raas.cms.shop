@@ -160,8 +160,8 @@ class EditPriceLoaderForm extends \RAAS\Form
                         'ufid' => array('type' => 'radio', 'name' => 'ufid'),
                         'column_id' => array('type' => 'hidden', 'name' => 'column_id', 'multiple' => true),
                         'column_fid' => array('type' => 'select', 'name' => 'column_fid', 'children' => $CONTENT['fields'], 'class' => 'span2', 'multiple' => true),
-                        'column_callback' => array('name' => 'column_callback', 'multiple' => true),
-                        'column_download_callback' => array('name' => 'column_download_callback', 'multiple' => true),
+                        'column_callback' => array('type' => 'textarea', 'name' => 'column_callback', 'multiple' => true),
+                        'column_download_callback' => array('type' => 'textarea', 'name' => 'column_download_callback', 'multiple' => true),
                     )
                 ))
             )
