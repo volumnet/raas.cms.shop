@@ -144,8 +144,11 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloade
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_cart (
   id int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'ID#',
   cart_type int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Cart type ID#',
+  epay_interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'E-pay interface ID#',
+
   PRIMARY KEY (id),
-  KEY cart_type (cart_type)
+  KEY cart_type (cart_type),
+  KEY (epay_interface_id)
 ) COMMENT='Cart blocks';
 
 
