@@ -11,11 +11,11 @@ class ViewSub_Orders extends \RAAS\Abstract_Sub_View
     public function view(array $IN = array())
     {
         $this->assignVars($IN);
-        $this->title = $this->_('ORDERS');
+        $this->title = $IN['Form']->caption;
         $this->path[] = array('name' => $this->_('ORDERS'), 'href' => $this->url);
         $this->path[] = array('name' => $IN['Item']->parent->name, 'href' => $this->url . '&id=' . $IN['Item']->pid);
         $this->contextmenu = $this->getOrderContextMenu($IN['Item']);
-        $this->template = 'order_view';
+        $this->template = $IN['Form']->template;
     }
 
 

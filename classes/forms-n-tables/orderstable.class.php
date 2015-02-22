@@ -55,6 +55,26 @@ class OrdersTable extends \RAAS\Table
                 'callback' => function($row) use ($col) { if (isset($row->fields[$col->urn])) { $y = $row->fields[$col->urn]->doRich(); } return $y ? $y : ''; }
             );
         }
+        $columns['status'] = array(
+            'caption' => $this->view->_('STATUS'),
+            'callback' => function($row) use ($view) { 
+                $text = '';
+                switch ($row->paid) {
+                    case \RAAS\CMS\Shop\Order::PAYMENT_PAID_NOT_CONFIRMED:
+                        $text .= '<span class="text-warning">';
+                        break;
+                    case \RAAS\CMS\Shop\Order::PAYMENT_PAID_CONFIRMED:
+                        $text .= '<span class="text-success">';
+                        break;
+                    default:
+                        $text .= '<span class="text-error">';
+                        break;
+                }
+                $text .= $row->status->id ? $row->status->name : $view->_('ORDER_STATUS_NEW');
+                $text .= '</span>';
+                return $text;
+            }
+        );
         $columns['c'] = array('caption' => $this->view->_('GOODS_COUNT'));
         $columns['total_sum'] = array('caption' => $this->view->_('SUM'));
         $columns[' '] = array('callback' => function ($row) use ($view) { return rowContextMenu($view->getOrderContextMenu($row)); });

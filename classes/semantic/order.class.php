@@ -4,15 +4,23 @@ use \RAAS\CMS\Feedback;
 
 class Order extends Feedback
 {
+    const PAYMENT_NOT_PAID = 0;
+    const PAYMENT_PAID_NOT_CONFIRMED = 1;
+    const PAYMENT_PAID_CONFIRMED = 2;
+
     protected static $tablename = 'cms_shop_orders';
     protected static $references = array(
         'user' => array('FK' => 'uid', 'classname' => 'RAAS\\CMS\\User', 'cascade' => true),
         'parent' => array('FK' => 'pid', 'classname' => 'RAAS\\CMS\\Shop\\Cart_Type', 'cascade' => true),
         'page' => array('FK' => 'page_id', 'classname' => 'RAAS\\CMS\\Page', 'cascade' => false),
         'viewer' => array('FK' => 'vis', 'classname' => 'RAAS\\User', 'cascade' => false),
+        'status' => array('FK' => 'status_id', 'classname' => 'RAAS\\CMS\\Shop\\Order_Status', 'cascade' => false),
     );
     protected static $links = array(
-        'items' => array('tablename' => 'cms_shop_orders_goods', 'field_from' => 'order_id', 'field_to' => 'material_id', 'classname' => 'RAAS\\CMS\\Material')
+        'items' => array('tablename' => 'cms_shop_orders_goods', 'field_from' => 'order_id', 'field_to' => 'material_id', 'classname' => 'RAAS\\CMS\\Material'),
+    );
+    protected static $children = array(
+        'history' => array('classname' => 'RAAS\\CMS\\Shop\\Order_History', 'FK' => 'order_id')
     );
 
     public function __get($var)
