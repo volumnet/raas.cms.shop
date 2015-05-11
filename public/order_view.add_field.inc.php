@@ -6,16 +6,10 @@ $_RAASForm_Control = function(\RAAS\Field $Field) use (&$_RAASForm_Attrs, &$_RAA
             echo '<strong>' . htmlspecialchars($Item->status->id ? $Item->status->name : \RAAS\CMS\Shop\Module::i()->view->_('ORDER_STATUS_NEW')) . '</strong>';
             break;
         case 'paid':
-            switch ($Item->paid) {
-                case \RAAS\CMS\Shop\Order::PAYMENT_PAID_NOT_CONFIRMED:
-                    echo '<strong class="text-warning">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_PAID_NOT_CONFIRMED');
-                    break;
-                case \RAAS\CMS\Shop\Order::PAYMENT_PAID_CONFIRMED:
-                    echo '<strong class="text-success">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_PAID_CONFIRMED');
-                    break;
-                default:
-                    echo '<strong class="text-error">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_NOT_PAID');
-                    break;
+            if ($Item->paid) {
+                echo '<strong class="text-success">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_PAID_CONFIRMED');
+            } else {
+                echo '<strong class="text-error">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_NOT_PAID');
             }
             echo '</strong>';
             break;

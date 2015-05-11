@@ -4,10 +4,6 @@ use \RAAS\CMS\Feedback;
 
 class Order extends Feedback
 {
-    const PAYMENT_NOT_PAID = 0;
-    const PAYMENT_PAID_NOT_CONFIRMED = 1;
-    const PAYMENT_PAID_CONFIRMED = 2;
-
     protected static $tablename = 'cms_shop_orders';
     protected static $references = array(
         'user' => array('FK' => 'uid', 'classname' => 'RAAS\\CMS\\User', 'cascade' => true),

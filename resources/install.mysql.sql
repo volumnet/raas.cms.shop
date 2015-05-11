@@ -145,6 +145,11 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_car
   id int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'ID#',
   cart_type int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Cart type ID#',
   epay_interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'E-pay interface ID#',
+  epay_login VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay login',
+  epay_pass1 VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay pass1',
+  epay_pass2 VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay pass2',
+  epay_test TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'E-pay test mode',
+  epay_currency VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Currency',
 
   PRIMARY KEY (id),
   KEY cart_type (cart_type),

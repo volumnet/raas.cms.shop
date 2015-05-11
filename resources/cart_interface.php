@@ -278,4 +278,7 @@ if (isset($_GET['back'])) {
 $OUT['Cart'] = $Cart;
 $OUT['Cart_Type'] = $Cart_Type;
 $OUT['convertMeta'] = $convertMeta;
+if ($Block->EPay_Interface->id) {
+    eval('?' . '>' . $Block->EPay_Interface->description);
+}
 return $OUT;

@@ -85,16 +85,9 @@ class ViewOrderForm extends ViewFeedbackForm
                     'default' => $this->Item->status_id,
                 ),
                 'paid' => array(
-                    'type' => 'select', 
-                    'class' => 'span2',
-                    'style' => 'margin: 0',
+                    'type' => 'checkbox', 
                     'name' => 'paid', 
                     'caption' => $this->view->_('PAYMENT_STATUS'),
-                    'children' => array(
-                        array('value' => Order::PAYMENT_NOT_PAID, 'caption' => $this->view->_('PAYMENT_NOT_PAID')),
-                        array('value' => Order::PAYMENT_PAID_NOT_CONFIRMED, 'caption' => $this->view->_('PAYMENT_PAID_NOT_CONFIRMED')),
-                        array('value' => Order::PAYMENT_PAID_CONFIRMED, 'caption' => $this->view->_('PAYMENT_PAID_CONFIRMED')),
-                    ),
                     'default' => $this->Item->paid,
                 ),
                 'description' => array('name' => 'description', 'caption' => $this->view->_('COMMENT'), 'required' => true, 'style' => 'margin: 0',),

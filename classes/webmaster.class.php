@@ -66,6 +66,14 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $Item->name = $this->view->_('YML_STANDARD_INTERFACE');
         $Item->description = file_get_contents($this->resourcesDir . '/yml_interface.php');
         $Item->commit();
+
+        $Item = Snippet::importByURN('__raas_robokassa_interface');
+        if (!$Item->id) {
+            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__raas_interfaces')->id, 'urn' => '__raas_robokassa_interface', 'locked' => 1));
+        }
+        $Item->name = $this->view->_('ROBOKASSA_INTERFACE');
+        $Item->description = file_get_contents($this->resourcesDir . '/robokassa_interface.php');
+        $Item->commit();
     }
 
 
@@ -73,8 +81,9 @@ class Webmaster extends \RAAS\CMS\Webmaster
     {
         // Добавим виджеты
         $snippets = array(
-            'cart' => $this->view->_('CART'), 
-            // 'yml' => $this->view->_('YANDEX_MARKET'),
+            'cart' => $this->view->_('CART'),
+            'robokassa' => $this->view->_('ROBOKASSA'), 
+            'yml' => $this->view->_('YANDEX_MARKET'),
         );
         $VF = Snippet_Folder::importByURN('__raas_views');
         foreach ($snippets as $urn => $name) {

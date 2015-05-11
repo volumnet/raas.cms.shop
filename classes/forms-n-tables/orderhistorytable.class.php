@@ -33,17 +33,7 @@ class OrderHistoryTable extends \RAAS\Table
         $columns['paid'] = array(
             'caption' => $this->view->_('PAYMENT_STATUS'),
             'callback' => function($row) use ($view) { 
-                switch ($row->paid) {
-                    case Order::PAYMENT_PAID_NOT_CONFIRMED:
-                        return $view->_('PAYMENT_PAID_NOT_CONFIRMED');
-                        break;
-                    case Order::PAYMENT_PAID_CONFIRMED:
-                        return $view->_('PAYMENT_PAID_CONFIRMED');
-                        break;
-                    default:
-                        return $view->_('PAYMENT_NOT_PAID');
-                        break;
-                }
+                return $view->_($row->paid ? 'PAYMENT_PAID' : 'PAYMENT_NOT_PAID');
             }
         );
         $columns['description'] = array(

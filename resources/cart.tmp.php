@@ -2,7 +2,6 @@
 namespace RAAS\CMS\Shop;
 use \RAAS\CMS\Material;
 use \RAAS\CMS\Package;
-
 function formatPrice($price)
 {
     $remainder = (float)$price - (float)(int)$price;
@@ -26,6 +25,8 @@ if ($_GET['AJAX']) {
     }
     echo json_encode($temp); 
     exit;
+} elseif ($epayWidget && ($epayWidget instanceof \RAAS\CMS\Snippet)) {
+    eval('?' . '>' . $epayWidget->description);
 } elseif ($success[(int)$Block->id]) { 
     ?>
     <div class="notifications">
