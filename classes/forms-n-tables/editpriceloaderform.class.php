@@ -80,7 +80,8 @@ class EditPriceLoaderForm extends \RAAS\Form
             $Material_Type = $CONTENT['material_types']['Set'][0];
         }
         foreach ((array)$Material_Type->fields as $row) {
-            if (!($row->multiple || in_array($row->datatype, array('file', 'image')))) {
+            // 2015-06-01, AVS: убрали условие !$row->multiple, т.к. из прайсов могут загружаться и множественные поля
+            if (!(in_array($row->datatype, array('file', 'image')))) {
                 $CONTENT['fields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
             }
         }

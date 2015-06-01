@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $articles[$row['id']] = \SOME\Text::beautify(trim($row['value']));
             }
         }
-        
+
         // Подготовить реальные файлы к загрузке
         $processFile = function($file) use (&$processFile, $mtypes, $Loader, $articles) {
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -47,15 +47,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 case 'jpg': case 'jpeg': case 'png': case 'gif':
                     if ($type = getimagesize($file['tmp_name'])) {
                         $file['type'] = image_type_to_mime_type($type[2]);
-                        if (($ext2 = image_type_to_extension($type[2])) != $ext) {
-                            list($article, $filename) = explode($Loader->sep_string, pathinfo($file['name'], PATHINFO_FILENAME));
-                            if ($article && $filename) {
-                                if ($temp = array_keys($articles, trim($article))) {
-                                    $file['original_name'] = $file['name'];
-                                    $file['name'] = $filename . '.' . $ext2;
-                                    $file['materials'] = $temp;
+                        $temp = array();
+                        $article = $filename = '';
+                        $fn = pathinfo($file['name'], PATHINFO_FILENAME);
+                        foreach ($articles as $id => $a) {
+                            if (preg_match('/^' . preg_quote($a) . '($|' . preg_quote($Loader->sep_string) . ')/i', $fn)) {
+                                $article = $a;
+                                $filename = preg_replace('/^' . preg_quote($a) . '/i', '', $fn);
+                                $filename = trim($filename, $Loader->sep_string);
+                                if (!$filename) {
+                                    $filename = $a;
                                 }
+                                $temp[] = $id;
+                                break;
                             }
+                        }
+                        if ($temp) {
+                            $file['materials'] = $temp;
+                            $ext2 = image_type_to_extension($type[2]);
+                            $file['original_name'] = $file['name'];
+                            $file['name'] = $filename . $ext2;
                             $proceedFiles[] = $file;
                         }
                     }

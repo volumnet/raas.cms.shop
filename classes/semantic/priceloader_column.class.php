@@ -13,10 +13,10 @@ class PriceLoader_Column extends \SOME\SOME
 
     public function _Callback()
     {
-        $t = $this;
+        $t = $column = $this;
         if (trim($this->callback)) {
             $f = $this->callback;
-            return function($x) use ($f) { return eval($f); };
+            return function($x) use ($column, $f) { return eval($f); };
         }
     }
 

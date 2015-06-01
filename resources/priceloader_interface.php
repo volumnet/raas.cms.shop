@@ -178,6 +178,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
                 }
                 $itemSet = null;
+                // 2015-06-01, AVS: добавили понятие $new (тж. 11 строками ниже)
+                $new = false;
                 if (($uniqueColumn !== null) && trim($dataRow[$uniqueColumn])) {
                     $itemSet = $getItemByUniqueField(trim($dataRow[$uniqueColumn]));
                 } else {
@@ -188,12 +190,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $row->pid = $Loader->Material_Type->id;
                     $row->vis = 1;
                     $itemSet = array($row);
+                    $new = true;
                 }
                 foreach ($itemSet as $Item) {
                     // Сначала проходим нативные поля
                     for ($j = 0; $j < count($dataRow); $j++) {
-                        if (trim($dataRow[$j]) && (!$uniqueColumn || ($j != $uniqueColumn)) && !$Loader->columns[$j]->Field->id && $Loader->columns[$j]->fid) {
-                            $Item->{$Loader->columns[$j]->fid} = trim($dataRow[$j]);
+                        if ((!$uniqueColumn || ($j != $uniqueColumn)) && !$Loader->columns[$j]->Field->id && $Loader->columns[$j]->fid) {
+                            if (trim($dataRow[$j])) {
+                                $Item->{$Loader->columns[$j]->fid} = trim($dataRow[$j]);
+                            }
                         }
                     }
                     $id = $Item->id;
@@ -204,11 +209,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         }
                         // Проходим доп. поля
                         for ($j = 0; $j < count($dataRow); $j++) {
-                            if (trim($dataRow[$j]) && (!$uniqueColumn || ($j != $uniqueColumn)) && $Loader->columns[$j]->Field->id) {
-                                $val = $Item->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($dataRow[$j]));
-                                if ($val != $Item->fields[$Loader->columns[$j]->Field->urn]->getValues()) {
-                                    $Item->fields[$Loader->columns[$j]->Field->urn]->deleteValues();
-                                    $Item->fields[$Loader->columns[$j]->Field->urn]->addValue($val);
+                            // 2015-06-01, AVS: добавляем поддержку множественных значений:
+                            if (is_array($dataRow[$j])) {
+                                $Item->fields[$Loader->columns[$j]->Field->urn]->deleteValues();
+                                foreach ($dataRow[$j] as $val) {
+                                    if ($val = $Item->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($val))) {
+                                        $Item->fields[$Loader->columns[$j]->Field->urn]->addValue($val);
+                                    }
+                                }
+                            } else {
+                                // 2015-06-01, AVS: добавляем || $new , чтобы у новых товаров артикул тоже заполнялся
+                                if (trim($dataRow[$j]) && (!$uniqueColumn || ($j != $uniqueColumn) || $new) && $Loader->columns[$j]->Field->id) {
+                                    $val = $Item->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($dataRow[$j]));
+                                    if ($val != $Item->fields[$Loader->columns[$j]->Field->urn]->getValues()) {
+                                        $Item->fields[$Loader->columns[$j]->Field->urn]->deleteValues();
+                                        $Item->fields[$Loader->columns[$j]->Field->urn]->addValue($val);
+                                    }
                                 }
                             }
                         }
