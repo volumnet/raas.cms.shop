@@ -48,11 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     if ($type = getimagesize($file['tmp_name'])) {
                         $file['type'] = image_type_to_mime_type($type[2]);
                         $temp = array();
-                        $article = $filename = '';
                         $filename = pathinfo($file['name'], PATHINFO_FILENAME);
-                        foreach ($articles as $id => $a) {
-                            if (preg_match('/^' . preg_quote($a) . '($|' . preg_quote($Loader->sep_string) . ')/i', $fn)) {
-                                $article = $a;
+                        foreach ($articles as $id => $article) {
+                            if (preg_match('/^' . preg_quote($a) . '($|' . preg_quote($Loader->sep_string) . ')/i', $filename)) {
                                 $temp[] = $id;
                                 break;
                             }
