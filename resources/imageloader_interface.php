@@ -49,15 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $file['type'] = image_type_to_mime_type($type[2]);
                         $temp = array();
                         $article = $filename = '';
-                        $fn = pathinfo($file['name'], PATHINFO_FILENAME);
+                        $filename = pathinfo($file['name'], PATHINFO_FILENAME);
                         foreach ($articles as $id => $a) {
                             if (preg_match('/^' . preg_quote($a) . '($|' . preg_quote($Loader->sep_string) . ')/i', $fn)) {
                                 $article = $a;
-                                $filename = preg_replace('/^' . preg_quote($a) . '/i', '', $fn);
-                                $filename = trim($filename, $Loader->sep_string);
-                                if (!$filename) {
-                                    $filename = $a;
-                                }
                                 $temp[] = $id;
                                 break;
                             }
