@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $temp = array();
                         $filename = pathinfo($file['name'], PATHINFO_FILENAME);
                         foreach ($articles as $id => $article) {
-                            if (preg_match('/^' . preg_quote($a) . '($|' . preg_quote($Loader->sep_string) . ')/i', $filename)) {
+                            if (preg_match('/^' . preg_quote($article) . '($|' . preg_quote($Loader->sep_string) . ')/i', $filename)) {
                                 $temp[] = $id;
                                 break;
                             }
@@ -60,8 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             $ext2 = image_type_to_extension($type[2]);
                             $file['original_name'] = $file['name'];
                             $file['name'] = $filename . $ext2;
-                            $proceedFiles[] = $file;
                         }
+                        $proceedFiles[] = $file;
                     }
                     break;
                 case 'zip':
