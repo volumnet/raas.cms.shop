@@ -90,6 +90,7 @@ class EditBlockCartForm extends EditBlockForm
     protected function getEPayField()
     {
         $field = $this->getInterfaceField();
+        $field->required = false;
         $field->caption = Module::i()->view->_('EPAY_INTERFACE');
         $field->name = 'epay_interface_id';
         $field->default = null;
