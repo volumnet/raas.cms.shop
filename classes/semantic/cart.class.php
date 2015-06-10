@@ -107,13 +107,13 @@ abstract class Cart
 
     public function add(Material $Item, $amount = 1, $meta = '')
     {
-        $this->set($Item, $this->count($Item) + $amount, $meta);
+        $this->set($Item, $this->count($Item, $meta) + $amount, $meta);
     }
 
 
     public function reduce(Material $Item, $amount = 1, $meta = '')
     {
-        $this->set($Item, $this->count($Item) - $amount, $meta);
+        $this->set($Item, $this->count($Item, $meta) - $amount, $meta);
     }
 
 
