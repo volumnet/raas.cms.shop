@@ -138,7 +138,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $S = Snippet::importByURN('__raas_shop_order_notify');
         $FRM = new \RAAS\CMS\Form();
         $FRM->name = $this->view->_('ORDER_FORM');
-        $FRM->signature = 0;
+        $FRM->signature = 1;
         $FRM->antispam = 'hidden';
         $FRM->antispam_field_name = '_name';
         $FRM->interface_id = (int)$S->id;
