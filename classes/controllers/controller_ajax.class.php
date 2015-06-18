@@ -9,7 +9,7 @@ class Controller_Ajax extends Abstract_Controller
     protected function execute()
     {
         switch ($this->action) {
-            case 'material_fields':
+            case 'material_fields': case 'image_fields':
                 $this->{$this->action}();
                 break;
         }
@@ -27,6 +27,21 @@ class Controller_Ajax extends Abstract_Controller
         );
         $Set = array_merge(
             $Set, array_values(array_filter($Material_Type->fields, function($x) { return !($x->multiple || in_array($x->datatype, array('file', 'image'))); }))
+        );
+        $OUT['Set'] = array_map(function($x) { return array('val' => $x->id, 'text' => $x->name); }, $Set);
+        $this->view->show_page($OUT);
+    }
+    
+    
+    protected function image_fields()
+    {
+        
+        $Material_Type = new Material_Type((int)$this->id);
+        $Set = array(
+            
+        );
+        $Set = array_merge(
+            $Set, array_values(array_filter($Material_Type->fields, function($x) { return $x->datatype == 'image'; }))
         );
         $OUT['Set'] = array_map(function($x) { return array('val' => $x->id, 'text' => $x->name); }, $Set);
         $this->view->show_page($OUT);

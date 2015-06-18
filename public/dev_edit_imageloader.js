@@ -20,6 +20,12 @@ jQuery(document).ready(function($) {
                 before: function(data) { return data.Set; },
             }
         );
+        $('#ifid').RAAS_getSelect(
+            'ajax.php?p=cms&m=shop&action=image_fields&id=' + $(this).val(), 
+            {
+                before: function(data) { return data.Set; },
+            }
+        );
     })
     $('#std_interface').change(checkInterface);
 });
