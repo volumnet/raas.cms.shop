@@ -7,7 +7,7 @@ $_RAASForm_Control = function(\RAAS\Field $Field) use (&$_RAASForm_Attrs, &$_RAA
             break;
         case 'paid':
             if ($Item->paid) {
-                echo '<strong class="text-success">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_PAID_CONFIRMED');
+                echo '<strong class="text-success">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_PAID');
             } else {
                 echo '<strong class="text-error">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_NOT_PAID');
             }

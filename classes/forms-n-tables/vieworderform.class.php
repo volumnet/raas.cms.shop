@@ -31,6 +31,7 @@ class ViewOrderForm extends ViewFeedbackForm
     protected function getParams()
     {
         $arr = parent::getParams();
+        $arr['action'] = '#history';
         $arr['caption'] = $this->view->_('ORDERS');
         $arr['commit'] = function(RAASForm $Form) {
             $history = new Order_History();

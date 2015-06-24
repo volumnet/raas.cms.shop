@@ -58,7 +58,7 @@ class OrdersTable extends \RAAS\Table
         $columns['status'] = array(
             'caption' => $this->view->_('STATUS'),
             'callback' => function($row) use ($view) { 
-                $text = '<span class="text-' . ($row->paid ? 'success' : 'error') . '">'
+                $text = '<span class="text-' . ($row->paid ? 'success' : 'error') . '" title="' . $view->_($row->paid ? 'PAYMENT_PAID' : 'PAYMENT_NOT_PAID') . '">'
                       .    ($row->status->id ? $row->status->name : $view->_('ORDER_STATUS_NEW'))
                       . '</span>';
                 return $text;
