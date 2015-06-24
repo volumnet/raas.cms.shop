@@ -37,7 +37,7 @@ if ($success[(int)$Block->id] || $localError) {
             <tr data-role="cart-item">
               <td class="text-center cart-table__image-col">
                 <?php if ($row2->visImages) { ?>
-                    <a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>>
+                    <a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '" target="_blank"' : ''?>>
                       <img src="/<?php echo htmlspecialchars(addslashes($row2->visImages[0]->tnURL))?>" style="max-width: 48px" alt="<?php echo htmlspecialchars($row2->visImages[0]->name ?: $row->name)?>" target="_blank" /></a>
                 <?php } ?>
               </td>
@@ -60,24 +60,29 @@ if ($success[(int)$Block->id] || $localError) {
       </table>
       <div class="form-horizontal">
         <div data-role="feedback-form">
+          <div class="form-group">
+            <label class="control-label col-sm-3 col-md-2"><?php echo YOUR_ORDER_ID?></label>
+            <div class="col-sm-9 col-md-4"><strong><?php echo (int)$Item->id?></strong></div>
+          </div>
           <?php foreach ($Item->fields as $row) { ?>
               <div class="form-group">
                 <label class="control-label col-sm-3 col-md-2"><?php echo htmlspecialchars($row->name)?></label>
-                <div class="col-sm-9 col-md-4"><?php htmlspecialchars($Item->fields[$row->urn]->doRich())?></div>
+                <div class="col-sm-9 col-md-4"><?php echo htmlspecialchars($Item->fields[$row->urn]->doRich())?></div>
               </div>
           <?php } ?>
           <?php if ($requestForPayment) { ?>
               <div class="form-group">
                 <form action="<?php echo htmlspecialchars($paymentURL)?>" method="post" enctype="multipart/form-data">
-                  <input type="hidden" name="MrchLogin" value="<?php echo htmlspecialchars($Block->epay_login)?>">
-                  <input type="hidden" name="OutSum" value="<?php echo number_format((float)$Item->sum, 2, '.', '')?>">
-                  <input type="hidden" name="InvId" value="<?php echo (int)$Item->id?>">
-                  <input type="hidden" name="Desc" value="<?php echo sprintf(ORDER_NUM, (int)$Item->id, $_SERVER['HTTP_SERVER'])?>">
-                  <input type="hidden" name="SignatureValue" value="<?php echo htmlspecialchars($crc)?>">
-                  <input type="hidden" name="IncCurrLabel" value="<?php echo htmlspecialchars($Block->epay_currency)?>">
-                  <input type="hidden" name="OutSumCurrency" value="<?php echo htmlspecialchars($Block->epay_currency)?>">
-                  <input type="hidden" name="Culture" value="<?php echo htmlspecialchars($Page->lang)?>">
-                  <input type="hidden" name="Encoding" value="UTF-8">
+                  <input type="hidden" name="MrchLogin" value="<?php echo htmlspecialchars($Block->epay_login)?>" />
+                  <input type="hidden" name="OutSum" value="<?php echo number_format((float)$Item->sum, 2, '.', '')?>" />
+                  <input type="hidden" name="InvId" value="<?php echo (int)$Item->id?>" />
+                  <input type="hidden" name="Desc" value="<?php echo sprintf(ORDER_NUM, (int)$Item->id, $_SERVER['HTTP_SERVER'])?>" />
+                  <input type="hidden" name="SignatureValue" value="<?php echo htmlspecialchars($crc)?>" />
+                  <?php if (!$Block->epay_test && $Block->epay_currency && ($Block->epay_currency != 'RUR')) { ?>
+                      <input type="hidden" name="OutSumCurrency" value="<?php echo htmlspecialchars($Block->epay_currency)?>" />
+                  <?php } ?>
+                  <input type="hidden" name="Culture" value="<?php echo htmlspecialchars($Page->lang)?>" />
+                  <input type="hidden" name="Encoding" value="UTF-8" />
                   <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-default" type="submit"><?php echo PAY?></button></div>
                 </form>
               </div>

@@ -43,16 +43,22 @@ if ($_REQUEST['SignatureValue']) {
                 if ($_GET['action'] == 'success') {
                     $OUT['success'][(int)$Block->id] = sprintf(ORDER_SUCCESSFULLY_PAID, $Item->id);
                 } elseif ($_GET['action'] == 'fail') {
-                    $OUT['localError'] = array('order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $Item->id))
+                    $OUT['localError'] = array('order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $Item->id));
                 }
             } else {
                 $OUT['localError'] = array('crc' => INVALID_CRC);
             }
         }
     }
-} elseif ($Item->id) {
+} elseif ($Item->id && $_POST['epay']) {
     $OUT['epayWidget'] = Snippet::importByURN('robokassa');
     $OUT['paymentURL'] = $Block->epay_test ? 'http://test.robokassa.ru/Index.aspx' : 'https://auth.robokassa.ru/Merchant/Index.aspx';
     $OUT['requestForPayment'] = true;
-    $OUT['crc'] = $Block->epay_login . ':' . number_format($Item->sum, 2, '.', '') . ':' . (int)$Item->id . ':' . $Block->epay_currency . ':' . $Block->epay_pass1;
+    $crc = $Block->epay_login . ':' . number_format($Item->sum, 2, '.', '') . ':' . (int)$Item->id;
+    if (!$Block->epay_test) {
+        $crc .= ':' . $Block->epay_currency;
+    }
+    $crc .= ':' . $Block->epay_pass1;
+    $crc = md5($crc);
+    $OUT['crc'] = $crc;
 }

@@ -261,7 +261,9 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                     if ($Form->email) {
                         $notify($Item);
                     }
-                    $OUT['success'][(int)$Block->id] = true;
+                    if ($_POST['epay'] != 1) {
+                        $OUT['success'][(int)$Block->id] = true;
+                    }
                 }
             }
             $OUT['localError'] = $localError;

@@ -122,6 +122,15 @@ if ($_GET['AJAX']) {
                       </div>
                     </div>
                 <?php } ?>
+                <?php if ($Block->EPay_Interface->id && !$Form->fields['epay']) { ?>
+                    <div class="form-group">
+                      <label for="name" class="control-label col-sm-3 col-md-2"><?php echo PAYMENT_METHOD?></label>
+                      <div class="col-sm-9 col-md-4">
+                        <label><input type="radio" name="epay" value="0" <?php echo !$DATA['epay'] ? 'checked="checked"' : ''?> /> <?php echo PAY_ON_DELIVERY?></label>
+                        <label><input type="radio" name="epay" value="1" <?php echo $DATA['epay'] ? 'checked="checked"' : ''?> /> <?php echo PAY_BY_EPAY?></label>
+                      </div>
+                    </div>
+                <?php } ?>
                 <div class="form-group">
                   <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-default" type="submit"><?php echo SEND?></button></div>
                 </div>
