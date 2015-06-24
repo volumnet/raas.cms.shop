@@ -7,7 +7,7 @@ if ($success[(int)$Block->id] || $localError) {
     ?>
     <div class="notifications">
       <?php if ($success[(int)$Block->id]) { ?>
-          <div class="alert alert-success"><?php echo ORDER_SUCCESSFULLY_SENT?></div>
+          <div class="alert alert-success"><?php echo htmlspecialchars($success[(int)$Block->id])?></div>
       <?php } elseif ($localError) { ?>
           <div class="alert alert-danger">
             <ul>
