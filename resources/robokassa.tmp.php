@@ -76,7 +76,7 @@ if ($success[(int)$Block->id] || $localError) {
                   <input type="hidden" name="MrchLogin" value="<?php echo htmlspecialchars($Block->epay_login)?>" />
                   <input type="hidden" name="OutSum" value="<?php echo number_format((float)$Item->sum, 2, '.', '')?>" />
                   <input type="hidden" name="InvId" value="<?php echo (int)$Item->id?>" />
-                  <input type="hidden" name="Desc" value="<?php echo sprintf(ORDER_NUM, (int)$Item->id, $_SERVER['HTTP_SERVER'])?>" />
+                  <input type="hidden" name="Desc" value="<?php echo sprintf(ORDER_NUM, (int)$Item->id, $_SERVER['HTTP_HOST'])?>" />
                   <input type="hidden" name="SignatureValue" value="<?php echo htmlspecialchars($crc)?>" />
                   <?php if (!$Block->epay_test && $Block->epay_currency && ($Block->epay_currency != 'RUR')) { ?>
                       <input type="hidden" name="OutSumCurrency" value="<?php echo htmlspecialchars($Block->epay_currency)?>" />
