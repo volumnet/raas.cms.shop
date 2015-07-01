@@ -60,7 +60,7 @@ if (in_array($_GET['action'], array('result', 'success', 'fail')) && $_REQUEST['
     $OUT['paymentURL'] = $Block->epay_test ? 'http://test.robokassa.ru/Index.aspx' : 'https://auth.robokassa.ru/Merchant/Index.aspx';
     $OUT['requestForPayment'] = true;
     $crc = $Block->epay_login . ':' . number_format($Item->sum, 2, '.', '') . ':' . (int)$Item->id;
-    if (!$Block->epay_test) {
+    if (!$Block->epay_test && $Block->epay_currency && ($Block->epay_currency != 'RUR')) {
         $crc .= ':' . $Block->epay_currency;
     }
     $crc .= ':' . $Block->epay_pass1;
