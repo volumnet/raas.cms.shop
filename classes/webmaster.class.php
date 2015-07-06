@@ -173,7 +173,6 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $F->pid = $FRM->id;
         $F->name = $this->view->_('ORDER_COMMENT');
         $F->urn = 'description';
-        $F->required = 1;
         $F->datatype = 'textarea';
         $F->show_in_table = 0;
         $F->commit();
