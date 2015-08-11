@@ -69,7 +69,7 @@ if ($_GET['AJAX']) {
                     <td class="span1 cart-table__sum-col" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
                 <?php } ?>
                 <td class="span1 cart-table__actions-col">
-                  <a href="?action=delete&id=<?php echo (int)$row->id?>&meta=<?php echo htmlspecialchars($row->meta)?>&back=1" onclick="return confirm('<?php echo addslashes(CART_DELETE_CONFIRM)?>')">
+                  <a href="#" data-id="<?php echo (int)$row->id?>" data-meta="" data-toggle="modal" data-target="#confirmDeleteItemModal">
                     <i class="icon icon-remove" title="<?php echo DELETE?>"></i>
                   </a>
                 </td>
@@ -101,6 +101,7 @@ if ($_GET['AJAX']) {
               </div>
 
               <div data-role="feedback-form" <?php echo $success[(int)$Block->id] ? 'style="display: none"' : ''?>>
+                <p>Поля, помеченные звездочкой (*), обязательны для заполнения</p>
                 <?php if ($Form->signature) { ?>
                       <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
                 <?php } ?>
@@ -139,6 +140,20 @@ if ($_GET['AJAX']) {
         <?php } ?>
 
       </form>
+      <div class="modal fade" id="confirmDeleteItemModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header" style="border-bottom: none">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title"><?php echo addslashes(CART_DELETE_CONFIRM)?></h4>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo CANCEL?></button>
+              <a href="#" class="btn btn-primary"><?php echo DELETE?></a>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
     <script type="text/javascript">
     jQuery(document).ready(function($) {
@@ -178,6 +193,12 @@ if ($_GET['AJAX']) {
             $('[data-role="cart-table"] [data-role="total-amount"]').text(total_amount);
         }
         $('input[data-role="amount"]').change(calculate);
+
+        var $confirmDeleteItemModal = $('#confirmDeleteItemModal');
+        $('body').append($confirmDeleteItemModal);
+        $('a[data-target="#confirmDeleteItemModal"][data-toggle="modal"]').on('click', function() {
+            $('.modal-footer a', $confirmDeleteItemModal).attr('href', '?action=delete&id=' + parseInt($(this).attr('data-id')) + ($(this).attr('data-meta') ? '&meta=' + $(this).attr('data-meta') : ''));
+        });
     });
     </script>
 <?php 

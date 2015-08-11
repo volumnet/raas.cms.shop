@@ -248,3 +248,18 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   KEY (mtype),
   KEY (field_id)
 ) COMMENT='YM blocks to material types params ignored fields';
+
+
+CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_carts (
+    cart_type_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Cart type ID#',
+    uid INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'User ID#',
+    material_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material ID#',
+    meta VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Meta',
+    amount INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Amount',
+
+    PRIMARY KEY (cart_type_id, uid, material_id, meta),
+    KEY (cart_type_id),
+    KEY (uid),
+    KEY (material_id),
+    KEY (meta)
+) COMMENT 'Cart sessions';

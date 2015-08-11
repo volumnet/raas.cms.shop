@@ -51,7 +51,7 @@ $notify = function(Order $Item)
 
 $OUT = array();
 $Cart_Type = new Cart_Type((int)$config['cart_type']);
-$Cart = new Cookie_Cart($Cart_Type);
+$Cart = new Cart($Cart_Type, \RAAS\Controller_Frontend::i()->user);
 switch (isset($_GET['action']) ? $_GET['action'] : '') {
     case 'set':
         $Item = new Material((int)(isset($_GET['id']) ? $_GET['id'] : ''));
@@ -60,6 +60,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
         if ($Item->id) {
             $Cart->set($Item, $amount, $meta);
         }
+        new Redirector($_GET['back'] ? 'history:back' : \SOME\HTTP::queryString('action=&id=&meta=&amount='));
         break;
     case 'add':
         $Item = new Material((int)(isset($_GET['id']) ? $_GET['id'] : ''));
@@ -68,6 +69,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
         if ($Item->id && $amount) {
             $Cart->add($Item, $amount, $meta);
         }
+        new Redirector($_GET['back'] ? 'history:back' : \SOME\HTTP::queryString('action=&id=&meta=&amount='));
         break;
     case 'reduce':
         $Item = new Material((int)(isset($_GET['id']) ? $_GET['id'] : ''));
@@ -76,6 +78,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
         if ($Item->id && $amount) {
             $Cart->reduce($Item, $amount, $meta);
         }
+        new Redirector($_GET['back'] ? 'history:back' : \SOME\HTTP::queryString('action=&id=&meta=&amount='));
         break;
     case 'delete':
         $Item = new Material((int)(isset($_GET['id']) ? $_GET['id'] : ''));
@@ -83,9 +86,11 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
         if ($Item->id) {
             $Cart->set($Item, 0, $meta);
         }
+        new Redirector($_GET['back'] ? 'history:back' : \SOME\HTTP::queryString('action=&id=&meta=&amount='));
         break;
     case 'clear':
         $Cart->clear();
+        new Redirector($_GET['back'] ? 'history:back' : \SOME\HTTP::queryString('action=&id=&meta=&amount='));
         break;
     default:
         $Form = $Cart_Type->Form;
@@ -145,7 +150,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                 }
                 if (!$localError) {
                     if ((\RAAS\Controller_Frontend::i()->user instanceof \RAAS\CMS\User) && \RAAS\Controller_Frontend::i()->user->id) {
-                        $Item->uid = (int)Controller_Frontend::i()->user->id;
+                        $Item->uid = (int)\RAAS\Controller_Frontend::i()->user->id;
                     } else {
                         $Item->uid = 0;
                     }
