@@ -3,12 +3,15 @@ namespace RAAS\CMS\Shop;
 use \RAAS\CMS\Material;
 use \RAAS\CMS\Material_Field;
 use \RAAS\CMS\Material_Type;
+use \RAAS\CMS\User;
+use \RAAS\Application;
 use \stdClass;
 
-abstract class Cart
+class Cart
 {
     protected $cartType;
     protected $items = array();
+    protected $_user;
 
     public function __get($var)
     {
@@ -61,8 +64,9 @@ abstract class Cart
     }
 
 
-    public function __construct(Cart_Type $CartType = null)
+    public function __construct(Cart_Type $CartType = null, User $user = null)
     {
+        $this->_user = $user;
         if ($CartType) {
             $this->cartType = $CartType;
         } else {
@@ -124,10 +128,53 @@ abstract class Cart
     }
 
 
-    abstract protected function load();
+    protected function load()
+    {
+        $var = 'cart_' . (int)$this->cartType->id;
+        $items1 = @(array)json_decode($_COOKIE[$var], true);
+        if ($this->_user && (int)$this->_user->id) {
+            $items2 = array();
+            $SQL_query = "SELECT * FROM cms_shop_carts WHERE cart_type_id = " . (int)$this->cartType->id . " AND uid = " . (int)$this->_user->id;
+            $SQL_result = Cart_Type::_SQL()->get($SQL_query);
+            foreach ($SQL_result as $row) {
+                $items2[(int)$row['material_id']][$row['meta']] = (int)$row['amount'];
+            }
+            $this->items = $items2 + $items1;
+            if ($items1 != $items2) {
+                $this->save();
+            }
+        } else {
+            $this->items = $items1;
+        }
+    }
 
 
-    abstract protected function save();
+    protected function save()
+    {
+        $var = 'cart_' . (int)$this->cartType->id;
+        $_COOKIE[$var] = json_encode($this->items);
+        setcookie($var, $_COOKIE[$var], time() + Application::i()->registryGet('cookieLifetime') * 86400, '/');
+        if ($this->_user && (int)$this->_user->id) {
+            $arr = array();
+            foreach ($this->items as $item_id => $metas) {
+                foreach ($metas as $meta => $c) {
+                    $row = array(
+                        'cart_type_id' => (int)$this->cartType->id,
+                        'uid' => (int)$this->_user->id,
+                        'material_id' => (int)$item_id,
+                        'meta' => $meta,
+                        'amount' => (int)$c
+                    );
+                    $arr[] = $row;
+                }
+            }
+            $SQL_query = "DELETE FROM cms_shop_carts WHERE cart_type_id = " . (int)$this->cartType->id . " AND uid = " . (int)$this->_user->id;
+            $SQL_result = Cart_Type::_SQL()->query($SQL_query);
+            if ($arr) {
+                Cart_Type::_SQL()->add('cms_shop_carts', $arr);
+            }
+        }
+    }
 
 
     public function getPriceURN(Material_Type $Material_Type)
