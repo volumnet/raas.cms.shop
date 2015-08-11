@@ -101,7 +101,7 @@ if ($_GET['AJAX']) {
               </div>
 
               <div data-role="feedback-form" <?php echo $success[(int)$Block->id] ? 'style="display: none"' : ''?>>
-                <p>Поля, помеченные звездочкой (*), обязательны для заполнения</p>
+                <p><?php echo ASTERISK_MARKED_FIELDS_ARE_REQUIRED?></p>
                 <?php if ($Form->signature) { ?>
                       <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
                 <?php } ?>
