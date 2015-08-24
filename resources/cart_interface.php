@@ -165,7 +165,8 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                         $temp = array();
                         foreach ($Cart->items as $row) {
                             if ($row->amount) {
-                                $priceURN = $Cart->getPriceURN($row->material_type);
+                                $m = new Material($row->id);
+                                $priceURN = $Cart->getPriceURN($m->material_type);
                                 $price = number_format($row->{$priceURN}, 2, '.', '');
                                 $temp[] = array(
                                     'material_id' => $row->id, 
