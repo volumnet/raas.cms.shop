@@ -208,7 +208,7 @@ foreach ($Block->types as $mtype) {
             }
             
         }
-        echo '<offer id="' . (int)$row->id . '" type="' . htmlspecialchars($mtype->settings['type']) . '"' . $offerAttrs . '>' . $offerTxt . '</offer>';
+        echo '<offer id="' . (int)$row->id . '"' . ($mtype->settings['type'] ? ' type="' . htmlspecialchars($mtype->settings['type']) . '"' : '') . $offerAttrs . '>' . $offerTxt . '</offer>';
         $row->rollback();
         unset($row);
     }
