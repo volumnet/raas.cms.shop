@@ -11,7 +11,15 @@ while (ob_get_level()) {
 
 $getValue = function(Material $Item, $key, array $settings = array()) {
     if ($settings['field']->id) {
-        $x = $Item->fields[$settings['field']->urn]->doRich();
+        if ($settings['field']->datatype == 'image') {
+            if ($settings['field']->multiple) {
+                $x = $Item->{$settings['field_id']}[0]->fileURL;
+            } else {
+                $x = $Item->{$settings['field_id']}->fileURL;
+            }
+        } else {
+            $x = $Item->fields[$settings['field']->urn]->doRich();
+        }
     } elseif ($settings['field_id']) {
         $x = $Item->{$settings['field_id']};
     }
