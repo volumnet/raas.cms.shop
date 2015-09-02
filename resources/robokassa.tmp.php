@@ -21,7 +21,7 @@ if ($success[(int)$Block->id] || $localError) {
 <?php } ?>
 <?php if ($Item->id) { ?>
     <section class="cart">
-      <h2><?php echo htmlspecialchars(sprintf(ORDER_NUM, (int)$Item->id))?></h2>
+      <h2><?php echo htmlspecialchars(sprintf(ORDER_NUM, (int)$Item->id, $_SERVER['HTTP_HOST']))?></h2>
       <table class="table table-striped cart-table" data-role="cart-table">
         <thead>
           <tr>
