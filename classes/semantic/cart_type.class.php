@@ -1,6 +1,8 @@
 <?php
 namespace RAAS\CMS\Shop;
 
+use \RAAS\CMS\Package;
+
 class Cart_Type extends \SOME\SOME
 {
     protected static $tablename = 'cms_shop_cart_types';
@@ -21,9 +23,7 @@ class Cart_Type extends \SOME\SOME
         if (!$this->urn && $this->name) {
             $this->urn = \SOME\Text::beautify($this->name);
         }
-        while ((int)self::$SQL->getvalue(array("SELECT COUNT(*) FROM " . self::_tablename() . " WHERE urn = ? AND id != ?", $this->urn, (int)$this->id))) {
-            $this->urn = '_' . $this->urn . '_';
-        }
+        Package::i()->getUniqueURN($this);
         parent::commit();
         $SQL_query = "DELETE FROM " . self::_dbprefix() . self::$links['material_types']['tablename'] 
                    . " WHERE " . self::$links['material_types']['field_from'] . " = " . (int)$this->id;

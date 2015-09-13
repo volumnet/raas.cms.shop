@@ -21,6 +21,12 @@ class OrdersTable extends \RAAS\Table
     {
         $view = $this->view;
         $columns = array();
+        $columns['id'] = array(
+            'caption' => '#',
+            'callback' => function($row) use ($view) { 
+                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . (int)$row->id . '</a>';
+            }
+        );
         $columns['post_date'] = array(
             'caption' => $this->view->_('POST_DATE'),
             'callback' => function($row) use ($view) { 

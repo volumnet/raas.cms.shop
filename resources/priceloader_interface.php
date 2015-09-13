@@ -109,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $SQL_from = array(Material::_tablename() . " AS tM");
             $SQL_where = array();
             for ($i = 0; $i < max(count($row), count($Loader->columns)); $i++) {
-                if (trim($row[$i])) {
+                if (!is_array($row[$i]) && trim($row[$i])) {
                     $tmp_where = '';
                     if ($Loader->columns[$i]->Field->id) {
                         $SQL_from[] = Material::_dbprefix() . "cms_data AS tD" . (int)$Loader->columns[$i]->Field->id 
