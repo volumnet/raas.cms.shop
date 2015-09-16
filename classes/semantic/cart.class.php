@@ -31,7 +31,7 @@ class Cart
                         $row->id = $m->id;
                         $row->name = $m->name;
                         $row->meta = $meta;
-                        $row->realprice = (int)$m->{$this->getPriceURN($m->material_type)};
+                        $row->realprice = (float)$m->{$this->getPriceURN($m->material_type)};
                         $row->amount = $c;
                         $temp[] = $row;
                     }
