@@ -25,6 +25,7 @@ class ViewOrderForm extends ViewFeedbackForm
     public function __construct(array $params = array())
     {
         parent::__construct($params);
+        $this->caption = sprintf($this->view->_('ORDER_N'), (int)$this->Item->id);
     }
 
 
@@ -32,7 +33,6 @@ class ViewOrderForm extends ViewFeedbackForm
     {
         $arr = parent::getParams();
         $arr['action'] = '#history';
-        $arr['caption'] = $this->view->_('ORDERS');
         $arr['commit'] = function(RAASForm $Form) {
             $history = new Order_History();
             $history->uid = Application::i()->user->id;
