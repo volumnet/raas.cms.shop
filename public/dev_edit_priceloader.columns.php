@@ -58,9 +58,9 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
             </td>
             <td>
               <i class="icon icon-upload" title="<?php echo CMS\Shop\FOR_UPLOAD?>"></i>
-              <input type="text" name="column_callback[]" value="" placeholder="<?php echo CMS\Shop\FOR_UPLOAD?>" /><br />
+              <textarea name="column_callback[]" placeholder="<?php echo CMS\Shop\FOR_UPLOAD?>"></textarea><br />
               <i class="icon icon-download-alt" title="<?php echo CMS\Shop\FOR_DOWNLOAD?>"></i>
-              <input type="text" name="column_download_callback[]" value="" placeholder="<?php echo CMS\Shop\FOR_DOWNLOAD?>" />
+              <textarea name="column_download_callback[]" placeholder="<?php echo CMS\Shop\FOR_DOWNLOAD?>"></textarea>
             </td>
             <td><input type="radio" name="ufid" value="" disabled="disabled" /></td>
             <td><a href="#" class="close" data-role="raas-repo-del">&times;</a></td>
