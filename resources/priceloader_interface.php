@@ -199,6 +199,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             if (trim($dataRow[$j])) {
                                 $Item->{$Loader->columns[$j]->fid} = trim($dataRow[$j]);
                             }
+                        } elseif ($new && ($j == $uniqueColumn)) { // 2015-11-20, AVS: добавили URN по артикулу
+                            if (trim($dataRow[$j])) {
+                                $Item->urn = \SOME\Text::beautify(trim($dataRow[$j]));
+                            }
                         }
                     }
                     $id = $Item->id;
