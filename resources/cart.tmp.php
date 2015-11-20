@@ -70,7 +70,7 @@ if ($_GET['AJAX']) {
                 <?php } ?>
                 <td class="span1 cart-table__actions-col">
                   <a href="#" data-id="<?php echo (int)$row->id?>" data-meta="" data-toggle="modal" data-target="#confirmDeleteItemModal">
-                    <i class="icon icon-remove" title="<?php echo DELETE?>"></i>
+                    <i class="fa fa-remove" title="<?php echo DELETE?>"></i>
                   </a>
                 </td>
               </tr>
