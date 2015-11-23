@@ -5,9 +5,10 @@ use \RAAS\CMS\Material;
 use \RAAS\CMS\Material_Field;
 
 ini_set('max_execution_time', 300);
-while (ob_get_level()) {
-    ob_end_clean();
-}
+// 2015-11-23, AVS: убрал, т.к. мешает кэшировать
+// while (ob_get_level()) {
+//     ob_end_clean();
+// }
 
 $getValue = function(Material $Item, $key, array $settings = array()) {
     if ($settings['field']->id) {
@@ -45,7 +46,7 @@ $getValue = function(Material $Item, $key, array $settings = array()) {
 
 
 header('Content-Type: application/xml');
-echo '<' . '?xml version="1.0" encoding="UTF-8"?' . '><yml_catalog date="' . date('Y-m-d H:i') . '">';
+echo '<' . '?xml version="1.0" encoding="UTF-8"?' . '>' . "\n" . '<yml_catalog date="' . date('Y-m-d H:i') . '">';
 echo '<shop>';
 foreach (array('name', 'company', 'url', 'platform', 'version', 'agency', 'email', 'currencies', 'categories', 'local_delivery_cost', 'cpa') as $key) {
     switch ($key) {
@@ -225,4 +226,3 @@ echo '</offers>';
 echo '</shop>';
 echo '</yml_catalog>';
 echo '<!-- Memory used: ' . memory_get_usage() . ' -->';
-exit;
