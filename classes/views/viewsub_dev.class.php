@@ -37,7 +37,13 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
 
     public function cart_types(array $IN = array())
     {
-        return $this->stdDictionaryShowlist($IN, 'CART_TYPES', 'edit_cart_type', 'getCartTypeContextMenu', 'NO_CART_TYPES_FOUND', 'ADD_CART_TYPE');
+        $IN['Table'] = new CartTypesTable($IN);
+        $this->assignVars($IN);
+        $this->title = $IN['Table']->caption;
+        $this->path[] = array('name' => $this->_('DEVELOPMENT'), 'href' => \RAAS\CMS\ViewSub_Dev::i()->url);
+        $this->contextmenu = array(array('name' => $this->_('ADD_CART_TYPE'), 'href' => $this->url . '&action=edit_cart_type', 'icon' => 'plus'));
+        $this->template = $IN['Table']->template;
+        // return $this->stdDictionaryShowlist($IN, 'CART_TYPES', 'edit_cart_type', 'getCartTypeContextMenu', 'NO_CART_TYPES_FOUND', 'ADD_CART_TYPE');
     }
 
 
@@ -54,13 +60,25 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
 
     public function priceloaders(array $IN = array())
     {
-        return $this->stdDictionaryShowlist($IN, 'PRICELOADERS', 'edit_priceloader', 'getPriceLoaderContextMenu', 'NO_PRICELOADERS_FOUND', 'ADD_PRICELOADER');
+        $IN['Table'] = new PriceLoadersTable($IN);
+        $this->assignVars($IN);
+        $this->title = $IN['Table']->caption;
+        $this->path[] = array('name' => $this->_('DEVELOPMENT'), 'href' => \RAAS\CMS\ViewSub_Dev::i()->url);
+        $this->contextmenu = array(array('name' => $this->_('ADD_PRICELOADER'), 'href' => $this->url . '&action=edit_priceloader', 'icon' => 'plus'));
+        $this->template = $IN['Table']->template;
+        // return $this->stdDictionaryShowlist($IN, 'PRICELOADERS', 'edit_priceloader', 'getPriceLoaderContextMenu', 'NO_PRICELOADERS_FOUND', 'ADD_PRICELOADER');
     }
 
 
     public function imageloaders(array $IN = array())
     {
-        return $this->stdDictionaryShowlist($IN, 'IMAGELOADERS', 'edit_imageloader', 'getImageLoaderContextMenu', 'NO_IMAGELOADERS_FOUND', 'ADD_IMAGELOADER');
+        $IN['Table'] = new ImageLoadersTable($IN);
+        $this->assignVars($IN);
+        $this->title = $IN['Table']->caption;
+        $this->path[] = array('name' => $this->_('DEVELOPMENT'), 'href' => \RAAS\CMS\ViewSub_Dev::i()->url);
+        $this->contextmenu = array(array('name' => $this->_('ADD_IMAGELOADER'), 'href' => $this->url . '&action=edit_imageloader', 'icon' => 'plus'));
+        $this->template = $IN['Table']->template;
+        // return $this->stdDictionaryShowlist($IN, 'IMAGELOADERS', 'edit_imageloader', 'getImageLoaderContextMenu', 'NO_IMAGELOADERS_FOUND', 'ADD_IMAGELOADER');
     }
 
 
@@ -112,13 +130,6 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
     public function getImageLoaderContextMenu(ImageLoader $Item) 
     {
         return $this->stdView->stdContextMenu($Item, 0, 0, 'edit_imageloader', 'imageloaders', 'delete_imageloader');
-    }
-
-
-    private function stdDictionaryShowlist(array $IN, $title, $editAction, $contextMenuName, $emptyString, $addString)
-    {
-        $this->path[] = array('name' => $this->_('DEVELOPMENT'), 'href' => \RAAS\CMS\ViewSub_Dev::i()->url);
-        $this->stdView->stdShowlist($IN, $title, $editAction, $contextMenuName, $emptyString, $addString);
     }
 
 

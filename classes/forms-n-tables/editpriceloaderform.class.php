@@ -94,6 +94,7 @@ class EditPriceLoaderForm extends \RAAS\Form
             'meta' => array('CONTENT' => $CONTENT),
             'children' => array(
                 array('name' => 'name', 'caption' => $this->view->_('NAME')), 
+                array('name' => 'urn', 'caption' => $this->view->_('URN')), 
                 array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
                 array('type' => 'select', 'name' => 'cat_id', 'caption' => $this->view->_('ROOT_CATEGORY'), 'children' => $CONTENT['pages'], 'required' => true, ),
                 $this->getInterfaceField(),

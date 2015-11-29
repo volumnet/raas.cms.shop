@@ -1,6 +1,8 @@
 <?php
 namespace RAAS\CMS\Shop;
 
+use \RAAS\CMS\Package;
+
 class ImageLoader extends \SOME\SOME
 {
     protected static $tablename = 'cms_shop_imageloaders';
@@ -17,6 +19,10 @@ class ImageLoader extends \SOME\SOME
         if (!trim($this->name) && trim($this->Material_Type->name)) {
             $this->name = $this->Material_Type->name;
         }
+        if (!$this->urn && $this->name) {
+            $this->urn = $this->name;
+        }
+        Package::i()->getUniqueURN($this);
         parent::commit();
     }
 
@@ -34,5 +40,15 @@ class ImageLoader extends \SOME\SOME
         $Loader = $this;
         $OUT = eval('?' . '>' . $this->Interface->description);
         return $OUT;
+    }
+
+    
+    public static function importByURN($urn = '')
+    {
+        $SQL_query = "SELECT * FROM " . self::_tablename() . " WHERE urn = ?";
+        if ($SQL_result = self::$SQL->getline(array($SQL_query, $urn))) {
+            return new self($SQL_result);
+        }
+        return null;
     }
 }

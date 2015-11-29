@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
   ufid VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Unique field ID#',
   name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Name',
+  urn VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'URN',
   interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',
   rows INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Rows from top',
   cols INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Cols from left',
@@ -105,7 +106,8 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   KEY (mtype),
   KEY (ufid),
   KEY (interface_id),
-  KEY (cat_id)
+  KEY (cat_id),
+  INDEX (urn)
 ) COMMENT 'Price loaders';
 
 
@@ -130,6 +132,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloade
   ufid VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Unique field ID#',
   ifid VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Image field ID#',
   name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Name',
+  urn VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'URN',
   sep_string VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Separator string',
   interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',
 
@@ -137,7 +140,8 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloade
   KEY (mtype),
   KEY (ufid),
   KEY (ifid),
-  KEY (interface_id)
+  KEY (interface_id),
+  INDEX (urn)
 ) COMMENT 'Image loaders';
 
 

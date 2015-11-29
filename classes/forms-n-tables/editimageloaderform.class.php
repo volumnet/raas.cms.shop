@@ -90,6 +90,7 @@ class EditImageLoaderForm extends \RAAS\Form
             'meta' => array('CONTENT' => $CONTENT),
             'children' => array(
                 array('name' => 'name', 'caption' => $this->view->_('NAME')), 
+                array('name' => 'urn', 'caption' => $this->view->_('URN')), 
                 array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
                 array('type' => 'select', 'name' => 'ufid', 'caption' => $this->view->_('UNIQUE_FIELD'), 'children' => $CONTENT['fields']),
                 array('type' => 'select', 'name' => 'ifid', 'caption' => $this->view->_('IMAGE_FIELD'), 'children' => $CONTENT['imageFields']),

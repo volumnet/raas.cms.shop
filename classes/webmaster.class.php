@@ -138,6 +138,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $S = Snippet::importByURN('__raas_shop_order_notify');
         $FRM = new \RAAS\CMS\Form();
         $FRM->name = $this->view->_('ORDER_FORM');
+        $FRM->urn = 'order';
         $FRM->signature = 1;
         $FRM->antispam = 'hidden';
         $FRM->antispam_field_name = '_name';
@@ -250,6 +251,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $IL->mtype = $MT->id;
         $IL->ufid = $articleCol->id;
         $IL->name = $this->view->_('DEFAULT_IMAGELOADER');
+        $PL->urn = 'default';
         $IL->sep_string = '_';
         $IL->interface_id = (int)Snippet::importByURN('__raas_shop_imageloader_interface')->id;
         $IL->commit();
@@ -258,6 +260,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $PL->mtype = $MT->id;
         $PL->ufid = $articleCol->id;
         $PL->name = $this->view->_('DEFAULT_PRICELOADER');
+        $PL->urn = 'default';
         $PL->interface_id = (int)Snippet::importByURN('__raas_shop_priceloader_interface')->id;
         $PL->commit();
     }
