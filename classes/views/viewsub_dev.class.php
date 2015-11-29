@@ -115,9 +115,9 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
     }
 
 
-    public function getOrderStatusContextMenu(Order_Status $Item, $i = 0, $c = 0) 
+    public function getOrderStatusContextMenu(Order_Status $Item) 
     {
-        return $this->stdView->stdContextMenu($Item, $i, $c, 'edit_order_status', 'order_statuses', 'delete_order_status', 'move_up_order_status', 'move_down_order_status');
+        return $this->stdView->stdContextMenu($Item, 0, 0, 'edit_order_status', 'order_statuses', 'delete_order_status');
     }
 
 

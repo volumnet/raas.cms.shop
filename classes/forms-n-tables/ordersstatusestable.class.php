@@ -28,11 +28,18 @@ class OrdersStatusesTable extends \RAAS\Table
             }
         );
         $columns['urn'] = array('caption' => $this->view->_('URN'));
+        $columns['priority'] = array(
+            'caption' => $this->view->_('PRIORITY'),
+            'callback' => function($row, $i) { 
+                return '<input type="number" name="priority[' . (int)$row->id . ']" value="' . (($i + 1) * 10) . '" class="span1" min="0" />';
+            }
+        );
         $columns[' '] = array('callback' => function ($row) use ($view) { return rowContextMenu($view->getOrderStatusContextMenu($row)); });
         $defaultParams = array(
             'caption' => $this->view->_('ORDER_STATUSES'),
             'emptyString' => $this->view->_('NO_ORDER_STATUSES_FOUND'),
-            'Set' => $IN['Set']
+            'Set' => $IN['Set'],
+            'template' => 'cms/prioritytable.tmp.php'
         );
         $arr = array_merge($defaultParams, $params);
         $arr['columns'] = $columns;
