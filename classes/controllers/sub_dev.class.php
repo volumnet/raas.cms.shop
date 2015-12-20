@@ -36,26 +36,33 @@ class Sub_Dev extends \RAAS\Abstract_Sub_Controller
             case 'imageloaders':
                 $this->view->{$this->action}(array('Set' => ImageLoader::getSet()));
                 break;
-            case 'move_up_order_status': case 'move_down_order_status':
-                $Item = new Order_Status((int)$this->id);
-                $f = str_replace('_order_status', '', $this->action);
-                StdSub::$f($Item, $this->url . '&action=order_statuses');
-                break;
             case 'delete_cart_type':
-                $Item = new Cart_Type((int)$this->id);
-                StdSub::delete($Item, $this->url . '&action=cart_types');
+                $ids = (array)$_GET['id'];
+                $items = array_map(function($x) { return new Cart_Type((int)$x); }, $ids);
+                $items = array_filter($items, function($x) { return !$x->locked; });
+                $items = array_values($items);
+                StdSub::delete($items, $this->url . '&action=cart_types');
                 break;
             case 'delete_order_status':
-                $Item = new Order_Status((int)$this->id);
-                StdSub::delete($Item, $this->url . '&action=order_statuses');
+                $ids = (array)$_GET['id'];
+                $items = array_map(function($x) { return new Order_Status((int)$x); }, $ids);
+                $items = array_filter($items, function($x) { return !$x->locked; });
+                $items = array_values($items);
+                StdSub::delete($items, $this->url . '&action=order_statuses');
                 break;
             case 'delete_priceloader':
-                $Item = new PriceLoader((int)$this->id);
-                StdSub::delete($Item, $this->url . '&action=priceloaders');
+                $ids = (array)$_GET['id'];
+                $items = array_map(function($x) { return new PriceLoader((int)$x); }, $ids);
+                $items = array_filter($items, function($x) { return !$x->locked; });
+                $items = array_values($items);
+                StdSub::delete($items, $this->url . '&action=priceloaders');
                 break;
             case 'delete_imageloader':
-                $Item = new ImageLoader((int)$this->id);
-                StdSub::delete($Item, $this->url . '&action=imageloaders');
+                $ids = (array)$_GET['id'];
+                $items = array_map(function($x) { return new ImageLoader((int)$x); }, $ids);
+                $items = array_filter($items, function($x) { return !$x->locked; });
+                $items = array_values($items);
+                StdSub::delete($items, $this->url . '&action=imageloaders');
                 break;
             default:
                 new Redirector(\RAAS\CMS\ViewSub_Dev::i()->url);

@@ -22,13 +22,21 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
             case 'view':
                 $this->{$this->action}();
                 break;
-            case 'chvis': 
-                $Item = new Order($this->id);
-                StdSub::chvis($Item, $this->url);
-                break;
-            case 'delete':
-                $Item = new Order($this->id);
-                StdSub::delete($Item, $this->url . '&id=' . (int)$Item->pid);
+            case 'chvis': case 'delete': case 'vis': case 'invis':
+                $ids = (array)$_GET['id'];
+                if (in_array('all', $ids, true)) {
+                    $pids = (array)$_GET['pid'];
+                    $pids = array_filter($pids, 'trim');
+                    $pids = array_map('intval', $pids);
+                    if ($pids) {
+                        $items = Order::getSet(array('where' => "pid IN (" . implode(", ", $pids) . ")", 'orderBy' => "id"));
+                    }
+                } else {
+                    $items = array_map(function($x) { return new Order((int)$x); }, $ids);
+                }
+                $items = array_values($items);
+                $f = $this->action;
+                StdSub::$f($items, $this->url);
                 break;
             default:
                 $this->orders();
