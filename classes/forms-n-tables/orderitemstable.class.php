@@ -49,7 +49,7 @@ class OrderItemsTable extends \RAAS\Table
         );
         $defaultParams = array(
             'columns' => $columns,
-            'Set' => $params['Item']->items,
+            'Set' => $params['items'],
         );
         $arr = $defaultParams;
         parent::__construct($arr);

@@ -110,7 +110,7 @@ class ViewOrderForm extends ViewFeedbackForm
         $arr['items'] = new FieldSet(array(
             'name' => 'items', 
             'template' => 'order_view.items.inc.php', 
-            'meta' => array('Table' => new OrderItemsTable(array('Item' => $this->Item)))
+            'meta' => array('Table' => new OrderItemsTable(array('Item' => $this->Item, 'items' => $this->meta['items'])))
         ));
         $arr['pid'] = array('name' => 'pid', 'caption' => $this->view->_('CART_TYPE'), 'template' => 'order_view.add_field.inc.php');
         $arr = array_merge($arr, $this->getStat());

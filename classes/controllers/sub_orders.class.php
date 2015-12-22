@@ -73,8 +73,9 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
         $Item->vis = (int)$this->application->user->id;
         $Item->commit();
         $OUT['Item'] = $Item;
+        $OUT['items'] = Module::i()->getOrderItems($Item);
         $OUT['Cart_Types'] = $Cart_Types;
-        $Form = new ViewOrderForm(array('Item' => $Item));
+        $Form = new ViewOrderForm(array('Item' => $Item, 'meta' => array('items' => $OUT['items'])));
         $this->view->view(array_merge($Form->process(), $OUT));
     }
 }

@@ -1,8 +1,10 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\CMS\Block_Type;
 use \RAAS\CMS\Field;
 use \RAAS\CMS\Form_Field;
+use \RAAS\CMS\Material;
 
 class Module extends \RAAS\Module
 {
@@ -88,5 +90,13 @@ class Module extends \RAAS\Module
     }
 
 
-    
+    public function getOrderItems(Order $Order)
+    {
+        $SQL_query = "SELECT tM.*, tOG.meta, tOG.realprice, tOG.amount
+                        FROM " . Material::_tablename() . " AS tM 
+                        JOIN " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.material_id = tM.id 
+                       WHERE tOG.order_id = " . (int)$Order->id;
+        $Set = Material::getSQLSet($SQL_query);
+        return $Set;
+    }
 }
