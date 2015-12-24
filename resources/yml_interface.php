@@ -14,9 +14,9 @@ $getValue = function(Material $Item, $key, array $settings = array()) {
     if ($settings['field']->id) {
         if ($settings['field']->datatype == 'image') {
             if ($settings['field']->multiple) {
-                $x = $Item->{$settings['field_id']}[0]->fileURL;
+                $x = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $Item->{$settings['field']->urn}[0]->fileURL;
             } else {
-                $x = $Item->{$settings['field_id']}->fileURL;
+                $x = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $Item->{$settings['field']->urn}->fileURL;
             }
         } else {
             $x = $Item->fields[$settings['field']->urn]->doRich();
