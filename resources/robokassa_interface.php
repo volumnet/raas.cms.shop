@@ -57,7 +57,7 @@ if (in_array($_GET['action'], array('result', 'success', 'fail')) && $_REQUEST['
     }
 } elseif ($Item->id && $_POST['epay']) {
     $OUT['epayWidget'] = Snippet::importByURN('robokassa');
-    $OUT['paymentURL'] = $Block->epay_test ? 'http://test.robokassa.ru/Index.aspx' : 'https://auth.robokassa.ru/Merchant/Index.aspx';
+    $OUT['paymentURL'] = $Block->epay_test ? 'https://auth.robokassa.ru/Merchant/Index.aspx?IsTest=1' : 'https://auth.robokassa.ru/Merchant/Index.aspx';
     $OUT['requestForPayment'] = true;
     $crc = $Block->epay_login . ':' . number_format($Item->sum, 2, '.', '') . ':' . (int)$Item->id;
     if (!$Block->epay_test && $Block->epay_currency && ($Block->epay_currency != 'RUR')) {
