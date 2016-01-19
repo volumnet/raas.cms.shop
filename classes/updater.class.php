@@ -10,6 +10,7 @@ class Updater extends \RAAS\Updater
     {
         $this->update20150511();
         $this->update20151129();
+        $this->update20160119();
     }
 
 
@@ -64,6 +65,17 @@ class Updater extends \RAAS\Updater
                             ADD INDEX (urn)";
             $this->SQL->query($SQL_query);
             $SQL_query = "UPDATE " . \SOME\SOME::_dbprefix() . "cms_shop_imageloaders SET urn = 'default' WHERE (urn = '') AND (name = 'Стандартный загрузчик изображений' OR name = 'Default image loader')";
+            $this->SQL->query($SQL_query);
+        }
+    }
+
+
+    public function update20160119()
+    {
+        if (in_array(\SOME\SOME::_dbprefix() . "cms_shop_orders_goods", $this->tables) && !in_array('priority', $this->columns(\SOME\SOME::_dbprefix() . "cms_shop_orders_goods"))) {
+            $SQL_query = "ALTER TABLE " . \SOME\SOME::_dbprefix() . "cms_shop_orders_goods 
+                            ADD priority INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'priority',
+                            ADD INDEX (priority)";
             $this->SQL->query($SQL_query);
         }
     }

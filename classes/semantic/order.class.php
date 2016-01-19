@@ -1,6 +1,8 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\CMS\Feedback;
+use \RAAS\CMS\Material;
 
 class Order extends Feedback
 {
@@ -12,9 +14,7 @@ class Order extends Feedback
         'viewer' => array('FK' => 'vis', 'classname' => 'RAAS\\User', 'cascade' => false),
         'status' => array('FK' => 'status_id', 'classname' => 'RAAS\\CMS\\Shop\\Order_Status', 'cascade' => false),
     );
-    protected static $links = array(
-        'items' => array('tablename' => 'cms_shop_orders_goods', 'field_from' => 'order_id', 'field_to' => 'material_id', 'classname' => 'RAAS\\CMS\\Material'),
-    );
+    protected static $cognizableVars = array('fields', 'items');
     protected static $children = array(
         'history' => array('classname' => 'RAAS\\CMS\\Shop\\Order_History', 'FK' => 'order_id')
     );
@@ -47,11 +47,16 @@ class Order extends Feedback
     {
         parent::commit();
         if ($this->meta_items) {
-            $t = $this;
-            $SQL_query = "DELETE FROM " . static::_dbprefix() . self::$links['items']['tablename'] . " WHERE order_id = " . (int)$this->id;
+            $SQL_query = "DELETE FROM " . static::_dbprefix() . "cms_shop_orders_goods WHERE order_id = " . (int)$this->id;
             static::$SQL->query($SQL_query);
-            $arr = array_map(function($x) use ($t) { return array_merge(array('order_id' => (int)$t->id), (array)$x); }, $this->meta_items);
-            static::$SQL->add(static::_dbprefix() . self::$links['items']['tablename'], $arr);
+            $arr = array();
+            foreach ($this->meta_items as $i => $row) {
+                $arr[] = array_merge(
+                    array('order_id' => (int)$this->id, 'priority' => $i + 1),
+                    (array)$row
+                );
+            }
+            static::$SQL->add(static::_dbprefix() . "cms_shop_orders_goods", $arr);
             unset($this->meta_items);
         }
     }
@@ -68,10 +73,23 @@ class Order extends Feedback
         return $arr;
     }
 
-    public static function Order(self $Item)
+
+    public static function delete(self $Item)
     {
-        $SQL_query = "DELETE FROM " . static::_dbprefix() . self::$links['items']['tablename'] . " WHERE order_id = " . (int)$Item->id;
+        $SQL_query = "DELETE FROM " . static::_dbprefix() . "cms_shop_orders_goods WHERE order_id = " . (int)$Item->id;
         static::$SQL->query($SQL_query);
         parent::delete($Item);
+    }
+
+
+    protected function _items()
+    {
+        $SQL_query = "SELECT tM.*, tOG.meta, tOG.realprice, tOG.amount
+                        FROM " . Material::_tablename() . " AS tM 
+                        JOIN " . self::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.material_id = tM.id 
+                       WHERE tOG.order_id = " . (int)$this->id . "
+                    ORDER BY tOG.priority";
+        $Set = Material::getSQLSet($SQL_query);
+        return $Set;
     }
 }

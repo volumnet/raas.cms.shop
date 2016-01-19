@@ -62,11 +62,13 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_goo
   meta VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'Meta data',
   realprice DECIMAL(8,2) NOT NULL DEFAULT 0 COMMENT 'Real price',
   amount INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Amount',
+  priority INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Priority',
 
   PRIMARY KEY (order_id, material_id, meta),
   KEY (order_id),
   KEY (material_id),
-  KEY (meta)
+  KEY (meta),
+  INDEX (priority)
 ) COMMENT 'Orders goods';
 
 

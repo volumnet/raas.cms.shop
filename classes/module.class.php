@@ -88,15 +88,4 @@ class Module extends \RAAS\Module
         $Set = Order::getSQLSet($SQL_query, $Pages);
         return array('Set' => $Set, 'Pages' => $Pages, 'Parent' => $Parent, 'columns' => $columns);
     }
-
-
-    public function getOrderItems(Order $Order)
-    {
-        $SQL_query = "SELECT tM.*, tOG.meta, tOG.realprice, tOG.amount
-                        FROM " . Material::_tablename() . " AS tM 
-                        JOIN " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.material_id = tM.id 
-                       WHERE tOG.order_id = " . (int)$Order->id;
-        $Set = Material::getSQLSet($SQL_query);
-        return $Set;
-    }
 }
