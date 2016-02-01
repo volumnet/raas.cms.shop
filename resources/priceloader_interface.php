@@ -223,7 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 }
                             } else {
                                 // 2015-06-01, AVS: добавляем || $new , чтобы у новых товаров артикул тоже заполнялся
-                                if (trim($dataRow[$j]) && (!$uniqueColumn || ($j != $uniqueColumn) || $new) && $Loader->columns[$j]->Field->id) {
+                                // 2016-02-01, AVS: закомментировали trim($dataRow[$j]), т.к. пустые значения тоже должны вставляться
+                                if (/*trim($dataRow[$j]) && */(!$uniqueColumn || ($j != $uniqueColumn) || $new) && $Loader->columns[$j]->Field->id) {
                                     $val = $Item->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($dataRow[$j]));
                                     if ($val != $Item->fields[$Loader->columns[$j]->Field->urn]->getValues()) {
                                         $Item->fields[$Loader->columns[$j]->Field->urn]->deleteValues();
