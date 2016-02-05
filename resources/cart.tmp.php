@@ -168,6 +168,10 @@ if ($_GET['AJAX']) {
                 pT = ((i % 3 == 2) && (j > 0) ? ' ' : '') + pS.substr(j, 1) + pT;
             }
             if (pR > 0) {
+                pR = pR.toString();
+                if (pR.length < 2) {
+                    pR = '0' + pR;
+                }
                 pT += ',' + pR;
             }
             return pT;
