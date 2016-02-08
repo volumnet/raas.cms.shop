@@ -23,10 +23,10 @@ class PriceLoader_Column extends \SOME\SOME
 
     public function _CallbackDownload()
     {
-        $t = $this;
+        $t = $column = $this;
         if (trim($this->callback_download)) {
             $f = $this->callback_download;
-            return function($x) use ($f) { return eval($f); };
+            return function($x, $row) use ($f, $column) { return eval($f); };
         }
     }
 }
