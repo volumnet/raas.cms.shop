@@ -559,7 +559,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     continue;
                 }
                 if ($f = $col->CallbackDownload) {
-                    $x = $f($x);
+                    $x = $f($x, $row);
                 }
                 $temp[] = trim($x);
             }
