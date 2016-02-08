@@ -39,7 +39,12 @@ class OrdersStatusesTable extends \RAAS\Table
             'caption' => $this->view->_('ORDER_STATUSES'),
             'emptyString' => $this->view->_('NO_ORDER_STATUSES_FOUND'),
             'Set' => $IN['Set'],
-            'template' => 'cms/prioritytable.tmp.php'
+            'template' => 'cms/prioritytable.tmp.php',
+            'data-role' => 'multitable',
+            'meta' => array(
+                'allContextMenu' => $view->getAllOrderStatusesContextMenu(),
+            ),
+            
         );
         $arr = array_merge($defaultParams, $params);
         $arr['columns'] = $columns;

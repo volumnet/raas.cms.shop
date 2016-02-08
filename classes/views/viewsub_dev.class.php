@@ -113,11 +113,37 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
     {
         return $this->stdView->stdContextMenu($Item, 0, 0, 'edit_cart_type', 'cart_types', 'delete_cart_type');
     }
+    
+    
+    public function getAllCartTypesContextMenu()
+    {
+        $arr = array();
+        $arr[] = array(
+            'name' => $this->_('DELETE'), 
+            'href' => $this->url . '&action=delete_cart_type&back=1', 
+            'icon' => 'remove', 
+            'onclick' => 'return confirm(\'' . $this->_('DELETE_MULTIPLE_TEXT') . '\')'
+        );
+        return $arr;
+    }
 
 
     public function getOrderStatusContextMenu(Order_Status $Item) 
     {
         return $this->stdView->stdContextMenu($Item, 0, 0, 'edit_order_status', 'order_statuses', 'delete_order_status');
+    }
+    
+    
+    public function getAllOrderStatusesContextMenu()
+    {
+        $arr = array();
+        $arr[] = array(
+            'name' => $this->_('DELETE'), 
+            'href' => $this->url . '&action=delete_order_status&back=1', 
+            'icon' => 'remove', 
+            'onclick' => 'return confirm(\'' . $this->_('DELETE_MULTIPLE_TEXT') . '\')'
+        );
+        return $arr;
     }
 
 
@@ -125,11 +151,37 @@ class ViewSub_Dev extends \RAAS\Abstract_Sub_View
     {
         return $this->stdView->stdContextMenu($Item, 0, 0, 'edit_priceloader', 'priceloaders', 'delete_priceloader');
     }
+    
+    
+    public function getAllPriceLoadersContextMenu()
+    {
+        $arr = array();
+        $arr[] = array(
+            'name' => $this->_('DELETE'), 
+            'href' => $this->url . '&action=delete_priceloader&back=1', 
+            'icon' => 'remove', 
+            'onclick' => 'return confirm(\'' . $this->_('DELETE_MULTIPLE_TEXT') . '\')'
+        );
+        return $arr;
+    }
 
 
     public function getImageLoaderContextMenu(ImageLoader $Item) 
     {
         return $this->stdView->stdContextMenu($Item, 0, 0, 'edit_imageloader', 'imageloaders', 'delete_imageloader');
+    }
+    
+    
+    public function getAllImageLoadersContextMenu()
+    {
+        $arr = array();
+        $arr[] = array(
+            'name' => $this->_('DELETE'), 
+            'href' => $this->url . '&action=delete_imageloader&back=1', 
+            'icon' => 'remove', 
+            'onclick' => 'return confirm(\'' . $this->_('DELETE_MULTIPLE_TEXT') . '\')'
+        );
+        return $arr;
     }
 
 

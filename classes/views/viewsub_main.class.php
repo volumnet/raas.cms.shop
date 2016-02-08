@@ -48,4 +48,17 @@ class ViewSub_Main extends \RAAS\Abstract_Sub_View
         }
         return $arr;
     }
+    
+    
+    public function getAllYMLMaterialTypesContextMenu()
+    {
+        $arr = array();
+        $arr[] = array(
+            'name' => $this->_('DELETE'), 
+            'href' => $this->url . '&action=delete_yml_type&back=1', 
+            'icon' => 'remove', 
+            'onclick' => 'return confirm(\'' . $this->_('DELETE_MULTIPLE_TEXT') . '\')'
+        );
+        return $arr;
+    }
 }

@@ -80,7 +80,13 @@ class OrdersTable extends \RAAS\Table
             'emptyString' => $this->view->_('NO_NOTES_FOUND'),
             'callback' => function($Row) { if (!$Row->source->vis) { $Row->class = 'info'; } },
             'Set' => $params['Set'],
-            'template' => 'feedback'
+            'template' => 'feedback',
+            'data-role' => 'multitable',
+            'meta' => array(
+                'allContextMenu' => $view->getAllOrdersContextMenu(),
+                'allValue' => 'all&pid=' . (int)$Item->id,
+            ),
+            
         );
         unset($params['columns']);
 

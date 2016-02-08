@@ -42,7 +42,11 @@ class EditBlockYMLMaterialTypesTable extends \RAAS\Table
             'columns' => $columns,
             'emptyString' => $this->view->_('NO_NOTES_FOUND'),
             'Set' => array_values($params['Item']->types),
-            'template' => 'feedback'
+            'template' => 'feedback',
+            'data-role' => 'multitable',
+            'meta' => array(
+                'allContextMenu' => $view->getAllYMLMaterialTypesContextMenu(),
+            ),
         );
 
         $arr = $defaultParams;
