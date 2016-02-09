@@ -53,7 +53,7 @@ $notify = function(Order $Item)
     
     
     $subject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER, $Item->parent->name, $Item->page->name);
-    $userSubject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER, $Item->id, $_SERVER['HTTP_HOST']);
+    $userSubject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER_USER, $Item->id, $_SERVER['HTTP_HOST']);
     if ($emails) {
         \RAAS\Application::i()->sendmail($emails, $subject, $message, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS');
     }

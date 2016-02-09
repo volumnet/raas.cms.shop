@@ -112,9 +112,9 @@ $emailField = function($field)
                 <?php } ?>
               </td>
               <td><?php echo htmlspecialchars($row->meta)?>&nbsp;</td>
-              <td><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
+              <td style="text-align: right"><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
               <td><?php echo (int)$row->amount?></td>
-              <td><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+              <td style="text-align: right"><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
             </tr>
           <?php $sum += $row->amount * $row->realprice; } ?>
           <tr>
