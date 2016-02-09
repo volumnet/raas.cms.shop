@@ -97,12 +97,19 @@ $emailField = function($field)
           </tr>
         </thead>
         <tbody>
-          <?php $sum = 0; foreach ($Item->items as $row) { ?>
+          <?php 
+          $sum = 0; 
+          foreach ($Item->items as $row) { 
+            $url = ($forUser ? $row->url : '/admin/?p=cms&sub=main&action=edit_material&id=' . $row->id . '&pid=' . ($row->material_type->affectedPages[0]->id)); ?>
             <tr>
               <td>
-                <a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&sub=main&action=edit_material&id=' . $row->id . '&pid=' . ($row->material_type->affectedPages[0]->id))?>">
-                  <?php echo htmlspecialchars($row->name)?>
-                </a>
+                <?php if ($url) { ?>
+                    <a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . $url)?>">
+                      <?php echo htmlspecialchars($row->name)?>
+                    </a>
+                <?php } else { ?>
+                    <?php echo htmlspecialchars($row->name)?>
+                <?php } ?>
               </td>
               <td><?php echo htmlspecialchars($row->meta)?>&nbsp;</td>
               <td><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
@@ -117,21 +124,23 @@ $emailField = function($field)
         </tbody>
       </table>
     <?php } ?>
-    <p><a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&m=shop&sub=orders&action=view&id=' . $Item->id)?>"><?php echo VIEW?></a></p>
-    <p>
-      <small>
-        <?php echo IP_ADDRESS?>: <?php echo htmlspecialchars($Item->ip)?><br />
-        <?php echo USER_AGENT?>: <?php echo htmlspecialchars($Item->user_agent)?><br />
-        <?php echo PAGE?>: 
-        <?php if ($Item->page->parents) { ?>
-            <?php foreach ($Item->page->parents as $row) { ?>
-                <a href="<?php echo htmlspecialchars($Item->domain . $row->url)?>"><?php echo htmlspecialchars($row->name)?></a> / 
+    <?php if (!$forUser) { ?>
+        <p><a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&m=shop&sub=orders&action=view&id=' . $Item->id)?>"><?php echo VIEW?></a></p>
+        <p>
+          <small>
+            <?php echo IP_ADDRESS?>: <?php echo htmlspecialchars($Item->ip)?><br />
+            <?php echo USER_AGENT?>: <?php echo htmlspecialchars($Item->user_agent)?><br />
+            <?php echo PAGE?>: 
+            <?php if ($Item->page->parents) { ?>
+                <?php foreach ($Item->page->parents as $row) { ?>
+                    <a href="<?php echo htmlspecialchars($Item->domain . $row->url)?>"><?php echo htmlspecialchars($row->name)?></a> / 
+                <?php } ?>
             <?php } ?>
-        <?php } ?>
-        <a href="<?php echo htmlspecialchars($Item->domain . $Item->page->url)?>"><?php echo htmlspecialchars($Item->page->name)?></a>
-        <br />
-        <?php echo CART_TYPE?>: 
-        <a href="<?php echo htmlspecialchars($Item->domain . '/admin/?p=cms&m=shop&sub=orders&id=' . $Item->parent->id)?>"><?php echo htmlspecialchars($Item->parent->name)?></a>
-      </small>
-    </p>
+            <a href="<?php echo htmlspecialchars($Item->domain . $Item->page->url)?>"><?php echo htmlspecialchars($Item->page->name)?></a>
+            <br />
+            <?php echo CART_TYPE?>: 
+            <a href="<?php echo htmlspecialchars($Item->domain . '/admin/?p=cms&m=shop&sub=orders&id=' . $Item->parent->id)?>"><?php echo htmlspecialchars($Item->parent->name)?></a>
+          </small>
+        </p>
+    <?php } ?>
 <?php } ?>

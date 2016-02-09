@@ -13,13 +13,18 @@ $convertMeta = function($x)
 $notify = function(Order $Item)
 {
     $temp = array_values(array_filter(array_map('trim', preg_split('/(;|,)/', $Item->parent->Form->email))));
-    $emails = array();
+    $emails = $userEmails = array();
     $sms = array();
     foreach ($temp as $row) {
         if (($row[0] == '[') && ($row[strlen($row) - 1] == ']')) {
             $sms[] = substr($row, 1, -1);
         } else {
             $emails[] = $row;
+        }
+    }
+    foreach ($Item->fields as $key => $val) {
+        if ((($val->datatype == 'email') || ($key == 'email')) && $Item->$key) {
+            $userEmails = array_merge($userEmails, array_values(array_filter(array_map('trim', preg_split('/(;|,)/', $Item->$key)))));
         }
     }
     if ($Item->parent->Form->Interface->id) {
@@ -29,8 +34,15 @@ $notify = function(Order $Item)
     }
 
     ob_start();
+    $forUser = false;
     eval('?' . '>' . $template);
     $message = ob_get_contents();
+    ob_end_clean();
+    
+    ob_start();
+    $forUser = true;
+    eval('?' . '>' . $template);
+    $userMessage = ob_get_contents();
     ob_end_clean();
     
     ob_start();
@@ -41,8 +53,12 @@ $notify = function(Order $Item)
     
     
     $subject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER, $Item->parent->name, $Item->page->name);
+    $userSubject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER, $Item->id, $_SERVER['HTTP_HOST']);
     if ($emails) {
         \RAAS\Application::i()->sendmail($emails, $subject, $message, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS');
+    }
+    if ($userEmails) {
+        \RAAS\Application::i()->sendmail($userEmails, $userSubject, $userMessage, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS');
     }
     if ($sms) {
         \RAAS\Application::i()->sendmail($sms, $subject, $message_sms, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS', false);
@@ -264,9 +280,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                         }
                     }
                     $Cart->clear();
-                    if ($Form->email) {
-                        $notify($Item);
-                    }
+                    $notify($Item);
                     if ($_POST['epay'] != 1) {
                         $OUT['success'][(int)$Block->id] = true;
                     }
