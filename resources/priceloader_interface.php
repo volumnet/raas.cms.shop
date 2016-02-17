@@ -551,7 +551,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             foreach ($Loader->columns as $col) {
                 $x = null;
                 if ($col->Field->id) {
-                    $x = $row->fields[$col->Field->urn]->doRich();
+                    if ($col->Field->multiple) {
+                        $x = $row->fields[$col->Field->urn]->getValues(true); 
+                        $x = array_map(function($y) use ($col) { return $col->Field->doRich($y); }, $x);
+                    } else {
+                        $x = $row->fields[$col->Field->urn]->doRich();
+                    }
                 } elseif ($col->fid) {
                     $x = $row->{$col->fid};
                 } else {
@@ -560,6 +565,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
                 if ($f = $col->CallbackDownload) {
                     $x = $f($x, $row);
+                }
+                if (is_array($x)) {
+                    $x = implode(', ', $x);
                 }
                 $temp[] = trim($x);
             }
