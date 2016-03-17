@@ -43,6 +43,17 @@ class Cart_Type extends \SOME\SOME
     }
 
 
+    public static function importByURN($urn)
+    {
+        $SQL_query = "SELECT * FROM " . self::_tablename() . " WHERE urn = ?";
+        $SQL_bind = array($urn);
+        if ($SQL_result = self::$SQL->getline(array($SQL_query, $SQL_bind))) {
+            return new self($SQL_result);
+        } else {
+            return new self();
+        }
+    }
+    
     protected function _unreadOrders()
     {
         $SQL_query = "SELECT COUNT(*) FROM " . Order::_tablename() . " WHERE pid = " . (int)$this->id . " AND NOT vis";

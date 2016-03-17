@@ -74,6 +74,14 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $Item->name = $this->view->_('ROBOKASSA_INTERFACE');
         $Item->description = file_get_contents($this->resourcesDir . '/robokassa_interface.php');
         $Item->commit();
+
+        $Item = Snippet::importByURN('catalog_interface');
+        if (!$Item->id) {
+            $Item = new Snippet(array('pid' => Snippet_Folder::importByURN('__raas_interfaces')->id, 'urn' => 'catalog_interface', 'locked' => 0));
+        }
+        $Item->name = $this->view->_('CATALOG_INTERFACE');
+        $Item->description = file_get_contents($this->resourcesDir . '/catalog_interface.php');
+        $Item->commit();
     }
 
 
@@ -84,6 +92,9 @@ class Webmaster extends \RAAS\CMS\Webmaster
             'cart' => $this->view->_('CART'),
             'robokassa' => $this->view->_('ROBOKASSA'), 
             'yml' => $this->view->_('YANDEX_MARKET'),
+            'item_inc' => $this->view->_('ITEM_INC'),
+            'catalog' => $this->view->_('CATALOG'),
+            'catalog_filter' => $this->view->_('CATALOG'),
         );
         $VF = Snippet_Folder::importByURN('__raas_views');
         foreach ($snippets as $urn => $name) {
@@ -131,6 +142,52 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $F->multiple = 1;
             $F->urn = 'images';
             $F->datatype = 'image';
+            $F->commit();
+
+            $F = new Material_Field();
+            $F->pid = $MT->id;
+            $F->name = $this->view->_('VIDEOS');
+            $F->multiple = 1;
+            $F->urn = 'videos';
+            $F->datatype = 'text';
+            $F->commit();
+
+            $F = new Material_Field();
+            $F->pid = $MT->id;
+            $F->name = $this->view->_('FILES');
+            $F->multiple = 1;
+            $F->urn = 'files';
+            $F->datatype = 'file';
+            $F->commit();
+
+            $F = new Material_Field();
+            $F->pid = $MT->id;
+            $F->name = $this->view->_('SPECIAL_OFFER');
+            $F->urn = 'spec';
+            $F->datatype = 'checkbox';
+            $F->commit();
+
+            $F = new Material_Field();
+            $F->pid = $MT->id;
+            $F->name = $this->view->_('AVAILABLE');
+            $F->urn = 'available';
+            $F->datatype = 'checkbox';
+            $F->commit();
+
+            $F = new Material_Field();
+            $F->pid = $MT->id;
+            $F->name = $this->view->_('OLD_PRICE');
+            $F->urn = 'price_old';
+            $F->datatype = 'number';
+            $F->commit();
+
+            $F = new Material_Field();
+            $F->pid = $MT->id;
+            $F->name = $this->view->_('RELATED_GOODS');
+            $F->multiple = 1;
+            $F->urn = 'related';
+            $F->datatype = 'material';
+            $F->source = $MT->id;
             $F->commit();
         }
 
@@ -213,6 +270,24 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $Site = array_shift(Page::getSet(array('where' => "NOT pid")));
         if (!Page::getSet(array('where' => array("pid = " . (int)$Site->id, "urn = 'catalog'")))) {
             $catalog = $this->createPage(array('name' => $this->view->_('CATALOG'), 'urn' => 'catalog', 'cache' => 0, 'response_code' => 200), $Site);
+            $MT = Material_Type::importByURN('catalog');
+            $I = Snippet::importByURN('catalog_interface');
+            $S = Snippet::importByURN('catalog');
+            $B = new Block_Materials();
+            $B->location = 'content';
+            $B->vis = 1;
+            $B->author_id = $B->editor_id = Application::i()->user->id;
+            $B->cats = array($cart->id);
+            $B->material_type = $MT ? $MT->id : 0;
+            $B->nat = 1;
+            $B->pages_var_name = 'page';
+            $B->rows_per_page = 20;
+            $B->sort_field_default = 'price';
+            $B->sort_order_default = 'asc';
+            $B->name = $this->view->_('CATALOG');
+            $B->widget_id = $S->id;
+            $B->interface_id = $I->id;
+            $B->commit();
         }
 
         if (!Page::getSet(array('where' => array("pid = " . (int)$Site->id, "urn = 'cart'")))) {
