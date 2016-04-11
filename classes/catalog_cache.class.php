@@ -82,14 +82,6 @@ class Catalog_Cache
             return $y;
         }, $SQL_result);
 
-        foreach ($SQL_result as $key => $row) {
-            $row = new Material($row['id']);
-            $models = array();
-            foreach ((array)$row->model as $val) {
-                $models[$val->brand->name][$val->id] = $val->name;
-            }
-            $SQL_result[$key]['models'] = $models;
-        }
         // print_r ($SQL_result); exit;
 
         $this->_data = $SQL_result;
