@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             return array('localError' => array(array('name' => 'INVALID', 'value' => 'file', 'description' => Module::i()->view->_('ERR_EMPTY_FILE'))));
         }
         $log = $raw_data = array();
-        
+
         // Получим номер колонки с уникальным полем
         $uniqueColumn = null;
         if ($Loader->ufid) {
@@ -84,14 +84,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $backtrace = array();
         $context = $Page;
         $virtualLevel = null; // При запрете создавать новые категории, сюда устанавливается уровень не найденной категории (чтобы игнорировать дочерние)
-        
+
 
         // Поиск товара по уникальному полю
         $getItemByUniqueField = function($text) use ($Loader) {
             if (trim($text) && $Loader->ufid) {
                 $SQL_query = " SELECT tM.* FROM " . Material::_tablename() . " AS tM ";
                 if ($Loader->Unique_Field->id) {
-                    $SQL_query .= " JOIN " . Material::_dbprefix() . "cms_data AS tD ON tD.pid = tM.id AND tD.fid = " . (int)$Loader->Unique_Field->id 
+                    $SQL_query .= " JOIN " . Material::_dbprefix() . "cms_data AS tD ON tD.pid = tM.id AND tD.fid = " . (int)$Loader->Unique_Field->id
                                .  " WHERE TRIM(tD.value)";
                 } elseif ($Loader->ufid) {
                     $SQL_query .= " WHERE TRIM(tM." . $Loader->ufid . ")";
@@ -112,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if (!is_array($row[$i]) && trim($row[$i])) {
                     $tmp_where = '';
                     if ($Loader->columns[$i]->Field->id) {
-                        $SQL_from[] = Material::_dbprefix() . "cms_data AS tD" . (int)$Loader->columns[$i]->Field->id 
+                        $SQL_from[] = Material::_dbprefix() . "cms_data AS tD" . (int)$Loader->columns[$i]->Field->id
                                     . " ON tD" . (int)$Loader->columns[$i]->Field->id . ".pid = tM.id "
                                     . " AND tD" . (int)$Loader->columns[$i]->Field->id . ".fid = " . (int)$Loader->columns[$i]->Field->id;
                         $tmp_where = " TRIM(tD" . (int)$Loader->columns[$i]->Field->id . ".value) ";
@@ -236,10 +236,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
                     $affectedMaterials[] = (int)$Item->id;
                     $log[] = array(
-                        'time' => (microtime(true) - $st), 
+                        'time' => (microtime(true) - $st),
                         'text' => sprintf(
-                            Module::i()->view->_('LOG_MATERIAL_' . ($id ? 'UPDATED' : 'CREATED')), 
-                            Package_Sub_Main::i()->url . '&action=edit_material&id=' . (int)$Item->id, 
+                            Module::i()->view->_('LOG_MATERIAL_' . ($id ? 'UPDATED' : 'CREATED')),
+                            Package_Sub_Main::i()->url . '&action=edit_material&id=' . (int)$Item->id,
                             $Item->name
                         ),
                         'row' => $i,
@@ -274,8 +274,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             $id = $context->id;
                         } elseif ($Loader->create_pages) {
                             $arr = array(
-                                'pid' => (int)$context->id, 
-                                'vis' => 1, 
+                                'pid' => (int)$context->id,
+                                'vis' => 1,
                                 'name' => $name,
                                 'sitemaps_priority' => $context->sitemaps_priority ?: '0.5',
                                 'inherit_sitemaps_priority' => $context->inherit_sitemaps_priority,
@@ -301,10 +301,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $backtrace[$step] = $context;
                         $virtualLevel = null;
                         $log[] = array(
-                            'time' => (microtime(true) - $st), 
+                            'time' => (microtime(true) - $st),
                             'text' => sprintf(
-                                Module::i()->view->_('LOG_PAGE_' . ($id ? 'SELECTED' : 'CREATED')), 
-                                Package_Sub_Main::i()->url . '&action=edit_page&id=' . (int)$context->id, 
+                                Module::i()->view->_('LOG_PAGE_' . ($id ? 'SELECTED' : 'CREATED')),
+                                Package_Sub_Main::i()->url . '&action=edit_page&id=' . (int)$context->id,
                                 $context->name
                             ),
                             'row' => $i,
@@ -328,11 +328,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         if (($clear == PriceLoader::DELETE_PREVIOUS_MATERIALS_MATERIALS_ONLY) || ($clear == PriceLoader::DELETE_PREVIOUS_MATERIALS_MATERIALS_AND_PAGES)) {
             // Очищаем материалы
-            
+
             // Ищем задействованные типы
             $mtypes = array_merge(array((int)$Loader->Material_Type->id), (array)$Loader->Material_Type->all_children_ids);
             $mtypes = array_map('intval', $mtypes);
-            
+
             // Ищем материалы для удаления
             $affectedMaterials = array_map('intval', $affectedMaterials);
             $SQL_query = "SELECT tM.id FROM " . Material::_tablename() . " AS tM ";
@@ -344,15 +344,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $SQL_query .= " AND (tMPA.pid IN (" . implode(", ", array_merge(array($deleteRoot->id), (array)$deleteRoot->all_children_ids)) . ") OR tMPA.pid IS NULL)";
             }
             $materialsToClear = Material::_SQL()->getcol($SQL_query);
-            
+
             // Ищем поля картинок и файлов (с attachment'ами)
-            $SQL_query = "SELECT tF.id FROM " . Material_Field::_tablename() . " AS tF 
+            $SQL_query = "SELECT tF.id FROM " . Material_Field::_tablename() . " AS tF
                            WHERE tF.classname = 'RAAS\\\\CMS\\\\Material_Type' AND tF.pid IN (" . implode(", ", $mtypes ?: array(0)) . ") AND datatype IN ('image', 'file')";
             $fieldsToClear = Material::_SQL()->getcol($SQL_query);
 
             // Ищем attachment'ы для удаления
             $attachmentsToClear = array();
-            $SQL_query = "SELECT value FROM " . Material::_dbprefix() . "cms_data 
+            $SQL_query = "SELECT value FROM " . Material::_dbprefix() . "cms_data
                            WHERE pid IN (" . implode(", ", $materialsToClear ?: array(0)) . ") AND fid IN (" . implode(", ", $fieldsToClear ?: array(0)) . ")";
             $SQL_result = Material::_SQL()->getcol($SQL_query);
             foreach ($SQL_result as $val) {
@@ -373,8 +373,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 Material::_SQL()->query($SQL_query);
 
                 // Очищаем данные
-                $SQL_query = "DELETE tD 
-                                FROM " . Material::_dbprefix() . "cms_data AS tD JOIN " . Material_Field::_tablename() . " AS tF ON tF.id = tD.fid 
+                $SQL_query = "DELETE tD
+                                FROM " . Material::_dbprefix() . "cms_data AS tD JOIN " . Material_Field::_tablename() . " AS tF ON tF.id = tD.fid
                                WHERE (tF.classname = 'RAAS\\\\CMS\\\\Material_Type') AND (tF.pid > 0) AND (tD.pid IN (" . implode(", ", $materialsToClear ?: array(0)) . "))";
                 Material::_SQL()->query($SQL_query);
 
@@ -394,7 +394,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 foreach ($materialsToClear as $val) {
                     $row = new Material($val);
                     $log[] = array(
-                        'time' => (microtime(true) - $st), 
+                        'time' => (microtime(true) - $st),
                         'text' => sprintf(Module::i()->view->_('LOG_DELETE_MATERIALS'), Package_Sub_Main::i()->url . '&action=edit_material&id=' . $row->id, $row->name)
                     );
                 }
@@ -405,7 +405,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 foreach ($attachmentsToClear as $val) {
                     $row = new Attachment($val);
                     $log[] = array(
-                        'time' => (microtime(true) - $st), 
+                        'time' => (microtime(true) - $st),
                         'text' => sprintf(Module::i()->view->_('LOG_DELETE_ATTACHMENTS'), '/' . Package::i()->filesURL . '/' . $row->realname, $row->realname)
                     );
                 }
@@ -413,19 +413,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         if ($clear == PriceLoader::DELETE_PREVIOUS_MATERIALS_MATERIALS_AND_PAGES) {
             // Очищаем страницы
-            
+
             // Ищем страницы для удаления
             $affectedPages = array_map('intval', $affectedPages);
             $pagesToClear = array_diff($deleteRoot->all_children_ids, $affectedPages);
-            
+
             // Ищем поля картинок и файлов (с attachment'ами)
-            $SQL_query = "SELECT tF.id FROM " . Page_Field::_tablename() . " AS tF 
+            $SQL_query = "SELECT tF.id FROM " . Page_Field::_tablename() . " AS tF
                            WHERE tF.classname = 'RAAS\\\\CMS\\\\Material_Type' AND tF.pid = 0 AND datatype IN ('image', 'file')";
             $fieldsToClear = Page::_SQL()->getcol($SQL_query);
-            
+
             // Ищем attachment'ы для удаления
             $attachmentsToClear = array();
-            $SQL_query = "SELECT value FROM " . Page::_dbprefix() . "cms_data 
+            $SQL_query = "SELECT value FROM " . Page::_dbprefix() . "cms_data
                            WHERE pid IN (" . implode(", ", $pagesToClear ?: array(0)) . ") AND fid IN (" . implode(", ", $fieldsToClear ?: array(0)) . ")";
             $SQL_result = Page::_SQL()->getcol($SQL_query);
             foreach ($SQL_result as $val) {
@@ -446,8 +446,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 Material::_SQL()->query($SQL_query);
 
                 // Очищаем данные
-                $SQL_query = "DELETE tD 
-                                FROM " . Page::_dbprefix() . "cms_data AS tD JOIN " . Page_Field::_tablename() . " AS tF ON tF.id = tD.fid 
+                $SQL_query = "DELETE tD
+                                FROM " . Page::_dbprefix() . "cms_data AS tD JOIN " . Page_Field::_tablename() . " AS tF ON tF.id = tD.fid
                                WHERE (tF.classname = 'RAAS\\\\CMS\\\\Material_Type') AND (tF.pid = 0) AND (tD.pid IN (" . implode(", ", $pagesToClear ?: array(0)) . "))";
                 Page::_SQL()->query($SQL_query);
 
@@ -467,7 +467,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 foreach ($pagesToClear as $val) {
                     $row = new Page($val);
                     $log[] = array(
-                        'time' => (microtime(true) - $st), 
+                        'time' => (microtime(true) - $st),
                         'text' => sprintf(Module::i()->view->_('LOG_DELETE_PAGES'), Package_Sub_Main::i()->url . '&action=edit_page&id=' . $row->id, $row->name)
                     );
                 }
@@ -478,18 +478,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 foreach ($attachmentsToClear as $val) {
                     $row = new Attachment($val);
                     $log[] = array(
-                        'time' => (microtime(true) - $st), 
+                        'time' => (microtime(true) - $st),
                         'text' => sprintf(Module::i()->view->_('LOG_DELETE_ATTACHMENTS'), '/' . Package::i()->filesURL . '/' . $row->realname, $row->realname)
                     );
                 }
             }
         }
         $log[] = array(
-            'time' => (microtime(true) - $st), 
+            'time' => (microtime(true) - $st),
             'text' => sprintf(
-                Module::i()->view->_('LOG_OLD_MATERIALS_CLEARED'), 
-                $Loader->Material_Type->name, 
-                Package_Sub_Main::i()->url . '&id=' . (int)$Page->id, 
+                Module::i()->view->_('LOG_OLD_MATERIALS_CLEARED'),
+                $Loader->Material_Type->name,
+                Package_Sub_Main::i()->url . '&id=' . (int)$Page->id,
                 $Page->name
             )
         );
@@ -552,7 +552,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $x = null;
                 if ($col->Field->id) {
                     if ($col->Field->multiple) {
-                        $x = $row->fields[$col->Field->urn]->getValues(true); 
+                        $x = $row->fields[$col->Field->urn]->getValues(true);
                         $x = array_map(function($y) use ($col) { return $col->Field->doRich($y); }, $x);
                     } else {
                         $x = $row->fields[$col->Field->urn]->doRich();
@@ -613,7 +613,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
             if ($rows) {
                 $range = PHPExcel_Cell::stringFromColumnIndex((int)$cols) . (int)$rows . ':' . PHPExcel_Cell::stringFromColumnIndex($maxcol + (int)$cols) . (int)$rows;
-                $x->getActiveSheet()->getStyle($range)->getFont()->setBold(true); 
+                $x->getActiveSheet()->getStyle($range)->getFont()->setBold(true);
             }
             switch ($type) {
                 case 'xlsx':
@@ -642,7 +642,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header('Content-Type: text/csv; name="' . $filename . '"');
             break;
     }
-    
+
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     echo $text;
     exit;
