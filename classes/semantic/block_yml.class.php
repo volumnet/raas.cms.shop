@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\CMS\Block;
 use \RAAS\CMS\Material_Type;
 use \RAAS\CMS\Material_Field;
@@ -25,12 +26,12 @@ class Block_YML extends Block
         'vendor.model' => array('typePrefix', 'vendor', 'vendorCode', 'model'/*, 'provider', 'tarifplan'*/),
         'book' => array('author', 'name', 'publisher', 'series', 'year', 'ISBN', 'volume', 'part', 'language', 'binding', 'page_extent', 'table_of_contents'),
         'audiobook' => array(
-            'author', 'name', 'publisher', 'series', 'year', 'ISBN', 'volume', 'part', 'language', 'table_of_contents', 'performed_by', 'performance_type', 
+            'author', 'name', 'publisher', 'series', 'year', 'ISBN', 'volume', 'part', 'language', 'table_of_contents', 'performed_by', 'performance_type',
             'storage', 'format', 'recording_length'
         ),
         'artist.title' => array('artist', 'title', 'year', 'media', 'starring', 'director', 'originalName', 'country'),
         'tour' => array(
-            'worldRegion', 'country', 'region', 'days', 'dataTour', 'name', 'hotel_stars', 'room', 'meal', 'included', 'transport'/*, 'price_min', 'price_max', 
+            'worldRegion', 'country', 'region', 'days', 'dataTour', 'name', 'hotel_stars', 'room', 'meal', 'included', 'transport'/*, 'price_min', 'price_max',
             'options'*/
         ),
         'event-ticket' => array('name', 'place', 'hall', 'hall_plan', 'hall_part', 'date', 'is_premiere', 'is_kids'),
@@ -40,8 +41,8 @@ class Block_YML extends Block
         'additional' => array('multiple' => true, ),
         'adult' => array('type' => 'checkbox', 'callback' => 'return (int)$x ? "true" : "false";'),
         'age' => array(
-            'type' => 'number', 
-            'min' => 0, 
+            'type' => 'number',
+            'min' => 0,
             'callback' => '$ages = array(0, 6, 12, 16, 18); foreach ($ages as $age) { if ($age >= (int)$x) { return $age; } } return 18;',
         ),
         'aliases' => array(),
@@ -58,8 +59,8 @@ class Block_YML extends Block
         'cpa' => array('type' => 'checkbox'),
         'currencyId' => array('required' => true, ),
         'dataTour' => array(
-            'type' => 'date', 
-            'multiple' => true, 
+            'type' => 'date',
+            'multiple' => true,
             'callback' => 'return date("d/m/Y", strtotime($x));'
         ),
         'date' => array('required' => true, 'type' => 'datetime-local', 'callback' => 'return date("YYYY-MM-DDThh:mm", strtolower($x));', ),
@@ -109,7 +110,7 @@ class Block_YML extends Block
         'promo' => array(),
         'provider' => array(),
         'publisher' => array(),
-        'rec' => array('type' => 'material', 'callback' => 'return implode(",", array_map(function($y) { return (int)$y->id; }, (array)$x));'),
+        'rec' => array('type' => 'material', 'callback' => 'return implode(",", array_map(function ($y) { return (int)$y->id; }, (array)$x));'),
         'recording_length' => array(),
         'region' => array(),
         'related_offer' => array('type' => 'material', 'callback' => 'return $x->id;', 'multiple' => true, ),
@@ -141,8 +142,8 @@ class Block_YML extends Block
     {
         parent::__construct($import_data);
     }
-    
-    
+
+
     public function commit()
     {
         if (!$this->name) {
@@ -152,12 +153,22 @@ class Block_YML extends Block
         parent::commit();
         if ($this->meta_cats) {
             static::$SQL->query("DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_pages_assoc WHERE id = " . (int)$this->id);
-            $arr = array_map(function($x) use ($t) { return array('id' => (int)$t->id, 'page_id' => (int)$x); }, $this->meta_cats);
+            $arr = array_map(
+                function ($x) use ($t) {
+                    return array('id' => (int)$t->id, 'page_id' => (int)$x);
+                },
+                $this->meta_cats
+            );
             static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_pages_assoc", $arr);
         }
         if ($this->meta_currencies) {
             static::$SQL->query("DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_currencies WHERE id = " . (int)$this->id);
-            $arr = array_map(function($x) use ($t) { return array_merge(array('id' => (int)$t->id), (array)$x); }, $this->meta_currencies);
+            $arr = array_map(
+                function ($x) use ($t) {
+                    return array_merge(array('id' => (int)$t->id), (array)$x);
+                },
+                $this->meta_currencies
+            );
             static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_currencies", $arr);
         }
     }
@@ -167,10 +178,10 @@ class Block_YML extends Block
     {
         $this->removeType($MType);
         $arr = array(
-            'id' => $this->id, 
-            'mtype' => (int)$MType->id, 
-            'type' => trim($type), 
-            'param_exceptions' => (int)$param_exceptions, 
+            'id' => $this->id,
+            'mtype' => (int)$MType->id,
+            'type' => trim($type),
+            'param_exceptions' => (int)$param_exceptions,
             'params_callback' => trim($params_callback)
         );
         static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_material_types_assoc", $arr);
@@ -212,7 +223,7 @@ class Block_YML extends Block
 
     public function removeType(Material_Type $MType)
     {
-        $SQL_query = "DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_material_types_assoc 
+        $SQL_query = "DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_material_types_assoc
                        WHERE id = " . (int)$this->id . " AND mtype = " . (int)$MType->id;
         static::$SQL->query($SQL_query);
 
@@ -230,14 +241,14 @@ class Block_YML extends Block
     protected function getAddData()
     {
         return array(
-            'id' => (int)$this->id, 
+            'id' => (int)$this->id,
             'shop_name' => (string)$this->shop_name,
             'company' => (string)$this->company,
             'agency' => (string)$this->agency,
             'email' => (string)$this->email,
             'cpa' => (int)(bool)$this->cpa,
             'default_currency' => (string)$this->default_currency,
-            'local_delivery_cost' => $this->local_delivery_cost,
+            'local_delivery_cost' => (int)$this->local_delivery_cost,
         );
     }
 
@@ -280,7 +291,7 @@ class Block_YML extends Block
                         } else {
                             $mfarr['field_id'] = trim($row2['field_id']);
                         }
-                    } 
+                    }
                     if ($row2['field_static_value']) {
                         $mfarr['value'] = trim($row2['field_static_value']);
                     }
@@ -305,7 +316,7 @@ class Block_YML extends Block
                         } else {
                             $mfarr['field_id'] = trim($row2['field_id']);
                         }
-                    } 
+                    }
                     if ($row2['param_static_value']) {
                         $mfarr['value'] = trim($row2['param_static_value']);
                     }
