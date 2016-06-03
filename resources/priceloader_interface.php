@@ -15,10 +15,10 @@ use \PHPExcel_IOFactory;
 use \PHPExcel_Style_NumberFormat;
 use \PHPExcel_Cell_DataType;
 
-ini_set('max_execution_time', 300);
 $st = microtime(true);
 require_once Application::i()->includeDir . '/phpexcel/Classes/PHPExcel.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    ini_set('max_execution_time', 3600);
     // Загрузка прайса
     $affectedPages = array();
     $affectedMaterials = array();
@@ -496,6 +496,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     return array('log' => $log, 'raw_data' => $raw_data, 'ok' => true);
 } else {
+    ini_set('max_execution_time', 900);
     // Выгрузка прайса
     $downloadPrice = function(Page $Page = null, $level = 0) use ($Loader, &$downloadPrice, $cols, $rows) {
         static $mtypes;
