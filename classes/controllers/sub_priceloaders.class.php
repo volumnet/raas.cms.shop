@@ -6,7 +6,7 @@ use \RAAS\CMS\Page;
 class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
 {
     protected static $instance;
-    
+
     public function run()
     {
         $Form = new ProcessPriceLoaderForm();
@@ -32,8 +32,8 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
         } elseif ($IN === false) {
             $OUT['localError'] = array(
                 array(
-                    'name' => 'INVALID', 
-                    'value' => 'file', 
+                    'name' => 'INVALID',
+                    'value' => 'file',
                     'description' => $this->view->_(
                         ($_SERVER['REQUEST_METHOD'] == 'POST') ? 'ERR_SOME_ERROR_DUE_UPLOADING' : 'ERR_SOME_ERROR_DUE_DOWNLOADING'
                     )
@@ -44,8 +44,8 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
             $OUT['localSuccess'] = $IN['localSuccess'];
         } elseif (isset($IN['ok']) || ($IN === true)) {
             $OUT['localSuccess'] = array(
-                'name' => 'SUCCESS', 
-                'value' => 'file', 
+                'name' => 'SUCCESS',
+                'value' => 'file',
                 'description' => $this->view->_(($_SERVER['REQUEST_METHOD'] == 'POST') ? 'PRICE_SUCCESSFULLY_UPLOADED' : 'PRICE_SUCCESSFULLY_DOWNLOADED')
             );
         }

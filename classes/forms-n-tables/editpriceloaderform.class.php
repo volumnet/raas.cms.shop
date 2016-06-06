@@ -48,10 +48,10 @@ class EditPriceLoaderForm extends \RAAS\Form
         $field = new RAASField(array(
             'type' => 'select',
             'class' => 'input-xxlarge',
-            'name' => 'interface_id', 
+            'name' => 'interface_id',
             'required' => true,
-            'caption' => $this->view->_('INTERFACE'), 
-            'placeholder' => $this->view->_('_NONE'), 
+            'caption' => $this->view->_('INTERFACE'),
+            'placeholder' => $this->view->_('_NONE'),
             'children' => $wf(new Snippet_Folder()),
             'default' => (int)$snippet->id
         ));
@@ -69,6 +69,7 @@ class EditPriceLoaderForm extends \RAAS\Form
         $CONTENT['material_types'] = array('Set' => $mt->children);
         $CONTENT['fields'] = array(
             array('value' => 'urn', 'caption' => $this->view->_('URN')),
+            array('value' => 'vis', 'caption' => $this->view->_('VISIBILITY')),
             array('value' => 'name', 'caption' => $this->view->_('NAME')),
             array('value' => 'description', 'caption' => $this->view->_('DESCRIPTION')),
         );
@@ -93,17 +94,17 @@ class EditPriceLoaderForm extends \RAAS\Form
             'parentUrl' => Sub_Dev::i()->url . '&action=priceloaders',
             'meta' => array('CONTENT' => $CONTENT),
             'children' => array(
-                array('name' => 'name', 'caption' => $this->view->_('NAME')), 
-                array('name' => 'urn', 'caption' => $this->view->_('URN')), 
+                array('name' => 'name', 'caption' => $this->view->_('NAME')),
+                array('name' => 'urn', 'caption' => $this->view->_('URN')),
                 array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
                 array('type' => 'select', 'name' => 'cat_id', 'caption' => $this->view->_('ROOT_CATEGORY'), 'children' => $CONTENT['pages'], 'required' => true, ),
                 $this->getInterfaceField(),
                 array('type' => 'checkbox', 'name' => 'create_pages', 'caption' => $this->view->_('ALLOW_TO_CREATE_PAGES')),
                 array('type' => 'checkbox', 'name' => 'create_materials', 'caption' => $this->view->_('ALLOW_TO_CREATE_MATERIALS'), 'default' => 1),
                 array(
-                    'type' => 'radio', 
-                    'name' => 'catalog_offset', 
-                    'caption' => $this->view->_('CATALOG_OFFSET'), 
+                    'type' => 'radio',
+                    'name' => 'catalog_offset',
+                    'caption' => $this->view->_('CATALOG_OFFSET'),
                     'children' => array(
                         array('value' => static::CATALOG_OFFSET_BY_CELLS, 'caption' => $this->view->_('CATALOG_OFFSET_BY_CELLS')),
                         array('value' => static::CATALOG_OFFSET_BY_SPACES, 'caption' => $this->view->_('CATALOG_OFFSET_BY_SPACES')),

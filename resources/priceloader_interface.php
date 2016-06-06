@@ -196,7 +196,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     // Сначала проходим нативные поля
                     for ($j = 0; $j < count($dataRow); $j++) {
                         if ((!$uniqueColumn || ($j != $uniqueColumn)) && !$Loader->columns[$j]->Field->id && $Loader->columns[$j]->fid) {
-                            if (trim($dataRow[$j])) {
+                            if ($Loader->columns[$j]->fid == 'vis') {
+                                $Item->{$Loader->columns[$j]->fid} = (int)$dataRow[$j];
+                            } elseif (trim($dataRow[$j])) {
                                 $Item->{$Loader->columns[$j]->fid} = trim($dataRow[$j]);
                             }
                         } elseif ($new && ($j == $uniqueColumn)) { // 2015-11-20, AVS: добавили URN по артикулу
@@ -539,6 +541,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $x = Module::i()->view->_('NAME');
                 } elseif ($col->fid == 'urn') {
                     $x = Module::i()->view->_('URN');
+                } elseif ($col->fid == 'vis') {
+                    $x = Package::i()->view->_('VISIBILITY');
                 } elseif ($col->fid == 'description') {
                     $x = Module::i()->view->_('DESCRIPTION');
                 }
