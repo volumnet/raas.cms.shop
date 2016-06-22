@@ -69,8 +69,8 @@ foreach (array('name', 'company', 'url', 'platform', 'version', 'agency', 'email
         case 'categories':
             echo '<categories>';
             foreach ((array)$Block->catalog_cats as $row) {
-                echo '<category id="' . (int)$row->id . '"' . (($row->pid && in_array($row->pid, $Block->catalog_cats_ids)) ? ' parentId="' . (int)$row->pid . '"' : '') . '>' . 
-                        htmlspecialchars(trim($row->name)) . 
+                echo '<category id="' . (int)$row->id . '"' . (($row->pid && in_array($row->pid, $Block->catalog_cats_ids)) ? ' parentId="' . (int)$row->pid . '"' : '') . '>' .
+                        htmlspecialchars(trim($row->name)) .
                      '</category>';
             }
             echo '</categories>';
@@ -165,7 +165,7 @@ foreach ($Block->types as $mtype) {
                     break;
             }
         }
-        
+
         if ($mtype->settings['params'] || $mtype->settings['param_exceptions']) {
             $temp = $mtype->settings['params'];
             if ($mtype->settings['param_exceptions']) {
@@ -215,7 +215,7 @@ foreach ($Block->types as $mtype) {
                     }
                 }
             }
-            
+
         }
         echo '<offer id="' . (int)$row->id . '"' . ($mtype->settings['type'] ? ' type="' . htmlspecialchars($mtype->settings['type']) . '"' : '') . $offerAttrs . '>' . $offerTxt . '</offer>';
         $row->rollback();

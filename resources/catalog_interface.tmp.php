@@ -13,7 +13,7 @@ if ($Page->Material && $Block->nat) {
         if ((int)$Block->legacy && ($Item->pid == $Block->material_type)) {
             // Установлена переадресация
             header("HTTP/1.1 301 Moved Permanently");
-            header('Location: http://' . $_SERVER['HTTP_HOST'] . $Item->url); 
+            header('Location: http://' . $_SERVER['HTTP_HOST'] . $Item->url);
             exit;
         } else {
             return;
@@ -46,9 +46,70 @@ if ($Page->Material && $Block->nat) {
         $Set = array_filter($Set, function($row) use ($pages_ids) { return (bool)array_intersect((array)$row['pages_ids'], $pages_ids); });
     }
 
-    $isSearch = false;
+    $doSearch = false;
 
-    if ($Page->visChildren && !$isSearch) {
+    // Точное соответствие
+    foreach (array(/*...*/) as $key) {
+        if ($IN[$key]) {
+            $doSearch = true;
+            $Set = array_filter(
+                $Set,
+                function ($x) use ($IN, $key) {
+                    return (bool)array_intersect((array)$x[$key], (array)$IN[$key]);
+                }
+            );
+        }
+    }
+
+    // Вхождение подстроки
+    $getValueSubstringFilterFunction = function ($IN, $key) {
+        return function ($y) use ($IN, $key) {
+            return (bool)stristr($y, $IN[$key]);
+        };
+    };
+    foreach (array('article') as $key) {
+        if ($IN[$key]) {
+            $doSearch = true;
+            $Set = array_filter(
+                $Set,
+                function ($x) use ($IN, $key, $getValueSubstringFilterFunction) {
+                    return (bool)array_filter((array)$x[$key], $getValueSubstringFilterFunction($IN, $key));
+                }
+            );
+        }
+    }
+
+    // От .. до
+    $getValueFromToFilterFunction = function ($IN, $key, $from = true) {
+        if ($from) {
+            return function ($y) use ($IN, $key) {
+                return $y >= $IN[$key . '_from'];
+            };
+        } else {
+            return function ($y) use ($IN, $key) {
+                return $y <= $IN[$key . '_to'];
+            };
+        }
+    };
+
+    $getRowFromToFilterFunction = function ($IN, $key, $from = true) use ($getValueFromToFilterFunction) {
+        $f = $getValueFromToFilterFunction($IN, $key, $from);
+        return function ($x) use ($key, $f) {
+            return (bool)array_filter((array)$x[$key], $f);
+        };
+    };
+    foreach (array('price') as $key) {
+        if ($IN[$key . '_from']) {
+            $doSearch = true;
+            $Set = array_filter($Set, $getRowFromToFilterFunction($IN, $key, true));
+        }
+        if ($IN[$key . '_to']) {
+            $doSearch = true;
+            $Set = array_filter($Set, $getRowFromToFilterFunction($IN, $key, false));
+        }
+    }
+
+    if ($Page->visChildren && !$doSearch) {
         $cats = $Page->visChildren;
         $temp = array();
         foreach ($cats as $cat) {
@@ -83,21 +144,24 @@ if ($Page->Material && $Block->nat) {
 
         $sortFunction = create_function('$a, $b', $sortFunction);
         usort($Set, $sortFunction);
-        
+
         if (isset($Block->pages_var_name, $Block->rows_per_page) && (int)$Block->rows_per_page) {
             $Pages = new \SOME\Pages(isset($IN[$Block->pages_var_name]) ? (int)$IN[$Block->pages_var_name] : 1, (int)$Block->rows_per_page);
         }
 
         $Set = \SOME\SOME::getArraySet($Set, $Pages);
+        if ($IN['price_from']) {
+
+        }
         $nativeFields = Material::_classes();
         $nativeFields = $nativeFields['RAAS\\CMS\\Material']['fields'];
-        $Set = array_map(function($row) use ($nativeFields) { 
+        $Set = array_map(function($row) use ($nativeFields) {
             $native = array_intersect_key($row, array_flip($nativeFields));
-            $row2 = new Material($native); 
-            $row2->metacache = $row; 
-            return $row2; 
+            $row2 = new Material($native);
+            $row2->metacache = $row;
+            return $row2;
         }, $Set);
-        
+
         $OUT['Set'] = $Set;
         $OUT['MType'] = $MType;
         if ($Pages !== null) {
@@ -105,5 +169,7 @@ if ($Page->Material && $Block->nat) {
         }
         $OUT['showItems'] = true;
     }
+
+    $OUT['doSearch'] = $doSearch;
 }
 return $OUT;

@@ -38,20 +38,20 @@ $notify = function(Order $Item)
     eval('?' . '>' . $template);
     $message = ob_get_contents();
     ob_end_clean();
-    
+
     ob_start();
     $forUser = true;
     eval('?' . '>' . $template);
     $userMessage = ob_get_contents();
     ob_end_clean();
-    
+
     ob_start();
     $SMS = true;
     eval('?' . '>' . $template);
     $message_sms = ob_get_contents();
     ob_end_clean();
-    
-    
+
+
     $subject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER, $Item->parent->name, $Item->page->name);
     $userSubject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER_USER, $Item->id, $_SERVER['HTTP_HOST']);
     if ($emails) {
@@ -176,7 +176,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                     $Item->page_id = (int)$Page->id;
                     $Item->ip = (string)$_SERVER['REMOTE_ADDR'];
                     $Item->user_agent = (string)$_SERVER['HTTP_USER_AGENT'];
-                    
+
                     if ($Item instanceof Order) {
                         $temp = array();
                         foreach ($Cart->items as $row) {
@@ -185,10 +185,10 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                                 $priceURN = $Cart->getPriceURN($m->material_type);
                                 $price = number_format($row->{$priceURN}, 2, '.', '');
                                 $temp[] = array(
-                                    'material_id' => $row->id, 
-                                    'name' => $row->name, 
-                                    'meta' => $convertMeta($row->meta), 
-                                    'realprice' => number_format($row->realprice, 2, '.', ''), 
+                                    'material_id' => $row->id,
+                                    'name' => $row->name,
+                                    'meta' => $convertMeta($row->meta),
+                                    'realprice' => number_format($row->realprice, 2, '.', ''),
                                     'amount' => (int)$row->amount
                                 );
                             }
@@ -205,7 +205,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                                     if ($row->multiple) {
                                         foreach ($_FILES[$row->urn]['tmp_name'] as $key => $val) {
                                             $row2 = array(
-                                                'vis' => (int)$_POST[$row->urn . '@vis'][$key], 
+                                                'vis' => (int)$_POST[$row->urn . '@vis'][$key],
                                                 'name' => (string)$_POST[$row->urn . '@name'][$key],
                                                 'description' => (string)$_POST[$row->urn . '@description'][$key],
                                                 'attachment' => (int)$_POST[$row->urn . '@attachment'][$key]
@@ -235,8 +235,8 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                                         }
                                     } else {
                                         $row2 = array(
-                                            'vis' => (int)$_POST[$row->urn . '@vis'], 
-                                            'name' => (string)$_POST[$row->urn . '@name'], 
+                                            'vis' => (int)$_POST[$row->urn . '@vis'],
+                                            'name' => (string)$_POST[$row->urn . '@name'],
                                             'description' => (string)$_POST[$row->urn . '@description'],
                                             'attachment' => (int)$_POST[$row->urn . '@attachment']
                                         );

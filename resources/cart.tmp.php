@@ -23,11 +23,11 @@ if ($_GET['AJAX']) {
             'url' => $row2->url
         );
     }
-    echo json_encode($temp); 
+    echo json_encode($temp);
     exit;
 } elseif ($epayWidget && ($epayWidget instanceof \RAAS\CMS\Snippet)) {
     eval('?' . '>' . $epayWidget->description);
-} elseif ($success[(int)$Block->id]) { 
+} elseif ($success[(int)$Block->id]) {
     ?>
     <div class="notifications">
       <div class="alert alert-success"><?php echo ORDER_SUCCESSFULLY_SENT?></div>
@@ -38,56 +38,57 @@ if ($_GET['AJAX']) {
         <table class="table table-striped cart-table" data-role="cart-table">
           <thead>
             <tr>
-              <th class="span1 cart-table__image-col"><?php echo IMAGE?></th>
-              <th class="span7 cart-table__name-col"><?php echo NAME?></th>
-              <th class="span1 cart-table__price-col"><?php echo PRICE?></th>
+              <th class="cart-table__image-col"><?php echo IMAGE?></th>
+              <th class="cart-table__name-col"><?php echo NAME?></th>
+              <th class="cart-table__price-col"><?php echo PRICE?></th>
               <?php if (!$Cart->cartType->no_amount) { ?>
-                  <th class="span1 cart-table__amount-col"><?php echo AMOUNT?></th>
-                  <th class="span1 cart-table__sum-col"><?php echo SUM?></th>
+                  <th class="cart-table__amount-col"><?php echo AMOUNT?></th>
+                  <th class="cart-table__sum-col"><?php echo SUM?></th>
               <?php } ?>
-              <th class="span1 cart-table__actions-col"></th>
+              <th class="cart-table__actions-col"></th>
             </tr>
           </thead>
           <tbody>
             <?php $sum = $am = 0; foreach ($Cart->items as $row) { $row2 = new Material((int)$row->id); ?>
-              <tr data-role="cart-item">
-                <td class="text-center cart-table__image-col">
+              <tr data-role="cart-item" data-id="<?php echo (int)$row->id?>" data-price="<?php echo number_format($row->realprice, 2, '.', '')?>">
+                <td class="cart-table__image-col">
                   <?php if ($row2->visImages) { ?>
                       <a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>>
                         <img src="/<?php echo htmlspecialchars(addslashes($row2->visImages[0]->tnURL))?>" style="max-width: 48px" alt="<?php echo htmlspecialchars($row2->visImages[0]->name ?: $row->name)?>" /></a>
                   <?php } ?>
                 </td>
                 <td class="cart-table__name-col"><a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>><?php echo htmlspecialchars($row->name)?></a></td>
-                <td data-role="price" data-price="<?php echo number_format($row->realprice, 2, '.', '')?>" class="span1 cart-table__price-col" style="white-space: nowrap">
+                <td data-role="price" class="cart-table__price-col" style="white-space: nowrap">
                   <?php echo formatPrice($row->realprice)?> <span class="fa fa-rub"></span>
                   <?php if ($Cart->cartType->no_amount) { ?>
                       <input type="hidden" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" />
                   <?php } ?>
                 </td>
                 <?php if (!$Cart->cartType->no_amount) { ?>
-                    <td class="span1 cart-table__amount-col"><input type="number" class="form-control" style="max-width: 8em" data-role="amount" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" /></td>
-                    <td class="span1 cart-table__sum-col" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
+                    <td class="cart-table__amount-col"><input type="number" class="form-control" style="max-width: 8em" data-role="amount" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" min="<?php echo (int)$row2->min ?: 1?>" value="<?php echo (int)$row->amount?>" /></td>
+                    <td class="cart-table__sum-col" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
                 <?php } ?>
-                <td class="span1 cart-table__actions-col">
-                  <a href="#" data-id="<?php echo (int)$row->id?>" data-meta="" data-toggle="modal" data-target="#confirmDeleteItemModal">
+                <td class="cart-table__actions-col">
+                  <a href="?action=delete&id=<?php echo (int)$row->id . ($row->meta ? '&meta=' . htmlspecialchars($row->meta) : '')?>" data-role="delete-item">
                     <i class="fa fa-remove" title="<?php echo DELETE?>"></i>
                   </a>
                 </td>
               </tr>
             <?php $sum += $row->amount * $row->realprice; $am += $row->amount; } ?>
-            <tr>
-              <th colspan="<?php echo !$Cart->cartType->no_amount ? '3' : '2'?>"><?php echo TOTAL_SUM?>:</th>
-              <?php if (!$Cart->cartType->no_amount) { ?>
-                  <th class="cart-table__amount-col"><span data-role="total-amount"><?php echo (int)$am; ?></span></td>
-              <?php } ?>
-              <th class="cart-table__sum-col" style="white-space: nowrap"><span data-role="total-sum"><?php echo formatPrice($sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
-              <th class="cart-table__actions-col"></th>
-            </tr>
+            <?php if ($Form->id) { ?>
+                <tr>
+                  <th colspan="<?php echo !$Cart->cartType->no_amount ? '3' : '2'?>"><?php echo TOTAL_SUM?>:</th>
+                  <?php if (!$Cart->cartType->no_amount) { ?>
+                      <th class="cart-table__amount-col"><span data-role="total-amount"><?php echo (int)$am; ?></span></td>
+                  <?php } ?>
+                  <th class="cart-table__sum-col" style="white-space: nowrap"><span data-role="total-sum"><?php echo formatPrice($sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
+                  <th class="cart-table__actions-col"></th>
+                </tr>
+            <?php } ?>
           </tbody>
         </table>
         <?php if ($Form->id) { ?>
             <div class="form-horizontal">
-
               <?php include Package::i()->resourcesDir . '/form.inc.php'?>
               <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>
                 <div class="alert alert-success" <?php echo ($success[(int)$Block->id]) ? '' : 'style="display: none"'?>><?php echo FEEDBACK_SUCCESSFULLY_SENT?></div>
@@ -137,76 +138,19 @@ if ($_GET['AJAX']) {
                 </div>
               </div>
             </div>
+        <?php } else { ?>
+          <p><a href="?action=clear" data-role="clear-cart-trigger"><?php echo CLEAR_FAVORITES?></a></p>
         <?php } ?>
 
       </form>
-      <div class="modal fade" id="confirmDeleteItemModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header" style="border-bottom: none">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title"><?php echo addslashes(CART_DELETE_CONFIRM)?></h4>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-default" data-dismiss="modal"><?php echo CANCEL?></button>
-              <a href="#" class="btn btn-primary"><?php echo DELETE?></a>
-            </div>
-          </div>
-        </div>
-      </div>
     </section>
-    <script type="text/javascript">
-    jQuery(document).ready(function($) {
-        var formatPrice = function(price)
-        {
-            var pR = Math.round((parseFloat(price) - parseInt(price)) * 100);
-            var pS = parseInt(price).toString();
-            var pT = '';
-            
-            for (var i = 0; i < pS.length; i++) {
-                var j = pS.length - i - 1;
-                pT = ((i % 3 == 2) && (j > 0) ? ' ' : '') + pS.substr(j, 1) + pT;
-            }
-            if (pR > 0) {
-                pR = pR.toString();
-                if (pR.length < 2) {
-                    pR = '0' + pR;
-                }
-                pT += ',' + pR;
-            }
-            return pT;
-        }
-        var calculate = function() {
-            var total_sum = 0;
-            var total_amount = 0;
-            $('[data-role="cart-table"] [data-role="cart-item"]').each(function() {
-                var price = parseFloat($('[data-role="price"]', this).attr('data-price'));
-                var amount = parseInt($('[data-role="amount"]', this).val());
-                if (isNaN(price)) {
-                    price = 0;
-                }
-                if (isNaN(amount)) {
-                    amount = 0;
-                }
-                var sum = price * amount;
-                $('[data-role="sum"]', this).text(formatPrice(sum));
-                total_sum += sum;
-                total_amount += amount;
-            });
-            $('[data-role="cart-table"] [data-role="total-sum"]').text(formatPrice(total_sum));
-            $('[data-role="cart-table"] [data-role="total-amount"]').text(total_amount);
-        }
-        $('input[data-role="amount"]').change(calculate);
-
-        var $confirmDeleteItemModal = $('#confirmDeleteItemModal');
-        $('body').append($confirmDeleteItemModal);
-        $('a[data-target="#confirmDeleteItemModal"][data-toggle="modal"]').on('click', function() {
-            $('.modal-footer a', $confirmDeleteItemModal).attr('href', '?action=delete&id=' + parseInt($(this).attr('data-id')) + ($(this).attr('data-meta') ? '&meta=' + $(this).attr('data-meta') : ''));
-        });
-    });
-    </script>
-<?php 
-} else { 
-    echo YOUR_CART_IS_EMPTY;
+    <script src="/js/cart.js"></script>
+<?php
+} else {
+    if ($Form->id) {
+        echo YOUR_CART_IS_EMPTY;
+    } else {
+        echo YOUR_FAVORITES_IS_EMPTY;
+    }
 }
 ?>

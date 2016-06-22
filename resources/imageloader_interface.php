@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Ищем attachment'ы для удаления
             $attachmentsToClear = array();
-            $SQL_query = "SELECT value FROM " . Material::_dbprefix() . "cms_data 
+            $SQL_query = "SELECT value FROM " . Material::_dbprefix() . "cms_data
                            WHERE pid IN (" . implode(", ", $affectedMaterials ?: array(0)) . ") AND fid = " . (int)$Loader->Image_Field->id;
             $SQL_result = Material::_SQL()->getcol($SQL_query);
             foreach ($SQL_result as $val) {
@@ -116,8 +116,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             if (!$test) {
                 // Очищаем данные
-                $SQL_query = "DELETE tD 
-                                FROM " . Material::_dbprefix() . "cms_data AS tD 
+                $SQL_query = "DELETE tD
+                                FROM " . Material::_dbprefix() . "cms_data AS tD
                                WHERE tD.fid = " . (int)$Loader->Image_Field->id . " AND tD.pid IN (" . implode(", ", $affectedMaterials ?: array(0)) . ")";
                 Material::_SQL()->query($SQL_query);
 
@@ -137,14 +137,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 foreach ($attachmentsToClear as $val) {
                     $row = new Attachment($val);
                     $log[] = array(
-                        'time' => (microtime(true) - $st), 
+                        'time' => (microtime(true) - $st),
                         'text' => sprintf(Module::i()->view->_('LOG_DELETE_ATTACHMENTS'), '/' . Package::i()->filesURL . '/' . $row->realname, $row->realname)
                     );
                 }
                 foreach ($affectedMaterials as $val) {
                     $row = new Material($val);
                     $log[] = array(
-                        'time' => (microtime(true) - $st), 
+                        'time' => (microtime(true) - $st),
                         'text' => sprintf(Module::i()->view->_('LOG_DELETE_MATERIAL_IMAGES'), Package_Sub_Main::i()->url . '&action=edit_material&id=' . $row->id, $row->name)
                     );
                 }
@@ -175,13 +175,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         $Item->fields[$Loader->Image_Field->urn]->addValue(json_encode($row));
                     }
                     $log[] = array(
-                        'time' => (microtime(true) - $st), 
+                        'time' => (microtime(true) - $st),
                         'text' => sprintf(
-                            Module::i()->view->_('LOG_ADD_MATERIAL_IMAGE'), 
-                            '/' . Package::i()->filesURL . '/' . $att->realname, 
+                            Module::i()->view->_('LOG_ADD_MATERIAL_IMAGE'),
+                            '/' . Package::i()->filesURL . '/' . $att->realname,
                             $att->filename,
                             $file['original_name'],
-                            Package_Sub_Main::i()->url . '&action=edit_material&id=' . $Item->id, 
+                            Package_Sub_Main::i()->url . '&action=edit_material&id=' . $Item->id,
                             $Item->name
                         )
                     );

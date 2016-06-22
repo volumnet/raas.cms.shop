@@ -3,4 +3,3 @@
   <strong data-role="cart-block-amount"></strong><br />
   <?php echo TO_AMOUNT_OF?> <strong data-role="cart-block-sum"></strong> <i class="fa fa-rub"></i>
 </a>
-<script src="/js/cart_main.js"></script>

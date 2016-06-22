@@ -73,12 +73,14 @@ class Webmaster extends \RAAS\CMS\Webmaster
             'robokassa' => $this->view->_('ROBOKASSA'),
             'yml' => $this->view->_('YANDEX_MARKET'),
             'item_inc' => $this->view->_('ITEM_INC'),
+            'category_inc' => $this->view->_('CATEGORY_INC'),
             'catalog' => $this->view->_('CATALOG'),
             'catalog_filter' => $this->view->_('CATALOG_FILTER'),
             'cart_main' => $this->view->_('CART_MAIN'),
             'favorites_main' => $this->view->_('FAVORITES_MAIN'),
             'menu_left' => $this->view->_('LEFT_MENU'),
             'item_inc' => $this->view->_('ITEM_INC'),
+            'file_inc' => $this->view->_('FILE_INC'),
             'spec' => $this->view->_('SPECIAL_OFFER'),
             'my_orders' => $this->view->_('MY_ORDERS'),
         );
@@ -109,7 +111,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $MT = new Material_Type(array(
                 'name' => $this->view->_('CATALOG'),
                 'urn' => 'catalog',
-                'global_type' => 1,
+                'global_type' => 0,
             ));
             $MT->commit();
 
@@ -140,14 +142,6 @@ class Webmaster extends \RAAS\CMS\Webmaster
             ));
             $F->commit();
 
-            $F = new Material_Field(array(
-                'pid' => $MT->id,
-                'name' => $this->view->_('VIDEOS_URL'),
-                'placeholder' => $this->view->_('VIDEOS_URL_HINT'),
-                'multiple' => 1,
-                'urn' => 'videos_url',
-                'datatype' => 'text',
-            ));
             $F->commit();
 
             $F = new Material_Field(array(
@@ -155,7 +149,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'name' => $this->view->_('VIDEOS'),
                 'multiple' => 1,
                 'urn' => 'videos',
-                'datatype' => 'image',
+                'datatype' => 'text',
             ));
             $F->commit();
 
@@ -481,6 +475,12 @@ class Webmaster extends \RAAS\CMS\Webmaster
                     }
                 }
             }
+            foreach ($categories as $category) {
+                $row = $this->nextImage;
+                $att = $this->getAttachmentFromFilename($row['filename'], $row['url'], $category->fields['image']);
+                $row = array('vis' => 1, 'name' => '', 'description' => '', 'attachment' => (int)$att->id);
+                $category->fields['image']->addValue(json_encode($row));
+            }
             $goods = array();
             for ($i = 0; $i < 10; $i++) {
                 $temp = $this->nextText;
@@ -492,12 +492,18 @@ class Webmaster extends \RAAS\CMS\Webmaster
                     'priority' => ($i + 1) * 10,
                     'sitemaps_priority' => 0.5
                 ));
+                $cats = array();
+                $Item->cats = array(
+                    $categories[111]->id, $categories[112]->id, $categories[113]->id,
+                    $categories[12]->id, $categories[13]->id,
+                    $categories[2]->id, $categories[3]->id,
+                );
                 $Item->commit();
                 $Item->fields['article']->addValue(dechex(crc32($i)));
                 $Item->fields['price']->addValue($price = rand(100, 100000));
                 $Item->fields['price_old']->addValue(($price % 2) ? (int)($price * (100 - rand(5, 25)) / 100) : 0);
-                $Item->fields['videos_url']->addValue('http://www.youtube.com/watch?v=YVgc2PQd_bo');
-                $Item->fields['videos_url']->addValue('https://vk.com/video?z=video-13951265_137506880');
+                $Item->fields['videos']->addValue('http://www.youtube.com/watch?v=YVgc2PQd_bo');
+                $Item->fields['videos']->addValue('http://www.youtube.com/watch?v=YVgc2PQd_bo');
                 $Item->fields['spec']->addValue(1);
                 $Item->fields['available']->addValue((int)(bool)($i % 4));
                 $Item->fields['min']->addValue($i % 4 ? 1 : 2);
@@ -515,13 +521,11 @@ class Webmaster extends \RAAS\CMS\Webmaster
                     $Item->fields['files']->addValue(json_encode($row));
                 }
 
-                if (!$i) {
-                    for ($j = 0; $j < 4; $j++) {
-                        $row = $this->nextImage;
-                        $att = $this->getAttachmentFromFilename($row['filename'], $row['url'], $catalogType->fields['images']);
-                        $row = array('vis' => 1, 'name' => '', 'description' => '', 'attachment' => (int)$att->id);
-                        $Item->fields['images']->addValue(json_encode($row));
-                    }
+                for ($j = 0; $j < (!$i ? 4 : 1); $j++) {
+                    $row = $this->nextImage;
+                    $att = $this->getAttachmentFromFilename($row['filename'], $row['url'], $catalogType->fields['images']);
+                    $row = array('vis' => 1, 'name' => '', 'description' => '', 'attachment' => (int)$att->id);
+                    $Item->fields['images']->addValue(json_encode($row));
                 }
                 $goods[] = $Item;
             }
@@ -561,7 +565,6 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 array(
                     'name' => $this->view->_('CART'),
                     'urn' => 'cart',
-                    'template' => 0,
                     'cache' => 0,
                     'response_code' => 200
                 ),
@@ -612,7 +615,6 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 array(
                     'name' => $this->view->_('FAVORITES'),
                     'urn' => 'favorites',
-                    'template' => 0,
                     'cache' => 0,
                     'response_code' => 200
                 ),
@@ -641,7 +643,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 $ajax
             );
             $B = new Block_Cart(array('cart_type' => (int)$cartType->id));
-            $this->createBlock($B, '', '__raas_shop_cart_interface', 'favorites', $ajaxFavorites);
+            $this->createBlock($B, '', '__raas_shop_cart_interface', 'cart', $ajaxFavorites);
         }
         return $favorites;
     }

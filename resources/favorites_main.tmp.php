@@ -1,4 +1,4 @@
-<a href="/cart/" data-role="cart-block" class="cart_main" style="display: none">
+<a href="/favorites/" data-role="favorites-block" class="favorites_main" style="display: none">
   <?php echo IN_FAVORITES?><br />
-  <strong data-role="cart-block-amount"></strong>
+  <strong data-role="favorites-block-amount"></strong>
 </a>
