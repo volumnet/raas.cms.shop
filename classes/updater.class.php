@@ -19,10 +19,9 @@ class Updater extends \RAAS\Updater
     {
         $w = new Webmaster();
         $s = Snippet::importByURN('__raas_shop_cart_interface');
+        $w->checkStdInterfaces();
         if (!$s || !$s->id) {
             $w->createIShop();
-        } else {
-            $w->checkStdInterfaces();
         }
     }
 

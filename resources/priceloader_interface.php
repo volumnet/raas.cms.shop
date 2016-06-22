@@ -15,10 +15,10 @@ use \PHPExcel_IOFactory;
 use \PHPExcel_Style_NumberFormat;
 use \PHPExcel_Cell_DataType;
 
-ini_set('max_execution_time', 300);
 $st = microtime(true);
 require_once Application::i()->includeDir . '/phpexcel/Classes/PHPExcel.php';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    ini_set('max_execution_time', 3600);
     // Загрузка прайса
     $affectedPages = array();
     $affectedMaterials = array();
@@ -196,7 +196,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     // Сначала проходим нативные поля
                     for ($j = 0; $j < count($dataRow); $j++) {
                         if ((!$uniqueColumn || ($j != $uniqueColumn)) && !$Loader->columns[$j]->Field->id && $Loader->columns[$j]->fid) {
-                            if (trim($dataRow[$j])) {
+                            if ($Loader->columns[$j]->fid == 'vis') {
+                                $Item->{$Loader->columns[$j]->fid} = (int)$dataRow[$j];
+                            } elseif (trim($dataRow[$j])) {
                                 $Item->{$Loader->columns[$j]->fid} = trim($dataRow[$j]);
                             }
                         } elseif ($new && ($j == $uniqueColumn)) { // 2015-11-20, AVS: добавили URN по артикулу
@@ -496,6 +498,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     return array('log' => $log, 'raw_data' => $raw_data, 'ok' => true);
 } else {
+    ini_set('max_execution_time', 900);
     // Выгрузка прайса
     $downloadPrice = function(Page $Page = null, $level = 0) use ($Loader, &$downloadPrice, $cols, $rows) {
         static $mtypes;
@@ -538,6 +541,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $x = Module::i()->view->_('NAME');
                 } elseif ($col->fid == 'urn') {
                     $x = Module::i()->view->_('URN');
+                } elseif ($col->fid == 'vis') {
+                    $x = Package::i()->view->_('VISIBILITY');
                 } elseif ($col->fid == 'description') {
                     $x = Module::i()->view->_('DESCRIPTION');
                 }
