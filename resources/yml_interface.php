@@ -96,7 +96,7 @@ foreach ($Block->types as $mtype) {
         $SQL_query .= " JOIN " . Material::_dbprefix() . "cms_materials_pages_assoc AS tMPA ON tMPA.id = tM.id";
     }
     $SQL_query .= " WHERE tM.vis AND tM.pid IN (" . implode(", ", array_merge(array((int)$mtype->id), (array)$mtype->all_children_ids)) . ") ";
-    if (!$mtype->global_type) {
+    if (!$mtype->global_type && $Block->catalog_cats_ids) {
         $SQL_query .= " AND tMPA.pid IN (" . implode(", ", $Block->catalog_cats_ids) . ")";
     }
     $SQL_result = Material::_SQL()->get($SQL_query);

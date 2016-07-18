@@ -369,9 +369,10 @@ class Webmaster extends \RAAS\CMS\Webmaster
     /**
      * Создаем загрузчики
      * @param Material_Type $catalogType тип материала каталога
+     * @param Page $catalog Страница каталога
      * @return array('priceloader' => PriceLoader, 'imageloader' => ImageLoader) созданные загрузчики
      */
-    public function createLoaders(Material_Type $catalogType)
+    public function createLoaders(Material_Type $catalogType, Page $catalog)
     {
         $loaders = array();
         $IL = ImageLoader::importByURN('default');
@@ -391,10 +392,11 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $PL = PriceLoader::importByURN('default');
         if (!$PL->id) {
             $PL = new PriceLoader(array(
-                'mtype' => $catalogType->id,
+                'mtype' => (int)$catalogType->id,
                 'ufid' => $catalogType->fields['article']->id,
                 'name' => $this->view->_('DEFAULT_PRICELOADER'),
                 'urn' => 'default',
+                'cat_id' => (int)$catalog->id,
                 'interface_id' => (int)Snippet::importByURN('__raas_shop_priceloader_interface')->id,
             ));
             $PL->commit();
@@ -402,8 +404,11 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $PLC = new PriceLoader_Column(
                 array('pid' => $PL->id, 'fid' => (int)$catalogType->fields['article']->id, 'priority' => ++$i)
             );
+            $PLC->commit();
             $PLC = new PriceLoader_Column(array('pid' => $PL->id, 'fid' => 'name', 'priority' => ++$i));
+            $PLC->commit();
             $PLC = new PriceLoader_Column(array('pid' => $PL->id, 'fid' => 'description', 'priority' => ++$i));
+            $PLC->commit();
             $PLC = new PriceLoader_Column(array(
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['related']->id,
@@ -424,6 +429,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                                     .  "return implode(', ', $temp);",
                 'priority' => ++$i
             ));
+            $PLC->commit();
             $PLC = new PriceLoader_Column(array(
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['available']->id,
@@ -431,18 +437,21 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'callback_download' => "return (int)\$x ? 'в наличии' : 'под заказ';",
                 'priority' => ++$i
             ));
+            $PLC->commit();
             $PLC = new PriceLoader_Column(array(
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['price_old']->id,
-                'callback' => "return (\$x && (trim(\$x) !== '0')) ? (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x)); : 0;",
+                'callback' => "\$y = str_replace(',', '.', \$x); $y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x)); return \$y;",
                 'priority' => ++$i
             ));
+            $PLC->commit();
             $PLC = new PriceLoader_Column(array(
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['price']->id,
-                'callback' => "return (\$x && (trim(\$x) !== '0')) ? (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x)); : 0;",
+                'callback' => "\$y = str_replace(',', '.', \$x); $y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x)); return \$y;",
                 'priority' => ++$i
             ));
+            $PLC->commit();
         }
         $loaders['priceloader'] = $PL;
         return $loaders;
@@ -494,6 +503,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 ));
                 $cats = array();
                 $Item->cats = array(
+                    $this->Site->id,
                     $categories[111]->id, $categories[112]->id, $categories[113]->id,
                     $categories[12]->id, $categories[13]->id,
                     $categories[2]->id, $categories[3]->id,
@@ -543,7 +553,20 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'sort_field_default' => 'price',
                 'sort_order_default' => 'asc',
             ));
-            $this->createBlock($B, 'content', 'catalog_interface', 'catalog', $catalog, true);
+            $catalogBlock = $this->createBlock($B, 'content', 'catalog_interface', 'catalog', $catalog, true);
+
+            $B = new Block_Material(array(
+                'material_type' => (int)$catalogType->id,
+                'nat' => 0,
+                'pages_var_name' => '',
+                'rows_per_page' => 0,
+                'sort_field_default' => 'price',
+                'sort_order_default' => 'asc',
+            ));
+            $catalogMain = $this->createBlock($B, 'content', 'catalog_interface', 'catalog', $this->Site, false);
+
+            $B = new Block_PHP();
+            $specBlock = $this->createBlock($B, 'content', null, 'spec', $this->Site, false);
         }
         return $catalog;
     }
@@ -621,7 +644,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 $this->Site
             );
             $B = new Block_Cart(array('cart_type' => (int)$cartType->id));
-            $this->createBlock($B, 'content', '__raas_shop_cart_interface', 'favorites', $favorites);
+            $this->createBlock($B, 'content', '__raas_shop_cart_interface', 'cart', $favorites);
 
             $B = new Block_PHP();
             $this->createBlock($B, 'left', '', 'favorites_main', $this->Site, true);
@@ -664,9 +687,10 @@ class Webmaster extends \RAAS\CMS\Webmaster
     /**
      * Создать страницу Яндекс-Маркета
      * @param Material_Type $catalogType Тип материала каталога
+     * @param Page $catalog Страница каталога
      * @return Page Созданная или существующая страница
      */
-    public function createYandexMarket(Material_Type $catalogType)
+    public function createYandexMarket(Material_Type $catalogType, Page $catalog)
     {
         $temp = Page::getSet(array('where' => array("pid = " . (int)$this->Site->id, "urn = 'yml'")));
         if ($temp) {
@@ -684,7 +708,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'meta_cats' => array_merge(array((int)$catalog->id), (array)$catalog->all_children_ids),
                 'local_delivery_cost' => 0,
             ));
-            $this->createBlock($B, '', '__raas_shop_yml_interface', 'yml', $cart);
+            $this->createBlock($B, '', '__raas_shop_yml_interface', 'yml', $yml);
             $B->addType(
                 $catalogType,
                 '',
@@ -697,15 +721,15 @@ class Webmaster extends \RAAS\CMS\Webmaster
                     'pickup' => array('field_static_value' => 1),
                     'delivery' => array('field_static_value' => 1),
                     'vendorCode' => array('field_id' => (int)$catalogType->fields['article']->id),
-                    'model' => 'name',
-                    'description' => 'description',
+                    'name' => array('field_id' => 'name'),
+                    'description' => array('field_id' => 'description'),
                     'rec' => (int)$catalogType->fields['related']->id,
                 ),
                 array(
                     array(
                         'param_name' => 'Спецпредложение',
                         'field_id' => (int)$catalogType->fields['spec']->id,
-                        'field_callback' => "return $x ? 'true' : 'false';"
+                        'field_callback' => "return \$x ? 'true' : 'false';"
                     )
                 )
             );
@@ -728,10 +752,10 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $menus = $this->createMenus($catalog);
         $cartTypes = $this->createCartTypes($catalogType, $catalogType->fields['price'], $forms['order']);
         $orderStatuses = $this->createOrderStatuses();
-        $loaders = $this->createLoaders($catalogType);
+        $loaders = $this->createLoaders($catalogType, $catalog);
         $cart = $this->createCart($cartTypes['cart'], $ajax);
         $favorites = $this->createFavorites($cartTypes['favorites'], $ajax);
         $this->adjustBlocks();
-        $yml = $this->createYandexMarket($catalogType);
+        $yml = $this->createYandexMarket($catalogType, $catalog);
     }
 }

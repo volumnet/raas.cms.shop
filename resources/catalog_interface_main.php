@@ -109,7 +109,7 @@ if ($Page->Material && $Block->nat) {
         }
     }
 
-    if ($Page->visChildren && !$doSearch) {
+    if ($Page->visChildren && !$doSearch && $Page->pid) {
         $cats = $Page->visChildren;
         $temp = array();
         foreach ($cats as $cat) {
@@ -150,9 +150,6 @@ if ($Page->Material && $Block->nat) {
         }
 
         $Set = \SOME\SOME::getArraySet($Set, $Pages);
-        if ($IN['price_from']) {
-
-        }
         $nativeFields = Material::_classes();
         $nativeFields = $nativeFields['RAAS\\CMS\\Material']['fields'];
         $Set = array_map(function($row) use ($nativeFields) {

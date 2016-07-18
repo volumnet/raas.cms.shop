@@ -212,7 +212,11 @@ if ($Item) {
       </div>
     </div>
 <?php } elseif ($showCatalog) { eval('?' . '>' . Snippet::importByURN('category_inc')->description); ?>
-    <?php eval('?' . '>' . Snippet::importByURN('catalog_filter')->description); ?>
+    <?php
+    if ($Page->pid) {
+        eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
+    }
+    ?>
     <div class="catalog">
       <div class="catalog__inner">
         <?php if ($Set) { ?>
@@ -230,7 +234,11 @@ if ($Item) {
     </div>
 <?php } elseif ($showItems) { ?>
     <div class="catalog">
-      <?php eval('?' . '>' . Snippet::importByURN('catalog_filter')->description); ?>
+      <?php
+      if ($Page->pid) {
+          eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
+      }
+      ?>
       <?php if ($Set) { ?>
           <div class="catalog__inner">
             <div class="row">

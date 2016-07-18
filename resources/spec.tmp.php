@@ -29,4 +29,5 @@ eval('?' . '>' . Snippet::importByURN('item_inc')->description);
         </div>
       </div>
     </div>
+    <script src="/js/spec.js"></script>
 <?php } ?>
