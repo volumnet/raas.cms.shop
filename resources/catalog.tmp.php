@@ -26,7 +26,7 @@ if ($Item) {
                 <div class="article__images__container">
                   <div class="article__image">
                     <?php for ($i = 0; $i < count($Item->visImages); $i++) { ?>
-                        <a href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-image-num="<?php echo (int)$i?>" rel="prettyPhoto[g]">
+                        <a href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-image-num="<?php echo (int)$i?>" data-lightbox-gallery="g">
                           <img src="/<?php echo htmlspecialchars($Item->visImages[$i]->tnURL)?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
                     <?php } ?>
                   </div>
@@ -144,7 +144,7 @@ if ($Item) {
                                     }
                                     $text .= '<div class="col-sm-3">
                                                 <div class="article__video">
-                                                  <a href="http://youtube.com/watch?v=' . $ytid . '" class="prettyPhoto" rel="prettyPhoto[v]" title="' . htmlspecialchars($ytname) . '">
+                                                  <a href="http://youtube.com/watch?v=' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
                                                     <img src="http://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
                                                   </a>
                                                 </div>
