@@ -300,7 +300,13 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $menus[$row['urn']] = $MNU;
         }
 
-        $B = new Block_Menu(array('menu' => $menus['left']->id ?: 0, 'full_menu' => 1,));
+        $stdCacheInterface = Snippet::importByURN('__raas_cache_interface');
+        $B = new Block_Menu(array(
+            'menu' => $menus['left']->id ?: 0,
+            'full_menu' => 1,
+            'cache_type' => Block::CACHE_DATA,
+            'cache_interface_id' => (int)$stdCacheInterface->id
+        ));
         $this->createBlock($B, 'left', '__raas_menu_interface', 'menu_left', $this->Site, true);
         $this->leftMenuBlock = $B;
 
