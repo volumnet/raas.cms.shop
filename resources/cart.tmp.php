@@ -54,7 +54,7 @@ if ($_GET['AJAX']) {
                 <td class="cart-table__image-col">
                   <?php if ($row2->visImages) { ?>
                       <a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>>
-                        <img src="/<?php echo htmlspecialchars(addslashes($row2->visImages[0]->tnURL))?>" style="max-width: 48px" alt="<?php echo htmlspecialchars($row2->visImages[0]->name ?: $row->name)?>" /></a>
+                        <img src="/<?php echo htmlspecialchars(addslashes($row2->visImages[0]->smallURL))?>" style="max-width: 48px" alt="<?php echo htmlspecialchars($row2->visImages[0]->name ?: $row->name)?>" /></a>
                   <?php } ?>
                 </td>
                 <td class="cart-table__name-col"><a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>><?php echo htmlspecialchars($row->name)?></a></td>

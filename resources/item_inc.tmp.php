@@ -14,7 +14,7 @@ $showItem = function($row) use ($formatPrice)
       <?php } ?>
       <a href="<?php echo $row->url?>" class="article__image<?php echo !$row->visImages ? ' article__image_nophoto' : ''?>">
         <?php if ($row->visImages) { ?>
-            <img src="/<?php echo htmlspecialchars(addslashes($row->visImages[0]->tnURL))?>" />
+            <img src="/<?php echo htmlspecialchars(addslashes($row->visImages[0]->smallURL))?>" />
         <?php } ?>
       </a>
       <form action="/cart/" class="article__controls" data-role="add-to-cart-form" data-id="<?php echo (int)$row->id?>" data-price="<?php echo (int)$row->price?>">
