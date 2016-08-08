@@ -222,7 +222,7 @@ if ($Item) {
         <?php if ($Set) { ?>
             <div class="row">
               <?php foreach ($Set as $row) { ?>
-                  <div class="col-xs-4 col-sm-3">
+                  <div class="col-xs-6 col-sm-3">
                     <?php $showCategory($row);?>
                   </div>
               <?php } ?>
