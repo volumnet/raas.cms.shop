@@ -27,14 +27,14 @@ if ($Item) {
                   <div class="article__image">
                     <?php for ($i = 0; $i < count($Item->visImages); $i++) { ?>
                         <a href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-image-num="<?php echo (int)$i?>" data-lightbox-gallery="g">
-                          <img src="/<?php echo htmlspecialchars($Item->visImages[$i]->tnURL)?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
+                          <img src="/<?php echo htmlspecialchars($Item->visImages[$i]->smallURL)?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
                     <?php } ?>
                   </div>
                   <?php if (count($Item->visImages) > 1) { ?>
                       <div class="article__images hidden-xs">
                         <?php for ($i = 0; $i < count($Item->visImages); $i++) { $row = $Item->visImages[$i]; ?>
                             <div data-href="/<?php echo htmlspecialchars(addslashes($row->fileURL))?>" class="article__images__image" data-image-num="<?php echo (int)$i?>">
-                              <img src="/<?php echo htmlspecialchars($row->tnURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></div>
+                              <img src="/<?php echo htmlspecialchars($row->smallURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></div>
                         <?php } ?>
                       </div>
                   <?php } ?>
