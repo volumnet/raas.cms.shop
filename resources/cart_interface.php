@@ -4,6 +4,8 @@ use \RAAS\CMS\Material;
 use \RAAS\Redirector;
 use \RAAS\CMS\DATETIMEFORMAT;
 use \RAAS\CMS\Material_Field;
+use \RAAS\CMS\Package;
+use \Mustache_Engine;
 
 $convertMeta = function($x)
 {
@@ -12,12 +14,15 @@ $convertMeta = function($x)
 
 $notify = function(Order $Item)
 {
-    $temp = array_values(array_filter(array_map('trim', preg_split('/(;|,)/', $Item->parent->Form->email))));
-    $emails = $userEmails = array();
-    $sms = array();
+    $temp = array_values(array_filter(array_map('trim', preg_split('/( |;|,)/', $Item->parent->Form->email))));
+    $emails = $userEmails = $sms_emails = $sms_phones = array();
     foreach ($temp as $row) {
         if (($row[0] == '[') && ($row[strlen($row) - 1] == ']')) {
-            $sms[] = substr($row, 1, -1);
+            if (filter_var(substr($row, 1, -1), FILTER_VALIDATE_EMAIL)) {
+                $sms_emails[] = substr($row, 1, -1);
+            } elseif (preg_match('/(\\+)?\\d+/umi', substr($row, 1, -1))) {
+                $sms_phones[] = substr($row, 1, -1);
+            }
         } else {
             $emails[] = $row;
         }
@@ -60,8 +65,16 @@ $notify = function(Order $Item)
     if ($userEmails) {
         \RAAS\Application::i()->sendmail($userEmails, $userSubject, $userMessage, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS');
     }
-    if ($sms) {
-        \RAAS\Application::i()->sendmail($sms, $subject, $message_sms, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS', false);
+    if ($sms_emails) {
+        \RAAS\Application::i()->sendmail($sms_emails, $subject, $message_sms, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS', false);
+    }
+    if ($sms_phones) {
+        $urlTemplate = Package::i()->registryGet('sms_gate');
+        $m = new Mustache_Engine();
+        foreach ($sms_phones as $phone) {
+            $url = $m->render($urlTemplate, array('PHONE' => urlencode($phone), 'TEXT' => urlencode($message_sms)));
+            $result = file_get_contents($url);
+        }
     }
 };
 
