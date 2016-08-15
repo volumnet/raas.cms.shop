@@ -115,7 +115,7 @@ if ($Item) {
                         $text = '<div class="article__files">';
                         foreach ($Item->files as $file) {
                             $text .= '<div class="article__file">
-                                        <a href="' . htmlspecialchars($file->fileURL) . '">'
+                                        <a href="/' . htmlspecialchars($file->fileURL) . '">'
                                   .  '    <span class="fa ' . $getFileIcon($file) . '"></span> '
                                   .       htmlspecialchars($file->name ?: basename($file->fileURL))
                                   . '   </a>
