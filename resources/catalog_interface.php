@@ -137,18 +137,22 @@ if ($Page->Material && $Block->nat) {
     }
 
     if ($Set) {
-        /*** SORTING ***/
-        // @todo доделать для будущих проектов
         $sortFunction = array();
-        if (isset($Block->sort_var_name, $IN[(string)$Block->sort_var_name])) {
-            $sortKey = $IN[(string)$Block->sort_var_name];
-            if ($f = $Material_Type->fields[$sortKey]->id) {
-                $sortFunction[] = 'strnatcmp($a["' . addslashes($sortKey) . '"], $b["' . addslashes($sortKey) . '"])';
+        if (in_array($IN['sort'], array('price'))) {
+            // Вариант для сортировки из фильтра
+            $sortFunction[] = '(' . ($IN['order'] == 'desc' ? '-1 * ' : '') . '((int)$a["' . $IN['sort'] . '"] - (int)$b["' . $IN['sort'] . '"]))';
+        } else {
+            $sortFunction[] = '((int)$a["priority"] - (int)$b["priority"])';
+            // Вариант для статической сортировки
+            if (isset($Block->sort_var_name, $IN[(string)$Block->sort_var_name])) {
+                $sortKey = $IN[(string)$Block->sort_var_name];
+                if ($f = $Material_Type->fields[$sortKey]->id) {
+                    $sortFunction[] = 'strnatcmp($a["' . addslashes($sortKey) . '"], $b["' . addslashes($sortKey) . '"])';
+                }
             }
+            $sortFunction[] = '((int)$a["price"] - (int)$b["price"])';
         }
-        $sortFunction[] = '((float)$a["price"] - (float)$b["price"])';
-        $sortFunction = 'return (' . implode(' || ', $sortFunction) . ');';
-
+        $sortFunction = 'return (' . implode(' ?: ', $sortFunction) . ');';
         $sortFunction = create_function('$a, $b', $sortFunction);
         usort($Set, $sortFunction);
 
