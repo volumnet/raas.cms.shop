@@ -211,59 +211,61 @@ if ($Item) {
         <?php } ?>
       </div>
     </div>
-<?php } elseif ($Set || $subCats) {
-    eval('?' . '>' . Snippet::importByURN('category_inc')->description); ?>
+<?php } else { ?>
     <div class="catalog">
       <?php
       if ($Page->pid) {
           eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
       }
       ?>
-      <div class="catalog__inner">
-        <?php if ($subCats) { ?>
-            <div class="row">
-              <?php foreach ($subCats as $row) { ?>
-                  <div class="col-xs-4 col-sm-3">
-                    <?php $showCategory($row);?>
+      <?php if ($Set || $subCats) { ?>
+          <?php if ($subCats) { ?>
+              <div class="catalog__inner">
+                <div class="row">
+                  <?php foreach ($subCats as $row) { ?>
+                      <div class="col-xs-4 col-sm-3">
+                        <?php $showCategory($row);?>
+                      </div>
+                  <?php } ?>
+                </div>
+              </div>
+          <?php } ?>
+          <?php if ($Set) { ?>
+              <?php eval('?' . '>' . Snippet::importByURN('category_inc')->description); ?>
+              <div class="catalog__inner">
+                <div class="row">
+                  <?php foreach ($Set as $row) { ?>
+                      <div class="col-sm-6 col-md-4">
+                        <?php $showItem($row)?>
+                      </div>
+                  <?php } ?>
+                </div>
+              </div>
+              <?php include \RAAS\CMS\Package::i()->resourcesDir . '/pages.inc.php'?>
+              <?php if ($Pages->pages > 1) { ?>
+                  <div data-pages="<?php echo $Pages->pages?>">
+                    <ul class="pagination pull-right">
+                      <?php
+                      echo $outputNav(
+                          $Pages,
+                          array(
+                              'pattern' => '<li><a href="' . \SOME\HTTP::queryString('page={link}') . '">{text}</a></li>',
+                              'pattern_active' => '<li class="active"><a>{text}</a></li>',
+                              'ellipse' => '<li class="disabled"><a>...</a></li>'
+                          )
+                      );
+                      ?>
+                    </ul>
                   </div>
+                  <div class="clearfix"></div>
               <?php } ?>
-            </div>
-        <?php } ?>
-      </div>
-      <?php if ($Set) { ?>
-          <div class="catalog__inner">
-            <div class="row">
-              <?php foreach ($Set as $row) { ?>
-                  <div class="col-sm-6 col-md-4">
-                    <?php $showItem($row)?>
-                  </div>
-              <?php } ?>
+          <?php } ?>
+      <?php } else { ?>
+          <div class="catalog">
+            <div class="catalog__inner">
+              <p><?php echo NO_RESULTS_FOUND?></p>
             </div>
           </div>
-          <?php include \RAAS\CMS\Package::i()->resourcesDir . '/pages.inc.php'?>
-          <?php if ($Pages->pages > 1) { ?>
-              <div data-pages="<?php echo $Pages->pages?>">
-                <ul class="pagination pull-right">
-                  <?php
-                  echo $outputNav(
-                      $Pages,
-                      array(
-                          'pattern' => '<li><a href="' . \SOME\HTTP::queryString('page={link}') . '">{text}</a></li>',
-                          'pattern_active' => '<li class="active"><a>{text}</a></li>',
-                          'ellipse' => '<li class="disabled"><a>...</a></li>'
-                      )
-                  );
-                  ?>
-                </ul>
-              </div>
-              <div class="clearfix"></div>
-          <?php } ?>
       <?php } ?>
-    </div>
-<?php } else { ?>
-    <div class="catalog">
-      <div class="catalog__inner">
-        <p><?php echo NO_RESULTS_FOUND?></p>
-      </div>
     </div>
 <?php } ?>
