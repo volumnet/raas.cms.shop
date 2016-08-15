@@ -34,8 +34,8 @@ if ($_GET['AJAX']) {
     </div>
 <?php } elseif ($Cart->items) { ?>
     <div class="cart">
-      <div class="cart__inner">
-        <form action="#feedback" method="post" enctype="multipart/form-data">
+      <form action="#feedback" method="post" enctype="multipart/form-data">
+        <div class="cart__inner">
           <table class="table table-striped cart-table" data-role="cart-table">
             <thead>
               <tr>
@@ -88,62 +88,62 @@ if ($_GET['AJAX']) {
               <?php } ?>
             </tbody>
           </table>
-          <?php if ($Form->id) { ?>
-              <div class="form-horizontal">
-                <?php include Package::i()->resourcesDir . '/form.inc.php'?>
-                <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>
-                  <div class="alert alert-success" <?php echo ($success[(int)$Block->id]) ? '' : 'style="display: none"'?>><?php echo FEEDBACK_SUCCESSFULLY_SENT?></div>
-                  <div class="alert alert-danger" <?php echo ($localError) ? '' : 'style="display: none"'?>>
-                    <ul>
-                      <?php foreach ((array)$localError as $key => $val) { ?>
-                          <li><?php echo htmlspecialchars($val)?></li>
-                      <?php } ?>
-                    </ul>
-                  </div>
-                </div>
-
-                <div data-role="feedback-form" <?php echo $success[(int)$Block->id] ? 'style="display: none"' : ''?>>
-                  <p><?php echo ASTERISK_MARKED_FIELDS_ARE_REQUIRED?></p>
-                  <?php if ($Form->signature) { ?>
-                        <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
-                  <?php } ?>
-                  <?php if ($Form->antispam == 'hidden' && $Form->antispam_field_name) { ?>
-                        <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" value="<?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?>" style="position: absolute; left: -9999px" />
-                  <?php } ?>
-                  <?php foreach ($Form->fields as $row) { ?>
-                      <div class="form-group">
-                        <label for="<?php echo htmlspecialchars($row->urn)?>" class="control-label col-sm-3 col-md-2"><?php echo htmlspecialchars($row->name . ($row->required ? '*' : ''))?></label>
-                        <div class="col-sm-9 col-md-4"><?php $getField($row, $DATA)?></div>
-                      </div>
-                  <?php } ?>
-                  <?php if ($Form->antispam == 'captcha' && $Form->antispam_field_name) { ?>
-                      <div class="form-group">
-                        <label for="name" class="control-label col-sm-3 col-md-2"><?php echo CAPTCHA?></label>
-                        <div class="col-sm-9 col-md-4 <?php echo htmlspecialchars($Form->antispam_field_name)?>">
-                          <img src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
-                          <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
-                        </div>
-                      </div>
-                  <?php } ?>
-                  <?php if ($Block->EPay_Interface->id && !$Form->fields['epay']) { ?>
-                      <div class="form-group">
-                        <label for="name" class="control-label col-sm-3 col-md-2"><?php echo PAYMENT_METHOD?></label>
-                        <div class="col-sm-9 col-md-4">
-                          <label><input type="radio" name="epay" value="0" <?php echo !$DATA['epay'] ? 'checked="checked"' : ''?> /> <?php echo PAY_ON_DELIVERY?></label>
-                          <label><input type="radio" name="epay" value="1" <?php echo $DATA['epay'] ? 'checked="checked"' : ''?> /> <?php echo PAY_BY_EPAY?></label>
-                        </div>
-                      </div>
-                  <?php } ?>
-                  <div class="form-group">
-                    <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-default" type="submit"><?php echo SEND?></button></div>
-                  </div>
+        </div>
+        <?php if ($Form->id) { ?>
+            <div class="form-horizontal">
+              <?php include Package::i()->resourcesDir . '/form.inc.php'?>
+              <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>
+                <div class="alert alert-success" <?php echo ($success[(int)$Block->id]) ? '' : 'style="display: none"'?>><?php echo FEEDBACK_SUCCESSFULLY_SENT?></div>
+                <div class="alert alert-danger" <?php echo ($localError) ? '' : 'style="display: none"'?>>
+                  <ul>
+                    <?php foreach ((array)$localError as $key => $val) { ?>
+                        <li><?php echo htmlspecialchars($val)?></li>
+                    <?php } ?>
+                  </ul>
                 </div>
               </div>
-          <?php } else { ?>
-            <p><a href="?action=clear" data-role="clear-cart-trigger"><?php echo CLEAR_FAVORITES?></a></p>
-          <?php } ?>
-        </form>
-      </div>
+
+              <div data-role="feedback-form" <?php echo $success[(int)$Block->id] ? 'style="display: none"' : ''?>>
+                <p><?php echo ASTERISK_MARKED_FIELDS_ARE_REQUIRED?></p>
+                <?php if ($Form->signature) { ?>
+                      <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
+                <?php } ?>
+                <?php if ($Form->antispam == 'hidden' && $Form->antispam_field_name) { ?>
+                      <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" value="<?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?>" style="position: absolute; left: -9999px" />
+                <?php } ?>
+                <?php foreach ($Form->fields as $row) { ?>
+                    <div class="form-group">
+                      <label for="<?php echo htmlspecialchars($row->urn)?>" class="control-label col-sm-3 col-md-2"><?php echo htmlspecialchars($row->name . ($row->required ? '*' : ''))?></label>
+                      <div class="col-sm-9 col-md-4"><?php $getField($row, $DATA)?></div>
+                    </div>
+                <?php } ?>
+                <?php if ($Form->antispam == 'captcha' && $Form->antispam_field_name) { ?>
+                    <div class="form-group">
+                      <label for="name" class="control-label col-sm-3 col-md-2"><?php echo CAPTCHA?></label>
+                      <div class="col-sm-9 col-md-4 <?php echo htmlspecialchars($Form->antispam_field_name)?>">
+                        <img src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
+                        <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
+                      </div>
+                    </div>
+                <?php } ?>
+                <?php if ($Block->EPay_Interface->id && !$Form->fields['epay']) { ?>
+                    <div class="form-group">
+                      <label for="name" class="control-label col-sm-3 col-md-2"><?php echo PAYMENT_METHOD?></label>
+                      <div class="col-sm-9 col-md-4">
+                        <label><input type="radio" name="epay" value="0" <?php echo !$DATA['epay'] ? 'checked="checked"' : ''?> /> <?php echo PAY_ON_DELIVERY?></label>
+                        <label><input type="radio" name="epay" value="1" <?php echo $DATA['epay'] ? 'checked="checked"' : ''?> /> <?php echo PAY_BY_EPAY?></label>
+                      </div>
+                    </div>
+                <?php } ?>
+                <div class="form-group">
+                  <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-default" type="submit"><?php echo SEND?></button></div>
+                </div>
+              </div>
+            </div>
+        <?php } else { ?>
+          <p><a href="?action=clear" data-role="clear-cart-trigger"><?php echo CLEAR_FAVORITES?></a></p>
+        <?php } ?>
+      </form>
     </div>
     <script src="/js/cart.js"></script>
 <?php
