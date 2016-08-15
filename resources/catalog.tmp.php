@@ -27,14 +27,14 @@ if ($Item) {
                   <div class="article__image">
                     <?php for ($i = 0; $i < count($Item->visImages); $i++) { ?>
                         <a href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-image-num="<?php echo (int)$i?>" data-lightbox-gallery="g">
-                          <img src="/<?php echo htmlspecialchars($Item->visImages[$i]->smallURL)?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
+                          <img src="/<?php echo htmlspecialchars($Item->visImages[$i]->tnURL)?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
                     <?php } ?>
                   </div>
                   <?php if (count($Item->visImages) > 1) { ?>
                       <div class="article__images hidden-xs">
                         <?php for ($i = 0; $i < count($Item->visImages); $i++) { $row = $Item->visImages[$i]; ?>
                             <div data-href="/<?php echo htmlspecialchars(addslashes($row->fileURL))?>" class="article__images__image" data-image-num="<?php echo (int)$i?>">
-                              <img src="/<?php echo htmlspecialchars($row->smallURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></div>
+                              <img src="/<?php echo htmlspecialchars($row->tnURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></div>
                         <?php } ?>
                       </div>
                   <?php } ?>
@@ -211,34 +211,25 @@ if ($Item) {
         <?php } ?>
       </div>
     </div>
-<?php } elseif ($showCatalog) { eval('?' . '>' . Snippet::importByURN('category_inc')->description); ?>
-    <?php
-    if ($Page->pid) {
-        eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
-    }
-    ?>
-    <div class="catalog">
-      <div class="catalog__inner">
-        <?php if ($Set) { ?>
-            <div class="row">
-              <?php foreach ($Set as $row) { ?>
-                  <div class="col-xs-6 col-sm-3">
-                    <?php $showCategory($row);?>
-                  </div>
-              <?php } ?>
-            </div>
-        <?php } else { ?>
-            <p><?php echo NO_RESULTS_FOUND?></p>
-        <?php } ?>
-      </div>
-    </div>
-<?php } elseif ($showItems) { ?>
+<?php } elseif ($Set || $subCats) {
+    eval('?' . '>' . Snippet::importByURN('category_inc')->description); ?>
     <div class="catalog">
       <?php
       if ($Page->pid) {
           eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
       }
       ?>
+      <div class="catalog__inner">
+        <?php if ($subCats) { ?>
+            <div class="row">
+              <?php foreach ($subCats as $row) { ?>
+                  <div class="col-xs-4 col-sm-3">
+                    <?php $showCategory($row);?>
+                  </div>
+              <?php } ?>
+            </div>
+        <?php } ?>
+      </div>
       <?php if ($Set) { ?>
           <div class="catalog__inner">
             <div class="row">
@@ -267,10 +258,12 @@ if ($Item) {
               </div>
               <div class="clearfix"></div>
           <?php } ?>
-      <?php } else { ?>
-          <div class="catalog__inner">
-            <p><?php echo NO_RESULTS_FOUND?></p>
-          </div>
       <?php } ?>
+    </div>
+<?php } else { ?>
+    <div class="catalog">
+      <div class="catalog__inner">
+        <p><?php echo NO_RESULTS_FOUND?></p>
+      </div>
     </div>
 <?php } ?>

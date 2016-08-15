@@ -133,9 +133,10 @@ if ($Page->Material && $Block->nat) {
             $cats[$key] = new Page($key);
             $cats[$key]->counter = $val;
         }
-        $OUT['Set'] = array_values($cats);
-        $OUT['showCatalog'] = true;
-    } else {
+        $OUT['subCats'] = array_values($cats);
+    }
+
+    if ($Set) {
         /*** SORTING ***/
         // @todo доделать для будущих проектов
         $sortFunction = array();
@@ -166,13 +167,12 @@ if ($Page->Material && $Block->nat) {
         }, $Set);
 
         $OUT['Set'] = $Set;
-        $OUT['MType'] = $MType;
         if ($Pages !== null) {
             $OUT['Pages'] = $Pages;
         }
-        $OUT['showItems'] = true;
     }
 
+    $OUT['MType'] = $MType;
     $OUT['doSearch'] = $doSearch;
 }
 return $OUT;
