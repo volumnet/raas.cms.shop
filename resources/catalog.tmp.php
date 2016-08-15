@@ -66,10 +66,12 @@ if ($Item) {
                 <?php } ?>
                 <a href="/favorites/?action=add&id=<?php echo (int)$Item->id?>" class="btn btn-info" data-role="add-to-favorites-trigger" data-id="<?php echo (int)$Item->id?>" data-active-html="<?php echo DELETE_FROM_FAVORITES?>"><?php echo TO_FAVORITES?></a>
               </form>
+              <!--noindex-->
               <div class="share">
                 <script type="text/javascript" src="//yastatic.net/share/share.js" charset="utf-8"></script>
                 <?php echo SHARE?>: <div class="yashare-auto-init" style="display: inline-block; vertical-align: middle" data-yashareL10n="ru" data-yashareQuickServices="vkontakte,facebook,twitter,odnoklassniki,moimir" data-yashareTheme="counter"></div>
               </div>
+              <!--/noindex-->
               <?php
               $propsText = '';
               $brands = $models = array();
