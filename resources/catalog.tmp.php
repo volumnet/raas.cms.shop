@@ -146,7 +146,7 @@ if ($Item) {
                                     }
                                     $text .= '<div class="col-sm-3">
                                                 <div class="article__video">
-                                                  <a href="http://youtube.com/watch?v=' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
+                                                  <a href="http://youtube.com/embed/' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
                                                     <img src="http://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
                                                   </a>
                                                 </div>
