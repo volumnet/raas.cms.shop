@@ -431,8 +431,8 @@ class Webmaster extends \RAAS\CMS\Webmaster
                                     .  "foreach ((array)\$x as \$val) {\n"
                                     .  "    \$row = new \\RAAS\\CMS\\Material((int)\$val);\n"
                                     .  "    \$temp[] = \$row->article;\n"
-                                    .  "}"
-                                    .  "return implode(', ', $temp);",
+                                    .  "}\n"
+                                    .  "return implode(', ', \$temp);",
                 'priority' => ++$i
             ));
             $PLC->commit();
