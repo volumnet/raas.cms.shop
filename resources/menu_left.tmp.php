@@ -33,9 +33,7 @@ $showMenu = function($node, \RAAS\CMS\Page $current) use (&$showMenu) {
 ?>
 <div class="menu_left__outer block_left">
   <div class="menu_left__title block_left__title">
-    <a href="<?php echo htmlspecialchars($Item->url)?>">
-      <?php echo htmlspecialchars($Item->page->name)?>
-    </a>
+    <a href="/catalog/"><?php echo CATALOG?></a>
   </div>
   <nav class="menu_left"><?php echo $showMenu($menuArr ?: $Item, $Page)?></nav>
 </div>
