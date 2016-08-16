@@ -137,6 +137,7 @@ if ($Page->Material && $Block->nat) {
     }
 
     if ($Set) {
+        $Set = array_filter($Set, function($row) use ($Page) { return in_array($Page->id, (array)$row['pages_ids']); });
         $sortFunction = array();
         if (in_array($IN['sort'], array('price'))) {
             // Вариант для сортировки из фильтра
