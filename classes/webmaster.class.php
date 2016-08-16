@@ -517,7 +517,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 $Item->commit();
                 $Item->fields['article']->addValue(dechex(crc32($i)));
                 $Item->fields['price']->addValue($price = rand(100, 100000));
-                $Item->fields['price_old']->addValue(($price % 2) ? (int)($price * (100 - rand(5, 25)) / 100) : 0);
+                $Item->fields['price_old']->addValue(($price % 2) ? (int)($price * (100 + rand(5, 25)) / 100) : 0);
                 $Item->fields['videos']->addValue('http://www.youtube.com/watch?v=YVgc2PQd_bo');
                 $Item->fields['videos']->addValue('http://www.youtube.com/watch?v=YVgc2PQd_bo');
                 $Item->fields['spec']->addValue(1);
