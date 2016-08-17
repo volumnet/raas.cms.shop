@@ -215,11 +215,13 @@ if ($Item) {
     </div>
 <?php } else { ?>
     <div class="catalog">
+      <?php
+      if ($Page->pid) {
+          eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
+      }
+      ?>
       <div class="catalog__inner">
         <?php
-        if ($Page->pid) {
-            eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
-        }
         if ($Set || $subCats) {
             if ($subCats) {
                 ?>

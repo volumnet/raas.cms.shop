@@ -12,6 +12,43 @@ if (!$cc->load()) {
 $cc = $cc->data;
 $cc = array_filter($cc, function($x) use ($Page) { return array_intersect(array_merge(array($Page->id), (array)$Page->all_children_ids), (array)$x['pages_ids']); });
 
+$filterProps = array(/*'example' => 'Пример', */);
+$filterRaw = array();
+$filter = array();
+
+// $dictionaryExample = new Dictionary(1);
+// $dictionaryExample = $dictionaryExample->children;
+// foreach ($dictionaryExample as $row) {
+//     $filterRaw['example'][] = array('value' => $row->urn, 'name' => $row->name);
+// }
+
+
+foreach ($filterRaw as $key => $arr) {
+    $filterSet = $cc;
+    foreach ($filterProps as $key2 => $name) {
+        if (($key2 != $key) && $DATA[$key2]) {
+            $filterSet = array_filter(
+                $filterSet,
+                function ($x) use ($key2, $DATA) {
+                    return $x[$key2] == $DATA[$key2];
+                }
+            );
+        }
+    }
+    $filterSet = array_map(
+        function ($x) use ($key) {
+            return $x[$key];
+        },
+        $filterSet
+    );
+    $filter[$key] = array_filter(
+        $arr,
+        function ($x) use ($filterSet) {
+            return in_array($x['value'], $filterSet);
+        }
+    );
+}
+
 $maxPrice = array_map(
     function ($x) {
         return (int)$x['price'];
@@ -29,6 +66,7 @@ $price2 = ceil(($DATA['price_to'] ?: $maxPrice) / (int)$priceStep) * (int)$price
 
 // echo microtime(1) - $mt;
 ?>
+<!--noindex-->
 <div class="catalog-filter">
   <form action="" method="get" data-page-id="<?php echo (int)$Page->id?>">
     <div class="row">
@@ -66,3 +104,4 @@ $price2 = ceil(($DATA['price_to'] ?: $maxPrice) / (int)$priceStep) * (int)$price
   </form>
   <script src="/js/catalog_filter.js"></script>
 </div>
+<!--/noindex-->
