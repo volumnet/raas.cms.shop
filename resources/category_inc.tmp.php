@@ -7,7 +7,7 @@ $showCategory = function($row)
     <a class="category" href="<?php echo $row->url . $queryString ?>">
       <div class="category__image<?php echo !$row->image->id ? ' category__image_nophoto' : ''?>">
         <?php if ($row->image->id) { ?>
-            <img src="/<?php echo htmlspecialchars(addslashes($row->image->smallURL))?>" />
+            <img src="/<?php echo htmlspecialchars(addslashes($row->image->smallURL))?>" alt="<?php echo htmlspecialchars($row->image->name ?: $row->name)?>" />
         <?php } ?>
       </div>
       <div class="category__text">
