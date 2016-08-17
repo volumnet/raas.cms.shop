@@ -55,6 +55,7 @@ if ($Item) {
                 </div>
               </div>
               <div class="article__available"><?php echo $Item->available ? '<span class="text-success">' . AVAILABLE . '</span>' : '<span class="text-danger">' . AVAILABLE_CUSTOM . '</span>'?></div>
+              <!--noindex-->
               <form action="/cart/" class="article__controls" data-role="add-to-cart-form" data-id="<?php echo (int)$Item->id?>" data-price="<?php echo (int)$Item->price?>">
                 <?php if ($Item->available) { ?>
                     <input type="hidden" name="action" value="add" />
@@ -64,8 +65,9 @@ if ($Item) {
                     <button type="submit" class="btn btn-danger"><?php echo TO_CART?></button>
                     <?php /* <a href="/cart/?action=add&id=<?php echo (int)$Item->id?>" class="btn btn-danger" data-role="add-to-cart-trigger" data-id="<?php echo (int)$Item->id?>" data-price="<?php echo (int)$Item->price?>" data-active-html="<?php echo DELETE_FROM_CART?>"><?php echo TO_CART?></button> */ ?>
                 <?php } ?>
-                <a href="/favorites/?action=add&id=<?php echo (int)$Item->id?>" class="btn btn-info" data-role="add-to-favorites-trigger" data-id="<?php echo (int)$Item->id?>" data-active-html="<?php echo DELETE_FROM_FAVORITES?>"><?php echo TO_FAVORITES?></a>
+                <a href="/favorites/?action=add&id=<?php echo (int)$Item->id?>" class="btn btn-info" data-role="add-to-favorites-trigger" data-id="<?php echo (int)$Item->id?>" data-active-html="<?php echo DELETE_FROM_FAVORITES?>" rel="nofollow"><?php echo TO_FAVORITES?></a>
               </form>
+              <!--/noindex-->
               <!--noindex-->
               <div class="share">
                 <script type="text/javascript" src="//yastatic.net/share/share.js" charset="utf-8"></script>

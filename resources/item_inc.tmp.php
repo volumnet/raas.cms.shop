@@ -37,14 +37,16 @@ $showItem = function($row) use ($formatPrice)
           <div class="article__available"><?php echo $row->available ? '<span class="text-success">В наличии</span>' : '<span class="text-danger">Под заказ</span>'?></div>
         </div>
         <div class="article__read-more">
+          <!--noindex-->
           <div class="article__add-to-cart">
             <?php if ($row->available) { ?>
                 <input type="number" class="form-control" autocomplete="off" name="amount" min="<?php echo (int)$row->min ?: 1?>" step="<?php echo (int)$row->step ?: 1?>" value="<?php echo (int)$row->min ?: 1?>" />
                 <button type="submit" class="btn btn-danger" title="<?php echo TO_CART?>"><span class="fa fa-shopping-cart"></span></button>
                 <?php /* <a href="/cart/?action=add&id=<?php echo (int)$row->id?>" class="btn btn-danger" data-role="add-to-cart-trigger" data-id="<?php echo (int)$row->id?>" data-price="<?php echo (int)$row->price?>" title="<?php echo TO_CART?>" data-active-title="<?php echo DELETE_FROM_CART?>"><span class="fa fa-shopping-cart"></span></button> */ ?>
             <?php } ?>
-            <a href="/favorites/?action=add&id=<?php echo (int)$row->id?>" class="btn btn-info" data-role="add-to-favorites-trigger" data-id="<?php echo (int)$row->id?>" title="<?php echo TO_FAVORITES?>" data-active-title="<?php echo DELETE_FROM_FAVORITES?>"><span class="fa fa-star"></span></a>
+            <a href="/favorites/?action=add&id=<?php echo (int)$row->id?>" class="btn btn-info" data-role="add-to-favorites-trigger" data-id="<?php echo (int)$row->id?>" title="<?php echo TO_FAVORITES?>" data-active-title="<?php echo DELETE_FROM_FAVORITES?>" rel="nofollow"><span class="fa fa-star"></span></a>
           </div>
+          <!--/noindex-->
         </div>
       </form>
     </div>
