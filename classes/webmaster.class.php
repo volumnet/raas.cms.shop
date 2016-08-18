@@ -174,7 +174,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'pid' => $MT->id,
                 'name' => $this->view->_('AVAILABLE'),
                 'urn' => 'available',
-                'default' => 1,
+                'defval' => 1,
                 'datatype' => 'checkbox',
             ));
             $F->commit();
@@ -183,7 +183,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'pid' => $MT->id,
                 'name' => $this->view->_('MINIMAL_AMOUNT'),
                 'urn' => 'min',
-                'default' => 1,
+                'defval' => 1,
                 'datatype' => 'number',
             ));
             $F->commit();
@@ -192,7 +192,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'pid' => $MT->id,
                 'name' => $this->view->_('CART_STEP'),
                 'urn' => 'step',
-                'default' => 1,
+                'defval' => 1,
                 'datatype' => 'number',
             ));
             $F->commit();
