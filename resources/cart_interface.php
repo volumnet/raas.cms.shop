@@ -59,13 +59,13 @@ $notify = function (Order $Item) {
     $subject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER, $Item->parent->name, $Item->page->name);
     $userSubject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER_USER, $Item->id, $_SERVER['HTTP_HOST']);
     if ($emails) {
-        \RAAS\Application::i()->sendmail($emails, $subject, $message, $this->view->_('ADMINISTRATION_OF_SITE') . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST']);
+        \RAAS\Application::i()->sendmail($emails, $subject, $message, ADMINISTRATION_OF_SITE . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST']);
     }
     if ($userEmails) {
-        \RAAS\Application::i()->sendmail($userEmails, $userSubject, $userMessage, $this->view->_('ADMINISTRATION_OF_SITE') . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST']);
+        \RAAS\Application::i()->sendmail($userEmails, $userSubject, $userMessage, ADMINISTRATION_OF_SITE . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST']);
     }
     if ($sms_emails) {
-        \RAAS\Application::i()->sendmail($sms_emails, $subject, $message_sms, $this->view->_('ADMINISTRATION_OF_SITE') . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST'], false);
+        \RAAS\Application::i()->sendmail($sms_emails, $subject, $message_sms, ADMINISTRATION_OF_SITE . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST'], false);
     }
     if ($sms_phones) {
         $urlTemplate = Package::i()->registryGet('sms_gate');
