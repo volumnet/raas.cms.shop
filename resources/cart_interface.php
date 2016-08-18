@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\CMS\Material;
 use \RAAS\Redirector;
 use \RAAS\CMS\DATETIMEFORMAT;
@@ -7,13 +8,11 @@ use \RAAS\CMS\Material_Field;
 use \RAAS\CMS\Package;
 use \Mustache_Engine;
 
-$convertMeta = function($x)
-{
+$convertMeta = function ($x) {
     return $x;
 };
 
-$notify = function(Order $Item)
-{
+$notify = function (Order $Item) {
     $temp = array_values(array_filter(array_map('trim', preg_split('/( |;|,)/', $Item->parent->Form->email))));
     $emails = $userEmails = $sms_emails = $sms_phones = array();
     foreach ($temp as $row) {
@@ -60,13 +59,13 @@ $notify = function(Order $Item)
     $subject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER, $Item->parent->name, $Item->page->name);
     $userSubject = date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER_USER, $Item->id, $_SERVER['HTTP_HOST']);
     if ($emails) {
-        \RAAS\Application::i()->sendmail($emails, $subject, $message, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS');
+        \RAAS\Application::i()->sendmail($emails, $subject, $message, $this->view->_('ADMINISTRATION_OF_SITE') . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST']);
     }
     if ($userEmails) {
-        \RAAS\Application::i()->sendmail($userEmails, $userSubject, $userMessage, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS');
+        \RAAS\Application::i()->sendmail($userEmails, $userSubject, $userMessage, $this->view->_('ADMINISTRATION_OF_SITE') . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST']);
     }
     if ($sms_emails) {
-        \RAAS\Application::i()->sendmail($sms_emails, $subject, $message_sms, 'info@' . $_SERVER['HTTP_HOST'], 'RAAS.CMS', false);
+        \RAAS\Application::i()->sendmail($sms_emails, $subject, $message_sms, $this->view->_('ADMINISTRATION_OF_SITE') . ' ' . $_SERVER['HTTP_HOST'], 'info@' . $_SERVER['HTTP_HOST'], false);
     }
     if ($sms_phones) {
         $urlTemplate = Package::i()->registryGet('sms_gate');
@@ -137,7 +136,8 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                 $Item->pid = (int)$Cart_Type->id;
                 foreach ($Form->fields as $row) {
                     switch ($row->datatype) {
-                        case 'file': case 'image':
+                        case 'file':
+                        case 'image':
                             if (!isset($_FILES[$row->urn]['tmp_name']) || !$row->isFilled($_FILES[$row->urn]['tmp_name'])) {
                                 if ($row->required && !$row->countValues()) {
                                     $localError[$row->urn] = sprintf(ERR_CUSTOM_FIELD_REQUIRED, $row->name);
@@ -213,7 +213,8 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                         if (isset($Item->fields[$fname])) {
                             $row = $Item->fields[$fname];
                             switch ($row->datatype) {
-                                case 'file': case 'image':
+                                case 'file':
+                                case 'image':
                                     $row->deleteValues();
                                     if ($row->multiple) {
                                         foreach ($_FILES[$row->urn]['tmp_name'] as $key => $val) {
