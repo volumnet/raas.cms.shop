@@ -8,9 +8,14 @@ $showItem = function($row) use ($formatPrice)
 {
     ?>
     <div class="article">
-      <div class="article__title"><a href="<?php echo $row->url?>"><?php echo htmlspecialchars($row->name)?></a></div>
+      <div class="article__title">
+        <a href="<?php echo $row->url?>"><?php echo htmlspecialchars($row->name)?></a>
+      </div>
       <?php if ($row->article) { ?>
-          <div class="article__article"><?php echo ARTICLE_SHORT?> <a href="<?php echo $row->url?>"><?php echo htmlspecialchars($row->article)?></a></div>
+          <div class="article__article">
+            <?php echo ARTICLE_SHORT?>
+            <a href="<?php echo $row->url?>"><?php echo htmlspecialchars($row->article)?></a>
+          </div>
       <?php } ?>
       <a href="<?php echo $row->url?>" class="article__image<?php echo !$row->visImages ? ' article__image_nophoto' : ''?>">
         <?php if ($row->visImages) { ?>

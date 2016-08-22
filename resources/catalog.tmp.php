@@ -16,9 +16,10 @@ $formatPrice = function($price) {
 if ($Item) {
     ?>
     <div class="catalog">
-      <div class="article_opened">
+      <div class="article_opened" itemscope itemtype="http://schema.org/Product">
+        <meta itemprop="name" content="<?php echo htmlspecialchars($Item->name)?>" />
         <div class="article__article">
-          <?php echo ARTICLE_SHORT?> <span><?php echo htmlspecialchars($Item->article)?></span>
+          <?php echo ARTICLE_SHORT?> <span itemprop="productID"><?php echo htmlspecialchars($Item->article)?></span>
         </div>
         <div class="row">
           <?php if ($Item->visImages) { ?>
@@ -26,7 +27,7 @@ if ($Item) {
                 <div class="article__images__container">
                   <div class="article__image">
                     <?php for ($i = 0; $i < count($Item->visImages); $i++) { ?>
-                        <a href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-image-num="<?php echo (int)$i?>" data-lightbox-gallery="g">
+                        <a itemprop="image" href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-image-num="<?php echo (int)$i?>" data-lightbox-gallery="g">
                           <img src="/<?php echo htmlspecialchars($Item->visImages[$i]->tnURL)?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
                     <?php } ?>
                   </div>
@@ -43,18 +44,23 @@ if ($Item) {
           <?php } ?>
           <div class="col-sm-6 col-lg-7">
             <div class="article_opened__details">
-              <div class="article__text">
-                <div class="article__price<?php echo ($Item->price_old && ($Item->price_old != $Item->price)) ? ' article__price_new' : ''?>" data-price="<?php echo (float)$Item->price?>">
-                  <?php if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
-                      <span class="article__price__old"><?php echo $formatPrice((float)$Item->price_old)?></span>
-                  <?php } ?>
-                  <span data-role="price-container">
-                    <?php echo $formatPrice((float)$Item->price)?>
-                  </span>
-                  <i class="fa fa-rub"></i>
+              <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+                <div class="article__text">
+                  <div class="article__price<?php echo ($Item->price_old && ($Item->price_old != $Item->price)) ? ' article__price_new' : ''?>" data-price="<?php echo (float)$Item->price?>">
+                    <?php if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
+                        <span class="article__price__old"><?php echo $formatPrice((float)$Item->price_old)?></span>
+                    <?php } ?>
+                    <span data-role="price-container" itemprop="price" content="<?php echo (float)$Item->price?>">
+                      <?php echo $formatPrice((float)$Item->price)?>
+                    </span>
+                    <i class="fa fa-rub" itemprop="priceCurrency" content="RUB"></i>
+                  </div>
+                </div>
+                <div class="article__available">
+                  <link itemprop="availability" href="http://schema.org/<?php echo $Item->available ? 'InStock' : 'PreOrder'?>" />
+                  <?php echo $Item->available ? '<span class="text-success">' . AVAILABLE . '</span>' : '<span class="text-danger">' . AVAILABLE_CUSTOM . '</span>'?>
                 </div>
               </div>
-              <div class="article__available"><?php echo $Item->available ? '<span class="text-success">' . AVAILABLE . '</span>' : '<span class="text-danger">' . AVAILABLE_CUSTOM . '</span>'?></div>
               <!--noindex-->
               <form action="/cart/" class="article__controls" data-role="add-to-cart-form" data-id="<?php echo (int)$Item->id?>" data-price="<?php echo (int)$Item->price?>">
                 <?php if ($Item->available) { ?>
@@ -91,12 +97,45 @@ if ($Item) {
                       !in_array($val->datatype, array('image', 'file', 'material', 'checkbox'))
                   ) {
                       if ($val->doRich()) {
-                          $propsText .= '<tr><th>' . htmlspecialchars($val->name) . ': </th><td>' . implode(', ', array_map(function($x) use ($val) { return $val->doRich($x); }, $val->getValues(true))) . '</td></tr>';
+                          $v = implode(', ', array_map(function($x) use ($val) { return $val->doRich($x); }, $val->getValues(true)));
+                          switch ($key) {
+                              case 'width': case 'height':
+                                  $propsText .= ' <tr>
+                                                    <th>' . htmlspecialchars($val->name) . ': </th>
+                                                    <td itemprop="<?php echo $key?>" itemtype="http://schema.org/QuantitativeValue">
+                                                      <span itemprop="value">' . $v . '</span>
+                                                    </td>
+                                                  </tr>';
+                                  break;
+                              case 'article':
+                                  $propsText .= ' <tr>
+                                                    <th>' . htmlspecialchars($val->name) . ': </th>
+                                                    <td itemprop="productId">' . $val['doRich'] . '</td>
+                                                  </tr>';
+                                  break;
+                              case 'brand':
+                                  $propsText .= ' <tr>
+                                                    <th>' . htmlspecialchars($val->name) . ': </th>
+                                                    <td itemprop="brand" itemscope itemtype="http://schema.org/Brand">
+                                                      <span itemprop="name">' . $v . '</span>
+                                                    </td>
+                                                  </tr>';
+                                  break;
+                              default:
+                                  $propsText .= ' <tr itemprop="additionalProperty" itemscope itemtype="http://schema.org/PropertyValue">
+                                                    <th itemprop="name">' . htmlspecialchars($val->name) . ': </th>
+                                                    <td itemprop="value">' . $v . '</td>
+                                                  </tr>';
+                                  break;
+                          }
                       }
                   }
               }
               if ($propsText) {
-                  echo '<div class="article__props"><table class="table table-striped"><tbody>' . $propsText . '</tbody></table></div><div class="clearfix"></div>';
+                  echo '<div class="article__props">
+                          <table class="table table-striped"><tbody>' . $propsText . '</tbody></table>
+                        </div>
+                        <div class="clearfix"></div>';
               }
               ?>
             </div>
@@ -110,7 +149,7 @@ if ($Item) {
             switch ($key) {
                 case 'description':
                     $name = DESCRIPTION;
-                    $text = trim($Item->description);
+                    $text = '<div itemprop="description">' . trim($Item->description) . '</div>';
                     break;
                 case 'files':
                     if ($Item->files) {
