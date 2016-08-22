@@ -454,7 +454,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $PLC = new PriceLoader_Column(array(
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['price']->id,
-                'callback' => "\$y = str_replace(',', '.', \$x); $y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x)); return \$y;",
+                'callback' => "\$y = str_replace(',', '.', \$x); $y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$y)); return \$y;",
                 'priority' => ++$i
             ));
             $PLC->commit();
