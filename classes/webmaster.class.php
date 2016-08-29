@@ -363,7 +363,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         foreach (array('progress' => 'IN_PROGRESS', 'completed' => 'COMPLETED', 'canceled' => 'CANCELED') as $key => $val) {
             $OS = Order_Status::importByURN($key);
             if (!$OS->id) {
-                $OS = new Order_Status(array('name' => $val, 'urn' => $key));
+                $OS = new Order_Status(array('name' => $this->view->_($val), 'urn' => $key));
                 $OS->commit();
             }
             $orderStatuses[$key] = $OS;
