@@ -139,6 +139,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'multiple' => 1,
                 'urn' => 'images',
                 'datatype' => 'image',
+                'show_in_table' => 1,
             ));
             $F->commit();
 
