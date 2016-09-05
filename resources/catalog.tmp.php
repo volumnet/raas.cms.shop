@@ -276,7 +276,6 @@ if ($Item) {
                 <?php
             }
             if ($Set) {
-                eval('?' . '>' . Snippet::importByURN('category_inc')->description);
                 ?>
                 <div class="row">
                   <?php foreach ($Set as $row) { ?>
