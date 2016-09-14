@@ -431,7 +431,9 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'callback_download' => "\$temp = array();\n"
                                     .  "foreach ((array)\$x as \$val) {\n"
                                     .  "    \$row = new \\RAAS\\CMS\\Material((int)\$val);\n"
-                                    .  "    \$temp[] = \$row->article;\n"
+                                    .  "    if (\$row->id) {\n"
+                                    .  "        \$temp[] = \$row->article;\n"
+                                    .  "    }\n"
                                     .  "}\n"
                                     .  "return implode(', ', \$temp);",
                 'priority' => ++$i
@@ -448,14 +450,14 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $PLC = new PriceLoader_Column(array(
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['price_old']->id,
-                'callback' => "\$y = str_replace(',', '.', \$x); $y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x)); return \$y;",
+                'callback' => "\$y = str_replace(',', '.', \$x); \$y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x)); return \$y;",
                 'priority' => ++$i
             ));
             $PLC->commit();
             $PLC = new PriceLoader_Column(array(
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['price']->id,
-                'callback' => "\$y = str_replace(',', '.', \$x); $y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$y)); return \$y;",
+                'callback' => "\$y = str_replace(',', '.', \$x); \$y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$y)); return \$y;",
                 'priority' => ++$i
             ));
             $PLC->commit();
