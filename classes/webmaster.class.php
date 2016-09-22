@@ -255,6 +255,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'name' => $this->view->_('PHONE'),
                 'urn' => 'phone',
                 'datatype' => 'text',
+                'required' => 1,
                 'show_in_table' => 1,
             ));
             $F->commit();
