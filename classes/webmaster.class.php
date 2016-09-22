@@ -387,6 +387,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $IL = new ImageLoader(array(
                 'mtype' => $catalogType->id,
                 'ufid' => $catalogType->fields['article']->id,
+                'ifid' => $catalogType->fields['images']->id,
                 'name' => $this->view->_('DEFAULT_IMAGELOADER'),
                 'urn' => 'default',
                 'sep_string' => '_',
@@ -420,7 +421,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['related']->id,
                 'callback' => "\$y = array_filter(array_map('trim', preg_split('/[;,]/umi', \$x)), 'trim');\n"
-                           .  "$temp = array();\n"
+                           .  "\$temp = array();\n"
                            .  "foreach (\$y as \$val) {\n"
                            .  "    \$SQL_query = \"SELECT pid FROM cms_data WHERE fid = " . (int)$catalogType->fields['article']->id . " AND value = '\" . \\RAAS\\CMS\\Material::_SQL()->real_escape_string(\$val) . \"'\";\n"
                            .  "    if (\$SQL_result = \\RAAS\\CMS\\Material::_SQL()->getvalue(\$SQL_query)) {\n"

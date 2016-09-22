@@ -299,9 +299,11 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                         $OUT['success'][(int)$Block->id] = true;
                     }
                 }
-            }
+				$OUT['DATA'] = $_POST;
+            } else {
+				$OUT['DATA'] = array();
+			}
             $OUT['localError'] = $localError;
-            $OUT['DATA'] = $_POST;
             $OUT['Item'] = $Item;
         }
         $OUT['Form'] = $Form;

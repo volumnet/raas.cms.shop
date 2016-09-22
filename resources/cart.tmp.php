@@ -20,7 +20,9 @@ if ($_GET['AJAX']) {
             'amount' => $row->amount,
             'price' => $row->realprice,
             'name' => $row->name,
-            'url' => $row2->url
+            'url' => $row2->url,
+			'image' => '/' . $row2->visImages[0]->smallURL,
+            'min' => $row2->min,
         );
     }
     echo json_encode($temp);
@@ -30,7 +32,7 @@ if ($_GET['AJAX']) {
 } elseif ($success[(int)$Block->id]) {
     ?>
     <div class="notifications">
-      <div class="alert alert-success"><?php echo ORDER_SUCCESSFULLY_SENT?></div>
+      <div class="alert alert-success"><?php echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id)?></div>
     </div>
 <?php } elseif ($Cart->items) { ?>
     <div class="cart">
@@ -49,7 +51,7 @@ if ($_GET['AJAX']) {
                 <th class="cart-table__actions-col"></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody data-role="cart__body_main">
               <?php $sum = $am = 0; foreach ($Cart->items as $row) { $row2 = new Material((int)$row->id); ?>
                 <tr data-role="cart-item" data-id="<?php echo (int)$row->id?>" data-price="<?php echo number_format($row->realprice, 2, '.', '')?>">
                   <td class="cart-table__image-col">
@@ -76,6 +78,8 @@ if ($_GET['AJAX']) {
                   </td>
                 </tr>
               <?php $sum += $row->amount * $row->realprice; $am += $row->amount; } ?>
+			</tbody>
+			<tbody>
               <?php if ($Form->id) { ?>
                   <tr>
                     <th colspan="<?php echo !$Cart->cartType->no_amount ? '3' : '2'?>"><?php echo TOTAL_SUM?>:</th>
@@ -114,7 +118,19 @@ if ($_GET['AJAX']) {
                 <?php foreach ($Form->fields as $row) { ?>
                     <div class="form-group">
                       <label for="<?php echo htmlspecialchars($row->urn)?>" class="control-label col-sm-3 col-md-2"><?php echo htmlspecialchars($row->name . ($row->required ? '*' : ''))?></label>
-                      <div class="col-sm-9 col-md-4"><?php $getField($row, $DATA)?></div>
+                      <div class="col-sm-9 col-md-4">
+                        <?php
+                        ob_start();
+                        $getField($row, $DATA);
+                        $temp = ob_get_contents();
+                        ob_end_clean();
+                        $temp = preg_replace('/id="(.*?)"/umi', 'id="${1}' . (int)$row->id . '"', $temp);
+                        if (($row->datatype == 'select') && $row->required && !$row->placeholder) {
+                            $temp = str_replace('required="required"', '', $temp);
+                        }
+                        echo $temp;
+                        ?>
+                      </div>
                     </div>
                 <?php } ?>
                 <?php if ($Form->antispam == 'captcha' && $Form->antispam_field_name) { ?>
@@ -136,7 +152,7 @@ if ($_GET['AJAX']) {
                     </div>
                 <?php } ?>
                 <div class="form-group">
-                  <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-default" type="submit"><?php echo SEND?></button></div>
+                  <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-primary" type="submit"><?php echo SEND?></button></div>
                 </div>
               </div>
             </div>
