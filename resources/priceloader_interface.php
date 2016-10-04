@@ -198,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         if ((!$uniqueColumn || ($j != $uniqueColumn)) && !$Loader->columns[$j]->Field->id && $Loader->columns[$j]->fid) {
                             if (in_array($Loader->columns[$j]->fid, array('vis', 'priority'))) {
                                 $Item->{$Loader->columns[$j]->fid} = (int)$dataRow[$j];
-                            } elseif (trim($dataRow[$j])) {
+                            } elseif (trim($dataRow[$j]) || !in_array($Loader->columns[$j]->fid, array('name', 'urn'))) {
                                 $Item->{$Loader->columns[$j]->fid} = trim($dataRow[$j]);
                             }
                         } elseif ($new && ($j == $uniqueColumn)) { // 2015-11-20, AVS: добавили URN по артикулу
