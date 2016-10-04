@@ -86,9 +86,8 @@ class EditPriceLoaderForm extends \RAAS\Form
         }
         foreach ((array)$Material_Type->fields as $row) {
             // 2015-06-01, AVS: убрали условие !$row->multiple, т.к. из прайсов могут загружаться и множественные поля
-            if (!(in_array($row->datatype, array('file', 'image')))) {
-                $CONTENT['fields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
-            }
+            // 2016-10-04, AVS: убрали ограничение !(in_array($row->datatype, array('file', 'image'))), т.к. был запрос на "хитрую" загрузку картинок из прайсов
+            $CONTENT['fields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
         }
         $p = new Page();
         $CONTENT['pages'] = array('Set' => $p->children);
