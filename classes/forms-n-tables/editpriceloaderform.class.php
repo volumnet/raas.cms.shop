@@ -72,6 +72,10 @@ class EditPriceLoaderForm extends \RAAS\Form
             array('value' => 'vis', 'caption' => $this->view->_('VISIBILITY')),
             array('value' => 'name', 'caption' => $this->view->_('NAME')),
             array('value' => 'description', 'caption' => $this->view->_('DESCRIPTION')),
+            array('value' => 'meta_title', 'caption' => $this->view->_('META_TITLE')),
+            array('value' => 'meta_description', 'caption' => $this->view->_('META_DESCRIPTION')),
+            array('value' => 'meta_keywords', 'caption' => $this->view->_('META_KEYWORDS')),
+            array('value' => 'priority', 'caption' => $this->view->_('PRIORITY')),
         );
         if ($Item->id) {
             $Material_Type = $Item->Material_Type;

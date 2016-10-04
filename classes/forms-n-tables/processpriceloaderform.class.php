@@ -56,6 +56,14 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                                     $text = $view->_('VISIBILITY');
                                 } elseif ($x->fid == 'description') {
                                     $text = $view->_('DESCRIPTION');
+                                } elseif ($x->fid == 'meta_title') {
+                                    $text = $view->_('META_TITLE');
+                                } elseif ($x->fid == 'meta_description') {
+                                    $text = $view->_('META_DESCRIPTION');
+                                } elseif ($x->fid == 'meta_keywords') {
+                                    $text = $view->_('META_KEYWORDS');
+                                } elseif ($x->fid == 'priority') {
+                                    $text = $view->_('PRIORITY');
                                 } else {
                                     $text = '';
                                 }

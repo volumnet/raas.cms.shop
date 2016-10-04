@@ -196,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     // Сначала проходим нативные поля
                     for ($j = 0; $j < count($dataRow); $j++) {
                         if ((!$uniqueColumn || ($j != $uniqueColumn)) && !$Loader->columns[$j]->Field->id && $Loader->columns[$j]->fid) {
-                            if ($Loader->columns[$j]->fid == 'vis') {
+                            if (in_array($Loader->columns[$j]->fid, array('vis', 'priority'))) {
                                 $Item->{$Loader->columns[$j]->fid} = (int)$dataRow[$j];
                             } elseif (trim($dataRow[$j])) {
                                 $Item->{$Loader->columns[$j]->fid} = trim($dataRow[$j]);
