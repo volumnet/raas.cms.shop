@@ -227,10 +227,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 // 2015-06-01, AVS: добавляем || $new , чтобы у новых товаров артикул тоже заполнялся
                                 // 2016-02-01, AVS: закомментировали trim($dataRow[$j]), т.к. пустые значения тоже должны вставляться
                                 if (/*trim($dataRow[$j]) && */(!$uniqueColumn || ($j != $uniqueColumn) || $new) && $Loader->columns[$j]->Field->id) {
-                                    $val = $Item->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($dataRow[$j]));
-                                    if ($val != $Item->fields[$Loader->columns[$j]->Field->urn]->getValues()) {
-                                        $Item->fields[$Loader->columns[$j]->Field->urn]->deleteValues();
-                                        $Item->fields[$Loader->columns[$j]->Field->urn]->addValue($val);
+                                    $field = $Item->fields[$Loader->columns[$j]->Field->urn];
+                                    $val = $field->fromRich(trim($dataRow[$j]));
+                                    $oldVal = $field->getValues();
+                                    if (in_array($field->datatype, array('file', 'image'))) {
+                                        if ($val) {
+                                            foreach ($oldVal as $att) {
+                                                Attachment::delete($att);
+                                            }
+                                            $field->deleteValues();
+                                            $field->addValue($val);
+                                        }
+                                    } elseif ($val != $oldVal) {
+                                        $field->deleteValues();
+                                        $field->addValue($val);
                                     }
                                 }
                             }
