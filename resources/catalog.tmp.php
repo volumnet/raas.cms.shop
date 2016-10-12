@@ -260,23 +260,21 @@ if ($Item) {
       if ($Page->pid) {
           eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
       }
-      ?>
-      <div class="catalog__inner">
-        <?php
-        if ($Set || $subCats) {
-            if ($subCats) {
-                ?>
-                <div class="row">
-                  <?php foreach ($subCats as $row) { ?>
-                      <div class="col-xs-4 col-sm-3">
-                        <?php $showCategory($row);?>
-                      </div>
-                  <?php } ?>
-                </div>
-                <?php
-            }
-            if ($Set) {
-                ?>
+      if ($Set || $subCats) {
+          if ($subCats) {
+              ?>
+              <div class="row">
+                <?php foreach ($subCats as $row) { ?>
+                    <div class="col-xs-4 col-sm-3">
+                      <?php $showCategory($row);?>
+                    </div>
+                <?php } ?>
+              </div>
+              <?php
+          }
+          if ($Set) {
+              ?>
+              <div class="catalog__inner">
                 <div class="row">
                   <?php foreach ($Set as $row) { ?>
                       <div class="col-sm-6 col-md-4">
@@ -284,12 +282,12 @@ if ($Item) {
                       </div>
                   <?php } ?>
                 </div>
-            <?php } ?>
-        <?php } else { ?>
-            <p><?php echo NO_RESULTS_FOUND?></p>
-        <?php } ?>
-      </div>
+              </div>
+          <?php } ?>
+      <?php } else { ?>
+          <p><?php echo NO_RESULTS_FOUND?></p>
       <?php
+      }
       if ($Set) {
           include \RAAS\CMS\Package::i()->resourcesDir . '/pages.inc.php';
           if ($Pages->pages > 1) {
