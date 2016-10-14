@@ -70,16 +70,14 @@ $price2 = ceil(($DATA['price_to'] ?: $maxPrice) / (int)$priceStep) * (int)$price
 <div class="catalog-filter">
   <form action="" method="get" data-page-id="<?php echo (int)$Page->id?>">
     <div class="row">
-      <div class="col-sm-3"><label><?php echo ARTICLE?></label></div>
-      <div class="col-sm-4"><label><?php echo PRICE?></label></div>
-    </div>
-    <div class="row">
       <div class="col-sm-3">
+        <div><label><?php echo ARTICLE?></label></div>
         <div class="catalog-filter__property">
           <input type="text" class="form-control" name="article" placeholder="Артикул" value="<?php echo htmlspecialchars($_GET['article'])?>">
         </div>
       </div>
       <div class="col-sm-4">
+        <div><label><?php echo PRICE?></label></div>
         <div class="catalog-filter__property catalog-filter__price">
           <div class="row">
             <div class="col-xs-1">от</div>
@@ -90,6 +88,7 @@ $price2 = ceil(($DATA['price_to'] ?: $maxPrice) / (int)$priceStep) * (int)$price
         </div>
       </div>
       <div class="col-sm-3">
+        <div>&nbsp;</div>
         <div class="catalog-filter__property catalog-filter__property_search">
           <button type="submit" class="btn btn-primary"><?php echo DO_SEARCH?></button>
           <a href="<?php echo htmlspecialchars($Page->url)?>" class="btn btn-default"><?php echo RESET?></a>
