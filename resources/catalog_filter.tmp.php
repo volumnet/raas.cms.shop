@@ -89,7 +89,7 @@ $price2 = ceil(($DATA['price_to'] ?: $maxPrice) / (int)$priceStep) * (int)$price
         </div>
       </div>
       <div class="col-sm-3">
-        <div>&nbsp;</div>
+        <div><label>&nbsp;</label></div>
         <div class="catalog-filter__property catalog-filter__property_search">
           <button type="submit" class="btn btn-primary"><?php echo DO_SEARCH?></button>
           <a href="<?php echo htmlspecialchars($Page->url)?>" class="btn btn-default"><?php echo RESET?></a>
