@@ -285,7 +285,7 @@ if ($Item) {
               </div>
           <?php } ?>
       <?php } else { ?>
-          <p><?php echo NO_RESULTS_FOUND?></p>
+          <div class="catalog__inner"><?php echo NO_RESULTS_FOUND?></div>
       <?php
       }
       if ($Set) {
