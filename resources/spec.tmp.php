@@ -12,22 +12,17 @@ $Set = Material::getSQLSet($SQL_query);
 eval('?' . '>' . Snippet::importByURN('item_inc')->description);
 ?>
 <?php if ($Set) { ?>
-    <div class="spec catalog">
-      <div class="catalog-carousel-block">
-        <div class="jcarousel-wrapper">
-          <div class="jcarousel" data-role="jcarousel">
-            <ul class="jcarousel-inner">
-              <?php foreach ((array)$Set as $row) { ?>
-                  <li>
-                    <?php $showItem($row); ?>
-                  </li>
-              <?php } ?>
-            </ul>
-          </div>
-          <a href="#" class="jcarousel-prev"></a>
-          <a href="#" class="jcarousel-next"></a>
+    <div class="spec">
+      <div class="spec__list" data-role="slider" data-slider-carousel="jcarousel" data-slider-duration="800" data-slider-interval="3000" data-slider-autoscroll="true">
+        <div class="spec-list">
+          <?php foreach ((array)$Set as $row) { ?>
+              <div class="spec-list__item">
+                <?php $showItem($row); ?>
+              </div>
+          <?php } ?>
         </div>
       </div>
+      <a href="#" class="spec__arrow spec__arrow_left" data-role="slider-prev"></a>
+      <a href="#" class="spec__arrow spec__arrow_right" data-role="slider-next"></a>
     </div>
-    <script src="/js/spec.js"></script>
 <?php } ?>

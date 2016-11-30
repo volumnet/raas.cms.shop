@@ -21,7 +21,7 @@ if ($_GET['AJAX']) {
             'price' => $row->realprice,
             'name' => $row->name,
             'url' => $row2->url,
-			'image' => '/' . $row2->visImages[0]->smallURL,
+			      'image' => '/' . $row2->visImages[0]->smallURL,
             'min' => $row2->min,
         );
     }
@@ -61,7 +61,7 @@ if ($_GET['AJAX']) {
                     <?php } ?>
                   </td>
                   <td class="cart-table__name-col"><a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '"' : ''?>><?php echo htmlspecialchars($row->name)?></a></td>
-                  <td data-role="price" class="cart-table__price-col" style="white-space: nowrap">
+                  <td data-role="price" class="cart-table__price-col">
                     <?php echo formatPrice($row->realprice)?> <span class="fa fa-rub"></span>
                     <?php if ($Cart->cartType->no_amount) { ?>
                         <input type="hidden" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" value="<?php echo (int)$row->amount?>" />
@@ -69,7 +69,7 @@ if ($_GET['AJAX']) {
                   </td>
                   <?php if (!$Cart->cartType->no_amount) { ?>
                       <td class="cart-table__amount-col"><input type="number" class="form-control" style="max-width: 8em" data-role="amount" name="amount[<?php echo htmlspecialchars((int)$row->id . '_' . $row->meta)?>]" min="<?php echo (int)$row2->min ?: 1?>" value="<?php echo (int)$row->amount?>" /></td>
-                      <td class="cart-table__sum-col" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
+                      <td class="cart-table__sum-col"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
                   <?php } ?>
                   <td class="cart-table__actions-col">
                     <a href="?action=delete&id=<?php echo (int)$row->id . ($row->meta ? '&meta=' . htmlspecialchars($row->meta) : '')?>" data-role="delete-item">
@@ -86,7 +86,7 @@ if ($_GET['AJAX']) {
                     <?php if (!$Cart->cartType->no_amount) { ?>
                         <th class="cart-table__amount-col"><span data-role="total-amount"><?php echo (int)$am; ?></span></td>
                     <?php } ?>
-                    <th class="cart-table__sum-col" style="white-space: nowrap"><span data-role="total-sum"><?php echo formatPrice($sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
+                    <th class="cart-table__sum-col"><span data-role="total-sum"><?php echo formatPrice($sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
                     <th class="cart-table__actions-col"></th>
                   </tr>
               <?php } ?>

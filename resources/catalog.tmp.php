@@ -16,25 +16,25 @@ $formatPrice = function($price) {
 if ($Item) {
     ?>
     <div class="catalog">
-      <div class="article_opened" itemscope itemtype="http://schema.org/Product">
+      <div class="catalog-article" itemscope itemtype="http://schema.org/Product">
         <meta itemprop="name" content="<?php echo htmlspecialchars($Item->name)?>" />
-        <div class="article__article">
+        <div class="catalog-article__article">
           <?php echo ARTICLE_SHORT?> <span itemprop="productID"><?php echo htmlspecialchars($Item->article)?></span>
         </div>
         <div class="row">
           <?php if ($Item->visImages) { ?>
               <div class="col-sm-6 col-lg-5">
-                <div class="article__images__container">
-                  <div class="article__image">
+                <div class="catalog-article__images-container">
+                  <div class="catalog-article__image">
                     <?php for ($i = 0; $i < count($Item->visImages); $i++) { ?>
                         <a itemprop="image" href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-image-num="<?php echo (int)$i?>" data-lightbox-gallery="g">
                           <img src="/<?php echo htmlspecialchars($Item->visImages[$i]->tnURL)?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
                     <?php } ?>
                   </div>
                   <?php if (count($Item->visImages) > 1) { ?>
-                      <div class="article__images hidden-xs">
+                      <div class="catalog-article__images hidden-xs">
                         <?php for ($i = 0; $i < count($Item->visImages); $i++) { $row = $Item->visImages[$i]; ?>
-                            <div data-href="/<?php echo htmlspecialchars(addslashes($row->fileURL))?>" class="article__images__image" data-image-num="<?php echo (int)$i?>">
+                            <div data-href="/<?php echo htmlspecialchars(addslashes($row->fileURL))?>" class="catalog-article__additional-image" data-image-num="<?php echo (int)$i?>">
                               <img src="/<?php echo htmlspecialchars($row->tnURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></div>
                         <?php } ?>
                       </div>
@@ -43,26 +43,28 @@ if ($Item) {
               </div>
           <?php } ?>
           <div class="col-sm-6 col-lg-7">
-            <div class="article_opened__details">
+            <div class="catalog-article__details">
               <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-                <div class="article__text">
-                  <div class="article__price<?php echo ($Item->price_old && ($Item->price_old != $Item->price)) ? ' article__price_new' : ''?>" data-price="<?php echo (float)$Item->price?>">
+                <div class="catalog-article__text">
+                  <div class="catalog-article__price-container" data-price="<?php echo (float)$Item->price?>">
                     <?php if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
-                        <span class="article__price__old"><?php echo $formatPrice((float)$Item->price_old)?></span>
+                        <span class="catalog-article__price catalog-article__price_old"><?php echo $formatPrice((float)$Item->price_old)?></span>
                     <?php } ?>
-                    <span data-role="price-container" itemprop="price" content="<?php echo (float)$Item->price?>">
-                      <?php echo $formatPrice((float)$Item->price)?>
+                    <span class="catalog-article__price <?php echo ($Item->price_old && ($Item->price_old != $Item->price)) ? ' catalog-article__price_new' : ''?>">
+                      <span data-role="price-container" itemprop="price" content="<?php echo (float)$Item->price?>">
+                        <?php echo $formatPrice((float)$Item->price)?>
+                      </span>
+                      <i class="fa fa-rub" itemprop="priceCurrency" content="RUB"></i>
                     </span>
-                    <i class="fa fa-rub" itemprop="priceCurrency" content="RUB"></i>
                   </div>
                 </div>
-                <div class="article__available">
+                <div class="catalog-article__available">
                   <link itemprop="availability" href="http://schema.org/<?php echo $Item->available ? 'InStock' : 'PreOrder'?>" />
                   <?php echo $Item->available ? '<span class="text-success">' . AVAILABLE . '</span>' : '<span class="text-danger">' . AVAILABLE_CUSTOM . '</span>'?>
                 </div>
               </div>
               <!--noindex-->
-              <form action="/cart/" class="article__controls" data-role="add-to-cart-form" data-id="<?php echo (int)$Item->id?>" data-price="<?php echo (int)$Item->price?>">
+              <form action="/cart/" class="catalog-article__controls" data-role="add-to-cart-form" data-id="<?php echo (int)$Item->id?>" data-price="<?php echo (int)$Item->price?>">
                 <?php if ($Item->available) { ?>
                     <input type="hidden" name="action" value="add" />
                     <input type="hidden" name="id" value="<?php echo (int)$Item->id?>" />
@@ -132,7 +134,7 @@ if ($Item) {
                   }
               }
               if ($propsText) {
-                  echo '<div class="article__props">
+                  echo '<div class="catalog-article__props">
                           <table class="table table-striped"><tbody>' . $propsText . '</tbody></table>
                         </div>
                         <div class="clearfix"></div>';
@@ -153,9 +155,9 @@ if ($Item) {
                     break;
                 case 'files':
                     if ($Item->files) {
-                        $text = '<div class="article__files">';
+                        $text = '<div class="catalog-article__files">';
                         foreach ($Item->files as $file) {
-                            $text .= '<div class="article__file">
+                            $text .= '<div class="catalog-article__file">
                                         <a href="/' . htmlspecialchars($file->fileURL) . '">'
                                   .  '    <span class="fa ' . $getFileIcon($file) . '"></span> '
                                   .       htmlspecialchars($file->name ?: basename($file->fileURL))
@@ -167,7 +169,7 @@ if ($Item) {
                     break;
                 case 'videos':
                     if ($Item->videos) {
-                        $text .= '<div class="article__videos">';
+                        $text .= '<div class="catalog-article__videos">';
                         for ($i = 0; $i < (count($Item->videos) / 4); $i++) {
                             $text .= '<div class="row">';
                             for ($j = $i * 4; $j < ($i + 1) * 4; $j++) {
@@ -186,7 +188,7 @@ if ($Item) {
                                         }
                                     }
                                     $text .= '<div class="col-sm-3">
-                                                <div class="article__video">
+                                                <div class="catalog-article__video">
                                                   <a href="http://youtube.com/embed/' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
                                                     <img src="http://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
                                                   </a>
@@ -216,18 +218,16 @@ if ($Item) {
                     break;
                 case 'related':
                     if ($Item->related) {
-                        $text .= '<div class="catalog__inner">
-                                    <div class="row">';
+                        $text .= '<div class="row catalog-list catalog-list_related">';
                         foreach ($Item->related as $row) {
-                            $text .= '<div class="col-sm-4">';
+                            $text .= '<div class="catalog-list__item">';
                             ob_start();
                             $showItem($row);
                             $text .= ob_get_contents();
                             ob_end_clean();
                             $text .= '</div>';
                         }
-                        $text .= '  </div>
-                                  </div>';
+                        $text .= '</div>';
                     }
                     break;
             }
@@ -256,31 +256,37 @@ if ($Item) {
     </div>
 <?php } else { ?>
     <div class="catalog">
-      <?php
-      if ($Page->pid) {
-          eval('?' . '>' . Snippet::importByURN('catalog_filter')->description);
+      <?php if ($Page->pid) { ?>
+          <div class="catalog__filter">
+            <?php eval('?' . '>' . Snippet::importByURN('catalog_filter')->description)?>
+          </div>
+          <?php
       }
       if ($Set || $subCats) {
           if ($subCats) {
               ?>
-              <div class="row">
-                <?php foreach ($subCats as $row) { ?>
-                    <div class="col-xs-4 col-sm-3">
-                      <?php $showCategory($row);?>
-                    </div>
-                <?php } ?>
+              <div class="catalog__categories-list">
+                <div class="catalog-categories-list">
+                  <?php foreach ($subCats as $row) { ?>
+                      <div class="catalog-categories-list__item">
+                        <?php $showCategory($row);?>
+                      </div>
+                  <?php } ?>
+                </div>
               </div>
               <?php
           }
           if ($Set) {
               ?>
               <div class="catalog__inner">
-                <div class="row">
-                  <?php foreach ($Set as $row) { ?>
-                      <div class="col-sm-6 col-md-4">
-                        <?php $showItem($row)?>
-                      </div>
-                  <?php } ?>
+                <div class="catalog__list">
+                  <div class="catalog-list">
+                    <?php foreach ($Set as $row) { ?>
+                        <div class="catalog-list__item">
+                          <?php $showItem($row)?>
+                        </div>
+                    <?php } ?>
+                  </div>
                 </div>
               </div>
           <?php } ?>

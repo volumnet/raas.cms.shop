@@ -7,43 +7,45 @@ $formatPrice = function($price) {
 $showItem = function($row) use ($formatPrice)
 {
     ?>
-    <div class="article">
-      <div class="article__title">
+    <div class="catalog-item">
+      <div class="catalog-item__title">
         <a href="<?php echo $row->url?>"><?php echo htmlspecialchars($row->name)?></a>
       </div>
       <?php if ($row->article) { ?>
-          <div class="article__article">
+          <div class="catalog-item__article">
             <?php echo ARTICLE_SHORT?>
             <a href="<?php echo $row->url?>"><?php echo htmlspecialchars($row->article)?></a>
           </div>
       <?php } ?>
-      <a href="<?php echo $row->url?>" class="article__image<?php echo !$row->visImages ? ' article__image_nophoto' : ''?>">
+      <a href="<?php echo $row->url?>" class="catalog-item__image<?php echo !$row->visImages ? ' catalog-item__image_nophoto' : ''?>">
         <?php if ($row->visImages) { ?>
             <img src="/<?php echo htmlspecialchars(addslashes($row->visImages[0]->smallURL))?>" alt="<?php echo htmlspecialchars($row->visImages[0]->name ?: $row->name)?>" />
         <?php } ?>
       </a>
-      <form action="/cart/" class="article__controls" data-role="add-to-cart-form" data-id="<?php echo (int)$row->id?>" data-price="<?php echo (int)$row->price?>">
+      <form action="/cart/" class="catalog-item__controls" data-role="add-to-cart-form" data-id="<?php echo (int)$row->id?>" data-price="<?php echo (int)$row->price?>">
         <?php if ($row->available) { ?>
             <input type="hidden" name="action" value="add" />
             <input type="hidden" name="id" value="<?php echo (int)$row->id?>" />
             <input type="hidden" name="back" value="1" />
             <?php /* <input type="hidden" name="amount" value="1" /> */?>
         <?php } ?>
-        <div class="article__text">
-          <div class="article__price<?php echo ($row->price_old && ($row->price_old != $row->price)) ? ' article__price_new' : ''?>" data-price="<?php echo (float)$row->price?>">
+        <div class="catalog-item__text">
+          <div class="catalog-item__price-container" data-price="<?php echo (float)$row->price?>">
             <?php if ($row->price_old && ($row->price_old != $row->price)) { ?>
-                <span class="article__price__old"><?php echo $formatPrice((float)$row->price_old)?></span>
+                <span class="catalog-item__price catalog-item__price_old"><?php echo $formatPrice((float)$row->price_old)?></span>
             <?php } ?>
-            <span data-role="price-container">
-              <?php echo $formatPrice((float)$row->price)?>
+            <span class="catalog-item__price <?php echo ($row->price_old && ($row->price_old != $row->price)) ? ' catalog-item__price_new' : ''?>">
+              <span data-role="price-container">
+                <?php echo $formatPrice((float)$row->price)?>
+              </span>
+              <i class="fa fa-rub"></i>
             </span>
-            <i class="fa fa-rub"></i>
           </div>
-          <div class="article__available"><?php echo $row->available ? '<span class="text-success">В наличии</span>' : '<span class="text-danger">Под заказ</span>'?></div>
+          <div class="catalog-item__available"><?php echo $row->available ? '<span class="text-success">В наличии</span>' : '<span class="text-danger">Под заказ</span>'?></div>
         </div>
-        <div class="article__read-more">
+        <div class="catalog-item__read-more">
           <!--noindex-->
-          <div class="article__add-to-cart">
+          <div class="catalog-item__add-to-cart">
             <?php if ($row->available) { ?>
                 <input type="number" class="form-control" autocomplete="off" name="amount" min="<?php echo (int)$row->min ?: 1?>" step="<?php echo (int)$row->step ?: 1?>" value="<?php echo (int)$row->min ?: 1?>" />
                 <button type="submit" class="btn btn-danger" title="<?php echo TO_CART?>"><span class="fa fa-shopping-cart"></span></button>

@@ -20,20 +20,43 @@ $showMenu = function($node, \RAAS\CMS\Page $current) use (&$showMenu) {
         }
         $active = ($url == \SOME\HTTP::queryString('', true));
         $semiactive = stristr(\SOME\HTTP::queryString('', true), $url) && ($url != '/');
-        if (stristr($ch, 'class="active"')) {
+        if (preg_match('/class="[\\w\\- ]*?active[\\w\\- ]*?"/umi', $ch)) {
             $semiactive = true;
         }
-        $text .= '<li' . ($active || $semiactive ? ' class="active"' : '') . '>'
-              .  '  <a' . ($active ? '' : ' href="' . htmlspecialchars($url) . '"') . '>' . htmlspecialchars($name) . '</a>'
+        $ulClasses = array(
+            'menu-left__list',
+            'menu-left__list_' . (!$level ? 'main' : 'inner'),
+            'menu-left__list_level_' . $level
+        );
+        $liClasses = array(
+            'menu-left__item',
+            'menu-left__item_' . (!$level ? 'main' : 'inner'),
+            'menu-left__item_level_' . $level
+        );
+        $aClasses = array(
+            'menu-left__link',
+            'menu-left__link_' . (!$level ? 'main' : 'inner'),
+            'menu-left__link_level_' . $level
+        );
+        if ($active || $semiactive) {
+            $liClasses[] = 'menu-left__item_active';
+            $aClasses[] = 'menu-left__link_active';
+            if ($semiactive) {
+                $liClasses[] = 'menu-left__item_semiactive';
+                $aClasses[] = 'menu-left__link_semiactive';
+            }
+        }
+        $text .= '<li class="' . implode(' ', $liClasses) . '">'
+              .  '  <a class="' . implode(' ', $aClasses) . '" ' . ($active ? '' : ' href="' . htmlspecialchars($url) . '"') . '>' . htmlspecialchars($name) . '</a>'
               .     $ch
               .  '</li>';
     }
-    return $text ? '<ul>' . $text . '</ul>' : $text;
+    return $text ? '<ul class="' . implode(' ', $ulClasses) . '">' . $text . '</ul>' : $text;
 };
 ?>
-<div class="menu_left__outer block_left">
-  <div class="menu_left__title block_left__title">
+<div class="menu-left__outer left-block">
+  <div class="menu-left__title left-block__title">
     <a href="/catalog/"><?php echo CATALOG?></a>
   </div>
-  <nav class="menu_left"><?php echo $showMenu($menuArr ?: $Item, $Page)?></nav>
+  <nav class="menu-left"><?php echo $showMenu($menuArr ?: $Item, $Page)?></nav>
 </div>

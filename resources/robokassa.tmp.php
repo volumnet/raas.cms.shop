@@ -3,7 +3,7 @@ namespace RAAS\CMS\Shop;
 use \RAAS\CMS\Material;
 use \RAAS\CMS\Package;
 
-if ($success[(int)$Block->id] || $localError) { 
+if ($success[(int)$Block->id] || $localError) {
     ?>
     <div class="notifications">
       <?php if ($success[(int)$Block->id]) { ?>
@@ -25,11 +25,11 @@ if ($success[(int)$Block->id] || $localError) {
       <table class="table table-striped cart-table" data-role="cart-table">
         <thead>
           <tr>
-            <th class="span1 cart-table__image-col"><?php echo IMAGE?></th>
-            <th class="span7 cart-table__name-col"><?php echo NAME?></th>
-            <th class="span1 cart-table__price-col"><?php echo PRICE?></th>
-            <th class="span1 cart-table__amount-col"><?php echo AMOUNT?></th>
-            <th class="span1 cart-table__sum-col"><?php echo SUM?></th>
+            <th class="cart-table__image-col"><?php echo IMAGE?></th>
+            <th class="cart-table__name-col"><?php echo NAME?></th>
+            <th class="cart-table__price-col"><?php echo PRICE?></th>
+            <th class="cart-table__amount-col"><?php echo AMOUNT?></th>
+            <th class="cart-table__sum-col"><?php echo SUM?></th>
           </tr>
         </thead>
         <tbody>
@@ -44,17 +44,17 @@ if ($success[(int)$Block->id] || $localError) {
               <td class="cart-table__name-col">
                 <a <?php echo $row2->url ? 'href="' . htmlspecialchars($row2->url) . '" target="_blank"' : ''?>><?php echo htmlspecialchars($row->name)?></a>
               </td>
-              <td data-role="price" class="span1 cart-table__price-col" style="white-space: nowrap">
+              <td data-role="price" class="cart-table__price-col">
                 <?php echo formatPrice($row->realprice)?> <span class="fa fa-rub"></span>
               </td>
-              <td class="span1 cart-table__amount-col"><?php echo (int)$row->amount?></td>
-              <td class="span1 cart-table__sum-col" style="white-space: nowrap"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
+              <td class="cart-table__amount-col"><?php echo (int)$row->amount?></td>
+              <td class="cart-table__sum-col"><span data-role="sum"><?php echo formatPrice($row->amount * $row->realprice)?></span> <span class="fa fa-rub"></span></td>
             </tr>
           <?php } ?>
           <tr>
             <th colspan="3"><?php echo TOTAL_SUM?>:</th>
             <th class="cart-table__amount-col"><span data-role="total-amount"><?php echo (int)$Item->count; ?></span></td>
-            <th class="cart-table__sum-col" style="white-space: nowrap"><span data-role="total-sum"><?php echo formatPrice($Item->sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
+            <th class="cart-table__sum-col"><span data-role="total-sum"><?php echo formatPrice($Item->sum)?></span>&nbsp;<span class="fa fa-rub"></span></th>
           </tr>
         </tbody>
       </table>

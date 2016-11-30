@@ -56,6 +56,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
         $interfaces['__raas_shop_priceloader_interface'] = $this->checkSnippet($ifo, '__raas_shop_priceloader_interface', 'PRICELOADER_STANDARD_INTERFACE', $this->stdPriceLoaderInterface);
         $interfaces['__raas_shop_yml_interface'] = $this->checkSnippet($ifo, '__raas_shop_yml_interface', 'YML_STANDARD_INTERFACE', file_get_contents($this->resourcesDir . '/yml_interface.php'));
         $interfaces['__raas_robokassa_interface'] = $this->checkSnippet($ifo, '__raas_robokassa_interface', 'ROBOKASSA_INTERFACE', file_get_contents($this->resourcesDir . '/robokassa_interface.php'));
+        $interfaces['__raas_my_orders_interface'] = $this->checkSnippet($ifo, '__raas_my_orders_interface', 'MY_ORDERS_STANDARD_INTERFACE', file_get_contents($this->resourcesDir . '/my_orders_interface.php'));
         $interfaces['catalog_interface'] = $this->checkSnippet($ifo, 'catalog_interface', 'CATALOG_INTERFACE', file_get_contents($this->resourcesDir . '/catalog_interface.php'), false);
         return $interfaces;
     }
