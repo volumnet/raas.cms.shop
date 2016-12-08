@@ -141,11 +141,12 @@ if ($Page->Material && $Block->nat) {
             // Вариант для сортировки из фильтра
             $sortFunction[] = '(' . ($IN['order'] == 'desc' ? '-1 * ' : '') . '((int)$a["' . $IN['sort'] . '"] - (int)$b["' . $IN['sort'] . '"]))';
         } else {
+            $sortFunction[] = '((int)(bool)$b["priority"] - (int)(bool)$a["priority"])';
             $sortFunction[] = '((int)$a["priority"] - (int)$b["priority"])';
             // Вариант для статической сортировки
             if (isset($Block->sort_var_name, $IN[(string)$Block->sort_var_name])) {
                 $sortKey = $IN[(string)$Block->sort_var_name];
-                if ($f = $Material_Type->fields[$sortKey]->id) {
+                if ($f = $MType->fields[$sortKey]->id) {
                     $sortFunction[] = 'strnatcmp($a["' . addslashes($sortKey) . '"], $b["' . addslashes($sortKey) . '"])';
                 }
             }
