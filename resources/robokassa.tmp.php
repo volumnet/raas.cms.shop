@@ -83,7 +83,7 @@ if ($success[(int)$Block->id] || $localError) {
                   <?php } ?>
                   <input type="hidden" name="Culture" value="<?php echo htmlspecialchars($Page->lang)?>" />
                   <input type="hidden" name="Encoding" value="UTF-8" />
-                  <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-default" type="submit"><?php echo PAY?></button></div>
+                  <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-primary" type="submit"><?php echo PAY?></button></div>
                 </form>
               </div>
           <?php } ?>
