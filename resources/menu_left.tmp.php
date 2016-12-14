@@ -1,7 +1,11 @@
 <?php
-$showMenu = function($node, \RAAS\CMS\Page $current) use (&$showMenu) {
+namespace RAAS\CMS;
+
+use SOME\HTTP;
+
+$showMenu = function($node, Page $current) use (&$showMenu) {
     static $level = 0;
-    if ($node instanceof \RAAS\CMS\Menu) {
+    if ($node instanceof Menu) {
         $children = $node->visSubMenu;
     } else {
         $children = (isset($node['children']) && is_array($node['children'])) ? $node['children'] : array();
@@ -11,15 +15,15 @@ $showMenu = function($node, \RAAS\CMS\Page $current) use (&$showMenu) {
         $level++;
         $ch = $showMenu($row, $current);
         $level--;
-        if ($node instanceof \RAAS\CMS\Menu) {
+        if ($node instanceof Menu) {
             $url = $row->url;
             $name = $row->name;
         } else {
             $url = $row['url'];
             $name = $row['name'];
         }
-        $active = ($url == \SOME\HTTP::queryString('', true));
-        $semiactive = stristr(\SOME\HTTP::queryString('', true), $url) && ($url != '/');
+        $active = ($url == HTTP::queryString('', true));
+        $semiactive = preg_match('/^' . preg_quote($url, '/') . '/umi', HTTP::queryString('', true)) && ($url != '/');
         if (preg_match('/class="[\\w\\- ]*?active[\\w\\- ]*?"/umi', $ch)) {
             $semiactive = true;
         }
