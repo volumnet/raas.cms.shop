@@ -23,7 +23,7 @@ $showMenu = function($node, Page $current) use (&$showMenu) {
             $name = $row['name'];
         }
         $active = ($url == HTTP::queryString('', true));
-        $semiactive = preg_match('/^' . preg_quote($url, '/') . '/umi', HTTP::queryString('', true)) && ($url != '/');
+        $semiactive = preg_match('/^' . preg_quote($url, '/') . '/umi', HTTP::queryString('', true)) && ($url != '/') && !$active;
         if (preg_match('/class="[\\w\\- ]*?active[\\w\\- ]*?"/umi', $ch)) {
             $semiactive = true;
         }
@@ -42,13 +42,12 @@ $showMenu = function($node, Page $current) use (&$showMenu) {
             'menu-left__link_' . (!$level ? 'main' : 'inner'),
             'menu-left__link_level_' . $level
         );
-        if ($active || $semiactive) {
+        if ($active) {
             $liClasses[] = 'menu-left__item_active';
             $aClasses[] = 'menu-left__link_active';
-            if ($semiactive) {
-                $liClasses[] = 'menu-left__item_semiactive';
-                $aClasses[] = 'menu-left__link_semiactive';
-            }
+        } elseif ($semiactive) {
+            $liClasses[] = 'menu-left__item_semiactive';
+            $aClasses[] = 'menu-left__link_semiactive';
         }
         $text .= '<li class="' . implode(' ', $liClasses) . '">'
               .  '  <a class="' . implode(' ', $aClasses) . '" ' . ($active ? '' : ' href="' . htmlspecialchars($url) . '"') . '>' . htmlspecialchars($name) . '</a>'
