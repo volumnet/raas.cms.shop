@@ -27,11 +27,6 @@ $showMenu = function($node, Page $current) use (&$showMenu) {
         if (preg_match('/class="[\\w\\- ]*?active[\\w\\- ]*?"/umi', $ch)) {
             $semiactive = true;
         }
-        $ulClasses = array(
-            'menu-left__list',
-            'menu-left__list_' . (!$level ? 'main' : 'inner'),
-            'menu-left__list_level_' . $level
-        );
         $liClasses = array(
             'menu-left__item',
             'menu-left__item_' . (!$level ? 'main' : 'inner'),
@@ -54,6 +49,11 @@ $showMenu = function($node, Page $current) use (&$showMenu) {
               .     $ch
               .  '</li>';
     }
+    $ulClasses = array(
+        'menu-left__list',
+        'menu-left__list_' . (!$level ? 'main' : 'inner'),
+        'menu-left__list_level_' . $level
+    );
     return $text ? '<ul class="' . implode(' ', $ulClasses) . '">' . $text . '</ul>' : $text;
 };
 ?>
