@@ -5,6 +5,7 @@ use \RAAS\CMS\Block_Type;
 use \RAAS\CMS\Field;
 use \RAAS\CMS\Form_Field;
 use \RAAS\CMS\Material;
+use RAAS\Application;
 
 class Module extends \RAAS\Module
 {
