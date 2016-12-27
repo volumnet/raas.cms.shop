@@ -64,12 +64,12 @@ class Module extends \RAAS\Module
     public function orders()
     {
         $Parent = new Cart_Type(isset($this->controller->nav['id']) ? (int)$this->controller->nav['id'] : 0);
-        $col_where = "classname = 'RAAS\\\\CMS\\\\Form' AND show_in_table";        
-        $SQL_query = "SELECT SQL_CALC_FOUND_ROWS tOr.*, 
-                             (SELECT SUM(tOG.amount) FROM " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG WHERE tOG.order_id = tOr.id) AS c, 
+        $col_where = "classname = 'RAAS\\\\CMS\\\\Form' AND show_in_table";
+        $SQL_query = "SELECT SQL_CALC_FOUND_ROWS tOr.*,
+                             (SELECT SUM(tOG.amount) FROM " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG WHERE tOG.order_id = tOr.id) AS c,
                              (SELECT SUM(tOG.realprice * tOG.amount) FROM " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG WHERE tOG.order_id = tOr.id) AS total_sum
                         FROM " . Order::_tablename() .  " AS tOr
-                   LEFT JOIN " . Cart_Type::_tablename() . " AS tCT ON tCT.id = tOr.pid 
+                   LEFT JOIN " . Cart_Type::_tablename() . " AS tCT ON tCT.id = tOr.pid
                    LEFT JOIN " . Field::_tablename() .  " AS tFi ON tFi.pid = tCT.form_id AND tFi.classname = 'RAAS\\\\CMS\\\\Form'
                    LEFT JOIN " . Order::_dbprefix() . "cms_data AS tD ON tD.pid = tOr.id AND tD.fid = tFi.id
                        WHERE 1 ";
@@ -82,9 +82,9 @@ class Module extends \RAAS\Module
         if (isset($this->controller->nav['search_string']) && $this->controller->nav['search_string']) {
             $SQL_query .= " AND tD.value LIKE '%" . $this->SQL->escape_like($this->controller->nav['search_string']) . "%' ";
         }
-        
+
         $SQL_query .= " GROUP BY tOr.id ORDER BY tOr.post_date DESC ";
-        $Pages = new \SOME\Pages(isset($this->controller->nav['page']) ? $this->controller->nav['page'] : 1, $this->registryGet('rowsPerPage'));
+        $Pages = new \SOME\Pages(isset($this->controller->nav['page']) ? $this->controller->nav['page'] : 1, Application::i()->registryGet('rowsPerPage'));
         $Set = Order::getSQLSet($SQL_query, $Pages);
         return array('Set' => $Set, 'Pages' => $Pages, 'Parent' => $Parent, 'columns' => $columns);
     }
