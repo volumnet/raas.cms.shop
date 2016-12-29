@@ -189,8 +189,8 @@ if ($Item) {
                                     }
                                     $text .= '<div class="col-sm-3">
                                                 <div class="catalog-article__video">
-                                                  <a href="http://youtube.com/embed/' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
-                                                    <img src="http://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
+                                                  <a href="https://youtube.com/embed/' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
+                                                    <img src="https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
                                                   </a>
                                                 </div>
                                               </div>';

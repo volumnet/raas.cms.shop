@@ -1,6 +1,5 @@
 <?php
-$smsField = function($field)
-{
+$smsField = function ($field) {
     $values = $field->getValues(true);
     $arr = array();
     foreach ($values as $key => $val) {
@@ -12,7 +11,8 @@ $smsField = function($field)
             case 'datetime-local':
                 $arr[$key] = date(DATETIMEFORMAT, strtotime($val));
                 break;
-            case 'file': case 'image':
+            case 'file':
+            case 'image':
                 $arr[$key] .= $val->name;
                 break;
             case 'htmlarea':
@@ -29,8 +29,8 @@ $smsField = function($field)
     }
     return $field->name . ': ' . implode(', ', $arr) . "\n";
 };
-$emailField = function($field)
-{
+
+$emailField = function ($field) {
     $values = $field->getValues(true);
     $arr = array();
     foreach ($values as $key => $val) {
@@ -49,13 +49,15 @@ $emailField = function($field)
                 $arr[$key] .= '<a href="mailto:' . htmlspecialchars($val) . '">' . htmlspecialchars($val) . '</a>';
                 break;
             case 'url':
-                $arr[$key] .= '<a href="http://' . htmlspecialchars(str_replace('http://', '', $val)) . '">' . htmlspecialchars($val) . '</a>';
+                $arr[$key] .= '<a href="' . (!preg_match('/^http(s)?:\\/\\//umi', trim($val)) ? 'http://' : '') . htmlspecialchars($val) . '">' . htmlspecialchars($val) . '</a>';
                 break;
             case 'file':
-                $arr[$key] .= '<a href="http://' . $_SERVER['HTTP_HOST'] . '/' . $val->fileURL . '">' . htmlspecialchars($val->name) . '</a>';
+                $arr[$key] .= '<a href="http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/' . $val->fileURL . '">' . htmlspecialchars($val->name) . '</a>';
                 break;
             case 'image':
-                $arr[$key] .= '<a href="http://' . $_SERVER['HTTP_HOST'] . '/' . $val->fileURL . '"><img src="http://' . $_SERVER['HTTP_HOST'] . '/' . $val->tnURL. '" alt="' . htmlspecialchars($val->name) . '" title="' . htmlspecialchars($val->name) . '" /></a>';
+                $arr[$key] .= '<a href="http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/' . $val->fileURL . '">
+                                 <img src="http://' . $_SERVER['HTTP_HOST'] . '/' . $val->tnURL. '" alt="' . htmlspecialchars($val->name) . '" title="' . htmlspecialchars($val->name) . '" />
+                               </a>';
                 break;
             case 'htmlarea':
                 $arr[$key] = '<div>' . $val . '</div>';
@@ -101,22 +103,22 @@ $emailField = function($field)
           <?php
           $sum = 0;
           foreach ($Item->items as $row) {
-            $url = ($forUser ? $row->url : '/admin/?p=cms&sub=main&action=edit_material&id=' . $row->id . '&pid=' . ($row->material_type->affectedPages[0]->id)); ?>
-            <tr>
-              <td>
-                <?php if ($url) { ?>
-                    <a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . $url)?>">
+              $url = ($forUser ? $row->url : '/admin/?p=cms&sub=main&action=edit_material&id=' . $row->id . '&pid=' . ($row->material_type->affectedPages[0]->id)); ?>
+              <tr>
+                <td>
+                  <?php if ($url) { ?>
+                      <a href="http<?php echo ($_SERVER['HTTPS'] == 'on' ? 's' : '')?>://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . $url)?>">
+                        <?php echo htmlspecialchars($row->name)?>
+                      </a>
+                  <?php } else { ?>
                       <?php echo htmlspecialchars($row->name)?>
-                    </a>
-                <?php } else { ?>
-                    <?php echo htmlspecialchars($row->name)?>
-                <?php } ?>
-              </td>
-              <td><?php echo htmlspecialchars($row->meta)?>&nbsp;</td>
-              <td style="text-align: right"><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
-              <td><?php echo (int)$row->amount?></td>
-              <td style="text-align: right"><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
-            </tr>
+                  <?php } ?>
+                </td>
+                <td><?php echo htmlspecialchars($row->meta)?>&nbsp;</td>
+                <td style="text-align: right"><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
+                <td><?php echo (int)$row->amount?></td>
+                <td style="text-align: right"><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+              </tr>
           <?php $sum += $row->amount * $row->realprice; } ?>
           <tr>
             <th colspan="4" style="text-align: right"><?php echo TOTAL_SUM?>:</th>
@@ -126,7 +128,7 @@ $emailField = function($field)
       </table>
     <?php } ?>
     <?php if (!$forUser) { ?>
-        <p><a href="http://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&m=shop&sub=orders&action=view&id=' . $Item->id)?>"><?php echo VIEW?></a></p>
+        <p><a href="http<?php echo ($_SERVER['HTTPS'] == 'on' ? 's' : '')?>://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&m=shop&sub=orders&action=view&id=' . $Item->id)?>"><?php echo VIEW?></a></p>
         <p>
           <small>
             <?php echo IP_ADDRESS?>: <?php echo htmlspecialchars($Item->ip)?><br />

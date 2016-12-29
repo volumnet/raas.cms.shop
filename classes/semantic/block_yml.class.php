@@ -102,7 +102,7 @@ class Block_YML extends Block
         'performance_type' => array(),
         'performed_by' => array(),
         'pickup' => array('type' => 'checkbox', 'callback' => 'return (int)$x ? "true" : "false";'),
-        'picture' => array('type' => 'image', 'multiple' => true, 'callback' => 'return ($x instanceof \\RAAS\\Attachment) ? "http://" . $_SERVER["HTTP_HOST"] . "/" . $x->fileURL : $x;'),
+        'picture' => array('type' => 'image', 'multiple' => true, 'callback' => 'return ($x instanceof \\RAAS\\Attachment) ? "http" . ($_SERVER["HTTPS"] == "on" ? "s" : "") . "://" . $_SERVER["HTTP_HOST"] . "/" . $x->fileURL : $x;'),
         'place' => array('required' => true),
         'price' => array('type' => 'number', 'min' => 0, 'step' => 0.01, 'required' => true, ),
         'price_max' => array('type' => 'number', 'min' => 0, 'step' => 0.01),

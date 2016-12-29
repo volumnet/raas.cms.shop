@@ -14,9 +14,9 @@ $getValue = function(Material $Item, $key, array $settings = array()) {
     if ($settings['field']->id) {
         if ($settings['field']->datatype == 'image') {
             if ($settings['field']->multiple) {
-                $x = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $Item->{$settings['field']->urn}[0]->fileURL;
+                $x = 'http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/' . $Item->{$settings['field']->urn}[0]->fileURL;
             } else {
-                $x = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $Item->{$settings['field']->urn}->fileURL;
+                $x = 'http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/' . $Item->{$settings['field']->urn}->fileURL;
             }
         } else {
             $x = $Item->fields[$settings['field']->urn]->doRich();
@@ -51,7 +51,7 @@ echo '<shop>';
 foreach (array('name', 'company', 'url', 'platform', 'version', 'agency', 'email', 'currencies', 'categories', 'local_delivery_cost', 'cpa') as $key) {
     switch ($key) {
         case 'url':
-            echo '<' . $key . '>http://' . htmlspecialchars($_SERVER['HTTP_HOST']) . '</' . $key . '>';
+            echo '<' . $key . '>http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . htmlspecialchars($_SERVER['HTTP_HOST']) . '</' . $key . '>';
             break;
         case 'platform':
             echo '<' . $key . '>RAAS.CMS</' . $key . '>';
@@ -130,7 +130,7 @@ foreach ($Block->types as $mtype) {
         foreach ($temp as $key) {
             switch ($key) {
                 case 'url':
-                    $offerTxt .= '<' . $key . '>http://' . $_SERVER['HTTP_HOST'] . $row->url . '</' . $key . '>';
+                    $offerTxt .= '<' . $key . '>http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $row->url . '</' . $key . '>';
                     break;
                 case 'categoryId':
                     if ($mtype->global_type) {

@@ -13,7 +13,7 @@ if ($Page->Material && $Block->nat) {
         if ((int)$Block->legacy && ($Item->pid == $Block->material_type)) {
             // Установлена переадресация
             header("HTTP/1.1 301 Moved Permanently");
-            header('Location: http://' . $_SERVER['HTTP_HOST'] . $Item->url);
+            header('Location: http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $Item->url);
             exit;
         } else {
             return;
@@ -45,7 +45,12 @@ if ($Page->Material && $Block->nat) {
         } else {
             $pages_ids = array($Page->id);
         }
-        $Set = array_filter($Set, function($row) use ($pages_ids) { return (bool)array_intersect((array)$row['pages_ids'], $pages_ids); });
+        $Set = array_filter(
+            $Set,
+            function ($row) use ($pages_ids) {
+                return (bool)array_intersect((array)$row['pages_ids'], $pages_ids);
+            }
+        );
     }
 
     $doSearch = false;
@@ -135,7 +140,12 @@ if ($Page->Material && $Block->nat) {
     }
 
     if ($Set) {
-        $Set = array_filter($Set, function($row) use ($Page) { return in_array($Page->id, (array)$row['pages_ids']); });
+        $Set = array_filter(
+            $Set,
+            function ($row) use ($Page) {
+                return in_array($Page->id, (array)$row['pages_ids']);
+            }
+        );
         $sortFunction = array();
         if (in_array($IN['sort'], array('price'))) {
             // Вариант для сортировки из фильтра
@@ -163,7 +173,7 @@ if ($Page->Material && $Block->nat) {
         $Set = \SOME\SOME::getArraySet($Set, $Pages);
         $nativeFields = Material::_classes();
         $nativeFields = $nativeFields['RAAS\\CMS\\Material']['fields'];
-        $Set = array_map(function($row) use ($nativeFields) {
+        $Set = array_map(function ($row) use ($nativeFields) {
             $native = array_intersect_key($row, array_flip($nativeFields));
             $row2 = new Material($native);
             $row2->metacache = $row;
