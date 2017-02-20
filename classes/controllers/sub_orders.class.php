@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\Redirector as Redirector;
 use \RAAS\Attachment as Attachment;
 use \ArrayObject as ArrayObject;
@@ -15,14 +16,17 @@ use \RAAS\StdSub as StdSub;
 class Sub_Orders extends \RAAS\Abstract_Sub_Controller
 {
     protected static $instance;
-    
+
     public function run()
     {
         switch ($this->action) {
             case 'view':
                 $this->{$this->action}();
                 break;
-            case 'chvis': case 'delete': case 'vis': case 'invis':
+            case 'chvis':
+            case 'delete':
+            case 'vis':
+            case 'invis':
                 $ids = (array)$_GET['id'];
                 if (in_array('all', $ids, true)) {
                     $pids = (array)$_GET['pid'];
@@ -32,7 +36,9 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
                         $items = Order::getSet(array('where' => "pid IN (" . implode(", ", $pids) . ")", 'orderBy' => "id"));
                     }
                 } else {
-                    $items = array_map(function($x) { return new Order((int)$x); }, $ids);
+                    $items = array_map(function ($x) {
+                        return new Order((int)$x);
+                    }, $ids);
                 }
                 $items = array_values($items);
                 $f = $this->action;
@@ -43,8 +49,8 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
                 break;
         }
     }
-    
-    
+
+
     protected function orders()
     {
         $IN = $this->model->orders();
@@ -52,17 +58,18 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
         $Pages = $IN['Pages'];
         $Item = $IN['Parent'];
         $Cart_Types = Cart_Type::getSet();
-        
+
         $OUT['Item'] = $Item;
         $OUT['columns'] = $IN['columns'];
         $OUT['Set'] = $Set;
         $OUT['Pages'] = $Pages;
         $OUT['Cart_Types'] = $Cart_Types;
         $OUT['search_string'] = isset($_GET['search_string']) ? (string)$_GET['search_string'] : '';
+        $OUT['statuses'] = Order_Status::getSet();
         $this->view->orders($OUT);
     }
-    
-    
+
+
     protected function view()
     {
         $Item = new Order($this->id);
