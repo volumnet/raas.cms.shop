@@ -1,12 +1,15 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\CMS\Material;
 use \RAAS\CMS\Package;
+
 function formatPrice($price)
 {
     $remainder = (float)$price - (float)(int)$price;
     return str_replace(' ', '&nbsp;', number_format((float)$price, ($remainder > 0) ? 2 : 0, ',', ' ' ));
 }
+
 if ($_GET['AJAX']) {
     $temp = array();
     $temp['count'] = (int)$Cart->count;

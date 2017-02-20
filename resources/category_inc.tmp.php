@@ -1,4 +1,6 @@
 <?php
+namespace RAAS\CMS\Shop;
+
 $showCategory = function($row)
 {
     $queryString = http_build_query(array_intersect_key($_GET, array_flip(array('brand', 'model', 'engine'))));

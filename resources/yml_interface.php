@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \SimpleXMLElement;
 use \RAAS\CMS\Material;
 use \RAAS\CMS\Material_Field;

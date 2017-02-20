@@ -1,3 +1,7 @@
+<?php
+namespace RAAS\CMS\Shop;
+
+?>
 <!--noindex-->
 <a href="/cart/" data-role="cart-block" class="cart-main" style="display: none" rel="nofollow">
   <?php echo IN_YOUR_CART?><br />
