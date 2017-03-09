@@ -7,6 +7,7 @@ use \RAAS\CMS\DATETIMEFORMAT;
 use \RAAS\CMS\Material_Field;
 use \RAAS\CMS\Package;
 use \Mustache_Engine;
+use RAAS\Attachment;
 
 $convertMeta = function ($x) {
     return $x;
