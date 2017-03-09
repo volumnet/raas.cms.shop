@@ -229,7 +229,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                                                 $att->upload = $_FILES[$row->urn]['tmp_name'][$key];
                                                 $att->filename = $_FILES[$row->urn]['name'][$key];
                                                 $att->mime = $_FILES[$row->urn]['type'][$key];
-                                                $att->parent = $Material;
+                                                $att->parent = $Item;
                                                 if ($row->datatype == 'image') {
                                                     $att->image = 1;
                                                     if ($temp = (int)$this->package->registryGet('maxsize')) {
@@ -259,7 +259,7 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                                             $att->upload = $_FILES[$row->urn]['tmp_name'];
                                             $att->filename = $_FILES[$row->urn]['name'];
                                             $att->mime = $_FILES[$row->urn]['type'];
-                                            $att->parent = $Material;
+                                            $att->parent = $Item;
                                             if ($row->datatype == 'image') {
                                                 $att->image = 1;
                                                 if ($temp = (int)$this->package->registryGet('maxsize')) {
