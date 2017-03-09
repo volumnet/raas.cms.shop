@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \DOMDocument;
 
 header('Content-Type: application/xml');

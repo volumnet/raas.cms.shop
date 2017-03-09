@@ -1,4 +1,6 @@
 <?php
+namespace RAAS\CMS\Shop;
+
 $formatPrice = function($price) {
     $remainder = (float)$price - (float)(int)$price;
     return str_replace(' ', '&nbsp;', number_format((float)$price, ($remainder > 0) ? 2 : 0, ',', ' ' ));

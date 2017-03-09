@@ -1,4 +1,6 @@
 <?php
+namespace RAAS\CMS\Shop;
+
 $getFileIcon = function($row)
 {
     $ext = pathinfo($row->fileURL, PATHINFO_EXTENSION);

@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\CMS\Material;
 use \RAAS\CMS\Package;
 use \RAAS\CMS\Sub_Main as Package_Sub_Main;
@@ -40,11 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         // Подготовить реальные файлы к загрузке
-        $processFile = function($file) use (&$processFile, $mtypes, $Loader, $articles) {
+        $processFile = function ($file) use (&$processFile, $mtypes, $Loader, $articles) {
             $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
             $proceedFiles = array();
             switch ($ext) {
-                case 'jpg': case 'jpeg': case 'png': case 'gif':
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                case 'gif':
                     if ($type = getimagesize($file['tmp_name'])) {
                         $file['type'] = image_type_to_mime_type($type[2]);
                         $temp = array();
@@ -195,7 +199,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $st = microtime(true);
     $mtypes = array_merge(array((int)$Loader->Material_Type->id), (array)$Loader->Material_Type->all_children_ids);
     if ($Loader->Image_Field->id) {
-
         $SQL_query = "SELECT tM.*, ";
         if ($Loader->Unique_Field->id) {
             $SQL_query .= " tD.value ";
@@ -250,7 +253,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         } else {
             return array('localError' => array(array('name' => 'INVALID', 'value' => 'loader', 'description' => Module::i()->view->_('IMAGES_NOT_FOUND'))));
         }
-
     } else {
         return array('localError' => array(array('name' => 'INVALID', 'value' => 'loader', 'description' => Module::i()->view->_('LOADER_HAS_NO_IMAGE_FIELD'))));
     }

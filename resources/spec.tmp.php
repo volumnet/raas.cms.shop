@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS;
+
 $MType = Material_Type::importByURN('catalog');
 $Field = $MType->fields['spec'];
 $SQL_query = "SELECT tM.* FROM " . Material::_tablename() . " AS tM

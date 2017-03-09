@@ -1,4 +1,6 @@
 <?php
+namespace RAAS\CMS\Shop;
+
 $smsField = function ($field) {
     $values = $field->getValues(true);
     $arr = array();

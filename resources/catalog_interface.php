@@ -128,7 +128,7 @@ if ($Page->Material && $Block->nat) {
                     $temp[$cat->id]++;
                 }
             }
-            $cat->rollback();
+            $cat->reload();
             unset($cat);
         }
         $cats = array();

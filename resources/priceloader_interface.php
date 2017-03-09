@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \Exception;
 use \RAAS\CMS\Page;
 use \RAAS\CMS\Material;
@@ -31,7 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         $type = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         switch ($type) {
-            case 'xls': case 'xlsx':
+            case 'xls':
+            case 'xlsx':
                 switch ($type) {
                     case 'xls':
                         $readerName = 'Excel5';
@@ -62,9 +64,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 unset($csv);
                 break;
         }
-        $DATA = array_map(function($x) use ($cols) { return array_slice($x, $cols); }, $DATA);
+        $DATA = array_map(function ($x) use ($cols) {
+            return array_slice($x, $cols);
+        }, $DATA);
         $DATA = array_slice($DATA, $rows);
-        $DATA = array_filter($DATA, function($x) { return count(array_filter($x, 'trim')); }); // Фильтруем пустые строки
+        $DATA = array_filter($DATA, function ($x) {
+            return count(array_filter($x, 'trim'));
+        }); // Фильтруем пустые строки
         $DATA = array_values($DATA);
         if (!$DATA || ((count($DATA) == 1) && (count(array_filter($DATA[0])) == 1))) {
             return array('localError' => array(array('name' => 'INVALID', 'value' => 'file', 'description' => Module::i()->view->_('ERR_EMPTY_FILE'))));
@@ -87,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
         // Поиск товара по уникальному полю
-        $getItemByUniqueField = function($text) use ($Loader) {
+        $getItemByUniqueField = function ($text) use ($Loader) {
             if (trim($text) && $Loader->ufid) {
                 $SQL_query = " SELECT tM.* FROM " . Material::_tablename() . " AS tM ";
                 if ($Loader->Unique_Field->id) {
@@ -105,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
         // Поиск товара по всем полям
-        $getItemByEntireRow = function(array $row = array()) use ($Loader) {
+        $getItemByEntireRow = function (array $row = array()) use ($Loader) {
             $SQL_from = array(Material::_tablename() . " AS tM");
             $SQL_where = array();
             for ($i = 0; $i < max(count($row), count($Loader->columns)); $i++) {
@@ -135,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
         // Возвращает последнюю категорию из backtrace
-        $lastCat = function() use (&$backtrace, &$Page) {
+        $lastCat = function () use (&$backtrace, &$Page) {
             if ($backtrace) {
                 $temp = array_reverse($backtrace);
                 $temp = array_values($temp);
@@ -146,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
         // Возвращает последний уровень из backtrace
-        $lastLevel = function() use (&$backtrace) {
+        $lastLevel = function () use (&$backtrace) {
             if ($backtrace) {
                 $temp = array_reverse($backtrace, true);
                 $temp = array_keys($temp);
@@ -157,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
         // Усечение backtrace
-        $cropBacktrace = function($level) use (&$backtrace) {
+        $cropBacktrace = function ($level) use (&$backtrace) {
             $keys = array_keys($backtrace);
             foreach ($keys as $key) {
                 if ($key >= $level) {
@@ -510,7 +516,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 } else {
     ini_set('max_execution_time', 900);
     // Выгрузка прайса
-    $downloadPrice = function(Page $Page = null, $level = 0) use ($Loader, &$downloadPrice, $cols, $rows) {
+    $downloadPrice = function (Page $Page = null, $level = 0) use ($Loader, &$downloadPrice, $cols, $rows) {
         static $mtypes;
         if (!$mtypes) {
             $mtypes = array_merge(array((int)$Loader->Material_Type->id), (array)$Loader->Material_Type->all_children_ids);
@@ -568,7 +574,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($col->Field->id) {
                     if ($col->Field->multiple) {
                         $x = $row->fields[$col->Field->urn]->getValues(true);
-                        $x = array_map(function($y) use ($col) { return $col->Field->doRich($y); }, $x);
+                        $x = array_map(function ($y) use ($col) {
+                            return $col->Field->doRich($y);
+                        }, $x);
                     } else {
                         $x = $row->fields[$col->Field->urn]->doRich();
                     }
@@ -604,7 +612,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $DATA = $downloadPrice($Page);
     if ($cols > 0) {
-        $DATA = array_map(function($row) use ($cols) { return array_merge(array_fill(0, (int)$cols, ''), (array)$row); }, $DATA);
+        $DATA = array_map(function ($row) use ($cols) {
+            return array_merge(array_fill(0, (int)$cols, ''), (array)$row);
+        }, $DATA);
     }
     if ($rows > 1) {
         $DATA = array_merge(array_fill(0, (int)($rows - 1), array('')), $DATA);
@@ -614,7 +624,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
     $filename = date('Y-m-d') . ' - ' . $Page->name;
     switch ($type) {
-        case 'xls': case 'xlsx':
+        case 'xls':
+        case 'xlsx':
             $filename .= '.' . $type;
             $x = new PHPExcel();
             $x->setActiveSheetIndex(0)->setTitle($Page->name);

@@ -1,8 +1,9 @@
 <?php
-use \RAAS\CMS\Snippet;
-use \RAAS\Application;
-use \RAAS\CMS\Shop\Order;
-use \RAAS\CMS\Shop\Order_History;
+namespace RAAS\CMS\Shop;
+
+use RAAS\CMS\Snippet;
+use RAAS\Application;
+
 if (in_array($_GET['action'], array('result', 'success', 'fail')) && $_REQUEST['InvId']) {
     // Подписанное значение - либо RESULT URL, либо SUCCESS URL, либо FAIL URL
     $inv_id = $_REQUEST['InvId'];

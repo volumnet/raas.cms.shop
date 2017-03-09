@@ -81,7 +81,26 @@ class Module extends \RAAS\Module
             $columns = Form_Field::getSet(array('where' => $col_where));
         }
         if (isset($this->controller->nav['search_string']) && $this->controller->nav['search_string']) {
-            $SQL_query .= " AND tD.value LIKE '%" . $this->SQL->escape_like($this->controller->nav['search_string']) . "%' ";
+            $SQL_query .= " AND (
+                                (tOr.id = '" . $this->SQL->real_escape_string($this->controller->nav['search_string']) . "') OR
+                                (tOr.ip LIKE '%" . $this->SQL->escape_like($this->controller->nav['search_string']) . "%') OR
+                                (tD.value LIKE '%" . $this->SQL->escape_like($this->controller->nav['search_string']) . "%')
+                            ) ";
+        }
+        if (isset($this->controller->nav['status_id']) && ((string)$this->controller->nav['status_id'] !== '')) {
+            $SQL_query .= " AND tOr.status_id = " . (int)$this->controller->nav['status_id'];
+        }
+        if (isset($this->controller->nav['from']) && $this->controller->nav['from']) {
+            $t = strtotime($this->controller->nav['from']);
+            if ($t > 0) {
+                $SQL_query .= " AND tOr.post_date >= '" . date('Y-m-d H:i:s', $t) . "'";
+            }
+        }
+        if (isset($this->controller->nav['to']) && $this->controller->nav['to']) {
+            $t = strtotime($this->controller->nav['to']);
+            if ($t > 0) {
+                $SQL_query .= " AND tOr.post_date <= '" . date('Y-m-d H:i:s', $t) . "'";
+            }
         }
 
         $SQL_query .= " GROUP BY tOr.id ORDER BY tOr.post_date DESC ";
