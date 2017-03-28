@@ -262,23 +262,25 @@ if ($Item) {
           </div>
           <?php
       }
-      if ($Set || $subCats) {
-          if ($subCats) {
-              ?>
-              <div class="catalog__categories-list">
-                <div class="catalog-categories-list">
-                  <?php foreach ($subCats as $row) { ?>
-                      <div class="catalog-categories-list__item">
-                        <?php $showCategory($row);?>
-                      </div>
-                  <?php } ?>
+      ?>
+      <div class="catalog__inner">
+        <?php
+        if ($Set || $subCats) {
+            if ($subCats) {
+                ?>
+                <div class="catalog__categories-list">
+                  <div class="catalog-categories-list">
+                    <?php foreach ($subCats as $row) { ?>
+                        <div class="catalog-categories-list__item">
+                          <?php $showCategory($row);?>
+                        </div>
+                    <?php } ?>
+                  </div>
                 </div>
-              </div>
-              <?php
-          }
-          if ($Set) {
-              ?>
-              <div class="catalog__inner">
+                <?php
+            }
+            if ($Set) {
+                ?>
                 <div class="catalog__list">
                   <div class="catalog-list">
                     <?php foreach ($Set as $row) { ?>
@@ -288,12 +290,12 @@ if ($Item) {
                     <?php } ?>
                   </div>
                 </div>
-              </div>
-          <?php } ?>
-      <?php } else { ?>
-          <div class="catalog__inner"><?php echo NO_RESULTS_FOUND?></div>
+            <?php } ?>
+        <?php } else { ?>
+            <p><?php echo NO_RESULTS_FOUND?></p>
+        <?php } ?>
+      </div>
       <?php
-      }
       if ($Set) {
           include \RAAS\CMS\Package::i()->resourcesDir . '/pages.inc.php';
           if ($Pages->pages > 1) {
