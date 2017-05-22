@@ -112,7 +112,7 @@ if ($Item) {
                               case 'article':
                                   $propsText .= ' <tr>
                                                     <th>' . htmlspecialchars($val->name) . ': </th>
-                                                    <td itemprop="productId">' . $val['doRich'] . '</td>
+                                                    <td itemprop="productID">' . $val['doRich'] . '</td>
                                                   </tr>';
                                   break;
                               case 'brand':
