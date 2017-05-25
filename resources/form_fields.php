@@ -20,6 +20,9 @@ $smsField = function ($field) {
             case 'htmlarea':
                 $arr[$key] = strip_tags($val);
                 break;
+            case 'material':
+                $arr[$key] = $val->name;
+                break;
             default:
                 if (!$field->multiple && ($field->datatype == 'checkbox')) {
                     $arr[$key] = $val ? _YES : _NO;
@@ -63,6 +66,11 @@ $emailField = function ($field) {
                 break;
             case 'htmlarea':
                 $arr[$key] = '<div>' . $val . '</div>';
+                break;
+            case 'material':
+                $arr[$key] = '<a href="http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/' . htmlspecialchars($val->url) . '">
+                                ' . htmlspecialchars($val->name) . '
+                              </a>';
                 break;
             default:
                 if (!$field->multiple && ($field->datatype == 'checkbox')) {
