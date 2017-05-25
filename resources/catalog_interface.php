@@ -20,6 +20,19 @@ if ($Page->Material && $Block->nat) {
         }
     }
     $OUT['Item'] = $Item;
+
+    // Отзывы
+    // $commentsMType = Material_Type::importByURN('goods_comments');
+    // $commentMaterialField = $commentsMType->fields['material'];
+    // $SQL_query = "SELECT tM.*
+    //                 FROM " . Material::_tablename() . " AS tM
+    //                 JOIN cms_data AS tD ON tD.fid = " . (int)$commentMaterialField->id . " AND tD.pid = tM.id
+    //                WHERE tM.pid = " . (int)$commentsMType->id . " AND tM.vis AND tD.value = " . (int)$Page->Material->id
+    //            . " ORDER BY tM.post_date DESC";
+    // $comments = Material::getSQLSet($SQL_query);
+    // $OUT['comments'] = $comments;
+    // $OUT['commentFormBlock'] = Block::spawn(71);
+
     foreach (array('name', 'meta_title', 'meta_keywords', 'meta_description', 'h1') as $key) {
         $Page->{'old' . ucfirst($key)} = $Page->$key;
         $Page->$key = $Item->$key;

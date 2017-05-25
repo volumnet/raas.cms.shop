@@ -203,18 +203,15 @@ if ($Item) {
                     }
                     break;
                 case 'reviews':
-                    if ($hasComments) {
-                        if ($comments) {
-                            $name .= ' (' . count($comments) . ')';
-                            if ($comments) {
-                                ob_start();
-                                eval('?' . '>' . Snippet::importByURN('goods_comments')->description);
-                                $commentFormBlock->process($Page);
-                                $text .= ob_get_contents();
-                                ob_end_clean();
-                            }
-                        }
+                    $name = REVIEWS . ($comments ? ' (' . count($comments) . ')' : '');
+                    ob_start();
+                    if ($comments) {
+                        eval('?' . '>' . Snippet::importByURN('goods_comments')->description);
                     }
+                    if ($commentFormBlock) {
+                        $commentFormBlock->process($Page);
+                    }
+                    $text .= ob_get_clean();
                     break;
                 case 'related':
                     if ($Item->related) {
@@ -223,8 +220,7 @@ if ($Item) {
                             $text .= '<div class="catalog-list__item">';
                             ob_start();
                             $showItem($row);
-                            $text .= ob_get_contents();
-                            ob_end_clean();
+                            $text .= ob_get_clean();
                             $text .= '</div>';
                         }
                         $text .= '</div>';
