@@ -278,6 +278,15 @@ class Webmaster extends \RAAS\CMS\Webmaster
                 'show_in_table' => 0,
             ));
             $F->commit();
+
+            $F = new Form_Field(array(
+                'pid' => $FRM->id,
+                'name' => $this->view->_('AGREE_PRIVACY_POLICY'),
+                'urn' => 'agree',
+                'required' => 1,
+                'datatype' => 'checkbox',
+            ));
+            $F->commit();
         }
         $forms['order'] = $FRM;
         return $forms;
