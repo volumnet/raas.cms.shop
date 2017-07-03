@@ -182,6 +182,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     if ($f = $Loader->columns[$j]->Callback) {
                         $dataRow[$j] = $f($dataRow[$j]);
                     }
+                    if ((!$uniqueColumn || ($j != $uniqueColumn)) && !$Loader->columns[$j]->Field->id && $Loader->columns[$j]->fid) {
+                        if (in_array($Loader->columns[$j]->fid, array('vis', 'priority'))) {
+                            $dataRow[$j] = (int)$dataRow[$j];
+                        }
+                    } elseif (is_array($dataRow[$j])) {
+                        foreach ($dataRow[$j] as $k => $val) {
+                            if ($val = $Loader->Material_Type->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($val))) {
+                                $dataRow[$j][$k] = $val;
+                            }
+                        }
+                    } else {
+                        $dataRow[$j] = $Loader->Material_Type->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($dataRow[$j]));
+                    }
                 }
                 $itemSet = null;
                 // 2015-06-01, AVS: добавили понятие $new (тж. 11 строками ниже)
@@ -203,9 +216,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     for ($j = 0; $j < count($dataRow); $j++) {
                         if ((!$uniqueColumn || ($j != $uniqueColumn)) && !$Loader->columns[$j]->Field->id && $Loader->columns[$j]->fid) {
                             if (in_array($Loader->columns[$j]->fid, array('vis', 'priority'))) {
-                                $Item->{$Loader->columns[$j]->fid} = (int)$dataRow[$j];
+                                $Item->{$Loader->columns[$j]->fid} = $dataRow[$j];
                             } elseif (trim($dataRow[$j]) || !in_array($Loader->columns[$j]->fid, array('name', 'urn'))) {
-                                $Item->{$Loader->columns[$j]->fid} = trim($dataRow[$j]);
+                                $Item->{$Loader->columns[$j]->fid} = $dataRow[$j];
                             }
                         } elseif ($new && ($j == $uniqueColumn)) { // 2015-11-20, AVS: добавили URN по артикулу
                             if (trim($dataRow[$j])) {
@@ -216,7 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $id = $Item->id;
                     if (!$test) {
                         $Item->commit();
-                        if ($Item->id && !$Loader->Material_Type->global_type && $context->id && !in_array($context->id, $Item->pages_ids)) {
+                        if ($Item->id && !$Loader->Material_Type->global_type && $context->id && ($new || ($context->id != $Page->id)) && !in_array($context->id, $Item->pages_ids)) {
                             Material::_SQL()->add(Material::_dbprefix() . "cms_materials_pages_assoc", array('id' => (int)$Item->id, 'pid' => (int)$context->id));
                         }
                         // Проходим доп. поля
@@ -225,7 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             if (is_array($dataRow[$j])) {
                                 $Item->fields[$Loader->columns[$j]->Field->urn]->deleteValues();
                                 foreach ($dataRow[$j] as $val) {
-                                    if ($val = $Item->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($val))) {
+                                    if ($val !== null) {
                                         $Item->fields[$Loader->columns[$j]->Field->urn]->addValue($val);
                                     }
                                 }
@@ -234,7 +247,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 // 2016-02-01, AVS: закомментировали trim($dataRow[$j]), т.к. пустые значения тоже должны вставляться
                                 if (/*trim($dataRow[$j]) && */(!$uniqueColumn || ($j != $uniqueColumn) || $new) && $Loader->columns[$j]->Field->id) {
                                     $field = $Item->fields[$Loader->columns[$j]->Field->urn];
-                                    $val = $field->fromRich(trim($dataRow[$j]));
+                                    $val = $dataRow[$j];
                                     $oldVal = $field->getValues();
                                     if (in_array($field->datatype, array('file', 'image'))) {
                                         if ($val) {
