@@ -15,6 +15,7 @@ use \PHPExcel_Cell;
 use \PHPExcel_IOFactory;
 use \PHPExcel_Style_NumberFormat;
 use \PHPExcel_Cell_DataType;
+use SOME\Text;
 
 $st = microtime(true);
 require_once Application::i()->includeDir . '/phpexcel/Classes/PHPExcel.php';
