@@ -15,7 +15,7 @@ use \PHPExcel_Cell;
 use \PHPExcel_IOFactory;
 use \PHPExcel_Style_NumberFormat;
 use \PHPExcel_Cell_DataType;
-use SOME\Text;
+use SOME\SOME;
 
 $st = microtime(true);
 require_once Application::i()->includeDir . '/phpexcel/Classes/PHPExcel.php';
@@ -189,8 +189,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         }
                     } elseif (is_array($dataRow[$j])) {
                         foreach ($dataRow[$j] as $k => $val) {
-                            if ($val = $Loader->Material_Type->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($val))) {
-                                $dataRow[$j][$k] = $val;
+                            if ($val instanceof SOME) {
+                                $dataRow[$j][$k] = (int)$val->id;
+                            } elseif (!is_object($val) && !is_array($val)) {
+                                if ($val = $Loader->Material_Type->fields[$Loader->columns[$j]->Field->urn]->fromRich(trim($val))) {
+                                    $dataRow[$j][$k] = $val;
+                                }
                             }
                         }
                     } else {
