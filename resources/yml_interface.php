@@ -11,7 +11,7 @@ ini_set('max_execution_time', 300);
 //     ob_end_clean();
 // }
 
-$getValue = function(Material $Item, $key, array $settings = array()) {
+$getValue = function (Material $Item, $key, array $settings = array()) {
     if ($settings['field']->id) {
         if ($settings['field']->datatype == 'image') {
             if ($settings['field']->multiple) {
@@ -123,11 +123,11 @@ foreach ($Block->types as $mtype) {
     $ignoredFields = array_filter($ignoredFields);
     $ignoredFields = array_values($ignoredFields);
 
+    $temp = array_merge(Block_YML::$defaultFields[0], (array)Block_YML::$ymlTypes[$mtype->settings['type']], Block_YML::$defaultFields[1]);
     foreach ($SQL_result as $row2) {
         $row = new Material($row2);
         $offerTxt = '';
         $offerAttrs = '';
-        $temp = array_merge(Block_YML::$defaultFields[0], (array)Block_YML::$ymlTypes[$mtype->settings['type']], Block_YML::$defaultFields[1]);
         foreach ($temp as $key) {
             switch ($key) {
                 case 'url':
@@ -143,6 +143,15 @@ foreach ($Block->types as $mtype) {
                         foreach ($cats as $val) {
                             $offerTxt .= '<' . $key . '>' . (int)$val . '</' . $key . '>';
                         }
+                    }
+                    break;
+                case 'oldprice':
+                    if (isset($mtype->settings['fields'][$key]) && ($arr = $mtype->settings['fields'][$key])) {
+                        $v = (float)$getValue($row, $key, $arr);
+                        if ($v) {
+                            $offerTxt .= '<' . $key . '>' . htmlspecialchars((float)$v) . '</' . $key . '>';
+                        }
+                        unset($v);
                     }
                     break;
                 default:
@@ -216,7 +225,6 @@ foreach ($Block->types as $mtype) {
                     }
                 }
             }
-
         }
         echo '<offer id="' . (int)$row->id . '"' . ($mtype->settings['type'] ? ' type="' . htmlspecialchars($mtype->settings['type']) . '"' : '') . $offerAttrs . '>' . $offerTxt . '</offer>';
         $row->rollback();
