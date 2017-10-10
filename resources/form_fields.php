@@ -124,7 +124,7 @@ $emailField = function ($field) {
                       <?php echo htmlspecialchars($row->name)?>
                   <?php } ?>
                 </td>
-                <td><?php echo htmlspecialchars($row->meta)?>&nbsp;</td>
+                <td><?php echo htmlspecialchars($row->__get('meta'))?>&nbsp;</td>
                 <td style="text-align: right"><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
                 <td><?php echo (int)$row->amount?></td>
                 <td style="text-align: right"><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
