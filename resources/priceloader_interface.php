@@ -132,10 +132,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     $SQL_where[] = $tmp_where;
                 }
             }
-            $SQL_query = "SELECT tM.* FROM " . implode(" JOIN ", $SQL_from) . " WHERE " . ($SQL_where ? implode(" AND ", $SQL_where) : " 1 ") . " ORDER BY tM.id";
-            $SQL_result = Material::getSQLSet($SQL_query);
-            if ($SQL_result) {
-                return $SQL_result;
+            if ($SQL_where) {
+                $SQL_query = "SELECT tM.* FROM " . implode(" JOIN ", $SQL_from) . " WHERE " . implode(" AND ", $SQL_where) . " ORDER BY tM.id";
+                $SQL_result = Material::getSQLSet($SQL_query);
+                if ($SQL_result) {
+                    return $SQL_result;
+                }
             }
             return array();
         };
@@ -204,8 +206,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $itemSet = null;
                 // 2015-06-01, AVS: добавили понятие $new (тж. 11 строками ниже)
                 $new = false;
-                if (($uniqueColumn !== null) && trim($dataRow[$uniqueColumn])) {
-                    $itemSet = $getItemByUniqueField(trim($dataRow[$uniqueColumn]));
+                $itemSet = array();
+                if ($uniqueColumn !== null) {
+                    if (trim($dataRow[$uniqueColumn])) {
+                        $itemSet = $getItemByUniqueField(trim($dataRow[$uniqueColumn]));
+                    }
                 } else {
                     $itemSet = $getItemByEntireRow($dataRow);
                 }
