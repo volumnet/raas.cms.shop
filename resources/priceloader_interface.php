@@ -233,6 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
                     $id = $Item->id;
                     if (!$test) {
+                        $affectedFields = array();
                         $Item->commit();
                         if ($Item->id && !$Loader->Material_Type->global_type && $context->id && ($new || ($context->id != $Page->id)) && !in_array($context->id, $Item->pages_ids)) {
                             Material::_SQL()->add(Material::_dbprefix() . "cms_materials_pages_assoc", array('id' => (int)$Item->id, 'pid' => (int)$context->id));
@@ -245,6 +246,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 foreach ($dataRow[$j] as $val) {
                                     if ($val !== null) {
                                         $Item->fields[$Loader->columns[$j]->Field->urn]->addValue($val);
+                                        $affectedFields[] = $Loader->columns[$j]->Field->urn;
                                     }
                                 }
                             } else {
@@ -261,12 +263,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             }
                                             $field->deleteValues();
                                             $field->addValue($val);
+                                            $affectedFields[] = $Loader->columns[$j]->Field->urn;
                                         }
                                     } elseif ($val != $oldVal) {
                                         $field->deleteValues();
                                         $field->addValue($val);
+                                        $affectedFields[] = $Loader->columns[$j]->Field->urn;
                                     }
                                 }
+                            }
+                        }
+                        foreach ($Item->fields as $field) {
+                            if ($field->defval && !in_array($field->urn, $affectedFields)) {
+                                $field->addValue($field->defval);
                             }
                         }
                     }
