@@ -123,12 +123,16 @@ foreach ($Block->types as $mtype) {
     $ignoredFields = array_filter($ignoredFields);
     $ignoredFields = array_values($ignoredFields);
 
-    $temp = array_merge(Block_YML::$defaultFields[0], (array)Block_YML::$ymlTypes[$mtype->settings['type']], Block_YML::$defaultFields[1]);
+    $stdFieldsNames = array_merge(
+        Block_YML::$defaultFields[0],
+        (array)Block_YML::$ymlTypes[$mtype->settings['type']],
+        Block_YML::$defaultFields[1]
+    );
     foreach ($SQL_result as $row2) {
         $row = new Material($row2);
         $offerTxt = '';
         $offerAttrs = '';
-        foreach ($temp as $key) {
+        foreach ($stdFieldsNames as $key) {
             switch ($key) {
                 case 'url':
                     $offerTxt .= '<' . $key . '>http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $row->url . '</' . $key . '>';
