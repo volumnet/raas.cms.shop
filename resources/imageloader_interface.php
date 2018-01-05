@@ -226,11 +226,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 foreach ($attachments as $attachment) {
                     if ($attachment->id) {
                         $filename = array();
-                        $filename[] = \SOME\Text::beautify(trim($row->{$Loader->Unique_Field->id ? $Loader->Unique_Field->urn : $Loader->ufid}));
-                        $filename[] = trim($Loader->sep_string);
-                        $filename[] = trim($attachment->filename);
-                        $filename = array_filter($filename);
-                        $filename = implode('', $filename);
+                        $article = \SOME\Text::beautify(trim($row->{$Loader->Unique_Field->id ? $Loader->Unique_Field->urn : $Loader->ufid}));
+                        $realname = $attachment->realname;
+                        if (preg_match('/^' . preg_quote($article) . '(' . preg_quote($Loader->sep_string) . '|$)/umi', $realname)) {
+                            $filename = $realname;
+                        } else {
+                            $filename[] = $article;
+                            $filename[] = trim($Loader->sep_string);
+                            $filename[] = trim(str_replace($Loader->sep_string, '', $realname));
+                            $filename = array_filter($filename);
+                            $filename = trim(implode('', $filename));
+                            while (in_array($filename, $DATA)) {
+                                $filename .= $Loader->sep_string . $attachment->id;
+                            }
+                        }
                         $DATA[$attachment->file] = trim($filename);
                     }
                 }
@@ -238,6 +247,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $row->rollback();
             unset($row);
         }
+        // header('Content-Type: text/plain');
+        // print_r ($DATA);
+        // exit;
         if ($DATA) {
             $tmpname = tempnam(sys_get_temp_dir(), '');
             $z = new \SOME\ZipArchive();
