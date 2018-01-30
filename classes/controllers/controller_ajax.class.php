@@ -5,7 +5,7 @@ use \RAAS\CMS\Material_Type as Material_Type;
 class Controller_Ajax extends Abstract_Controller
 {
     protected static $instance;
-    
+
     protected function execute()
     {
         switch ($this->action) {
@@ -14,16 +14,21 @@ class Controller_Ajax extends Abstract_Controller
                 break;
         }
     }
-    
-    
+
+
     protected function material_fields()
     {
-        
+
         $Material_Type = new Material_Type((int)$this->id);
         $Set = array(
             (object)array('id' => 'urn', 'name' => $this->view->_('URN')),
+            (object)array('id' => 'vis', 'name' => $this->view->_('VISIBILITY')),
             (object)array('id' => 'name', 'name' => $this->view->_('NAME')),
             (object)array('id' => 'description', 'name' => $this->view->_('DESCRIPTION')),
+            (object)array('id' => 'meta_title', 'name' => $this->view->_('META_TITLE')),
+            (object)array('id' => 'meta_description', 'name' => $this->view->_('META_DESCRIPTION')),
+            (object)array('id' => 'meta_keywords', 'name' => $this->view->_('META_KEYWORDS')),
+            (object)array('id' => 'priority', 'name' => $this->view->_('PRIORITY')),
         );
         $Set = array_merge(
             $Set, array_values(array_filter($Material_Type->fields, function($x) { return !($x->multiple || in_array($x->datatype, array('file', 'image'))); }))
@@ -31,14 +36,14 @@ class Controller_Ajax extends Abstract_Controller
         $OUT['Set'] = array_map(function($x) { return array('val' => $x->id, 'text' => $x->name); }, $Set);
         $this->view->show_page($OUT);
     }
-    
-    
+
+
     protected function image_fields()
     {
-        
+
         $Material_Type = new Material_Type((int)$this->id);
         $Set = array(
-            
+
         );
         $Set = array_merge(
             $Set, array_values(array_filter($Material_Type->fields, function($x) { return $x->datatype == 'image'; }))
