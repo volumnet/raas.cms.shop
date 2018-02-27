@@ -30,13 +30,18 @@ jQuery(document).ready(function($) {
     checkInterface(true);
 
     $('#mtype').change(function() {
-        $('[data-role="field-id-column"]').RAAS_getSelect(
-            'ajax.php?p=cms&m=shop&action=material_fields&id=' + $(this).val(), 
-            {
-                before: function(data) { data.Set.unshift({ text: '--', val: '' }); return data.Set; },
-                after: function() { $('tbody[data-role="raas-repo-container"]').empty(); }
-            }
-        );
+        var mtype = $(this).val();
+        $('[data-role="field-id-column"]').each(function () {
+            var $self = $(this);
+            var val = $(this).val();
+            $(this).RAAS_getSelect(
+                'ajax.php?p=cms&m=shop&action=material_fields&id=' + mtype, 
+                {
+                    before: function(data) { data.Set.unshift({ text: '--', val: '' }); return data.Set; },
+                    after: function() { $self.val(val); }
+                }
+            )
+        });
     })
 
     $('[data-role="raas-repo-block"]').on('click', '[data-role="raas-repo-del"], [data-role="raas-repo-add"]', function() {

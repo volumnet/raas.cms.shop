@@ -21,19 +21,22 @@ class Controller_Ajax extends Abstract_Controller
 
         $Material_Type = new Material_Type((int)$this->id);
         $Set = array(
-            (object)array('id' => 'urn', 'name' => $this->view->_('URN')),
-            (object)array('id' => 'vis', 'name' => $this->view->_('VISIBILITY')),
-            (object)array('id' => 'name', 'name' => $this->view->_('NAME')),
-            (object)array('id' => 'description', 'name' => $this->view->_('DESCRIPTION')),
-            (object)array('id' => 'meta_title', 'name' => $this->view->_('META_TITLE')),
-            (object)array('id' => 'meta_description', 'name' => $this->view->_('META_DESCRIPTION')),
-            (object)array('id' => 'meta_keywords', 'name' => $this->view->_('META_KEYWORDS')),
-            (object)array('id' => 'priority', 'name' => $this->view->_('PRIORITY')),
+            (object)array('val' => 'urn', 'text' => $this->view->_('URN')),
+            (object)array('val' => 'vis', 'text' => $this->view->_('VISIBILITY')),
+            (object)array('val' => 'name', 'text' => $this->view->_('NAME')),
+            (object)array('val' => 'description', 'text' => $this->view->_('DESCRIPTION')),
+            (object)array('val' => 'meta_title', 'text' => $this->view->_('META_TITLE')),
+            (object)array('val' => 'meta_description', 'text' => $this->view->_('META_DESCRIPTION')),
+            (object)array('val' => 'meta_keywords', 'text' => $this->view->_('META_KEYWORDS')),
+            (object)array('val' => 'priority', 'text' => $this->view->_('PRIORITY')),
         );
-        $Set = array_merge(
-            $Set, array_values(array_filter($Material_Type->fields, function($x) { return !($x->multiple || in_array($x->datatype, array('file', 'image'))); }))
-        );
-        $OUT['Set'] = array_map(function($x) { return array('val' => $x->id, 'text' => $x->name); }, $Set);
+        // $Set = array_merge($Set, array_values($Material_Type->fields));
+        foreach ((array)$Material_Type->fields as $row) {
+            // 2017-02-27, AVS: убрали условие !$row->multiple, т.к. из прайсов могут загружаться и множественные поля
+            // 2017-02-27, AVS: убрали ограничение !(in_array($row->datatype, array('file', 'image'))), т.к. был запрос на "хитрую" загрузку картинок из прайсов
+            $Set[] = array('val' => (int)$row->id, 'text' => $row->name);
+        }
+        $OUT['Set'] = $Set;
         $this->view->show_page($OUT);
     }
 
