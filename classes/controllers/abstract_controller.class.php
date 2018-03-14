@@ -4,7 +4,7 @@ namespace RAAS\CMS\Shop;
 abstract class Abstract_Controller extends \RAAS\Abstract_Module_Controller
 {
     protected static $instance;
-    
+
     protected function execute()
     {
         $this->view->submenu = $this->view->shopMenu();
@@ -29,4 +29,10 @@ abstract class Abstract_Controller extends \RAAS\Abstract_Module_Controller
     }
 
 
+    public function config()
+    {
+        return array(
+            array('type' => 'checkbox', 'name' => 'allow_order_edit', 'caption' => $this->view->_('ALLOW_ORDER_EDIT')),
+        );
+    }
 }

@@ -1,17 +1,17 @@
 <?php
 namespace RAAS\CMS\Shop;
 
-use \RAAS\Redirector as Redirector;
-use \RAAS\Attachment as Attachment;
-use \ArrayObject as ArrayObject;
-use \RAAS\Field as Field;
-use \RAAS\FieldSet as FieldSet;
-use \RAAS\FieldContainer as FieldContainer;
-use \RAAS\FormTab as FormTab;
-use \RAAS\CMS\Form as CMSForm;
-use \RAAS\OptGroup as OptGroup;
-use \RAAS\Option as Option;
-use \RAAS\StdSub as StdSub;
+use RAAS\Redirector as Redirector;
+use RAAS\Attachment as Attachment;
+use ArrayObject as ArrayObject;
+use RAAS\Field as Field;
+use RAAS\FieldSet as FieldSet;
+use RAAS\FieldContainer as FieldContainer;
+use RAAS\FormTab as FormTab;
+use RAAS\CMS\Form as CMSForm;
+use RAAS\OptGroup as OptGroup;
+use RAAS\Option as Option;
+use RAAS\StdSub as StdSub;
 
 class Sub_Orders extends \RAAS\Abstract_Sub_Controller
 {
@@ -44,6 +44,9 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
                 $f = $this->action;
                 StdSub::$f($items, $this->url);
                 break;
+            case 'edit':
+                $this->edit();
+                break;
             default:
                 $this->orders();
                 break;
@@ -67,6 +70,21 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
         $OUT['search_string'] = isset($_GET['search_string']) ? (string)$_GET['search_string'] : '';
         $OUT['statuses'] = Order_Status::getSet();
         $this->view->orders($OUT);
+    }
+
+
+    protected function edit()
+    {
+        $Item =  new Order($this->id);
+        $Parent = $Item->id ? $Item->parent : new Cart_Type((int)$this->nav['pid']);
+        if (!Module::i()->registryGet('allow_order_edit') || !$Parent->id) {
+            new Redirector($this->url);
+        }
+        if (!$Item->id) {
+            $Item->pid = $Parent->id;
+        }
+        $Form = new EditOrderForm(array('Item' => $Item, 'Parent' => $Parent));
+        $this->view->edit($Form->process());
     }
 
 

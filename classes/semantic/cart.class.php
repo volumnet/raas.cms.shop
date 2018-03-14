@@ -1,11 +1,12 @@
 <?php
 namespace RAAS\CMS\Shop;
-use \RAAS\CMS\Material;
-use \RAAS\CMS\Material_Field;
-use \RAAS\CMS\Material_Type;
-use \RAAS\CMS\User;
-use \RAAS\Application;
-use \stdClass;
+
+use RAAS\CMS\Material;
+use RAAS\CMS\Material_Field;
+use RAAS\CMS\Material_Type;
+use RAAS\CMS\User;
+use RAAS\Application;
+use stdClass;
 
 class Cart
 {
@@ -182,14 +183,45 @@ class Cart
         $mt = $Material_Type;
         while ($mt->id) {
             foreach ($this->cartType->material_types as $row) {
-                if ($row->id == $Material_Type->id) {
-                    $field_id = $row->price_id;
-                    $Field = new Material_Field((int)$field_id);
-                    return $Field->urn;
+                if ($row->id == $mt->id) {
+                    $field = new Material_Field((int)$row->price_id);
+                    return $field->urn;
                 }
             }
             $mt = $mt->pid ? $mt->parent : new Material_Type();
         }
         return 'price';
+    }
+
+
+    public function getPrice(Material $material)
+    {
+        $mt = $material->material_type;
+        while ($mt->id) {
+            foreach ($this->cartType->material_types as $row) {
+                if ($row->id == $mt->id) {
+                    $field = new Material_Field((int)$row->price_id);
+                    $priceURN = $field->urn;
+                    $fieldCallback = null;
+                    if ($row->price_callback) {
+                        $fieldCallback = create_function('$x', $row->price_callback);
+                    }
+                    break(2);
+                }
+            }
+            $mt = $mt->pid ? $mt->parent : new Material_Type();
+        }
+        if (!$priceURN) {
+            $priceURN = 'price';
+            $fieldCallback = null;
+        }
+        if ($fieldCallback) {
+            $price = $fieldCallback($material);
+        } elseif ($priceURN) {
+            $price = number_format($material->{$priceURN}, 2, '.', '');
+        } else {
+            $price = null;
+        }
+        return $price;
     }
 }
