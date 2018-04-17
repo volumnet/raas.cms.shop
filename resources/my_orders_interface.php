@@ -29,7 +29,7 @@ if ($Item) {
         default:
             $Page->oldName = $Page->name;
             $Page->Item = $Item;
-            $Page->name = ORDER_NUMBER . ' ' . $Item->id . ' ' . FROM . ' ' . date(DATETIME_FORMAT, strtotime($Item->post_date));
+            $Page->name = ORDER_NUMBER . ' ' . $Item->id . ' ' . FROM . ' ' . date(DATETIMEFORMAT, strtotime($Item->post_date));
             $OUT['Item'] = $Item;
             break;
     }
