@@ -660,7 +660,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         case 'xlsx':
             $filename .= '.' . $type;
             $x = new PHPExcel();
-            $x->setActiveSheetIndex(0)->setTitle($Page->name);
+            $x->setActiveSheetIndex(0)->setTitle(mb_substr($Page->name, 0, 30));
             $maxcol = 0;
             for ($i = 0; $i < count($DATA); $i++) {
                 $maxcol = max($maxcol, count($DATA[$i]));
