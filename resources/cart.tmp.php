@@ -96,7 +96,13 @@ if ($_GET['AJAX']) {
             </tbody>
           </table>
         </div>
-        <?php if ($Form->id) { ?>
+        <?php if ($Form->id) {
+            foreach ($Form->fields as $fieldUrn => $field) {
+                if (!$DATA[$fieldUrn] && ($userVal = Controller_Frontend::i()->user->{$fieldUrn})) {
+                    $DATA[$fieldUrn] = $userVal;
+                }
+            }
+            ?>
             <div class="form-horizontal">
               <?php include Package::i()->resourcesDir . '/form2.inc.php'?>
               <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>
