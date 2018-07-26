@@ -238,7 +238,7 @@ class Block_YML extends Block
     }
 
 
-    protected function getAddData()
+    public function getAddData()
     {
         return array(
             'id' => (int)$this->id,

@@ -84,6 +84,7 @@ class UpdateYMLCommand extends LockCommand
         foreach ($blocks as $block) {
             $page = $block->parent;
             if ($page->url == $ymlPageURL) {
+                $block = Block_YML::spawn($block->id);
                 break;
             }
         }

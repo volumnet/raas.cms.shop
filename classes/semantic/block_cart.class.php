@@ -12,13 +12,13 @@ class Block_Cart extends Block
         'Cart_Type' => array('FK' => 'cart_type', 'classname' => 'RAAS\\CMS\\Shop\\Cart_Type', 'cascade' => true),
         'EPay_Interface' => array('FK' => 'epay_interface_id', 'classname' => 'RAAS\\CMS\\Snippet', 'cascade' => false),
     );
-    
+
     public function __construct($import_data = null)
     {
         parent::__construct($import_data);
     }
-    
-    
+
+
     public function commit()
     {
         if (!$this->name) {
@@ -28,10 +28,10 @@ class Block_Cart extends Block
     }
 
 
-    protected function getAddData()
+    public function getAddData()
     {
         return array(
-            'id' => (int)$this->id, 
+            'id' => (int)$this->id,
             'cart_type' => (int)$this->cart_type,
             'epay_interface_id' => (int)$this->epay_interface_id,
             'epay_login' => trim($this->epay_login),
