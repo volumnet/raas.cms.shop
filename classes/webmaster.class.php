@@ -725,7 +725,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
             $B = new Block_YML(array(
                 'agency' => 'Volume Networks',
                 'email' => 'info@volumnet.ru',
-                'default_currency' => 'RUR',
+                'default_currency' => 'RUB',
                 'meta_cats' => array_merge(array((int)$catalog->id), (array)$catalog->all_children_ids),
                 'local_delivery_cost' => 0,
             ));
@@ -737,7 +737,7 @@ class Webmaster extends \RAAS\CMS\Webmaster
                     'available' => array('field_id' => (int)$catalogType->fields['available']->id),
                     'price' => array('field_id' => (int)$catalogType->fields['price']->id),
                     'oldprice' => array('field_id' => (int)$catalogType->fields['price_old']->id),
-                    'currencyId' => array('field_static_value' => 'RUR'),
+                    'currencyId' => array('field_static_value' => 'RUB'),
                     'picture' => array('field_id' => (int)$catalogType->fields['images']->id),
                     'pickup' => array('field_static_value' => 1),
                     'delivery' => array('field_static_value' => 1),
