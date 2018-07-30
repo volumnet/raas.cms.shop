@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\Field as RAASField;
 use \RAAS\CMS\Form as CMSForm;
 use \RAAS\CMS\EditBlockForm;
@@ -12,10 +13,10 @@ use \RAAS\CMS\Page;
 
 class EditBlockYMLForm extends EditBlockForm
 {
-    protected static $currencies = array('RUR', 'USD', 'EUR', 'UAH', 'BYR', 'KZT');
+    protected static $currencies = array('RUB', 'USD', 'EUR', 'UAH', 'BYR', 'KZT');
 
     protected static $rates = array('CBRF', 'NBU', 'NBK', 'CB');
-    
+
     public function __get($var)
     {
         switch ($var) {
@@ -36,9 +37,9 @@ class EditBlockYMLForm extends EditBlockForm
         parent::__construct($params);
         $this->children['catsTab'] = $this->getCatsTab();
         $this->children = new FieldCollection(array(
-            'commonTab' => $this->children['commonTab'], 
-            'catsTab' => $this->children['catsTab'], 
-            'serviceTab' => $this->children['serviceTab'], 
+            'commonTab' => $this->children['commonTab'],
+            'catsTab' => $this->children['catsTab'],
+            'serviceTab' => $this->children['serviceTab'],
             'pagesTab' => $this->children['pagesTab']
         ));
     }
@@ -70,22 +71,31 @@ class EditBlockYMLForm extends EditBlockForm
             'caption' => $this->view->_('CURRENCIES'),
             'children' => array(
                 'default_currency' => array(
-                    'type' => 'select', 
-                    'name' => 'default_currency', 
-                    'caption' => $this->view->_('DEFAULT_CURRENCY'), 
-                    'default' => 'RUR',
-                    'children' => array_map(function($x) use ($t) { return array('value' => (string)$x, 'caption' => $t->view->_('CURRENCY_' . $x)); }, self::$currencies)
+                    'type' => 'select',
+                    'name' => 'default_currency',
+                    'caption' => $this->view->_('DEFAULT_CURRENCY'),
+                    'default' => 'RUB',
+                    'children' => array_map(function ($x) use ($t) {
+                        return array(
+                            'value' => (string)$x,
+                            'caption' => $t->view->_('CURRENCY_' . $x)
+                        );
+                    }, self::$currencies)
                 ),
                 'currencies' => new FieldSet(array(
                     'template' => 'cms/shop/edit_block_yml_currencies.inc.php',
-                    'export' => function($FieldSet) {
+                    'export' => function ($FieldSet) {
                         $temp = array();
                         if (isset($_POST['rate'])) {
                             foreach ((array)$_POST['rate'] as $key => $val) {
                                 if (trim($_POST['rate'][$key])) {
                                     $temp[] = array(
-                                        'currency_name' => trim($key), 
-                                        'currency_rate' => trim((trim($_POST['rate'][$key]) != '-1') ? $_POST['rate'][$key] : str_replace(',', '.', $_POST['rate_txt'][$key])),
+                                        'currency_name' => trim($key),
+                                        'currency_rate' => trim(
+                                            (trim($_POST['rate'][$key]) != '-1') ?
+                                            $_POST['rate'][$key] :
+                                            str_replace(',', '.', $_POST['rate_txt'][$key])
+                                        ),
                                         'currency_plus' => trim(str_replace(',', '.', $_POST['plus'][$key])),
                                     );
                                 }
@@ -108,11 +118,19 @@ class EditBlockYMLForm extends EditBlockForm
                         'data-role' => 'currency-selector',
                         'name' => 'rate[' . $val . ']',
                         'children' => array_merge(
-                            array_map(function($x) use ($t) { return array('value' => $x, 'caption' => $t->view->_('CURRENCY_RATE_' . $x)); }, static::$rates),
-                            array(array('value' => '-1', 'caption' => $this->view->_('CURRENCY_RATE_MANUAL')))
+                            array_map(function ($x) use ($t) {
+                                return array(
+                                    'value' => $x,
+                                    'caption' => $t->view->_('CURRENCY_RATE_' . $x)
+                                );
+                            }, static::$rates),
+                            array(array(
+                                'value' => '-1',
+                                'caption' => $this->view->_('CURRENCY_RATE_MANUAL')
+                            ))
                         ),
                         'placeholder' => $this->view->_('_NONE'),
-                        'import' => function($Field) use ($val, $rates) { 
+                        'import' => function ($Field) use ($val, $rates) {
                             if (isset($Field->Form->Item->currencies[$val])) {
                                 $val2 = $Field->Form->Item->currencies[$val]['rate'];
                                 if (in_array($val2, $rates)) {
@@ -126,13 +144,13 @@ class EditBlockYMLForm extends EditBlockForm
                         }
                     ),
                     'rate_txt' => array(
-                        'type' => 'number', 
-                        'min' => 0, 
-                        'step' => 0.01, 
-                        'name' => 'rate_txt[' . $val . ']', 
-                        'disabled' => true, 
+                        'type' => 'number',
+                        'min' => 0,
+                        'step' => 0.01,
+                        'name' => 'rate_txt[' . $val . ']',
+                        'disabled' => true,
                         'data-role' => 'currency-rate',
-                        'import' => function($Field) use ($val, $rates) { 
+                        'import' => function ($Field) use ($val, $rates) {
                             if (isset($Field->Form->Item->currencies[$val])) {
                                 $val2 = $Field->Form->Item->currencies[$val]['rate'];
                                 if (!in_array($val2, $rates)) {
@@ -143,12 +161,12 @@ class EditBlockYMLForm extends EditBlockForm
                         }
                     ),
                     'plus' => array(
-                        'type' => 'number', 
-                        'min' => 0, 
-                        'step' => 0.01, 
-                        'name' => 'plus[' . $val . ']', 
+                        'type' => 'number',
+                        'min' => 0,
+                        'step' => 0.01,
+                        'name' => 'plus[' . $val . ']',
                         'data-role' => 'currency-plus',
-                        'import' => function($Field) use ($val, $rates) { 
+                        'import' => function ($Field) use ($val, $rates) {
                             if (isset($Field->Form->Item->currencies[$val])) {
                                 $val2 = $Field->Form->Item->currencies[$val]['plus'];
                                 return $val2;
@@ -160,15 +178,21 @@ class EditBlockYMLForm extends EditBlockForm
             ));
         }
         $mt = new Material_Type();
-        
+
         if ($this->Item->id) {
             $tab->children['material_types'] = new FieldSet(array(
                 'caption' => $this->view->_('MATERIAL_TYPES'),
                 'template' => 'cms/shop/edit_block_yml_material_types.inc.php',
-                'meta' => array('Table' => new EditBlockYMLMaterialTypesTable(array('Item' => $this->Item)), 'Page' => new Page((int)$_GET['pid'])),
+                'meta' => array(
+                    'Table' => new EditBlockYMLMaterialTypesTable(array('Item' => $this->Item)),
+                    'Page' => new Page((int)$_GET['pid'])
+                ),
                 'children' => array(
                     'types_select' => new RAASField(array(
-                        'type' => 'select', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => array('Set' => $mt->children), 'id' => 'types_select'
+                        'type' => 'select',
+                        'caption' => $this->view->_('MATERIAL_TYPE'),
+                        'children' => array('Set' => $mt->children),
+                        'id' => 'types_select'
                     )),
                 )
             ));
@@ -190,19 +214,20 @@ class EditBlockYMLForm extends EditBlockForm
         $tab = new FormTab(array('name' => 'meta_cats', 'caption' => $this->view->_('CATALOG_CATEGORIES')));
         $t = $this;
         $tab->children[] = new RAASField(array(
-            'type' => 'checkbox', 
-            'name' => 'meta_cats', 
-            'caption' => $this->view->_('CATALOG_CATEGORIES'), 
-            'multiple' => 'multiple', 
+            'type' => 'checkbox',
+            'name' => 'meta_cats',
+            'caption' => $this->view->_('CATALOG_CATEGORIES'),
+            'multiple' => 'multiple',
             'children' => $this->meta['CONTENT']['cats'],
-            'check' => function($Field) use ($t) {
+            'check' => function ($Field) use ($t) {
                 if (!isset($_POST['meta_cats']) || !$_POST['meta_cats']) {
                     return array('name' => 'MISSED', 'value' => $Field->name, 'description' => $t->view->_('ERR_NO_CATEGORIES'));
                 }
             },
-            'import' => function($Field) { return $Field->Form->Item->catalog_cats_ids; },
+            'import' => function ($Field) {
+                return $Field->Form->Item->catalog_cats_ids;
+            },
         ));
         return $tab;
     }
-
 }
