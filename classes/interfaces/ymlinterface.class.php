@@ -23,7 +23,7 @@ class YMLInterface extends AbstractInterface
 
     /**
      * Конструктор класса
-     * @param Block $block Блок, для которого применяется интерфейс
+     * @param Block_YML $block Блок, для которого применяется интерфейс
      * @param Page|null $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @param array $post Поля $_POST параметров
