@@ -74,6 +74,9 @@ if ($success[(int)$Block->id] || $localError) {
           <?php if ($requestForPayment) { ?>
               <div class="form-group">
                 <form action="<?php echo htmlspecialchars($paymentURL)?>" method="post" enctype="multipart/form-data">
+                  <?php if ($Block->epay_test) { ?>
+                    <input type="hidden" name="IsTest" value="1" />
+                  <?php } ?>
                   <input type="hidden" name="MrchLogin" value="<?php echo htmlspecialchars($Block->epay_login)?>" />
                   <input type="hidden" name="OutSum" value="<?php echo number_format((float)$Item->sum, 2, '.', '')?>" />
                   <input type="hidden" name="InvId" value="<?php echo (int)$Item->id?>" />
