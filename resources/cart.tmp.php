@@ -161,6 +161,14 @@ if ($_GET['AJAX']) {
       </form>
     </div>
     <script src="/js/cart.js"></script>
+<?php } elseif ($localError) { ?>
+  <div class="alert alert-danger">
+    <ul>
+      <?php foreach ((array)$localError as $key => $val) { ?>
+          <li><?php echo htmlspecialchars($val)?></li>
+      <?php } ?>
+    </ul>
+  </div>
 <?php
 } else {
     if ($Form->id) {
