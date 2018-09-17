@@ -21,6 +21,7 @@ class UpdateYMLCommand extends LockCommand
      * @param bool $https Включен ли HTTPS
      * @param bool $forceUpdate Принудительно выполнить обновление, даже если материалы не были обновлены
      * @param bool $forceLockUpdate Принудительно выполнить обновление, даже если есть параллельный процесс
+     * @param int $limit Лимит обновляемых товаров (для отладки)
      */
     public function process(
         $ymlPageURL = '/yml/',
@@ -40,7 +41,7 @@ class UpdateYMLCommand extends LockCommand
                       . " WHERE 1";
             $lastModifiedMaterialTimestamp = Material::_SQL()->getvalue($sqlQuery);
             $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(modify_date))
-                           FROM " . Material::_tablename()
+                           FROM " . Page::_tablename()
                       . " WHERE 1";
             $lastModifiedPageTimestamp = Material::_SQL()->getvalue($sqlQuery);
             if (is_file($outputFile)) {
