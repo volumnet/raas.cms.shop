@@ -140,7 +140,13 @@ class Cart
             foreach ($SQL_result as $row) {
                 $items2[(int)$row['material_id']][$row['meta']] = (int)$row['amount'];
             }
-            $this->items = $items2 + $items1;
+            $items = $items2;
+            foreach ($items1 as $materialId => $metaItems) {
+                foreach ($metaItems as $meta => $amount) {
+                    $items[(int)$materialId][$meta] = $amount;
+                }
+            }
+            $this->items = $items;
             if ($items1 != $items2) {
                 $this->save();
             }
