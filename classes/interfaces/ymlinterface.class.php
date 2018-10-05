@@ -138,7 +138,7 @@ class YMLInterface extends AbstractInterface
     public function getShopNameBlock(Block_YML $block)
     {
         $text = '';
-        if (isset($block->config['name'])) {
+        if (isset($block->config['shop_name'])) {
             $text .= '<name>' . htmlspecialchars(trim($block->config['shop_name'])) . '</name>';
         }
         return $text;
