@@ -412,6 +412,7 @@ class YMLInterface extends AbstractInterface
         if (!$mtype->global_type && $catalogCatsIds) {
             $sqlQuery .= " AND tMPA.pid IN (" . implode(", ", $catalogCatsIds) . ")";
         }
+        $sqlQuery .= " GROUP BY tM.id";
         $sqlResult = Material::_SQL()->query($sqlQuery);
         return $sqlResult;
     }
