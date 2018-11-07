@@ -1,0 +1,401 @@
+<?xml version="1.0"?>
+<data xmlns:i="urn:1C.ru:commerceml_2" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <fields>
+    <Field>
+      <values>
+        <value id="ce78d3b5-d5cc-11e8-9aa9-6cf04909dac2">эконом</value>
+      </values>
+      <id>ce78d3b0-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Ценовой сегмент</name>
+      <datatype update="false">select</datatype>
+      <source_type update="false">csv</source_type>
+      <source><![CDATA[эконом]]></source>
+    </Field>
+    <Field>
+      <id>ce78d3d3-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Размер изделия</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>ce78d3e2-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Страна изготовитель</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>ce78d3eb-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Материал</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>ce78d429-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Цвет бумаги</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>ce78d43d-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Плотность бумаги блокнота</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>f13e6d9c-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Белизна</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>f13e6d9d-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Склейка</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <values>
+        <value id="f13e6d9f-d5cc-11e8-9aa9-6cf04909dac2">голубой</value>
+      </values>
+      <id>f13e6d9e-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Цвет бокса</name>
+      <datatype update="false">select</datatype>
+      <source_type update="false">csv</source_type>
+      <source><![CDATA[голубой]]></source>
+    </Field>
+    <Field>
+      <id>ce78d405-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Количество упаковок в коробе</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>ce78d47c-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Количество штук в упаковке</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>f13e6d63-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Плотность бумаги</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>f13e6d75-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Количество листов в блокноте</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>f13e6da4-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Клейкость</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>f13e6da5-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Неоновый</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>f13e6da6-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Размер блокнота</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>f13e6da7-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Цвет блокнота</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <id>ce78d3af-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Страна происхождения</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <values>
+        <value id="ce78d4f7-d5cc-11e8-9aa9-6cf04909dac2">пластик</value>
+        <value id="ce78d4f5-d5cc-11e8-9aa9-6cf04909dac2">картон</value>
+      </values>
+      <id>ce78d4f4-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Материал диспенсера</name>
+      <datatype update="false">select</datatype>
+      <source_type update="false">csv</source_type>
+      <source><![CDATA[пластик
+картон]]></source>
+    </Field>
+    <Field>
+      <values>
+        <value id="f13e6dab-d5cc-11e8-9aa9-6cf04909dac2">закладки</value>
+        <value id="f13e6da9-d5cc-11e8-9aa9-6cf04909dac2">блокнот</value>
+        <value id="f13e6daa-d5cc-11e8-9aa9-6cf04909dac2">блокнот 200 листов</value>
+      </values>
+      <id>f13e6da8-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Комплектация диспенсера</name>
+      <datatype update="false">select</datatype>
+      <source_type update="false">csv</source_type>
+      <source><![CDATA[закладки
+блокнот
+блокнот 200 листов]]></source>
+    </Field>
+    <Field>
+      <id>f13e6dac-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Способ крепления диспенсера</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+    <Field>
+      <values>
+        <value id="f13e6dae-d5cc-11e8-9aa9-6cf04909dac2">белый</value>
+        <value id="f13e6daf-d5cc-11e8-9aa9-6cf04909dac2">в ассортименте</value>
+      </values>
+      <id>f13e6dad-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Цвет диспенсера</name>
+      <datatype update="false">select</datatype>
+      <source_type update="false">csv</source_type>
+      <source><![CDATA[белый
+в ассортименте]]></source>
+    </Field>
+    <Field>
+      <id>ce78d3e3-d5cc-11e8-9aa9-6cf04909dac2</id>
+      <classname update="false">RAAS\CMS\Material_Type</classname>
+      <pid update="false" map="false">4</pid>
+      <name>Тип подвеса</name>
+      <datatype update="false">text</datatype>
+      <source_type update="false"/>
+      <source/>
+    </Field>
+  </fields>
+  <pages>
+    <Page>
+      <id>e7a0df87-96e8-11e8-9a9f-6cf04909dac2</id>
+      <pid update="false"/>
+      <name>Каталог продукции</name>
+    </Page>
+    <Page>
+      <id>e7a0df86-96e8-11e8-9a9f-6cf04909dac2</id>
+      <pid>e7a0df87-96e8-11e8-9a9f-6cf04909dac2</pid>
+      <name>Сувенирная продукция</name>
+    </Page>
+    <Page>
+      <id>e7a0df83-96e8-11e8-9a9f-6cf04909dac2</id>
+      <pid>e7a0df87-96e8-11e8-9a9f-6cf04909dac2</pid>
+      <name>Бумага и бумажная продукция</name>
+    </Page>
+    <Page>
+      <id>e7a0df95-96e8-11e8-9a9f-6cf04909dac2</id>
+      <pid>e7a0df83-96e8-11e8-9a9f-6cf04909dac2</pid>
+      <name>Бумага для заметок</name>
+    </Page>
+    <Page>
+      <id>e7a0dffe-96e8-11e8-9a9f-6cf04909dac2</id>
+      <pid>e7a0df95-96e8-11e8-9a9f-6cf04909dac2</pid>
+      <name>Блокноты для заметок с клейким краем</name>
+    </Page>
+    <Page>
+      <id>d6bb8a11-d694-11e8-9aa9-6cf04909dac2</id>
+      <pid>e7a0dffe-96e8-11e8-9a9f-6cf04909dac2</pid>
+      <name>новый каталог тест</name>
+    </Page>
+    <Page>
+      <id>e7a0dfff-96e8-11e8-9a9f-6cf04909dac2</id>
+      <pid>e7a0df95-96e8-11e8-9a9f-6cf04909dac2</pid>
+      <name>Диспенсеры для блокнотов</name>
+    </Page>
+  </pages>
+  <materials>
+    <Material>
+      <id>b323ca07-96e9-11e8-9a9f-6cf04909dac2</id>
+      <pid update="false">4</pid>
+      <name>Блок-кубик ATTACHE Fantasy 9х9х5 стакан голубой белый блок</name>
+      <description>Блок-кубик Attache серии Fanasy для записей выполнен из белой офсетной бумаги. Голубой пластиковый стакан обеспечивает удобство использования и порядок на рабочем столе. Блок-кубик упакован в термоусадочную пленку. Размер изделия (ШхДхВ): 90х90х50 мм Плотность бумаги: офсет 70-80 г/м2. Белизна: 86-92 %.</description>
+      <pages_ids update="true">
+        <pageId>e7a0df86-96e8-11e8-9a9f-6cf04909dac2</pageId>
+      </pages_ids>
+      <fields>
+        <field urn="article">354656</field>
+        <field id="ce78d3b0-d5cc-11e8-9aa9-6cf04909dac2">ce78d3b5-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="ce78d3d3-d5cc-11e8-9aa9-6cf04909dac2">90х90х50 мм</field>
+        <field id="ce78d3e2-d5cc-11e8-9aa9-6cf04909dac2">Российская Федерация</field>
+        <field id="ce78d3eb-d5cc-11e8-9aa9-6cf04909dac2">пластик</field>
+        <field id="ce78d429-d5cc-11e8-9aa9-6cf04909dac2">белый</field>
+        <field id="ce78d43d-d5cc-11e8-9aa9-6cf04909dac2">80</field>
+        <field id="f13e6d9c-d5cc-11e8-9aa9-6cf04909dac2">86-92 %</field>
+        <field id="f13e6d9d-d5cc-11e8-9aa9-6cf04909dac2">Да</field>
+        <field id="f13e6d9e-d5cc-11e8-9aa9-6cf04909dac2">f13e6d9f-d5cc-11e8-9aa9-6cf04909dac2</field>
+      </fields>
+    </Material>
+    <Material delete="1">
+      <id>b323ca0b-96e9-11e8-9a9f-6cf04909dac2</id>
+      <pid update="false">4</pid>
+      <name>Блок-кубик Attache Selection куб 76х76, желтый неон 400 л</name>
+      <description>Блок-кубик Attache Selection Радуга с клеевым краем. Размер: 76х76 мм. Цвет: неон, желтый. Количество: 400 л</description>
+      <pages_ids update="true">
+        <pageId>e7a0dffe-96e8-11e8-9a9f-6cf04909dac2</pageId>
+      </pages_ids>
+      <fields>
+        <field urn="article">383720</field>
+        <field id="ce78d405-d5cc-11e8-9aa9-6cf04909dac2">12</field>
+        <field id="ce78d47c-d5cc-11e8-9aa9-6cf04909dac2">1</field>
+        <field id="f13e6d63-d5cc-11e8-9aa9-6cf04909dac2">75</field>
+        <field id="f13e6d75-d5cc-11e8-9aa9-6cf04909dac2">400</field>
+        <field id="f13e6da4-d5cc-11e8-9aa9-6cf04909dac2">20 Н/м</field>
+        <field id="f13e6da5-d5cc-11e8-9aa9-6cf04909dac2">Нет</field>
+        <field id="f13e6da6-d5cc-11e8-9aa9-6cf04909dac2">76х76 мм</field>
+        <field id="f13e6da7-d5cc-11e8-9aa9-6cf04909dac2">желтый</field>
+      </fields>
+    </Material>
+    <Material delete="1">
+      <id>b323ca16-96e9-11e8-9a9f-6cf04909dac2</id>
+      <pid update="false">4</pid>
+      <name>Блок-кубик Attache Selection с кл. кр. 76х76 + кл. заклад. плас. 76х14</name>
+      <description>Блок-кубик Attache Selection с клеевым краем размером 76х76 мм + клейкие закладки пластиковые размером 76х14 мм Ручка в комплект не входит.</description>
+      <pages_ids update="true">
+        <pageId>e7a0dfff-96e8-11e8-9a9f-6cf04909dac2</pageId>
+      </pages_ids>
+      <fields>
+        <field urn="article">383737</field>
+        <field id="ce78d3af-d5cc-11e8-9aa9-6cf04909dac2">Китай</field>
+        <field id="ce78d4f4-d5cc-11e8-9aa9-6cf04909dac2">ce78d4f7-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="f13e6da4-d5cc-11e8-9aa9-6cf04909dac2">2,0 кг/м</field>
+        <field id="f13e6da8-d5cc-11e8-9aa9-6cf04909dac2">f13e6dab-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="f13e6dac-d5cc-11e8-9aa9-6cf04909dac2">настольный</field>
+        <field id="f13e6dad-d5cc-11e8-9aa9-6cf04909dac2">f13e6dae-d5cc-11e8-9aa9-6cf04909dac2</field>
+      </fields>
+    </Material>
+    <Material delete="1">
+      <id>b323ca17-96e9-11e8-9a9f-6cf04909dac2</id>
+      <pid update="false">4</pid>
+      <name>Блок-кубик Attache Selection с кл. кр. 76х76 + кл. заклад. плас. 76х25</name>
+      <description>Блок-кубик Attache Selection с клеевым краем размера 76х76 мм + клейкие закладки пластиковые размером 76х25 мм Ручка в комплект не входит.Размер диспенсера - 16,6 x 10, 6 x 2,7 см.</description>
+      <pages_ids update="true">
+        <pageId>e7a0dfff-96e8-11e8-9a9f-6cf04909dac2</pageId>
+      </pages_ids>
+      <fields>
+        <field urn="article">383736</field>
+        <field id="ce78d3af-d5cc-11e8-9aa9-6cf04909dac2">Китай</field>
+        <field id="ce78d4f4-d5cc-11e8-9aa9-6cf04909dac2">ce78d4f7-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="f13e6da4-d5cc-11e8-9aa9-6cf04909dac2">2,0 кг/м</field>
+        <field id="f13e6da8-d5cc-11e8-9aa9-6cf04909dac2">f13e6da9-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="f13e6dac-d5cc-11e8-9aa9-6cf04909dac2">настольный</field>
+        <field id="f13e6dad-d5cc-11e8-9aa9-6cf04909dac2">f13e6dae-d5cc-11e8-9aa9-6cf04909dac2</field>
+      </fields>
+    </Material>
+    <Material delete="1">
+      <id>b323ca94-96e9-11e8-9a9f-6cf04909dac2</id>
+      <pid update="false">4</pid>
+      <name>Блок-кубик Post-it Z-куб карт дисп B330-1RG/ED/OB 200л Цветы</name>
+      <description>ЭКО-серия: возможность сэкономить при покупке, не теряя в качестве. Яркий, оригинальный и компактный диспенсер с самоклеящейся бумагой для заметок. Благодаря специальной вакуумной присоске под собственным весом моментально самозакрепляется на любой гладкой горизонтальной поверхности, поэтому клейкие листочки легко извлекаются из него одной рукой и строго по одному.</description>
+      <pages_ids update="true">
+        <pageId>e7a0dfff-96e8-11e8-9a9f-6cf04909dac2</pageId>
+      </pages_ids>
+      <fields>
+        <field urn="article">141011</field>
+        <field id="ce78d3af-d5cc-11e8-9aa9-6cf04909dac2">Франция</field>
+        <field id="ce78d3e2-d5cc-11e8-9aa9-6cf04909dac2">Французская Республика</field>
+        <field id="ce78d3e3-d5cc-11e8-9aa9-6cf04909dac2">Полиэтиленовая упаковка без европодвеса</field>
+        <field id="ce78d4f4-d5cc-11e8-9aa9-6cf04909dac2">ce78d4f5-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="f13e6da4-d5cc-11e8-9aa9-6cf04909dac2">2,7 кг/м</field>
+        <field id="f13e6da8-d5cc-11e8-9aa9-6cf04909dac2">f13e6daa-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="f13e6dac-d5cc-11e8-9aa9-6cf04909dac2">настольный</field>
+        <field id="f13e6dad-d5cc-11e8-9aa9-6cf04909dac2">f13e6daf-d5cc-11e8-9aa9-6cf04909dac2</field>
+      </fields>
+    </Material>
+    <Material delete="1">
+      <id>b323ca95-96e9-11e8-9a9f-6cf04909dac2</id>
+      <pid update="false">4</pid>
+      <name>Блок-кубик Post-it диспенсер Компактный + 1 бл цв.ассорт. OL-33</name>
+      <description>Яркий, легкий и недорогой диспенсер с одним Z-блоком в комплекте. Благодаря специальной вакуумной присоске под собственным весом моментально самозакрепляется на любой гладкой горизонтальной поверхности, поэтому стикеры легко извлекаются одной рукой и строго по одному. Для перезаправки подходят любые Z-блоки Post-itR</description>
+      <pages_ids update="true">
+        <pageId>e7a0dfff-96e8-11e8-9a9f-6cf04909dac2</pageId>
+      </pages_ids>
+      <fields>
+        <field urn="article">395544</field>
+        <field id="ce78d3af-d5cc-11e8-9aa9-6cf04909dac2">Гонконг</field>
+        <field id="ce78d4f4-d5cc-11e8-9aa9-6cf04909dac2">ce78d4f7-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="f13e6da4-d5cc-11e8-9aa9-6cf04909dac2">2,7 кг/м</field>
+        <field id="f13e6da8-d5cc-11e8-9aa9-6cf04909dac2">f13e6da9-d5cc-11e8-9aa9-6cf04909dac2</field>
+        <field id="f13e6dac-d5cc-11e8-9aa9-6cf04909dac2">настольный</field>
+        <field id="f13e6dad-d5cc-11e8-9aa9-6cf04909dac2">f13e6dae-d5cc-11e8-9aa9-6cf04909dac2</field>
+      </fields>
+    </Material>
+    <Material>
+      <id>d6bb8a12-d694-11e8-9aa9-6cf04909dac2</id>
+      <pid update="false">4</pid>
+      <name>Новая номенклатура тест</name>
+      <description/>
+      <pages_ids update="true">
+        <pageId>d6bb8a11-d694-11e8-9aa9-6cf04909dac2</pageId>
+      </pages_ids>
+      <fields>
+        <field urn="article">123456789</field>
+      </fields>
+    </Material>
+  </materials>
+</data>

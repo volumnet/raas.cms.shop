@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit colors="true" bootstrap="./bootstrap.php">
+  <testsuites>
+    <testsuite>
+      <file>./src/XmlDataConverterTest.php</file>
+      <file>./src/BatchFindTraitTest.php</file>
+      <file>./src/BatchDeleteTraitTest.php</file>
+      <file>./src/interfaces/Sync1CInterfaceTest.php</file>
+    </testsuite>
+  </testsuites>
+  <filter>
+    <whitelist>
+      <directory suffix=".php">../classes</directory>
+    </whitelist>
+  </filter>
+  <logging>
+    <log type="coverage-html" target="coverage" />
+  </logging>
+</phpunit>
