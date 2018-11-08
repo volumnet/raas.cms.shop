@@ -9,7 +9,7 @@
           <Material>
             <id><xsl:apply-templates select="i:Ид" /></id>
             <fields>
-              <xsl:for-each select=".//i:Цена[descendant::i:Валюта[text()='RUB']]">
+              <xsl:for-each select=".//i:Цена[descendant::i:Валюта[contains(text(), 'RUB') or contains(text(), 'руб') or contains(text(), 'RUR')]]">
                 <field urn="price"><xsl:value-of select="i:ЦенаЗаЕдиницу/text()"/></field>
               </xsl:for-each>
               <field urn="available">
