@@ -11,6 +11,7 @@ use RAAS\CMS\Material_Type;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Page;
+use RAAS\CMS\Field;
 
 /**
  * Класс теста интерфейса синхронизации с 1С
@@ -143,6 +144,9 @@ class Sync1CInterfaceTest extends BaseTest
             [Material::class, 'name', 'Товар 1', [
                 "SELECT COUNT(*) FROM cms_materials_pages_assoc WHERE id = Material.id AND pid = 17"
             ], null],
+            [Material_Field::class, 'name', '', [], null],
+            [Material_Field::class, 'name', null, [], null],
+            [Material_Field::class, 'name', 'Особое поле', ['pid' => [4, 5]], 48],
         ];
     }
 
@@ -336,6 +340,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             string Наименование родительского класса
      *             string Наименование поля ID# родителя
      *             SOME Родительская сущность по умолчанию
+     *             bool Учитывать дочерние элементы для родительского, в качестве родительских
      *             array Массив проверки полей сущности
      *             array Массив проверки записей маппинга по данной сущности
      *         ]>
@@ -352,6 +357,7 @@ class Sync1CInterfaceTest extends BaseTest
                 Material_Type::class,
                 'pid',
                 new Material_Type(),
+                false,
                 ['id' => 5, 'pid' => 4],
                 [],
             ],
@@ -364,6 +370,7 @@ class Sync1CInterfaceTest extends BaseTest
                 Material_Type::class,
                 'pid',
                 new Material_Type(),
+                false,
                 ['id' => 5, 'pid' => 4],
                 [],
             ],
@@ -376,6 +383,7 @@ class Sync1CInterfaceTest extends BaseTest
                 Material_Type::class,
                 'pid',
                 new Material_Type(),
+                false,
                 ['id' => 5, 'pid' => 4],
                 ['aaa' => 5],
             ],
@@ -388,6 +396,7 @@ class Sync1CInterfaceTest extends BaseTest
                 Material_Type::class,
                 'pid',
                 new Material_Type(),
+                false,
                 ['id' => null],
                 [],
             ],
@@ -400,7 +409,21 @@ class Sync1CInterfaceTest extends BaseTest
                 Material_Type::class,
                 'pid',
                 new Material_Type(3),
+                false,
                 ['id' => null],
+                [],
+            ],
+            [
+                Material_Field::class,
+                ['id' => 'zxlkjsdruowisdn', 'name' => 'Особое поле'],
+                [],
+                'id',
+                'name',
+                Material_Type::class,
+                'pid',
+                new Material_Type(4),
+                true,
+                ['id' => 48, 'pid' => 5],
                 [],
             ],
         ];
@@ -419,6 +442,7 @@ class Sync1CInterfaceTest extends BaseTest
      * @param string $parentClassname Наименование родительского класса
      * @param string $pidN Наименование поля ID# родителя
      * @param SOME $defaultParent Родительская сущность по умолчанию
+     * @param bool $withParentChildren Учитывать дочерние элементы для родительского, в качестве родительских
      * @param array<string[] => mixed> $expectedTest Массив проверки полей сущности
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по данной сущности
      * @dataProvider findOrCreateEntityDataProvider
@@ -432,6 +456,7 @@ class Sync1CInterfaceTest extends BaseTest
         $parentClassname,
         $pidN,
         SOME $defaultParent,
+        $withParentChildren,
         array $expectedTest,
         array $mappingTest
     ) {
@@ -445,7 +470,8 @@ class Sync1CInterfaceTest extends BaseTest
             $searchField,
             $parentClassname,
             $pidN,
-            $defaultParent
+            $defaultParent,
+            $withParentChildren
         );
 
         foreach ($expectedTest as $key => $val) {
@@ -1122,6 +1148,13 @@ class Sync1CInterfaceTest extends BaseTest
                 $materialType,
                 ['id' => null],
                 ['zxjhcoihwoer' => null],
+            ],
+            [
+                ['id' => 'zxjhcoihwoer', 'name' => 'Особое поле'],
+                [],
+                new Material_Type(4),
+                ['id' => 48],
+                ['zxjhcoihwoer' => 48],
             ],
         ];
     }
