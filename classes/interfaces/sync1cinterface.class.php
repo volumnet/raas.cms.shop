@@ -163,21 +163,21 @@ class Sync1CInterface extends AbstractInterface
      */
     public function findEntityByField($classname, $fieldName, $value, array $context = [])
     {
-        if (isset($value)) {
-            $context[$fieldName] = $value;
-        }
-        $val = $value;
+        $context[$fieldName] = (string)$value;
         $sqlWhere = [];
         $sqlBind = [];
         foreach ($context as $k => $v) {
             if (is_numeric($k)) {
                 $sqlWhereRow = "(" . $v . ")";
             } else {
-                $sqlWhereRow = $k . " = ";
-                if (is_numeric($v)) {
-                    $sqlWhereRow .= $v;
+                if (is_array($v)) {
+                    $v = array_map(function ($x) {
+                        return is_numeric($x) ? $x : "'" . Application::i()->SQL->real_escape_string($x) . "'";
+                    }, $v);
+                    $sqlWhereRow = $k . " IN (" . implode(", ", $v) . ")";
                 } else {
-                    $sqlWhereRow .= "'" . Application::i()->SQL->real_escape_string($v) . "'";
+                    $sqlWhereRow = $k . " = "
+                                 . (is_numeric($v) ? $v : "'" . Application::i()->SQL->real_escape_string($v) . "'");
                 }
             }
             $sqlWhere[] = $sqlWhereRow;
@@ -290,6 +290,7 @@ class Sync1CInterface extends AbstractInterface
      * @param string $parentClassname Наименование родительского класса
      * @param string $pidN Наименование поля ID# родителя
      * @param SOME $defaultParent Родительская сущность по умолчанию
+     * @param bool $withParentChildren Учитывать дочерние элементы для родительского, в качестве родительских
      * @return SOME Найденная или созданная сущность
      */
     public function findOrCreateEntity(
@@ -300,7 +301,8 @@ class Sync1CInterface extends AbstractInterface
         $searchField = 'name',
         $parentClassname = null,
         $pidN = 'pid',
-        SOME $defaultParent = null
+        SOME $defaultParent = null,
+        $withParentChildren = false
     ) {
         $entity = $this->findEntityById($classname, $data, $idN, $mapping);
         if (!$entity) {
@@ -311,7 +313,11 @@ class Sync1CInterface extends AbstractInterface
                     $parent = $defaultParent;
                 }
                 if ($parent->id) {
-                    $context = ['pid' => (int)$parent->id];
+                    if ($withParentChildren && ($selfAndChildrenIds = $parent->selfAndChildrenIds)) {
+                        $context = ['pid' => $selfAndChildrenIds];
+                    } else {
+                        $context = ['pid' => (int)$parent->id];
+                    }
                 }
             }
             $entity = $this->findEntityByField($classname, $searchField, $data[$searchField], $context);
@@ -522,7 +528,8 @@ class Sync1CInterface extends AbstractInterface
             'name',
             Material_Type::class,
             'pid',
-            $defaultParent
+            $defaultParent,
+            false
         );
         return $entity;
     }
@@ -547,7 +554,8 @@ class Sync1CInterface extends AbstractInterface
             'name',
             Material_Type::class,
             'pid',
-            $defaultParent
+            $defaultParent,
+            true
         );
         return $entity;
     }
@@ -572,7 +580,8 @@ class Sync1CInterface extends AbstractInterface
             'name',
             Page::class,
             'pid',
-            $defaultParent
+            $defaultParent,
+            false
         );
         return $entity;
     }
