@@ -5,6 +5,7 @@ use RAAS\Application;
 
 require __DIR__ . '/../../../../cron/cron.php';
 require __DIR__ . '/src/BaseTest.php';
+require Application::i()->includeDir . '/PHPExcel/Classes/PHPExcel.php';
 $_SERVER['HTTP_HOST'] = 'localhost';
 $_SERVER['HTTPS'] = 'off';
-\RAAS\Application::i()->run('cron', false);
+Application::i()->run('cron', false);
