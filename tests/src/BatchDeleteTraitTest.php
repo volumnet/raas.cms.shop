@@ -14,7 +14,7 @@ use RAAS\CMS\Field;
 /**
  * Класс теста массового удаления сущностей
  */
-class BatchDeleteTraitTest extends BaseTest
+class BatchDeleteTraitTest extends BaseDBTest
 {
     /**
      * Тест удаления страниц по ID#

@@ -27,6 +27,7 @@ use RAAS\CMS\Field;
 class PriceloaderInterface extends AbstractInterface
 {
     use BatchDeleteTrait;
+    use InheritPageTrait;
 
     /**
      * Максимальное время загрузки прайса
@@ -609,24 +610,13 @@ class PriceloaderInterface extends AbstractInterface
         $arr = [
             'pid' => (int)$context->id,
             'vis' => 1,
-            'pvis' => (int)((int)$context->vis && (int)$context->pvis),
             'name' => $name,
-            'sitemaps_priority' => $context->sitemaps_priority ?: '0.5',
-            'inherit_sitemaps_priority' => $context->inherit_sitemaps_priority,
-            'nat' => $context->nat,
-            'lang' => $context->inherit_lang ? $context->lang : Package::i()->view->language
         ];
-        foreach (['title', 'keywords', 'description'] as $key) {
-            $arr['meta_' . $key] = $context->{'inherit_meta_' . $key} ? $context->{'meta_' . $key} : '';
-            $arr['inherit_meta_' . $key] = $context->{'inherit_meta_' . $key};
-        }
-        foreach (['changefreq', 'cache', 'template'] as $key) {
-            $arr[$key] = $context->$key;
-            $arr['inherit_' . $key] = $context->{'inherit_' . $key};
-        }
         $context = new Page($arr);
+        $this->inheritPageNativeFields($context);
         if (!$test) {
             $context->commit();
+            $this->inheritPageCustomFields($context);
             $context->rollback();
         }
         return $context;

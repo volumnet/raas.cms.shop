@@ -11,6 +11,7 @@
       <file>./src/ExcelPriceloaderDataConverterTest.php</file> 
       <file>./src/PriceloaderDataConverterTest.php</file> 
       <file>./src/XmlDataConverterTest.php</file>
+      <file>./src/InheritPageTraitTest.php</file>
       <file>./src/interfaces/Sync1CInterfaceTest.php</file>
       <file>./src/interfaces/PriceloaderInterfaceTest.php</file>
     </testsuite>

@@ -9,7 +9,7 @@ use RAAS\CMS\Page;
 /**
  * Класс теста массового поиска сущностей
  */
-class BatchFindTraitTest extends BaseTest
+class BatchFindTraitTest extends BaseDBTest
 {
     /**
      * Провайдер данных для функции testGetMaterialsIdsByTypeAndPage

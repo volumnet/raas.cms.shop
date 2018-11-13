@@ -93,7 +93,7 @@
             <pid update="false">4</pid>
             <name><xsl:apply-templates select="i:Наименование" /></name>
             <description><xsl:apply-templates select="i:Описание" /></description>
-            <pages_ids update="true">
+            <pages_ids create="true">
               <xsl:for-each select="i:Группы/i:Ид">
                 <pageId><xsl:value-of select="text()"/></pageId>
               </xsl:for-each>

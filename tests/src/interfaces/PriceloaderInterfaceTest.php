@@ -13,7 +13,7 @@ use RAAS\CMS\Page;
 /**
  * Класс теста интерфейса загрузчика прайсов
  */
-class PriceloaderInterfaceTest extends BaseTest
+class PriceloaderInterfaceTest extends BaseDBTest
 {
     /**
      * Получает интерфейс загрузчика прайсов
@@ -173,6 +173,21 @@ class PriceloaderInterfaceTest extends BaseTest
 
 
     /**
+     * Тест получения номера уникальной колонки - случай, когда уникальная колонка некорректна
+     */
+    public function testGetUniqueColumnIndexWithInvalidColumn()
+    {
+        $interface = $this->getInterface();
+        $loader = $interface->loader;
+        $loader->ufid = 'abc';
+
+        $i = $interface->getUniqueColumnIndex($loader);
+
+        $this->assertNull($i);
+    }
+
+
+    /**
      * Тест проверки, относится ли строка к товару
      */
     public function testIsItemDataRow()
@@ -208,11 +223,15 @@ class PriceloaderInterfaceTest extends BaseTest
      */
     public function convertCellDataProvider()
     {
+        $customMaterialCol = new PriceLoader_Column(4);
+        $customMaterialCol->callback = 'namespace RAAS\CMS;
+                                        return [new Material(10), new Material(11), new Material(12)];';
         return [
             [new PriceLoader_Column(['pid' => 1, 'fid' => 'vis']), 'aaa', 1],
             [new PriceLoader_Column(5), 'в наличии', 1],
             [new PriceLoader_Column(5), 'под заказ', 0],
-            [new PriceLoader_Column(4), 'f4dbdf21, 83dcefb7, 1ad5be0d', [10, 11, 12]]
+            [new PriceLoader_Column(4), 'f4dbdf21, 83dcefb7, 1ad5be0d', [10, 11, 12]],
+            [$customMaterialCol, '', [10, 11, 12]]
         ];
     }
 
@@ -753,6 +772,9 @@ class PriceloaderInterfaceTest extends BaseTest
         $this->assertEquals(1, $result->vis);
         $this->assertEquals(1, $result->pvis);
         $this->assertEquals(15, $result->pid);
+        $this->assertEquals(1, $result->template);
+        $this->assertEquals(1, $result->cache);
+        $this->assertEquals(1, $result->inherit_lang);
         $this->assertNotNull($result->id);
 
         Page::delete($result);

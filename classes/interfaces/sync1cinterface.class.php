@@ -25,6 +25,9 @@ use RAAS\CMS\Page;
  */
 class Sync1CInterface extends AbstractInterface
 {
+    use BatchDeleteTrait;
+    use InheritPageTrait;
+
     /**
      * Не удалять предыдущие материалы и страницы
      */
@@ -39,8 +42,6 @@ class Sync1CInterface extends AbstractInterface
      * Удалять предыдущие материалы и страницы
      */
     const DELETE_PREVIOUS_MATERIALS_MATERIALS_AND_PAGES = 2;
-
-    use BatchDeleteTrait;
 
     /**
      * Загрузка прайса на сервер
@@ -713,13 +714,15 @@ class Sync1CInterface extends AbstractInterface
             $entity->deleted = true;
             return $entity;
         }
-        $this->updateEntity($entity, $data, $mapping);
         $new = !$entity->id;
+        $this->updateEntity($entity, $data, $mapping);
         if ($new) {
+            $this->inheritPageNativeFields($entity); // Вызываем после updateEntity, т.к. до этого родитель не установлен
             $entity->new = true;
         }
         $entity->commit();
         if ($new) {
+            $this->inheritPageCustomFields($entity);
             $mapping[Page::class][$data['id']] = $entity->id;
         }
         $this->updateCustomFields($entity, $new, $data, $mapping, $dir);

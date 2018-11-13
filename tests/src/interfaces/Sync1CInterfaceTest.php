@@ -16,8 +16,39 @@ use RAAS\CMS\Field;
 /**
  * Класс теста интерфейса синхронизации с 1С
  */
-class Sync1CInterfaceTest extends BaseTest
+class Sync1CInterfaceTest extends BaseDBTest
 {
+    /**
+     * Перестройка перед тестом
+     */
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
+        Page::_SQL()->update(Page::_tablename(), "id = 3", [
+            'cache' => 1,
+            'inherit_cache' => 1,
+            'inherit_template' => 1,
+            'inherit_sitemaps_priority' => 1,
+            'sitemaps_priority' => 0.75
+        ]);
+        Page::_SQL()->add('cms_data', [
+            [
+                'pid' => 3,
+                'fid' => 1,
+                'fii' => 0,
+                'value' => 'Test description',
+                'inherited' => 1
+            ],
+            [
+                'pid' => 3,
+                'fid' => 3,
+                'fii' => 0,
+                'value' => 1,
+                'inherited' => 0
+            ]
+        ]);
+    }
+
     /**
      * Тест получения данных
      */
@@ -1776,7 +1807,19 @@ class Sync1CInterfaceTest extends BaseTest
                 [],
                 $page,
                 $dir,
-                ['id' => 34, 'pid' => 3, 'name' => 'Name1', 'urn' => 'name1', 'new' => true],
+                [
+                    'id' => 34,
+                    'pid' => 3,
+                    'name' => 'Name1',
+                    'urn' => 'name1',
+                    'new' => true,
+                    'template' => 1,
+                    'inherit_template' => 1,
+                    'lang' => 'ru',
+                    'cache' => 1,
+                    '_description_' => 'Test description',
+                    'noindex' => 0,
+                ],
                 ['bbb' => 34],
             ],
         ];
@@ -1808,10 +1851,10 @@ class Sync1CInterfaceTest extends BaseTest
         $result = $interface->processPage($data, $mapping, $defaultParent, $dir);
 
         foreach ($expectedTest as $key => $val) {
-            $this->assertEquals($val, $result->$key);
+            $this->assertEquals($val, $result->$key, $key);
         }
         foreach ($mappingTest as $key => $val) {
-            $this->assertEquals($val, $mapping[Page::class][$key]);
+            $this->assertEquals($val, $mapping[Page::class][$key], $key);
         }
     }
 

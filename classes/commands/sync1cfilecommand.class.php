@@ -47,6 +47,8 @@ class Sync1CFileCommand extends Command
             }
         }
 
+        $controller = $this->controller;
+
         $interface->process(
             $config['page'],
             $config['materialType'],
@@ -58,7 +60,9 @@ class Sync1CFileCommand extends Command
             $config['articleFieldURN'],
             $config['assets1CDir'],
             $clear,
-            array($this->controller, 'doLog'),
+            function ($x) use ($controller) {
+                return $controller->doLog($x);
+            },
             $config['saveMappingAfterIterations']
         );
     }

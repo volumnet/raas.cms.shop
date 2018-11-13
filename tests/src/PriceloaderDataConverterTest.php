@@ -10,7 +10,7 @@ use SOME\CSV;
 /**
  * Класс теста конвертера данных для загрузчика прайсов
  */
-class PriceloaderDataConverterTest extends BaseTest
+class PriceloaderDataConverterTest extends BaseDBTest
 {
     /**
      * Тест фабрики конвертеров по расширению файла

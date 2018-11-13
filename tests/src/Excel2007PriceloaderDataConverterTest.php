@@ -12,7 +12,7 @@ use PHPExcel_Writer_Excel2007;
  */
 class Excel2007PriceloaderDataConverterTest extends BaseTest
 {
-   /**
+    /**
      * Тест получения reader'а для заданного типа Excel
      */
     public function testGetReader()

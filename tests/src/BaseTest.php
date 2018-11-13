@@ -13,15 +13,6 @@ use RAAS\Application;
 class BaseTest extends PHPUnit_Framework_TestCase
 {
     /**
-     * Перестройка перед тестом
-     */
-    public static function setUpBeforeClass()
-    {
-        $newSQL = file_get_contents(__DIR__ . '/../resources/test.sql');
-        Application::i()->SQL->query($newSQL);
-    }
-
-    /**
      * Получение папки с ресурсами
      */
     public function getResourcesDir()
