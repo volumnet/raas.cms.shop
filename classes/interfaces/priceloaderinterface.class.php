@@ -114,8 +114,8 @@ class PriceloaderInterface extends AbstractInterface
      *             'log' ?=> array<[
      *                 'time' => float Время, прошедшее с начала загрузки
      *                 'text' => string Текст записи,
-     *                 'row' ?=> int К какой строке относится запись (относительно смещений),
-     *                 'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений),
+     *                 'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
+     *                 'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *             ]> Лог выполнения,
      *             'raw_data' ?=> array<array<string>> Массив сырых данных,
      *             'ok' ?=> true Обработка завершена
@@ -424,8 +424,8 @@ class PriceloaderInterface extends AbstractInterface
      */
     public function applyNativeField(PriceLoader_Column $col, Material $item, $data, $isUnique = false)
     {
-        $data = trim($data);
         if ($col->isNative && !($isUnique && $item->id)) {
+            $data = trim((string)$data);
             // У существующих товаров не обновляем уникальное поле
             $fid = $col->fid;
             if (in_array($fid, ['vis', 'priority'])) {
@@ -433,9 +433,9 @@ class PriceloaderInterface extends AbstractInterface
             } elseif ($data || !in_array($fid, ['name', 'urn'])) {
                 $item->$fid = $data;
             }
-        }
-        if (!$item->id && $isUnique) { // 2015-11-20, AVS: добавили URN по артикулу
-            $item->urn = Text::beautify($data);
+            if (!$item->id && $isUnique) { // 2015-11-20, AVS: добавили URN по артикулу
+                $item->urn = Text::beautify($data);
+            }
         }
         return $item;
     }
@@ -831,8 +831,8 @@ class PriceloaderInterface extends AbstractInterface
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
-     *            'row' ?=> int К какой строке относится запись (относительно смещений),
-     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений),
+     *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
+     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *        ]> $log Лог выполнения
      * @param int|null $uniqueIndex Индекс (начиная с 0) уникальной колонки, null если нет
      * @param bool $test Тестовый режим
@@ -895,8 +895,8 @@ class PriceloaderInterface extends AbstractInterface
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
-     *            'row' ?=> int К какой строке относится запись (относительно смещений),
-     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений),
+     *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
+     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *        ]> $log Лог выполнения
      * @param bool $test Тестовый режим
      * @param int $rows Сколько строк пропускать
@@ -969,8 +969,8 @@ class PriceloaderInterface extends AbstractInterface
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
-     *            'row' ?=> int К какой строке относится запись (относительно смещений),
-     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений),
+     *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
+     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *        ]> $log Лог выполнения
      * @param array<array<string>> $rawData Массив сырых данных
      * @param bool $test Тестовый режим
@@ -1015,7 +1015,7 @@ class PriceloaderInterface extends AbstractInterface
                     $test,
                     $rows,
                     $st,
-                    $i + 1
+                    $i
                 );
             } elseif ($this->isPageDataRow($dataRow)) {
                 // Категория
@@ -1031,7 +1031,7 @@ class PriceloaderInterface extends AbstractInterface
                     $test,
                     $rows,
                     $st,
-                    $i + 1
+                    $i
                 );
             }
             $rawData[] = $dataRow;
@@ -1046,8 +1046,8 @@ class PriceloaderInterface extends AbstractInterface
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
-     *            'row' ?=> int К какой строке относится запись (относительно смещений),
-     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений),
+     *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
+     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *        ]> $log Лог выполнения
      * @param array<int> $affectedMaterialsIds Массив ID# "затронутых" материалов
      * @param bool $test Тестовый режим
@@ -1092,8 +1092,8 @@ class PriceloaderInterface extends AbstractInterface
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
-     *            'row' ?=> int К какой строке относится запись (относительно смещений),
-     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений),
+     *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
+     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *        ]> $log Лог выполнения
      * @param array<int> $affectedPagesIds Массив ID# "затронутых" страниц
      * @param bool $test Тестовый режим
@@ -1138,8 +1138,8 @@ class PriceloaderInterface extends AbstractInterface
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
-     *            'row' ?=> int К какой строке относится запись (относительно смещений),
-     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений),
+     *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
+     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *        ]> $log Лог выполнения
      * @param array<int> $affectedMaterialsIds Массив ID# "затронутых" материалов
      * @param array<int> $affectedPagesIds Массив ID# "затронутых" страниц

@@ -1302,9 +1302,9 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $this->assertEquals(0, $rawData[3][4]);
         $this->assertEquals(1, $rawData[4][4]);
         $this->assertContains('Категория 1', $log[0]['text']);
-        $this->assertEquals(1, $log[0]['row']);
+        $this->assertEquals(0, $log[0]['row']);
         $this->assertContains('Товар 2', $log[4]['text']);
-        $this->assertEquals(5, $log[4]['row']);
+        $this->assertEquals(4, $log[4]['row']);
     }
 
 
@@ -1581,7 +1581,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $this->assertNotEquals(22, $page->id);
         $this->assertNotEquals(17, $item->id);
         $this->assertContains('Категория 1', $result['log'][0]['text']);
-        $this->assertEquals(1, $result['log'][0]['row']);
+        $this->assertEquals(0, $result['log'][0]['row']);
         $this->assertEquals('Категория 1', $result['raw_data'][0][0]);
         $this->assertTrue($result['ok']);
     }

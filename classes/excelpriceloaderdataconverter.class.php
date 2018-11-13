@@ -5,12 +5,13 @@
 namespace RAAS\CMS\Shop;
 
 use PHPExcel;
+use PHPExcel_Cell;
+use PHPExcel_Cell_DataType;
+use PHPExcel_Exception;
 use PHPExcel_Reader_IReader;
 use PHPExcel_Reader_IWriter;
-use PHPExcel_Cell_DataType;
-use PHPExcel_Cell;
+use PHPExcel_Worksheet;
 use RAAS\Exception;
-use PHPExcel_Exception;
 
 /**
  * Класс конвертера Excel для загрузчика прайсов

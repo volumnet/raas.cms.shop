@@ -441,10 +441,9 @@ class Webmaster extends \RAAS\CMS\Webmaster
                            .  "}\n"
                            .  "return \$temp;",
                 'callback_download' => "\$temp = array();\n"
-                                    .  "foreach ((array)\$x as \$val) {\n"
-                                    .  "    \$row = new \\RAAS\\CMS\\Material((int)\$val);\n"
-                                    .  "    if (\$row->id) {\n"
-                                    .  "        \$temp[] = \$row->article;\n"
+                                    .  "foreach ((array)\$x as \$item) {\n"
+                                    .  "    if (\$item->id) {\n"
+                                    .  "        \$temp[] = \$item->article;\n"
                                     .  "    }\n"
                                     .  "}\n"
                                     .  "return implode(', ', \$temp);",
