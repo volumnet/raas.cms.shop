@@ -19,7 +19,7 @@ class EditOrderForm extends Form
     {
         switch ($var) {
             case 'view':
-                return ViewSub_Dev::i();
+                return ViewSub_Orders::i();
                 break;
             default:
                 return parent::__get($var);
@@ -37,7 +37,7 @@ class EditOrderForm extends Form
 
         $defaultParams = array(
             'caption' => $Item->id ? $view->_('EDIT_ORDER') . ' #' . (int)$Item->id : $view->_('NEW_ORDER'),
-            'parentUrl' => Sub_Dev::i()->url . '&action=orders&id=' . (int)$Parent->id,
+            'parentUrl' => Sub_Orders::i()->url . '&action=orders&id=' . (int)$Parent->id,
             'children' => array(),
             'export' => function ($Form) {
                 $Item = $Form->Item;
