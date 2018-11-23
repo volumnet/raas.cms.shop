@@ -37,7 +37,7 @@ class EditOrderForm extends Form
 
         $defaultParams = array(
             'caption' => $Item->id ? $view->_('EDIT_ORDER') . ' #' . (int)$Item->id : $view->_('NEW_ORDER'),
-            'parentUrl' => Sub_Orders::i()->url . '&action=orders&id=' . (int)$Parent->id,
+            'parentUrl' => Sub_Orders::i()->url . '&id=' . (int)$Parent->id,
             'children' => array(),
             'export' => function ($Form) {
                 $Item = $Form->Item;
