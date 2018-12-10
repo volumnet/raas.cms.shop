@@ -90,6 +90,9 @@ class Module extends \RAAS\Module
         if (isset($this->controller->nav['status_id']) && ((string)$this->controller->nav['status_id'] !== '')) {
             $SQL_query .= " AND tOr.status_id = " . (int)$this->controller->nav['status_id'];
         }
+        if (isset($this->controller->nav['paid']) && ($paid = $this->controller->nav['paid'])) {
+            $SQL_query .= " AND " . ($paid > 0 ? "" : "NOT") . " tOr.paid";
+        }
         if (isset($this->controller->nav['from']) && $this->controller->nav['from']) {
             $t = strtotime($this->controller->nav['from']);
             if ($t > 0) {
