@@ -1,7 +1,13 @@
 <form class="form-search" action="" method="get">
   <?php foreach ($VIEW->nav as $key => $val) { ?>
       <?php if (!in_array($key, array('page', 'search_string', 'from', 'to', 'status_id'))) { ?>
-          <input type="hidden" name="<?php echo htmlspecialchars($key)?>" value="<?php echo htmlspecialchars($val)?>" />
+          <?php if (is_array($val)) { ?>
+              <?php foreach ($val as $k => $v) { ?>
+                  <input type="hidden" name="<?php echo htmlspecialchars($key . '[' . $k . ']')?>" value="<?php echo htmlspecialchars((string)$v)?>" />
+              <?php } ?>
+          <?php } else { ?>
+              <input type="hidden" name="<?php echo htmlspecialchars($key)?>" value="<?php echo htmlspecialchars($val)?>" />
+          <?php } ?>
       <?php } ?>
   <?php } ?>
   <input type="datetime" name="from" style="width: 8em;" placeholder="<?php echo CMS\SHOW_FROM?>" value="<?php echo $VIEW->nav['from']?>" />
