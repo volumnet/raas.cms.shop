@@ -49,22 +49,26 @@ class Sync1CFileCommand extends Command
 
         $controller = $this->controller;
 
-        $interface->process(
-            $config['page'],
-            $config['materialType'],
-            $goodsFile,
-            $offersFile,
-            $config['goodsXSLFile'],
-            $config['offersXSLFile'],
-            $config['mappingFile'],
-            $config['articleFieldURN'],
-            $config['assets1CDir'],
-            $clear,
-            function ($x) use ($controller) {
-                return $controller->doLog($x);
-            },
-            $config['saveMappingAfterIterations']
-        );
+        try {
+            $interface->process(
+                $config['page'],
+                $config['materialType'],
+                $goodsFile,
+                $offersFile,
+                $config['goodsXSLFile'],
+                $config['offersXSLFile'],
+                $config['mappingFile'],
+                $config['articleFieldURN'],
+                $config['assets1CDir'],
+                $clear,
+                function ($x) use ($controller) {
+                    return $controller->doLog($x);
+                },
+                $config['saveMappingAfterIterations']
+            );
+        } catch (\Exception $e) {
+            $this->controller->doLog($e->getMessage());
+        }
     }
 
 

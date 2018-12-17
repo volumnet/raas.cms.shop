@@ -100,9 +100,13 @@
             </pages_ids>
             <fields>
               <field urn="article"><xsl:apply-templates select="i:Артикул" /></field>
-              <xsl:for-each select="./i:Картинка">
-                <field urn="images"><xsl:value-of select="text()"/></field>
-              </xsl:for-each>
+              <xsl:if test="./i:Картинка">
+                <field urn="images">
+                  <xsl:for-each select="./i:Картинка">
+                    <value><xsl:value-of select="text()"/></value>
+                  </xsl:for-each>
+                </field>
+              </xsl:if>
               <xsl:for-each select="./i:ЗначенияСвойств/i:ЗначенияСвойства">
                 <field>
                   <xsl:attribute name="id"><xsl:value-of select="i:Ид"/></xsl:attribute>
