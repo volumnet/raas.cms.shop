@@ -362,7 +362,7 @@ class CatalogInterface extends MaterialInterface
     /**
      * Получает поля $_GET параметров для фильтрации
      * @param Block_Material $block Блок, для которого применяется интерфейс
-     * @param Pagel $page Страница, для которой применяется интерфейс
+     * @param Page $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @return array<string[] => mixed>
      */
@@ -409,7 +409,7 @@ class CatalogInterface extends MaterialInterface
     /**
      * Определяет, ведется ли сейчас поиск
      * @param Block_Material $block Блок, для которого применяется интерфейс
-     * @param Pagel $page Страница, для которой применяется интерфейс
+     * @param Page $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @return bool
      */
@@ -427,7 +427,7 @@ class CatalogInterface extends MaterialInterface
     /**
      * Устанавливает (если нет) фильтр каталога
      * @param Block_Material $block Блок, для которого применяется интерфейс
-     * @param Pagel $page Страница, для которой применяется интерфейс
+     * @param Page $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      */
     public function setCatalogFilter(Block_Material $block, Page $page, array $get = [])
