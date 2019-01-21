@@ -37,7 +37,7 @@ use RAAS\CMS\Page;
  *                > $sortMapping Маппинг свойств для сортировки (в пустом ключе - товары без сортировки (по порядку отображения))
  * @property-read array<int> $catalogGoodsIds ID# товаров, доступные по страницам без учета фильтров
  * @property-read array<int> $categoryGoodsIds ID# товаров, доступные на текущей странице без учета фильтров
- * @property-read array<string[] имя свойства => mixed|array<mixed> значение или набор значений> $filter Значения фильтра
+ * @property-read array<string[] ID# свойства => mixed|array<mixed> значение или набор значений> $filter Значения фильтра
  * @property-read bool $filterHasCheckedOptions Есть ли у фильтра отмеченные опции
  * @property-read array<string[] ID# свойства => array<
  *                    mixed[] значение => ['value' => mixed значение, 'enabled' => bool Активно ли значение]
@@ -120,7 +120,7 @@ class CatalogFilter
 
     /**
      * Значения фильтра
-     * @var array<string[] имя свойства => mixed|array<mixed> значение или набор значений>
+     * @var array<string[] ID# свойства => mixed|array<mixed> значение или набор значений>
      */
     protected $filter = [];
 
@@ -399,7 +399,13 @@ class CatalogFilter
                     $filter[$prop->id][$limitName] = trim($val);
                 }
             } elseif ($prop = $this->propertiesByURNs[$key]) {
-                $filter[$prop->id] = array_unique((array)$val);
+                if ($val = array_values(
+                    array_unique(array_filter((array)$val, function ($x) {
+                        return trim($x) !== '';
+                    }))
+                )) {
+                    $filter[$prop->id] = $val;
+                }
             }
         }
         return $filter;
@@ -437,9 +443,13 @@ class CatalogFilter
         unset($filteredMapping['pages_ids']);
         if ($catalogId) {
             $catalogGoodsIds = $propsMapping['pages_ids'][$catalogId];
+            $catalogGoodsIdsFlipped = array_flip($catalogGoodsIds);
             foreach ($filteredMapping as $propVar => $propValues) {
-                $filteredMapping[$propVar] = array_map(function ($valueGoodsIds) use ($catalogGoodsIds) {
-                    return array_values(array_intersect($valueGoodsIds, $catalogGoodsIds));
+                $filteredMapping[$propVar] = array_map(function ($valueGoodsIds) use ($catalogGoodsIds, $catalogGoodsIdsFlipped) {
+                    $y = array_flip($valueGoodsIds);
+                    $res = array_keys(array_intersect_key($y, $catalogGoodsIdsFlipped));
+                    return $res;
+                    // return array_values(array_intersect($valueGoodsIds, $catalogGoodsIds));
                 }, $filteredMapping[$propVar]);
                 $filteredMapping[$propVar] = array_filter($filteredMapping[$propVar]);
             }
@@ -756,7 +766,7 @@ class CatalogFilter
     /**
      * Экспортирует данные
      * @return [
-     *             'materialType' => array<string[] ключ типа материалов => mixed значение>,
+     *             'materialType' => Material_Type,
      *             'withChildrenGoods' => bool Учитывать товары из дочерних категорий,
      *             'ignoredFields' => array<int ID# поля | string URN поля> Игнорируемые поля,
      *             'materialTypesIds' => int ID# всех типов материалов,
@@ -774,13 +784,11 @@ class CatalogFilter
     public function export()
     {
         $result = [
-            'materialType' => $this->materialType->getArrayCopy(),
+            'materialType' => $this->materialType,
             'withChildrenGoods' => (bool)$this->withChildrenGoods,
             'ignoredFields' => $this->ignoredFields,
             'materialTypesIds' => $this->materialTypesIds,
-            'properties' => array_map(function ($property) {
-                return $property->getArrayCopy();
-            }, $this->properties),
+            'properties' => $this->properties,
             'catalogGoodsIds' => $this->catalogGoodsIds,
             'propsMapping' => $this->propsMapping,
         ];
@@ -791,7 +799,7 @@ class CatalogFilter
     /**
      * Импортирует данные
      * @param [
-     *             'materialType' => array<string[] ключ типа материалов => mixed значение>,
+     *             'materialType' => Material_Type,
      *             'withChildrenGoods' => bool Учитывать товары из дочерних категорий,
      *             'ignoredFields' => array<int ID# поля | string URN поля> Игнорируемые поля,
      *             'materialTypesIds' => int ID# всех типов материалов,
@@ -823,16 +831,16 @@ class CatalogFilter
                 throw new Exception('Invalid import format - property ' . $key . ' is not set');
             }
         }
-        $materialType = new Material_Type($data['materialType']);
+        $materialType = $data['materialType'];
         $filter = new CatalogFilter($materialType, (bool)$data['withChildrenGoods'], (array)$data['ignoredFields']);
         foreach (['materialTypesIds', 'catalogGoodsIds', 'propsMapping'] as $key) {
             $filter->$key = $data[$key];
         }
         $props = $propsByURNs = [];
         foreach ((array)$data['properties'] as $propId => $propData) {
-            $field = new Material_Field($propData);
+            $field = $propData;
             $props[$propId] = $field;
-            $propsByURNs[$propData['urn']] = $field;
+            $propsByURNs[$propData->urn] = $field;
         }
         $filter->properties = $props;
         $filter->propertiesByURNs = $propsByURNs;

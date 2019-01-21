@@ -85,11 +85,47 @@ class Order extends Feedback
     protected function _items()
     {
         $SQL_query = "SELECT tM.*, tOG.meta, tOG.realprice, tOG.amount
-                        FROM " . Material::_tablename() . " AS tM 
-                        JOIN " . self::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.material_id = tM.id 
+                        FROM " . Material::_tablename() . " AS tM
+                        JOIN " . self::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.material_id = tM.id
                        WHERE tOG.order_id = " . (int)$this->id . "
                     ORDER BY tOG.priority";
         $Set = Material::getSQLSet($SQL_query);
         return $Set;
+    }
+
+    /**
+     * Получает список товаров в виде массива текста (для комментариев)
+     * @param array<
+     *            Material материал с полями заказа (
+     *                'meta' => string Мета-данные материала в заказе
+     *                'realprice' => float Стоимость материала в заказе (за единицу)
+     *                'amount' => int Количество
+     *            )|array<[
+     *                'material_id' => int ID# материала
+     *                'name' => string Наименование материала
+     *                'meta' => string Мета-данные материала в заказе
+     *                'realprice' => float Стоимость материала в заказе (за единицу)
+     *                'amount' => int Количество
+     *            ]>
+     *        > $items Список товаров
+     * @return array<string>
+     */
+    public static function getItemsTextArr(array $items = [])
+    {
+        $arr = [];
+        foreach ($items as $item) {
+            if ($item instanceof Material) {
+                $arr[] = '#' . $item->id . ' ' . $item->name
+                       . ($item->meta['meta'] ? ' (' . $item->meta['meta'] . ')' : '')
+                       . ': ' . (float)$item->realprice . ' x ' . (int)$item->amount
+                       . ' = ' . (float)($item->realprice * $item->amount);
+            } elseif (is_array($item)) {
+                $arr[] = '#' . $item['material_id'] . ' ' . $item['name']
+                       . ($item['meta'] ? ' (' . $item['meta'] . ')' : '')
+                       . ': ' . (float)$item['realprice'] . ' x ' . (int)$item['amount']
+                       . ' = ' . (float)($item['realprice'] * $item['amount']);
+            }
+        }
+        return $arr;
     }
 }

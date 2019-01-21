@@ -592,6 +592,32 @@ class CatalogFilterTest extends BaseDBTest
 
 
     /**
+     * Тест составления фильтра по переменным окружения - случай с пустым значением
+     */
+    public function testGetFilterWithEmptyValue()
+    {
+        $filter = new CatalogFilter(new Material_Type(4));
+        $filterData = [
+            'price_old_from' => 10000,
+            'price_old_to' => 20000,
+            'article' => ['', '0'],
+            'videos_like' => 'youtube',
+            'available' => 1
+        ];
+
+        $filter->build();
+        $result = $filter->getFilter($filterData);
+
+        $this->assertEquals([
+            '34' => ['from' => 10000, 'to' => 20000],
+            '25' => ['0'],
+            '28' => ['like' => 'youtube'],
+            '31' => [1]
+        ], $result);
+    }
+
+
+    /**
      * Тест составления фильтра по переменным окружения - случай, когда фильтр не инициализирован
      * @expectedException Exception
      */

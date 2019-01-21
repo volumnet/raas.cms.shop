@@ -147,8 +147,12 @@ class CatalogInterface extends MaterialInterface
     ) {
         if ($page->catalogFilter) {
             $ids = $page->catalogFilter->getIds();
-            $sqlWhere[] = "tM.id IN (" . implode(", ", array_fill(0, count($ids), "?")) . ")";
-            $sqlWhereBind = array_merge($sqlWhereBind, $ids);
+            if ($ids) {
+                $sqlWhere[] = "tM.id IN (" . implode(", ", array_fill(0, count($ids), "?")) . ")";
+                $sqlWhereBind = array_merge($sqlWhereBind, $ids);
+            } else {
+                $sqlWhere[] = "0";
+            }
         }
     }
 
@@ -161,6 +165,9 @@ class CatalogInterface extends MaterialInterface
         array $filter = [],
         array $get = []
     ) {
+        $fullTextFilter = array_values(array_filter($filter, function ($x) {
+            return $x['relation'] == 'FULLTEXT';
+        }));
         $filter = array_values(array_filter($filter, function ($x) {
             return !is_numeric($x['field']);
         }));
@@ -172,6 +179,64 @@ class CatalogInterface extends MaterialInterface
             $filter,
             $get
         );
+        $this->getFullTextFilteringSQL(
+            $sqlFrom,
+            $sqlFromBind,
+            $sqlWhere,
+            $sqlWhereBind,
+            $fullTextFilter,
+            $get
+        );
+    }
+
+
+    /**
+     * Получает SQL-инструкции по полнотекстовому поиску
+     * @param array<
+     *            string[] псевдоним поля => string SQL-инструкция по выборке таблицы
+     *        > $sqlFrom Список подключаемых таблиц
+     * @param array<mixed Значение связки> $sqlFromBind Связки для SQL FROM
+     * @param array<string SQL-инструкция> $sqlWhere Ограничения для SQL WHERE
+     * @param array<mixed Значение связки> $sqlWhereBind Связки для SQL WHERE
+     * @param array<[
+     *            'var' => string Переменная для фильтрации
+     *            'relation' => 'FULLTEXT' Отношение для фильтрации
+     *            'field' => int ID# поля артикула
+     *        ]> $filter Данные по фильтрации
+     * @param array $get Поля $_GET параметров
+     */
+    public function getFullTextFilteringSQL(
+        array &$sqlFrom,
+        array &$sqlFromBind,
+        array &$sqlWhere,
+        array &$sqlWhereBind,
+        array $filter = [],
+        array $get = []
+    ) {
+        $sqlArray = [];
+        foreach ((array)$filter as $filterItem) {
+            if (isset(
+                $filterItem['var'],
+                $filterItem['relation'],
+                $filterItem['field'],
+                $get[$filterItem['var']]
+            ) && $filterItem['relation'] == 'FULLTEXT') {
+                $var = $filterItem['var'];
+                $val = $get[$var];
+                $field = $filterItem['field'];
+                $sqlField = $this->getField($field, 't' . $field, $sqlFrom, $sqlFromBind);
+                $sqlNameField = $this->getField('name', '', $sqlFrom, $sqlFromBind);
+
+                $filteringItemSQL = $this->getFilteringItemSQL($sqlField, 'LIKE', $val);
+                $filteringNameSQL = $this->getFilteringItemSQL($sqlNameField, 'LIKE', $val);
+                $sqlArray[$var][] = "(" . implode(" OR ", [$filteringNameSQL[0], $filteringItemSQL[0]]) . ")";
+                $sqlWhereBind[] = $filteringNameSQL[1];
+                $sqlWhereBind[] = $filteringItemSQL[1];
+            }
+        }
+        foreach ($sqlArray as $key => $arr) {
+            $sqlWhere[$key] = $arr ? "(" . implode(" AND ", $arr) . ")" : "";
+        }
     }
 
 
@@ -206,6 +271,9 @@ class CatalogInterface extends MaterialInterface
             // Выберем подходящую запись
             // (у которой значение var совпадает со значением переменной сортировки $_GET)
             $sortItem = $this->getMatchingSortParam($sortVal, $sortParams, 'var');
+            $orderRelation = isset($sortItem['relation'])
+                           ? (string)$sortItem['relation']
+                           : '';
             if ($sortItem) {
                 if (is_numeric($sortItem['field'])) {
                     if ($catalogFilter &&
@@ -215,7 +283,7 @@ class CatalogInterface extends MaterialInterface
                         $order = ($order == 'desc' ? -1 : 1);
                         $urn = $catalogFilter->properties[$sortItem['field']]->urn;
                         $ids = $catalogFilter->getIds($urn, $order);
-                        $sqlSort = "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")";
+                        $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
                         $sqlOrder = "";
                     }
                 } else {
@@ -225,9 +293,6 @@ class CatalogInterface extends MaterialInterface
                         $sqlFrom,
                         $sqlFromBind
                     );
-                    $orderRelation = isset($sortItem['relation'])
-                                   ? (string)$sortItem['relation']
-                                   : '';
                     $sqlOrder = mb_strtoupper(
                         $this->getOrder($orderVar, $orderRelation, $get)
                     );
@@ -245,7 +310,7 @@ class CatalogInterface extends MaterialInterface
                     $order = ($order == 'desc' ? -1 : 1);
                     $urn = $catalogFilter->properties[$sortDefField]->urn;
                     $ids = $catalogFilter->getIds($urn, $order);
-                    $sqlSort = "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")";
+                    $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
                     $sqlOrder = "";
                 }
             } else {
@@ -373,7 +438,7 @@ class CatalogInterface extends MaterialInterface
         foreach ((array)$block->filter as $filterParam) {
             if (mb_substr($filterParam['var'], 0, 1) == '-') {
                 $ignoredParams[] = mb_substr($filterParam['var'], 1);
-            } else {
+            } elseif ($filterParam['relation'] != 'FULLTEXT') {
                 $filterParams[$filterParam['var']] = $filterParam;
             }
         }
@@ -416,7 +481,12 @@ class CatalogInterface extends MaterialInterface
     public function isSearch(Block_Material $block, CatalogFilter $catalogFilter, $get = [])
     {
         foreach ((array)$block->filter as $filterParam) {
-            if (!is_numeric($filterParam['field']) && isset($get[$filterParam['var']])) {
+            if ((
+                    !is_numeric($filterParam['field']) ||
+                    ($filterParam['relation'] == 'FULLTEXT')
+                ) &&
+                isset($get[$filterParam['var']])
+            ) {
                 return true;
             }
         }

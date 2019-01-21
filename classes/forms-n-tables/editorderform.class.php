@@ -38,8 +38,11 @@ class EditOrderForm extends Form
         $defaultParams = array(
             'caption' => $Item->id ? $view->_('EDIT_ORDER') . ' #' . (int)$Item->id : $view->_('NEW_ORDER'),
             'parentUrl' => Sub_Orders::i()->url . '&id=' . (int)$Parent->id,
+            'meta' => array(
+                'allContextMenu' => $view->getAllOrderGoodsContextMenu($Item),
+            ),
             'children' => array(),
-            'export' => function ($Form) {
+            'export' => function ($Form) use ($view) {
                 $Item = $Form->Item;
                 $Form->exportDefault();
                 $Item->vis = (int)Application::i()->user->id;
@@ -52,24 +55,13 @@ class EditOrderForm extends Form
                         }
                     }
 
-                    $itemsOld = $itemsNew = array();
-                    foreach ($Item->items as $row) {
-                        $itemsOld[] = '#' . $row->id . ' ' . $row->name
-                                    . ($row->meta ? ' (' . $row->meta . ')' : '')
-                                    . ': ' . (float)$row->realprice . ' x ' . (int)$row->amount
-                                    . ' = ' . (float)($row->realprice * $row->amount);
-                    }
-                    foreach ($Item->meta_items as $arr) {
-                        $itemsNew[] = '#' . $arr['material_id'] . ' ' . $arr['name']
-                                    . ($arr['meta'] ? ' (' . $arr['meta'] . ')' : '')
-                                    . ': ' . (float)$arr['realprice'] . ' x ' . (int)$arr['amount']
-                                    . ' = ' . (float)($arr['realprice'] * $arr['amount']);
-                    }
+                    $itemsOld = Order::getItemsTextArr($Item->items);
+                    $itemsNew = Order::getItemsTextArr($Item->meta_items);
                     if ($deletedItems = array_diff($itemsOld, $itemsNew)) {
-                        $dataChanged['Удаленные товары'] = implode("\n", $deletedItems);
+                        $dataChanged[$view->_('DELETED_GOODS')] = implode("\n", $deletedItems);
                     }
                     if ($addedItems = array_diff($itemsNew, $itemsOld)) {
-                        $dataChanged['Новые товары'] = implode("\n", $addedItems);
+                        $dataChanged[$view->_('NEW_GOODS')] = implode("\n", $addedItems);
                     }
                     if ($dataChanged) {
                         $newComment = array();
@@ -80,7 +72,7 @@ class EditOrderForm extends Form
                     }
                 }
             },
-            'oncommit' => function ($Form) {
+            'oncommit' => function ($Form) use ($view) {
                 $Form->oncommitDefault();
                 $Item = $Form->Item;
                 if ($Item->newComment) {
@@ -90,7 +82,7 @@ class EditOrderForm extends Form
                         'post_date' => date('Y-m-d H:i:s'),
                         'status_id' => $Item->status_id,
                         'paid' => $Item->paid,
-                        'description' => 'Заказ изменен: ' . "\n" . $Item->newComment
+                        'description' => $view->_('ORDER_CHANGED') . ": \n" . $Item->newComment
                     ));
                     $comment->commit();
                 }
@@ -137,6 +129,7 @@ class EditOrderForm extends Form
                 if ($FieldSet->Form->Item->items) {
                     foreach ((array)$FieldSet->Form->Item->items as $row) {
                         $DATA['material'][] = (int)$row->id;
+                        $DATA['material_name'][] = $row->name;
                         $DATA['meta'][] = trim($row->meta);
                         $DATA['realprice'][] = (float)$row->realprice;
                         $DATA['amount'][] = (int)$row->amount;
@@ -152,7 +145,7 @@ class EditOrderForm extends Form
                     if ($row->id && ($_POST['amount'][$key] > 0)) {
                         $items[] = array(
                             'material_id' => (int)$val,
-                            'name' => $row->name,
+                            'name' => trim($_POST['material_name'][$key]) ?: $row->name,
                             'meta' => $_POST['meta'][$key],
                             'realprice' => (float)$_POST['realprice'][$key],
                             'amount' => (int)$_POST['amount'][$key]
