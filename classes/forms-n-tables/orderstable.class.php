@@ -61,7 +61,7 @@ class OrdersTable extends Table
                 'caption' => $col->name,
                 'callback' => function ($row) use ($col) {
                     if (isset($row->fields[$col->urn])) {
-                        $y = $row->fields[$col->urn]->doRich();
+                        $y = htmlspecialchars($row->fields[$col->urn]->doRich());
                     }
                     return $y ? $y : '';
                 }
