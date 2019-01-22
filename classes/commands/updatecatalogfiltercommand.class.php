@@ -31,28 +31,30 @@ class UpdateCatalogFilterCommand extends LockCommand
         if (!$forceLockUpdate && $this->checkLock()) {
             return;
         }
-        if (!$forceUpdate) {
-            $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(modify_date))
-                           FROM " . Material::_tablename()
-                      . " WHERE 1";
-            $lastModifiedMaterialTimestamp = Material::_SQL()->getvalue($sqlQuery);
-            $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(modify_date))
-                           FROM " . Page::_tablename()
-                      . " WHERE 1";
-            $lastModifiedPageTimestamp = Material::_SQL()->getvalue($sqlQuery);
-            if (is_file($outputFile)) {
-                if (filemtime($outputFile) >= max($lastModifiedMaterialTimestamp, $lastModifiedPageTimestamp)) {
-                    $this->controller->doLog('Data is actual');
-                    return;
-                }
-            }
-        }
-        $this->lock();
         $materialType = Material_Type::importByURN($materialTypeURN);
         if ($materialType->id) {
             $catalogFilter = new CatalogFilter($materialType, $withChildrenGoods, []);
+            $outputFile = $catalogFilter->getDefaultFilename($materialType->id);
+            if (!$forceUpdate) {
+                $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(modify_date))
+                               FROM " . Material::_tablename()
+                          . " WHERE 1";
+                $lastModifiedMaterialTimestamp = Material::_SQL()->getvalue($sqlQuery);
+                $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(modify_date))
+                               FROM " . Page::_tablename()
+                          . " WHERE 1";
+                $lastModifiedPageTimestamp = Material::_SQL()->getvalue($sqlQuery);
+                if (is_file($outputFile)) {
+                    if (filemtime($outputFile) >= max($lastModifiedMaterialTimestamp, $lastModifiedPageTimestamp)) {
+                        $this->controller->doLog('Data is actual');
+                        return;
+                    }
+                }
+            }
+            $this->lock();
             $catalogFilter->build();
             $catalogFilter->save();
+            $this->controller->doLog('Completed');
         }
         $this->unlock();
     }
