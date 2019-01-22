@@ -283,7 +283,8 @@ switch (isset($_GET['action']) ? $_GET['action'] : '') {
                                     $row->deleteValues();
                                     if (isset($_POST[$row->urn])) {
                                         foreach ((array)$_POST[$row->urn] as $val) {
-                                            $row->addValue($val);
+                                            // 2019-01-22, AVS: закрываем XSS-уязвимость
+                                            $row->addValue(strip_tags($val));
                                         }
                                     }
                                     break;
