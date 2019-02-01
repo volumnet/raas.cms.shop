@@ -34,7 +34,7 @@ class UpdateCatalogFilterCommand extends LockCommand
         $materialType = Material_Type::importByURN($materialTypeURN);
         if ($materialType->id) {
             $catalogFilter = new CatalogFilter($materialType, $withChildrenGoods, []);
-            $outputFile = $catalogFilter->getDefaultFilename($materialType->id);
+            $outputFile = $catalogFilter->getDefaultFilename($materialType->id, $withChildrenGoods);
             if (!$forceUpdate) {
                 $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(modify_date))
                                FROM " . Material::_tablename()

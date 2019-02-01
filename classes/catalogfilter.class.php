@@ -11,7 +11,6 @@ namespace RAAS\CMS\Shop;
 use SOME\Pages;
 use SOME\Singleton;
 use RAAS\Exception;
-use RAAS\Timer;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Material_Type;
@@ -211,6 +210,7 @@ class CatalogFilter
      */
     public function apply(Page $catalog, array $params = [])
     {
+        ini_set('max_execution_time', 3600);
         $this->catalog = $catalog;
         $this->filter = $this->getFilter($params);
         $this->filterHasCheckedOptions = $this->getFilterHasCheckedOptions($this->filter);
@@ -220,11 +220,13 @@ class CatalogFilter
         $goodsIdsMapping = $this->reduceMappingToGoodsIds($filteredMapping);
         $crossFilterMapping = $this->applyCrossFilter($goodsIdsMapping, $this->categoryGoodsIds);
         $this->sortMapping = $this->getSortMapping($catalogPropsMapping, $crossFilterMapping['']);
+        // $st = microtime(true);
         $this->availableProperties = $this->getAvailableProperties(
             $catalogPropsMapping,
             $crossFilterMapping,
             $this->filter
         );
+        // var_dump(microtime(true) - $st); exit;
     }
 
 
@@ -445,12 +447,14 @@ class CatalogFilter
             $catalogGoodsIds = $propsMapping['pages_ids'][$catalogId];
             $catalogGoodsIdsFlipped = array_flip($catalogGoodsIds);
             foreach ($filteredMapping as $propVar => $propValues) {
+                $t = new \RAAS\Timer;
+                $t->start();
                 $filteredMapping[$propVar] = array_map(function ($valueGoodsIds) use ($catalogGoodsIds, $catalogGoodsIdsFlipped) {
                     $y = array_flip($valueGoodsIds);
                     $res = array_keys(array_intersect_key($y, $catalogGoodsIdsFlipped));
                     return $res;
-                    // return array_values(array_intersect($valueGoodsIds, $catalogGoodsIds));
-                }, $filteredMapping[$propVar]);
+                }, $propValues);
+                // 2019-01-31, AVS: 0.15 секунд за итерацию - слишком много
                 $filteredMapping[$propVar] = array_filter($filteredMapping[$propVar]);
             }
         }
@@ -642,8 +646,8 @@ class CatalogFilter
         $filteredPropsMapping = [];
         foreach ($propsMapping as $propId => $propValues) {
             $prop = $this->properties ? $this->properties[$propId] : new Material_Field($propId);
+            $crossFilterGoodsIds = $crossFilterMapping[$propId] ?: $crossFilterMapping[''];
             foreach ($propValues as $propValue => $goodsIds) {
-                $crossFilterGoodsIds = $crossFilterMapping[$propId] ?: $crossFilterMapping[''];
                 $valueData = [
                     'prop' => $prop,
                     'enabled' => (bool)array_intersect($goodsIds, $crossFilterGoodsIds)
@@ -851,11 +855,14 @@ class CatalogFilter
     /**
      * Получает путь к файлу по умолчанию
      * @param int $materialTypeId ID# типа материалов
+     * @param bool $withChildrenGoods Учитывать товары из дочерних категорий
      * @return string
      */
-    public static function getDefaultFilename($materialTypeId)
+    public static function getDefaultFilename($materialTypeId, $withChildrenGoods)
     {
-        return Package::i()->cacheDir . '/system/catalogfilter' . (int)$materialTypeId . '.php';
+        return Package::i()->cacheDir . '/system/catalogfilter' .
+               (int)$materialTypeId . '.' .
+               ($withChildrenGoods ? 'wch' : 'noch') . '.php';
     }
 
 
@@ -867,7 +874,7 @@ class CatalogFilter
     public function save($filename = null)
     {
         if (!$filename) {
-            $filename = static::getDefaultFilename($this->materialType->id);
+            $filename = static::getDefaultFilename($this->materialType->id, $this->withChildrenGoods);
         }
         $dir = dirname($filename);
         @mkdir($dir, 0777, true);
@@ -887,14 +894,15 @@ class CatalogFilter
     /**
      * Загружает кэш из файла
      * @param Material_Type $materialType Тип материала
+     * @param bool $withChildrenGoods Учитывать товары из дочерних категорий
      * @param string|null $filename Путь, откуда загружаем. Если не указан, будет использован путь по умолчанию
      * @return static
      * @throws Exception Выбрасывает исключение, если не удалось загрузить файл (или каскадно, если файл не распознан)
      */
-    public static function load(Material_Type $materialType, $filename = null)
+    public static function load(Material_Type $materialType, $withChildrenGoods = false, $filename = null)
     {
         if (!$filename) {
-            $filename = static::getDefaultFilename($materialType->id);
+            $filename = static::getDefaultFilename($materialType->id, $withChildrenGoods);
         }
         if (!is_file($filename)) {
             throw new Exception('Cannot load filter cache data - filename ' . $filename . ' doesn\'t exist');
@@ -917,7 +925,7 @@ class CatalogFilter
     public static function loadOrBuild(Material_Type $materialType, $withChildrenGoods = false, array $ignored = [], $filename = null, $save = true)
     {
         try {
-            $filter = static::load($materialType, $filename);
+            $filter = static::load($materialType, $withChildrenGoods, $filename);
         } catch (Exception $e) {
             $filter = new static($materialType, $withChildrenGoods, $ignored);
             $filter->build();

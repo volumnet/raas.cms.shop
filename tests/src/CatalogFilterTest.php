@@ -939,11 +939,11 @@ class CatalogFilterTest extends BaseDBTest
     public function testImport()
     {
         $filterData = [
-            'materialType' => ['id' => 4, 'name' => 'Каталог продукции'],
+            'materialType' => new Material_Type(['id' => 4, 'name' => 'Каталог продукции']),
             'withChildrenGoods' => true,
             'ignoredFields' => ['article', 33],
             'materialTypesIds' => [4, 5],
-            'properties' => [26 => ['id' => 26, 'name' => 'Стоимость', 'urn' => 'price']],
+            'properties' => [26 => new Material_Field(['id' => 26, 'name' => 'Стоимость', 'urn' => 'price'])],
             'catalogGoodsIds' => [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
             'propsMapping' => [
                 '31' => [1 => [11, 12, 13, 15, 16, 17, 19]],
@@ -983,9 +983,20 @@ class CatalogFilterTest extends BaseDBTest
      */
     public function testGetDefaultFilename()
     {
-        $result = CatalogFilter::getDefaultFilename(4);
+        $result = CatalogFilter::getDefaultFilename(4, false);
 
-        $this->assertEquals(Package::i()->cacheDir . '/system/catalogfilter4.php', $result);
+        $this->assertEquals(Package::i()->cacheDir . '/system/catalogfilter4.noch.php', $result);
+    }
+
+
+    /**
+     * Тест получения пути к файлу по умолчанию - случай с товарами из дочерних категорий
+     */
+    public function testGetDefaultFilenameWithChildren()
+    {
+        $result = CatalogFilter::getDefaultFilename(4, true);
+
+        $this->assertEquals(Package::i()->cacheDir . '/system/catalogfilter4.wch.php', $result);
     }
 
 
@@ -995,7 +1006,7 @@ class CatalogFilterTest extends BaseDBTest
     public function testSave()
     {
         $filter = new CatalogFilter(new Material_Type(4), true);
-        $filename = Package::i()->cacheDir . '/system/catalogfilter4.php';
+        $filename = Package::i()->cacheDir . '/system/catalogfilter4.wch.php';
 
         $filter->build();
         $filter->save();
@@ -1031,7 +1042,7 @@ class CatalogFilterTest extends BaseDBTest
      */
     public function testLoad()
     {
-        $result = CatalogFilter::load(new Material_Type(4));
+        $result = CatalogFilter::load(new Material_Type(4), true);
 
         $this->assertEquals('Каталог продукции', $result->materialType->name);
         $this->assertEquals([4, 5], $result->materialTypesIds);
@@ -1049,7 +1060,7 @@ class CatalogFilterTest extends BaseDBTest
      */
     public function testLoadWithInvalidFilepath()
     {
-        $result = CatalogFilter::load(new Material_Type(4), $this->getResourcesDir . '/aaa.php');
+        $result = CatalogFilter::load(new Material_Type(4), false, $this->getResourcesDir . '/aaa.php');
     }
 
 
@@ -1058,7 +1069,7 @@ class CatalogFilterTest extends BaseDBTest
      */
     public function testLoadOrBuild()
     {
-        $filename = Package::i()->cacheDir . '/system/catalogfilter4.php';
+        $filename = Package::i()->cacheDir . '/system/catalogfilter4.wch.php';
         @unlink($filename);
 
         $this->assertFileNotExists($filename);
