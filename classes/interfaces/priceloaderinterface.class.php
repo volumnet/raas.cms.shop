@@ -21,7 +21,7 @@ use RAAS\CMS\Page_Field;
 use RAAS\CMS\Field;
 
 /**
- * Класс интерфейса обработчика прайсов Альянс
+ * Класс интерфейса обработчика прайсов
  * @property-read PriceLoader $loader Загрузчик прайсов
  */
 class PriceloaderInterface extends AbstractInterface
