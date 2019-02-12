@@ -1689,6 +1689,63 @@ class PriceloaderInterfaceTest extends BaseDBTest
 
 
     /**
+     * Тест выгрузки ячейки материала с нативным полем
+     */
+    public function testExportMaterialColumnWithNativeField()
+    {
+        $column = new PriceLoader_Column(2);
+        $item = new Material(10);
+        $interface = $this->getInterface();
+
+        $result = $interface->exportMaterialColumn($column, $item);
+
+        $this->assertEquals('Товар 1', $result);
+    }
+
+
+    /**
+     * Тест выгрузки ячейки материала с одиночным кастомным полем
+     */
+    public function testExportMaterialColumnWithSingleCustomField()
+    {
+        $column = new PriceLoader_Column(5);
+        $item = new Material(10);
+        $interface = $this->getInterface();
+
+        $result = $interface->exportMaterialColumn($column, $item);
+
+        $this->assertEquals('под заказ', $result);
+    }
+
+
+    /**
+     * Тест выгрузки ячейки материала с множественным кастомным полем
+     */
+    public function testExportMaterialColumnWithMultipleCustomField()
+    {
+        $column = new PriceLoader_Column(4);
+        $column->callback_download = ' $temp = array();
+                                    foreach ((array)$x as $y) {
+                                        if ($y && $y->fields["article"]) {
+                                            $temp[] = $y->article;
+                                        }
+                                    }
+                                    return $temp;';
+        $column->commit();
+        $item = new Material(10);
+        $item->fields['related']->deleteValues();
+        $item->fields['related']->addValue(10);
+        $item->fields['related']->addValue(11);
+        $item->fields['related']->addValue(12);
+        $interface = $this->getInterface();
+
+        $result = $interface->exportMaterialColumn($column, $item);
+
+        $this->assertEquals('f4dbdf21, 83dcefb7, 1ad5be0d', $result);
+    }
+
+
+    /**
      * Тест выгрузки строки материала
      */
     public function testExportMaterialRow()

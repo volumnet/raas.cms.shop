@@ -20,27 +20,65 @@ use RAAS\CMS\Page;
 /**
  * Класс фильтра каталога
  * @property-read Material_Type $materialType Тип материалов
- * @property-read array<int> $materialTypesIds ID# всех типов материалов
+ * @property-read array<int> $materialTypesIds  ID# типов материалов
  * @property-read bool $withChildrenGoods Учитывать товары из дочерних категорий
- * @property-read array<int ID# поля | string URN поля> $ignoredFields Игнорируемые поля
+ * @property-read array<
+ *                    int ID# поля | string URN поля
+ *                > $ignoredFields Игнорируемые поля
  * @property-read Page $catalog Текущий каталог
- * @property-read array<int[] ID# свойства => Material_Field> $properties Список свойств
- * @property-read array<string[] URN свойства => Material_Field> $propertiesByURNs Список свойств по URN
+ * @property-read array<
+ *                    int[] ID# свойства => Material_Field
+ *                > $properties Список свойств
+ * @property-read array<
+ *                    string[] URN свойства => Material_Field
+ *                > $propertiesByURNs Список свойств по URN
+ * @property-read array<
+ *                    int[] ID# свойства (только те, у которых rich-значения
+ *                              отличаются от сырых значений) => array<
+ *                        mixed[] сырое значение => mixed rich-значение
+ *                    >
+ *                > $richValues Rich-значения свойств, у которых могут заведомо
+ *                              отличаться от сырых значений
+ * @property-read array<
+ *                    string ID# поля => int ID# поля
+ *                > $numericFieldsIds Массив ID# числовых полей (number или range)
  * @property-read array<
  *                    string[] ID# свойства => array<
- *                        mixed[] значение => array<int ID# товара>
+ *                        mixed[] значение => array<
+ *                            string[] ID# товара => int ID# товара
+ *                        >
  *                    >
  *                > $propsMapping Маппинг свойств к товарам
  * @property-read array<
- *                    string[] ID# свойства => array<int ID# товара>
- *                > $sortMapping Маппинг свойств для сортировки (в пустом ключе - товары без сортировки (по порядку отображения))
- * @property-read array<int> $catalogGoodsIds ID# товаров, доступные по страницам без учета фильтров
- * @property-read array<int> $categoryGoodsIds ID# товаров, доступные на текущей странице без учета фильтров
- * @property-read array<string[] ID# свойства => mixed|array<mixed> значение или набор значений> $filter Значения фильтра
+ *                    string[] ID# свойства => array<
+ *                        string[] ID# товара => int ID# товара
+ *                    >
+ *                > $sortMapping Маппинг свойств для сортировки
+ *                               (в пустом ключе - товары без сортировки (по порядку отображения))
+ * @property-read array<
+ *                    string[] ID# товара => int ID# товара
+ *                > $catalogGoodsIds ID# товаров, доступные по страницам
+ *                                   без учета фильтров
+ * @property-read array<
+ *                    string[] ID# товара => int ID# товара
+ *                > $categoryGoodsIds ID# товаров, доступные на текущей странице
+ *                                    без учета фильтров
+ * @property-read array<
+ *                    string[] ID# свойства => mixed|array<mixed> значение или набор значений
+ *                > $filter Значения фильтра
  * @property-read bool $filterHasCheckedOptions Есть ли у фильтра отмеченные опции
  * @property-read array<string[] ID# свойства => array<
- *                    mixed[] значение => ['value' => mixed значение, 'enabled' => bool Активно ли значение]
+ *                    mixed[] значение => [
+ *                        'value' => mixed значение,
+ *                        'enabled' => bool Активно ли значение
+ *                    ]
  *                >> $availableProperties Доступные для фильтра свойства
+ * @property-read array<
+ *                    string ID# категории => int количество товаров
+ *                > $counter Счетчик товаров в категориях с учетом подкатегорий
+ * @property-read array<
+ *                    string ID# категории => int количество товаров
+ *                > $selfCounter Счетчик товаров в категориях без учета подкатегорий
  */
 class CatalogFilter
 {
@@ -52,7 +90,7 @@ class CatalogFilter
 
     /**
      * ID# всех типов материалов
-     * @var array<int>
+     * @var array<string[] ID# типа материалов => int ID# типа материалов>
      */
     protected $materialTypesIds = [];
 
@@ -76,13 +114,13 @@ class CatalogFilter
 
     /**
      * ID# товаров, доступные по страницам без учета фильтров
-     * @var array<int>
+     * @var array<string[] ID# товара => int ID# товара>
      */
     protected $catalogGoodsIds = [];
 
     /**
      * ID# товаров, доступные на текущей странице без учета фильтров
-     * @var array<int>
+     * @var array<string[] ID# товара => int ID# товара>
      */
     protected $categoryGoodsIds = [];
 
@@ -90,17 +128,22 @@ class CatalogFilter
      * Маппинг свойств к товарам
      * @var array<
      *          int[] ID# свойства => array<
-     *              mixed[] значение => array<int ID# товара>
+     *              mixed[] значение => array<
+     *                  string[] ID# товара => int ID# товара
+     *              >
      *          >
      *      >
      */
     protected $propsMapping = [];
 
     /**
-     * Маппинг свойств для сортировки (в пустом ключе - товары без сортировки (по порядку отображения))
+     * Маппинг свойств для сортировки
+     * (в пустом ключе - товары без сортировки (по порядку отображения))
      * Уже после применения каталога и фильтров
      * @var array<
-     *          string[] ID# свойства => array<int ID# товара>
+     *          string[] ID# свойства => array<
+     *              string[] ID# товара => int ID# товара
+     *          >
      *      >
      */
     protected $sortMapping = [];
@@ -118,8 +161,28 @@ class CatalogFilter
     protected $propertiesByURNs = [];
 
     /**
+     * Rich-значения свойств, у которых могут заведомо отличаться от сырых значений
+     * @var array<
+     *          int[] ID# свойства (только те, у которых rich-значения
+     *                    отличаются от сырых значений) => array<
+     *              mixed[] сырое значение => mixed rich-значение
+     *          >
+     *      >
+     */
+    protected $richValues = [];
+
+
+    /**
+     * Массив ID# числовых полей (number или range)
+     * @var array<string ID# поля => int ID# поля>
+     */
+    protected $numericFieldsIds = [];
+
+    /**
      * Значения фильтра
-     * @var array<string[] ID# свойства => mixed|array<mixed> значение или набор значений>
+     * @var array<
+     *          string[] ID# свойства => mixed|array<mixed> значение или набор значений
+     *      >
      */
     protected $filter = [];
 
@@ -132,10 +195,25 @@ class CatalogFilter
     /**
      * Доступные для фильтра свойства
      * @var array<string[] ID# свойства => array<
-     *          mixed[] значение => ['value' => mixed значение, 'enabled' => bool Активно ли значение]
+     *          mixed[] значение => [
+     *              'value' => mixed значение,
+     *              'enabled' => bool Активно ли значение
+     *          ]
      *      >>
      */
     protected $availableProperties = [];
+
+    /**
+     * Счетчик товаров в категориях с учетом подкатегорий
+     * @var array<string ID# категории => int количество товаров>
+     */
+    protected $counter = [];
+
+    /**
+     * Счетчик товаров в категориях без учета подкатегорий
+     * @var array<string ID# категории => int количество товаров>
+     */
+    protected $selfCounter = [];
 
     public function __get($var)
     {
@@ -147,6 +225,8 @@ class CatalogFilter
             case 'catalog':
             case 'properties':
             case 'propertiesByURNs':
+            case 'richValues':
+            case 'numericFieldsIds':
             case 'propsMapping':
             case 'sortMapping':
             case 'catalogGoodsIds':
@@ -154,6 +234,8 @@ class CatalogFilter
             case 'filter':
             case 'filterHasCheckedOptions':
             case 'availableProperties':
+            case 'counter':
+            case 'selfCounter':
                 return $this->$var;
                 break;
         }
@@ -163,10 +245,15 @@ class CatalogFilter
      * Конструктор класса
      * @param Material_Type $materialType Тип материала
      * @param bool $withChildrenGoods Учитывать товары из дочерних категорий
-     * @param array<int ID# поля | string URN поля | Material_Field поле> $ignored Игнорируемые поля
+     * @param array<
+     *            int ID# поля | string URN поля | Material_Field поле
+     *        > $ignored Игнорируемые поля
      */
-    public function __construct(Material_Type $materialType, $withChildrenGoods = false, array $ignored = [])
-    {
+    public function __construct(
+        Material_Type $materialType,
+        $withChildrenGoods = false,
+        array $ignored = []
+    ) {
         $this->materialType = $materialType;
         $this->withChildrenGoods = $withChildrenGoods;
         foreach ($ignored as $ignoredField) {
@@ -185,21 +272,87 @@ class CatalogFilter
     public function build()
     {
         $this->materialTypesIds = $this->materialType->selfAndChildrenIds;
-        $properties = $this->getAllProperties($this->materialTypesIds, $this->ignoredFields);
+        $properties = $this->getAllProperties(
+            $this->materialTypesIds,
+            $this->ignoredFields
+        );
         foreach ($properties as $property) {
-            $this->properties[$property->id] = $property;
+            $this->properties[(string)$property->id] = $property;
             $this->propertiesByURNs[$property->urn] = $property;
+            if (in_array($property->datatype, ['number', 'range'])) {
+                $this->numericFieldsIds[(string)$property->id] = (int)$property->id;
+            }
         }
-        $this->catalogGoodsIds = $this->getCatalogGoodsIds($this->materialTypesIds);
+        $this->catalogGoodsIds = $this->getCatalogGoodsIds(
+            $this->materialTypesIds
+        );
         $this->propsMapping = $this->buildCache(
             $this->materialTypesIds,
             array_keys($this->properties),
             $this->catalogGoodsIds
         );
+        $parents = $this->getPagesParents();
+        $bubbledUpPagesMapping = $this->bubbleUpGoods(
+            (array)$this->propsMapping['pages_ids'],
+            $parents
+        );
+        $this->selfCounter = array_map('count', $this->propsMapping['pages_ids']);
+        $this->counter = array_map('count', $bubbledUpPagesMapping);
         if ($this->withChildrenGoods) {
-            $parents = $this->getPagesParents();
-            $this->propsMapping['pages_ids'] = $this->bubbleUpGoods((array)$this->propsMapping['pages_ids'], $parents);
+            $this->propsMapping['pages_ids'] = $bubbledUpPagesMapping;
         }
+        $this->richValues = $this->getRichValues(
+            $this->propsMapping,
+            $this->properties
+        );
+        foreach ($this->propsMapping as $propId => $propData) {
+            uksort($this->propsMapping[$propId], function ($a, $b) use ($propId) {
+                $aRich = isset($this->richValues[$propId][$a])
+                       ? $this->richValues[$propId][$a]
+                       : $a;
+                $bRich = isset($this->richValues[$propId][$b])
+                       ? $this->richValues[$propId][$b]
+                       : $b;
+                return strnatcasecmp($aRich, $bRich);
+            });
+        }
+    }
+
+
+    /**
+     * Формирует rich-значения для свойств, у которых они заведомо могут
+     * отличаться от сырых значений
+     * @param array<
+     *            string[] ID# свойства => array<
+     *                mixed[] значение => array<
+     *                   string[] ID# товара => int ID# товара
+     *                >
+     *            >
+     *        > $propsMapping Маппинг свойств к товарам
+     * @param array<int[] ID# свойства => Material_Field> Список всех свойств
+     * @return array<
+     *             int[] ID# свойства (только те, у которых rich-значения
+     *                        отличаются от сырых значений) => array<
+     *                 mixed[] сырое значение => mixed rich-значение
+     *             >
+     *          >
+     */
+    public function getRichValues(array $propsMapping = [], array $properties = [])
+    {
+        $result = [];
+        foreach ($propsMapping as $propId => $propValues) {
+            $prop = $properties[$propId];
+            if ($prop->id) {
+                if (in_array($prop->datatype, ['radio', 'select']) ||
+                    (($prop->datatype == 'checkbox') && $prop->multiple)
+                ) {
+                    foreach ($propValues as $propValue => $propGoodsIds) {
+                        $result[$propId][$propValue] = $prop->doRich($propValue);
+                    }
+                }
+            }
+        }
+        return $result;
     }
 
 
@@ -210,30 +363,73 @@ class CatalogFilter
      */
     public function apply(Page $catalog, array $params = [])
     {
-        ini_set('max_execution_time', 3600);
         $this->catalog = $catalog;
         $this->filter = $this->getFilter($params);
-        $this->filterHasCheckedOptions = $this->getFilterHasCheckedOptions($this->filter);
+        $this->filterHasCheckedOptions = $this->getFilterHasCheckedOptions(
+            $this->filter
+        );
+        // Получим список товаров в данной категории (без учета фильтра)
         $this->categoryGoodsIds = $this->propsMapping['pages_ids'][$catalog->id];
-        $catalogPropsMapping = $this->applyCatalog($this->propsMapping, $this->catalog->id);
-        $filteredMapping = $this->applyFilter($catalogPropsMapping, $this->filter);
+
+        // Отфильтруем $this->propsMapping, оставив только те товары, которые есть
+        // в данной категории ($this->categoryGoodsIds), попутно уберем из него
+        // элемент pages_ids
+        $catalogPropsMapping = $this->applyCatalog(
+            $this->propsMapping,
+            $this->catalog->id
+        );
+
+        // Выкинем из предыдущего пункта те свойства, которые не присутствуют в
+        // фильтре и те значения, которые не подходят под фильтр.
+        // Иными словами, в $filteredMapping остаются только те свойства
+        // и значения, которые удовлетворяют фильтру
+        $filteredMapping = $this->applyFilter(
+            $catalogPropsMapping,
+            $this->filter
+        );
+
+        // Объединим все товары по свойствам (не будем учитывать значения).
+        // Иными словами, $goodsIdsMapping['price'] - это те ID# товаров, которые
+        // находятся в текущей категории и удовлетворяют фильтру по цене.
+        // Как и в предыдущем пункте, свойства только те, которые есть в фильтре.
         $goodsIdsMapping = $this->reduceMappingToGoodsIds($filteredMapping);
-        $crossFilterMapping = $this->applyCrossFilter($goodsIdsMapping, $this->categoryGoodsIds);
-        $this->sortMapping = $this->getSortMapping($catalogPropsMapping, $crossFilterMapping['']);
-        // $st = microtime(true);
+
+        // Получим кросс-фильтры.
+        // В противоположность предыдущему пункту,
+        // $crossFilterMapping['price'] - это все товары, у которых применяется
+        // весь фильтр, кроме фильтра по цене (сделано для того, чтобы потом
+        // получить все возможные значения по свойству для фильтра,
+        // не обращая внимания на ограничения собственно по этому свойству)
+        // ВАЖНАЯ ЧАСТЬ - под пустым индексом [''] находится список товаров, с
+        // применением ВСЕГО фильтра, т.е. фактически отображаемые товары
+        $crossFilterMapping = $this->applyCrossFilter(
+            $goodsIdsMapping,
+            $this->categoryGoodsIds
+        );
+
+        // Отсортируем полный маппинг по значениям свойств и отберем только
+        // список товаров с применением каталога и фильтра, а затем объединим по
+        // свойствам
+        $this->sortMapping = $this->getSortMapping(
+            $catalogPropsMapping,
+            $crossFilterMapping[''] // Фактически отображаемые товары
+        );
+
+        // Получим список доступных свойств и значений
         $this->availableProperties = $this->getAvailableProperties(
             $catalogPropsMapping,
             $crossFilterMapping,
-            $this->filter
+            $this->filter,
+            $this->numericFieldsIds,
+            $this->richValues
         );
-        // var_dump(microtime(true) - $st); exit;
     }
 
 
     /**
      * Получает все доступные ID# товаров
      * @param array<int> $mtypesIds ID# всех учитываемых типов материалов
-     * @return array<int>
+     * @return array<string[] ID# товара => int ID# товара>
      */
     public function getCatalogGoodsIds(array $mtypesIds)
     {
@@ -247,7 +443,11 @@ class CatalogFilter
                         AND (NOT show_to OR show_to >= NOW())
                         AND pid IN (" . implode(", ", $mtypesIds) . ")
                    ORDER BY priority";
-        $catalogGoodsIds = Material::_SQL()->getcol($sqlQuery);
+        $sqlResult = Material::_SQL()->getcol($sqlQuery);
+        $catalogGoodsIds = [];
+        foreach ($sqlResult as $val) {
+            $catalogGoodsIds[(string)$val] = (int)$val;
+        }
         return $catalogGoodsIds;
     }
 
@@ -255,11 +455,15 @@ class CatalogFilter
     /**
      * Получает все свойства (кроме файлов, изображений и материалов)
      * @param array<int> $materialTypesIds ID# типов материалов
-     * @param array<int ID# поля | string URN поля | Material_Field поле> $ignored Игнорируемые поля
+     * @param array<
+     *            int ID# поля | string URN поля | Material_Field поле
+     *        > $ignored Игнорируемые поля
      * @return array<Material_Field>
      */
-    public function getAllProperties(array $materialTypesIds, array $ignored = [])
-    {
+    public function getAllProperties(
+        array $materialTypesIds,
+        array $ignored = []
+    ) {
         $ignoredIds = $ignoredURNs = [];
         foreach ($ignored as $ignoredField) {
             if ($ignoredField instanceof Material_Field) {
@@ -310,11 +514,23 @@ class CatalogFilter
      * Получает исходную таблицу свойств
      * @param array<int> $mtypesIds ID# всех учитываемых типов материалов
      * @param array<int> $propertiesIds ID# всех свойств
-     * @param array<int> $catalogGoodsIds ID# товаров, доступные по страницам без учета фильтров
-     * @return array<string[] ID# свойства => array<mixed[] значение => array<int ID# товара>>>
+     * @param array<
+     *            string[] ID# товара => int ID# товара
+     *        > $catalogGoodsIds ID# товаров, доступные по страницам
+     *                           без учета фильтров
+     * @return array<
+     *             string[] ID# свойства => array<
+     *                 mixed[] значение => array<
+     *                     string[] ID# товара => int ID# товара
+     *                 >
+     *             >
+     *         >
      */
-    public function buildCache(array $mtypesIds, array $propertiesIds, array $catalogGoodsIds)
-    {
+    public function buildCache(
+        array $mtypesIds,
+        array $propertiesIds,
+        array $catalogGoodsIds
+    ) {
         $propsMapping = [];
         if ($catalogGoodsIds && $propertiesIds) {
             $sqlQuery = "SELECT *
@@ -323,14 +539,16 @@ class CatalogFilter
                             AND fid IN (" . implode(", ", $propertiesIds) . ")";
             $sqlResult = Material::_SQL()->query($sqlQuery);
             foreach ($sqlResult as $sqlRow) {
-                $propsMapping[trim($sqlRow['fid'])][trim($sqlRow['value'])][(int)$sqlRow['pid']] = (int)$sqlRow['pid'];
+                $propsMapping[trim($sqlRow['fid'])][trim($sqlRow['value'])][(string)$sqlRow['pid']] = (int)$sqlRow['pid'];
             }
-            foreach ($propsMapping as $fid => $fieldData) {
-                uksort($propsMapping[$fid], function ($a, $b) {
-                    return strnatcasecmp($a, $b);
-                });
-                $propsMapping[$fid] = array_map('array_values', $propsMapping[$fid]);
-            }
+            // 2019-02-06, AVS: Пока уберем сортировку, сортировать будем
+            // в build'е сразу по свойству $this->propsMapping
+            // foreach ($propsMapping as $fid => $fieldData) {
+            //     uksort($propsMapping[$fid], function ($a, $b) {
+            //         return strnatcasecmp($a, $b);
+            //     });
+            //     // $propsMapping[$fid] = array_map('array_values', $propsMapping[$fid]);
+            // }
 
             // Получим маппинг по страницам
             $sqlQuery = "SELECT *
@@ -338,7 +556,7 @@ class CatalogFilter
                           WHERE id IN (" . implode(", ", $catalogGoodsIds) . ")";
             $sqlResult = Material::_SQL()->get($sqlQuery);
             foreach ($sqlResult as $sqlRow) {
-                $propsMapping['pages_ids'][(string)$sqlRow['pid']][] = (int)$sqlRow['id'];
+                $propsMapping['pages_ids'][(string)$sqlRow['pid']][(string)$sqlRow['id']] = (int)$sqlRow['id'];
             }
         }
         return $propsMapping;
@@ -347,11 +565,19 @@ class CatalogFilter
 
     /**
      * Переносит товары из дочерних категорий в родительские
-     * @param array<int[] ID# страницы => array<int ID# товара>> $pagesMapping Старое соответствие товаров страницам
+     * @param array<
+     *            int[] ID# страницы => array<
+     *                string[] ID# товара => int ID# товара
+     *            >
+     *        > $pagesMapping Старое соответствие товаров страницам
      * @return array<
      *             int[] ID# страницы => int ID# родительской страницы
      *         > $parents Соответствие дочерних страниц родительским
-     * @param array<int[] ID# страницы => array<int ID# товара>>
+     * @param array<
+     *            int[] ID# страницы => array<
+     *                string[] ID# товара => int ID# товара
+     *            >
+     *        >
      */
     public function bubbleUpGoods(array $pagesMapping, array $parents)
     {
@@ -361,15 +587,12 @@ class CatalogFilter
                 if (!isset($newPagesMapping[$pageId])) {
                     $newPagesMapping[$pageId] = [];
                 }
-                $newPagesMapping[$pageId] = array_merge(
-                    $newPagesMapping[$pageId],
-                    $goodsIds
-                );
+                $newPagesMapping[$pageId] = $newPagesMapping[$pageId] + $goodsIds;
             }
         }
-        $newPagesMapping = array_map('array_unique', $newPagesMapping);
-        $newPagesMapping = array_map('array_filter', $newPagesMapping);
-        $newPagesMapping = array_map('array_values', $newPagesMapping);
+        // $newPagesMapping = array_map('array_unique', $newPagesMapping);
+        // $newPagesMapping = array_map('array_filter', $newPagesMapping);
+        // $newPagesMapping = array_map('array_values', $newPagesMapping);
         return $newPagesMapping;
     }
 
@@ -432,11 +655,17 @@ class CatalogFilter
     /**
      * Применяет ограничения по каталогу
      * @param array<string[] ID# свойства => array<
-     *            mixed[] значение => array<int ID# товара>
+     *            mixed[] значение => array<
+     *                string[] ID# товара => int ID# товара
+     *            >
      *        >> $propsMapping Старый маппинг
      * @param int $catalogId ID текущей категории
      * @return array<
-     *          string[] ID# свойства => array<mixed[] значение => array<int ID# товара>>
+     *          string[] ID# свойства => array<
+     *              mixed[] значение => array<
+     *                  string[] ID# товара => int ID# товара
+     *              >
+     *          >
      *      > Новый маппинг (после применения каталога, без pages_ids)
      */
     public function applyCatalog(array $propsMapping, $catalogId)
@@ -445,17 +674,20 @@ class CatalogFilter
         unset($filteredMapping['pages_ids']);
         if ($catalogId) {
             $catalogGoodsIds = $propsMapping['pages_ids'][$catalogId];
-            $catalogGoodsIdsFlipped = array_flip($catalogGoodsIds);
+            // $catalogGoodsIdsFlipped = array_flip($catalogGoodsIds);
             foreach ($filteredMapping as $propVar => $propValues) {
-                $t = new \RAAS\Timer;
-                $t->start();
-                $filteredMapping[$propVar] = array_map(function ($valueGoodsIds) use ($catalogGoodsIds, $catalogGoodsIdsFlipped) {
-                    $y = array_flip($valueGoodsIds);
-                    $res = array_keys(array_intersect_key($y, $catalogGoodsIdsFlipped));
-                    return $res;
-                }, $propValues);
+                $filteredMapping[$propVar] = array_map(
+                    function ($valueGoodsIds) use ($catalogGoodsIds) {
+                        // $y = array_flip($valueGoodsIds);
+                        $res = array_intersect_key($valueGoodsIds, $catalogGoodsIds);
+                        return $res;
+                    },
+                    $propValues
+                );
                 // 2019-01-31, AVS: 0.15 секунд за итерацию - слишком много
-                $filteredMapping[$propVar] = array_filter($filteredMapping[$propVar]);
+                $filteredMapping[$propVar] = array_filter(
+                    $filteredMapping[$propVar]
+                );
             }
         }
         return $filteredMapping;
@@ -465,7 +697,9 @@ class CatalogFilter
     /**
      * Применить фильтр к маппингу
      * @param array<string[] ID# свойства => array<
-     *            mixed[] значение => array<int ID# товара>
+     *            mixed[] значение => array<
+     *                string[] ID# товара => int ID# товара
+     *            >
      *        >> $propsMapping Старый маппинг
      * @param array<
      *            string[] имя свойства => array<mixed>|
@@ -473,7 +707,9 @@ class CatalogFilter
      *                                     ['like' => string] значение или набор значений
      *        > $filter Фильтр для проверки
      * @return array<string[] ID# свойства (только те, которые присутствуют в фильтре) => array<
-     *             mixed[] значение => array<int ID# товара>
+     *             mixed[] значение => array<
+     *                 string[] ID# товара => int ID# товара
+     *             >
      *         >> Новый маппинг (после применения фильтра)
      */
     public function applyFilter(array $propsMapping, array $filter = [])
@@ -481,7 +717,7 @@ class CatalogFilter
         $filteredMapping = [];
         foreach ($filter as $propId => $filterValues) {
             if (isset($filterValues['from']) || isset($filterValues['to'])) {
-                $newMappingValues = array();
+                $newMappingValues = [];
                 foreach ((array)$propsMapping[$propId] as $val => $valIds) {
                     if ((!isset($filterValues['from']) || ((float)$val >= (float)$filterValues['from'])) &&
                         (!isset($filterValues['to']) || ((float)$val <= (float)$filterValues['to']))) {
@@ -490,7 +726,7 @@ class CatalogFilter
                 }
                 $filteredMapping[$propId] = $newMappingValues;
             } elseif (isset($filterValues['like'])) {
-                $newMappingValues = array();
+                $newMappingValues = [];
                 foreach ((array)$propsMapping[$propId] as $val => $valIds) {
                     if (stristr($val, $filterValues['like'])) {
                         $newMappingValues[$val] = $valIds;
@@ -511,16 +747,28 @@ class CatalogFilter
     /**
      * Получает список доступных ID# товаров по свойствам, если бы применялись только ограничения этого свойства.
      * @param array<string[] ID# свойства => array<
-     *            mixed[] значение => array<int ID# товара>
+     *            mixed[] значение => array<
+     *                string[] ID# товара => int ID# товара
+     *            >
      *        >> $propsMapping Маппинг свойств
-     * @return array<string[] ID# свойства => array<int ID# товара>>
+     * @return array<
+     *             string[] ID# свойства => array<
+     *                 string[] ID# товара => int ID# товара
+     *             >
+     *         >
      */
     public function reduceMappingToGoodsIds(array $propsMapping)
     {
         $propsToGoodsIds = [];
         foreach ($propsMapping as $propsVar => $propsValues) {
-            $propsToGoodsIds[$propsVar] = array_reduce($propsValues, 'array_merge', []);
-            $propsToGoodsIds[$propsVar] = array_values(array_unique($propsToGoodsIds[$propsVar]));
+            $propsToGoodsIds[$propsVar] = array_reduce(
+                $propsValues,
+                function ($a, $b) {
+                    return $a + $b;
+                },
+                []
+            );
+            // $propsToGoodsIds[$propsVar] = array_values(array_unique($propsToGoodsIds[$propsVar]));
         }
         return $propsToGoodsIds;
     }
@@ -530,9 +778,20 @@ class CatalogFilter
      * Получает список доступных ID# товаров по свойствам,
      * если бы для каждого свойства применялись ограничения всех остальных свойств кроме него
      *
-     * @param array<string[] ID# свойства => array<int ID# товара>> $goodsIdsMapping Маппинг свойств
-     * @param array<int> $categoryGoodsIds ID# товаров, доступные на текущей странице без учета фильтров
-     * @return array<string[] ID# свойства => array<int ID# товара>> (под пустым индексом - все ограничения)
+     * @param array<
+     *            string[] ID# свойства => array<
+     *                string[] ID# товара => int ID# товара
+     *            >
+     *        > $goodsIdsMapping Маппинг свойств
+     * @param array<
+     *            string[] ID# товара => int ID# товара
+     *        > $categoryGoodsIds ID# товаров, доступные на текущей странице
+     *                            без учета фильтров
+     * @return array<
+     *             string[] ID# свойства => array<
+     *                 string[] ID# товара => int ID# товара
+     *             >
+     *         > (под пустым индексом - все ограничения)
      */
     public function applyCrossFilter(array $goodsIdsMapping, array $categoryGoodsIds)
     {
@@ -542,11 +801,15 @@ class CatalogFilter
             $newMapping = $goodsIdsMapping;
             unset($newMapping[$propVar]);
             if ($newMapping) {
-                $goodsIds = array_reduce($newMapping, 'array_intersect', $categoryGoodsIds);
+                $goodsIds = array_reduce(
+                    $newMapping,
+                    'array_intersect_key',
+                    $categoryGoodsIds
+                );
             } else {
                 $goodsIds = $categoryGoodsIds;
             }
-            $crossFilterMapping[$propVar] = array_values($goodsIds);
+            $crossFilterMapping[$propVar] = $goodsIds;
         }
         return $crossFilterMapping;
     }
@@ -621,10 +884,16 @@ class CatalogFilter
     /**
      * Получает доступные свойства
      * @param array<
-     *            string[] ID# свойства => array<mixed[] значение => array<int ID# товара>>
+     *            string[] ID# свойства => array<
+     *                mixed[] значение => array<
+     *                    string[] ID# товара => int ID# товара
+     *                >
+     *            >
      *        > $propsMapping Маппинг свойств
      * @param array<
-     *            string[] ID# свойства => array<int ID# товара>
+     *            string[] ID# свойства => array<
+     *                string[] ID# товара => int ID# товара
+     *            >
      *        > $crossFilterMapping Список доступных ID# товаров по свойствам,
      *                              если бы для каждого свойства применялись ограничения
      *                              всех остальных свойств кроме него
@@ -633,6 +902,16 @@ class CatalogFilter
      *                                     ['from' => float, 'to' => float]|
      *                                     ['like' => string] значение или набор значений
      *        > $filter Фильтр для проверки
+     * @param array<
+     *            string ID# поля => int ID# поля
+     *        > $numericFieldsIds Массив ID# числовых полей (number или range)
+     * @param array<
+     *           int[] ID# свойства (только те, у которых rich-значения
+     *                      отличаются от сырых значений) => array<
+     *               mixed[] сырое значение => mixed rich-значение
+     *           >
+     *        > $richValues Rich-значения свойств, у которых могут заведомо
+     *                      отличаться от сырых значений
      * @return array<string[] ID# свойства => array<mixed[] значение => [
      *             'value' => mixed значение,
      *             'doRich' => mixed Отформатированное значение
@@ -641,23 +920,32 @@ class CatalogFilter
      *             'enabled' => bool Активно ли значение
      *         ]>>
      */
-    public function getAvailableProperties(array $propsMapping, array $crossFilterMapping, array $filter = [])
-    {
+    public function getAvailableProperties(
+        array $propsMapping,
+        array $crossFilterMapping,
+        array $filter = [],
+        array $numericFieldsIds = [],
+        array $richValues = []
+    ) {
         $filteredPropsMapping = [];
         foreach ($propsMapping as $propId => $propValues) {
             $prop = $this->properties ? $this->properties[$propId] : new Material_Field($propId);
             $crossFilterGoodsIds = $crossFilterMapping[$propId] ?: $crossFilterMapping[''];
+            $filterPropValuesFlipped = [];
+            if (isset($filter[$propId])) {
+                $filterPropValuesFlipped = array_flip((array)$filter[$propId]);
+            }
             foreach ($propValues as $propValue => $goodsIds) {
                 $valueData = [
                     'prop' => $prop,
-                    'enabled' => (bool)array_intersect($goodsIds, $crossFilterGoodsIds)
+                    'enabled' => (bool)array_intersect_key($goodsIds, $crossFilterGoodsIds)
                 ];
-                if (!in_array($prop->datatype, ['number', 'range'])) {
-                    $valueData = array_merge($valueData, [
-                        'value' => $propValue,
-                        'doRich' => $prop->doRich($propValue),
-                        'checked' => in_array($propValue, (array)$filter[$propId]),
-                    ]);
+                if (!isset($numericFieldsIds[$propId])) {
+                    $valueData['value'] = $propValue;
+                    $valueData['doRich'] = isset($richValues[$propId][$propValue])
+                                         ? $richValues[$propId][$propValue]
+                                         : $propValue;
+                    $valueData['checked'] = isset($filterPropValuesFlipped[$propValue]);
                 }
                 $filteredPropsMapping[$propId][$propValue] = $valueData;
             }
@@ -668,27 +956,32 @@ class CatalogFilter
 
     /**
      * Получает маппинг по сортировке
+     *
+     * 2019-02-06, AVS: убрали собственно сортировку, сортировать будем в build'е
+     * при создании кэша
      * @param array<
      *            string[] ID# свойства => array<
-     *                mixed[] значение => array<int ID# товара>
+     *                mixed[] значение => array<
+     *                    string[] ID# товара => int ID# товара
+     *                >
      *            >
      *        > $catalogPropsMapping Маппинг свойств к товарам в пределах категории
-     * @param array<int> $goodsIds ID# товаров после применения категории и фильтра
+     * @param array<
+     *            string[] ID# товара => int ID# товара
+     *        > $goodsIds ID# товаров после применения категории и фильтра
+     * @return array<
+     *            string[] ID# свойства => array<
+     *                string[] ID# товара => int ID# товара
+     *            >
+     *        > Маппинг ID# товаров, отсортированных по значениям
      */
     public function getSortMapping($catalogPropsMapping, $goodsIds)
     {
-        $newCatalogPropsMapping = [];
-        foreach ($catalogPropsMapping as $propId => $propData) {
-            $mappingKeys = array_keys($propData);
-            natcasesort($mappingKeys);
-            foreach ($mappingKeys as $propValue) {
-                $newCatalogPropsMapping[$propId][$propValue] = $catalogPropsMapping[$propId][$propValue];
-            }
-        }
-        $catalogReduced = $this->reduceMappingToGoodsIds($newCatalogPropsMapping);
+        // var_dump($catalogPropsMapping); exit;
+        $catalogReduced = $this->reduceMappingToGoodsIds($catalogPropsMapping);
         $sortMapping = [];
         foreach ($catalogReduced as $propId => $propGoodsIds) {
-            $sortMapping[$propId] = array_values(array_intersect($propGoodsIds, $goodsIds));
+            $sortMapping[$propId] = array_intersect_key($propGoodsIds, $goodsIds);
         }
         $sortMapping[''] = $goodsIds;
         return $sortMapping;
@@ -697,7 +990,8 @@ class CatalogFilter
 
     /**
      * Получает ID# товаров с учетом (или без учета) сортировки
-     * @param string $sort URN поля для сортировки, либо пустая строка для сортировки только по порядку отображения
+     * @param string $sort URN поля для сортировки, либо пустая строка
+     *                     для сортировки только по порядку отображения
      * @param int $order Порядок сортировки - >= 0 - прямой, < 0 - обратный
      * @return array<int>
      * @throws Exception Выбрасывает исключение, когда фильтр не инициализирован и/или не задан
@@ -715,15 +1009,16 @@ class CatalogFilter
         if ($sortKey && ($order < 0)) {
             $ids = array_reverse($ids);
         }
-        return $ids;
+        return array_values($ids);
     }
 
 
     /**
      * Получает товары с учетом (или без учета) сортировки
-     * @param string $sort URN поля для сортировки, либо пустая строка для сортировки только по порядку отображения
+     * @param string $sort URN поля для сортировки, либо пустая строка
+     *                     для сортировки только по порядку отображения
      * @param Pages|null $pages Постраничная разбивка
-     * @return array<int>
+     * @return array<Material>
      */
     public function getMaterials(Pages $pages = null, $sort = '', $order = 1)
     {
@@ -733,7 +1028,11 @@ class CatalogFilter
         }
         if ($pages) {
             do {
-                $pageIds = array_slice($ids, (int)$pages->from, (int)$pages->rows_per_page);
+                $pageIds = array_slice(
+                    $ids,
+                    (int)$pages->from,
+                    (int)$pages->rows_per_page
+                );
                 $i++;
             } while (!$pages->check(count($pageIds), count($ids)) && ($i < 100));
         } else {
@@ -754,14 +1053,20 @@ class CatalogFilter
     /**
      * Считает количество товаров в категории
      * @param Page|int $page Страница или ID# страницы
+     * @param bool $withChildrenGoods Учитывать дочерние категории
      * @return int
      */
-    public function count($page)
+    public function count($page, $withChildrenGoods = true)
     {
         $count = 0;
         $pageId = (int)(($page instanceof Page) ? $page->id : $page);
-        if (isset($this->propsMapping['pages_ids'][$pageId])) {
-            $count = count($this->propsMapping['pages_ids'][$pageId]);
+        if ($withChildrenGoods) {
+            $counter = $this->counter;
+        } else {
+            $counter = $this->selfCounter;
+        }
+        if (isset($counter[$pageId])) {
+            $count = $counter[$pageId];
         }
         return $count;
     }
@@ -775,12 +1080,16 @@ class CatalogFilter
      *             'ignoredFields' => array<int ID# поля | string URN поля> Игнорируемые поля,
      *             'materialTypesIds' => int ID# всех типов материалов,
      *             'properties' => array<
-     *                                 int[] ID# свойства => array<string[] ключ свойства => mixed значение>
+     *                                 int[] ID# свойства => Material_Field
      *                             > Свойства,
-     *             'catalogGoodsIds' => array<int> ID# товаров,
+     *             'catalogGoodsIds' => array<
+     *                                      string[] ID# товара => int ID# товара
+     *                                  > ID# товаров,
      *             'propsMapping' => array<
      *                                   string[] ID# свойства => array<
-     *                                       mixed[] значение => array<int ID# товара>
+     *                                       mixed[] значение => array<
+     *                                           string[] ID# товара => int ID# товара
+     *                                       >
      *                                   >
      *                               > Маппинг свойств
      *         ]
@@ -795,6 +1104,10 @@ class CatalogFilter
             'properties' => $this->properties,
             'catalogGoodsIds' => $this->catalogGoodsIds,
             'propsMapping' => $this->propsMapping,
+            'richValues' => $this->richValues,
+            'numericFieldsIds' => $this->numericFieldsIds,
+            'counter' => $this->counter,
+            'selfCounter' => $this->selfCounter,
         ];
         return $result;
     }
@@ -805,15 +1118,21 @@ class CatalogFilter
      * @param [
      *             'materialType' => Material_Type,
      *             'withChildrenGoods' => bool Учитывать товары из дочерних категорий,
-     *             'ignoredFields' => array<int ID# поля | string URN поля> Игнорируемые поля,
+     *             'ignoredFields' => array<
+     *                 int ID# поля | string URN поля
+     *             > Игнорируемые поля,
      *             'materialTypesIds' => int ID# всех типов материалов,
      *             'properties' => array<
-     *                                 int[] ID# свойства => array<string[] ключ свойства => mixed значение>
+     *                                 int[] ID# свойства => Material_Field
      *                             > Свойства,
-     *             'catalogGoodsIds' => array<int> ID# товаров,
+     *             'catalogGoodsIds' => array<
+     *                                      string[] ID# товара => int ID# товара
+     *                                  > ID# товаров,
      *             'propsMapping' => array<
      *                                   string[] ID# свойства => array<
-     *                                       mixed[] значение => array<int ID# товара>
+     *                                       mixed[] значение => array<
+     *                                           string[] ID# товара => int ID# товара
+     *                                       >
      *                                   >
      *                               > Маппинг свойств
      *         ] $data Данные для импорта
@@ -830,14 +1149,32 @@ class CatalogFilter
             'properties',
             'catalogGoodsIds',
             'propsMapping',
+            'richValues',
+            'numericFieldsIds',
+            'counter',
+            'selfCounter',
         ] as $key) {
             if (!isset($data[$key])) {
-                throw new Exception('Invalid import format - property ' . $key . ' is not set');
+                throw new Exception(
+                    'Invalid import format - property ' . $key . ' is not set'
+                );
             }
         }
         $materialType = $data['materialType'];
-        $filter = new CatalogFilter($materialType, (bool)$data['withChildrenGoods'], (array)$data['ignoredFields']);
-        foreach (['materialTypesIds', 'catalogGoodsIds', 'propsMapping'] as $key) {
+        $filter = new CatalogFilter(
+            $materialType,
+            (bool)$data['withChildrenGoods'],
+            (array)$data['ignoredFields']
+        );
+        foreach ([
+            'materialTypesIds',
+            'catalogGoodsIds',
+            'propsMapping',
+            'richValues',
+            'numericFieldsIds',
+            'counter',
+            'selfCounter',
+        ] as $key) {
             $filter->$key = $data[$key];
         }
         $props = $propsByURNs = [];
@@ -868,7 +1205,8 @@ class CatalogFilter
 
     /**
      * Сохраняет кэш в файл
-     * @param string|null $filename Путь, куда сохраняем. Если не указан, будет использован путь по умолчанию
+     * @param string|null $filename Путь, куда сохраняем. Если не указан,
+     *                              будет использован путь по умолчанию
      * @throws Exception Выбрасывает исключение, если не удалось сохранить файл
      */
     public function save($filename = null)
@@ -895,12 +1233,17 @@ class CatalogFilter
      * Загружает кэш из файла
      * @param Material_Type $materialType Тип материала
      * @param bool $withChildrenGoods Учитывать товары из дочерних категорий
-     * @param string|null $filename Путь, откуда загружаем. Если не указан, будет использован путь по умолчанию
+     * @param string|null $filename Путь, откуда загружаем. Если не указан,
+     *                              будет использован путь по умолчанию
      * @return static
-     * @throws Exception Выбрасывает исключение, если не удалось загрузить файл (или каскадно, если файл не распознан)
+     * @throws Exception Выбрасывает исключение, если не удалось загрузить файл
+     *                   (или каскадно, если файл не распознан)
      */
-    public static function load(Material_Type $materialType, $withChildrenGoods = false, $filename = null)
-    {
+    public static function load(
+        Material_Type $materialType,
+        $withChildrenGoods = false,
+        $filename = null
+    ) {
         if (!$filename) {
             $filename = static::getDefaultFilename($materialType->id, $withChildrenGoods);
         }
@@ -917,13 +1260,21 @@ class CatalogFilter
      * Загружает или строит кэш
      * @param Material_Type $materialType Тип материала
      * @param bool $withChildrenGoods Учитывать товары из дочерних категорий
-     * @param array<int ID# поля | string URN поля | Material_Field поле> $ignored Игнорируемые поля
-     * @param string|null $filename Путь для загрузки/сохранения. Если не указан, будет использован путь по умолчанию
+     * @param array<
+     *            int ID# поля | string URN поля | Material_Field поле
+     *        > $ignored Игнорируемые поля
+     * @param string|null $filename Путь для загрузки/сохранения. Если не указан,
+     *                              будет использован путь по умолчанию
      * @param bool $save Сохранять кэш при построении
      * @return static
      */
-    public static function loadOrBuild(Material_Type $materialType, $withChildrenGoods = false, array $ignored = [], $filename = null, $save = true)
-    {
+    public static function loadOrBuild(
+        Material_Type $materialType,
+        $withChildrenGoods = false,
+        array $ignored = [],
+        $filename = null,
+        $save = true
+    ) {
         try {
             $filter = static::load($materialType, $withChildrenGoods, $filename);
         } catch (Exception $e) {

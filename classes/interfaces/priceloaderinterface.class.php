@@ -1240,6 +1240,40 @@ class PriceloaderInterface extends AbstractInterface
 
 
     /**
+     * Выгружает ячейку материала
+     * @param PriceLoader_Column $column Загрузчик прайсов
+     * @param Material $material Материал, для которого выгружаем строку
+     * @return string
+     */
+    public function exportMaterialColumn(PriceLoader_Column $column, Material $material)
+    {
+        $x = null;
+        if ($column->Field->id) {
+            if ($column->Field->multiple) {
+                $x = $material->fields[$column->Field->urn]->getValues(true);
+                $x = array_map(function ($y) use ($column) {
+                    return $column->Field->doRich($y);
+                }, $x);
+            } else {
+                $x = $material->fields[$column->Field->urn]->doRich();
+            }
+        } elseif ($column->fid) {
+            $x = $material->{$column->fid};
+        } else {
+            return '';
+        }
+        if ($f = $column->CallbackDownload) {
+            $x = $f($x, $material);
+        }
+        if (is_array($x)) {
+            $x = implode(', ', $x);
+        }
+        $x = trim($x);
+        return $x;
+    }
+
+
+    /**
      * Выгружает строку материала
      * @param PriceLoader $loader Загрузчик прайсов
      * @param Material $material Материал, для которого выгружаем строку
@@ -1249,29 +1283,8 @@ class PriceloaderInterface extends AbstractInterface
     {
         $row = [];
         foreach ($loader->columns as $col) {
-            $x = null;
-            if ($col->Field->id) {
-                if ($col->Field->multiple) {
-                    $x = $material->fields[$col->Field->urn]->getValues(true);
-                    $x = array_map(function ($y) use ($col) {
-                        return $col->Field->doRich($y);
-                    }, $x);
-                } else {
-                    $x = $material->fields[$col->Field->urn]->doRich();
-                }
-            } elseif ($col->fid) {
-                $x = $material->{$col->fid};
-            } else {
-                $row[] = '';
-                continue;
-            }
-            if ($f = $col->CallbackDownload) {
-                $x = $f($x, $material);
-            }
-            if (is_array($x)) {
-                $x = implode(', ', $x);
-            }
-            $row[] = trim($x);
+            $x = $this->exportMaterialColumn($col, $material);
+            $row[] = $x;
         }
         $material->rollback();
         return $row;

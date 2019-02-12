@@ -19,6 +19,14 @@ use RAAS\CMS\Page;
  */
 class CatalogFilterTest extends BaseDBTest
 {
+    public static function setUpBeforeClass()
+    {
+        parent::setUpBeforeClass();
+        $material = new Material(10);
+        $material->fields['testfield']->deleteValues();
+        $material->fields['testfield']->addValue('value1');
+    }
+
     /**
      * Тест получения всех свойств
      */
@@ -52,9 +60,25 @@ class CatalogFilterTest extends BaseDBTest
         $filter = new CatalogFilter(new Material_Type());
 
         $result = $filter->getCatalogGoodsIds([3, 4]);
-        sort($result);
 
-        $this->assertEquals([7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result);
+        $this->assertEquals(
+            [
+                '7' => 7,
+                '8' => 8,
+                '9' => 9,
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $result
+        );
     }
 
 
@@ -103,17 +127,40 @@ class CatalogFilterTest extends BaseDBTest
         $resultIsNotAvailable = array_unique($result[31][0]);
         $resultIsAvailable = array_unique($result[31][1]);
         $resultOnPage1 = array_unique($result['pages_ids'][1]);
-        sort($resultPriceIs83620);
-        sort($resultPriceIs67175);
-        sort($resultIsNotAvailable);
-        sort($resultIsAvailable);
-        sort($resultOnPage1);
 
-        $this->assertEquals([10], $resultPriceIs83620);
-        $this->assertEquals([11], $resultPriceIs67175);
-        $this->assertEquals([10, 14, 18], $resultIsNotAvailable);
-        $this->assertEquals([11, 12, 13, 15, 16, 17, 19], $resultIsAvailable);
-        $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $resultOnPage1);
+        $this->assertEquals(['10' => 10], $resultPriceIs83620);
+        $this->assertEquals(['11' => 11], $resultPriceIs67175);
+        $this->assertEquals(
+            ['10' => 10, '14' => 14, '18' => 18],
+            $resultIsNotAvailable
+        );
+        $this->assertEquals(
+            [
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '19' => 19
+            ],
+            $resultIsAvailable
+        );
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $resultOnPage1
+        );
     }
 
 
@@ -124,22 +171,60 @@ class CatalogFilterTest extends BaseDBTest
     {
         $filter = new CatalogFilter(new Material_Type());
         $pagesMapping = [
-            1 => [1, 2, 3],
-            11 => [4, 5, 6],
-            111 => [7, 8, 9],
-            12 => [10, 11, 12],
-            121 => [13, 14, 15],
+            1 => ['1' => 1, '2' => 2, '3' => 3],
+            11 => ['4' => 4, '5' => 5, '6' => 6],
+            111 => ['7' => 7, '8' => 8, '9' => 9],
+            12 => ['10' => 10, '11' => 11, '12' => 12],
+            121 => ['13' => 13, '14' => 14, '15' => 15],
         ];
         $parents = [1 => 0, 11 => 1, 111 => 11, 12 => 1, 121 => 12];
 
         $result = $filter->bubbleUpGoods($pagesMapping, $parents);
 
         $this->assertEquals([1, 11, 111, 12, 121], array_keys($result));
-        $this->assertEquals([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], $result[1]);
-        $this->assertEquals([4, 5, 6, 7, 8, 9], $result[11]);
-        $this->assertEquals([7, 8, 9], $result[111]);
-        $this->assertEquals([10, 11, 12, 13, 14, 15], $result[12]);
-        $this->assertEquals([13, 14, 15], $result[121]);
+        $this->assertEquals(
+            [
+                '1' => 1,
+                '2' => 2,
+                '3' => 3,
+                '4' => 4,
+                '5' => 5,
+                '6' => 6,
+                '7' => 7,
+                '8' => 8,
+                '9' => 9,
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15
+            ],
+            $result[1]
+        );
+        $this->assertEquals(
+            ['4' => 4, '5' => 5, '6' => 6, '7' => 7, '8' => 8, '9' => 9],
+            $result[11]
+        );
+        $this->assertEquals(
+            ['7' => 7, '8' => 8, '9' => 9],
+            $result[111]
+        );
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15
+            ],
+            $result[12]
+        );
+        $this->assertEquals(
+            ['13' => 13, '14' => 14, '15' => 15],
+            $result[121]
+        );
     }
 
 
@@ -178,53 +263,84 @@ class CatalogFilterTest extends BaseDBTest
         $filter = new CatalogFilter(new Material_Type());
         $propsMapping = [
             '0' => [
-                '1' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                '2' => [2, 4, 6, 8, 10],
-                '3' => [3, 6, 9],
-                '4' => [4, 8],
-                '5' => [5, 10],
-                '6' => [6],
+                '1' => [
+                    '1' => 1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
+                    '6' => 6,
+                    '7' => 7,
+                    '8' => 8,
+                    '9' => 9,
+                    '10' => 10
+                ],
+                '2' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '3' => ['3' => 3, '6' => 6, '9' => 9],
+                '4' => ['4' => 4, '8' => 8],
+                '5' => ['5' => 5, '10' => 10],
+                '6' => ['6' => 6],
             ],
             '1' => [
-                '1' => [2, 4, 6, 8, 10],
-                '2' => [3, 6, 9],
-                '3' => [4, 8],
-                '4' => [5, 10],
-                '5' => [6],
+                '1' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '2' => ['3' => 3, '6' => 6, '9' => 9],
+                '3' => ['4' => 4, '8' => 8],
+                '4' => ['5' => 5, '10' => 10],
+                '5' => ['6' => 6],
             ],
             '2' => [
-                '1' => [3, 6, 9],
-                '2' => [4, 8],
-                '3' => [5, 10],
-                '4' => [6],
+                '1' => ['3' => 3, '6' => 6, '9' => 9],
+                '2' => ['4' => 4, '8' => 8],
+                '3' => ['5' => 5, '10' => 10],
+                '4' => ['6' => 6],
             ],
             '3' => [
-                '1' => [4, 8],
-                '2' => [5, 10],
-                '3' => [6],
+                '1' => ['4' => 4, '8' => 8],
+                '2' => ['5' => 5, '10' => 10],
+                '3' => ['6' => 6],
             ],
             '4' => [
-                '1' => [5, 10],
-                '2' => [6],
+                '1' => ['5' => 5, '10' => 10],
+                '2' => ['6' => 6],
             ],
             '5' => [
-                '1' => [6],
+                '1' => ['6' => 6],
             ],
             'pages_ids' => [
-                '1' => [1, 2, 3],
-                '2' => [4, 5, 6],
-                '3' => [7, 8, 9, 10]
+                '1' => ['1' => 1, '2' => 2, '3' => 3],
+                '2' => ['4' => 4, '5' => 5, '6' => 6],
+                '3' => ['7' => 7, '8' => 8, '9' => 9, '10' => 10]
             ]
         ];
 
         $result = $filter->applyCatalog($propsMapping, 3);
 
         $this->assertEquals([
-            '0' => ['1' => [7, 8, 9, 10], '2' => [8, 10], '3' => [9], '4' => [8], '5' => [10]],
-            '1' => ['1' => [8, 10], '2' => [9], '3' => [8], '4' => [10]],
-            '2' => ['1' => [9], '2' => [8], '3' => [10]],
-            '3' => ['1' => [8], '2' => [10]],
-            '4' => ['1' => [10]],
+            '0' => [
+                '1' => ['7' => 7, '8' => 8, '9' => 9, '10' => 10],
+                '2' => ['8' => 8, '10' => 10],
+                '3' => ['9' => 9],
+                '4' => ['8' => 8],
+                '5' => ['10' => 10]
+            ],
+            '1' => [
+                '1' => ['8' => 8, '10' => 10],
+                '2' => ['9' => 9],
+                '3' => ['8' => 8],
+                '4' => ['10' => 10]
+            ],
+            '2' => [
+                '1' => ['9' => 9],
+                '2' => ['8' => 8],
+                '3' => ['10' => 10]
+            ],
+            '3' => [
+                '1' => ['8' => 8],
+                '2' => ['10' => 10]
+            ],
+            '4' => [
+                '1' => ['10' => 10]
+            ],
             '5' => [],
         ], $result);
     }
@@ -238,37 +354,48 @@ class CatalogFilterTest extends BaseDBTest
         $filter = new CatalogFilter(new Material_Type());
         $propsMapping = [
             '0' => [
-                '1' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                '2' => [2, 4, 6, 8, 10],
-                '3' => [3, 6, 9],
-                '4' => [4, 8],
-                '5' => [5, 10],
-                '6' => [6],
+                '1' => [
+                    '1' => 1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
+                    '6' => 6,
+                    '7' => 7,
+                    '8' => 8,
+                    '9' => 9,
+                    '10' => 10
+                ],
+                '2' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '3' => ['3' => 3, '6' => 6, '9' => 9],
+                '4' => ['4' => 4, '8' => 8],
+                '5' => ['5' => 5, '10' => 10],
+                '6' => ['6' => 6],
             ],
             '1' => [
-                '1' => [2, 4, 6, 8, 10],
-                '2' => [3, 6, 9],
-                '3' => [4, 8],
-                '4' => [5, 10],
-                '5' => [6],
+                '1' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '2' => ['3' => 3, '6' => 6, '9' => 9],
+                '3' => ['4' => 4, '8' => 8],
+                '4' => ['5' => 5, '10' => 10],
+                '5' => ['6' => 6],
             ],
             '2' => [
-                '1' => [3, 6, 9],
-                '2' => [4, 8],
-                '3' => [5, 10],
-                '4' => [6],
+                '1' => ['3' => 3, '6' => 6, '9' => 9],
+                '2' => ['4' => 4, '8' => 8],
+                '3' => ['5' => 5, '10' => 10],
+                '4' => ['6' => 6],
             ],
             '3' => [
-                '1' => [4, 8],
-                '2' => [5, 10],
-                '3' => [6],
+                '1' => ['4' => 4, '8' => 8],
+                '2' => ['5' => 5, '10' => 10],
+                '3' => ['6' => 6],
             ],
             '4' => [
-                '1' => [5, 10],
-                '2' => [6],
+                '1' => ['5' => 5, '10' => 10],
+                '2' => ['6' => 6],
             ],
             '5' => [
-                '1' => [6],
+                '1' => ['6' => 6],
             ]
         ];
         $filterData = ['0' => [2, 3], '1' => [2]];
@@ -276,8 +403,13 @@ class CatalogFilterTest extends BaseDBTest
         $result = $filter->applyFilter($propsMapping, $filterData);
 
         $this->assertEquals([
-            '0' => ['2' => [2, 4, 6, 8, 10], '3' => [3, 6, 9]],
-            '1' => ['2' => [3, 6, 9]],
+            '0' => [
+                '2' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '3' => ['3' => 3, '6' => 6, '9' => 9]
+            ],
+            '1' => [
+                '2' => ['3' => 3, '6' => 6, '9' => 9]
+            ],
         ], $result);
     }
 
@@ -290,37 +422,48 @@ class CatalogFilterTest extends BaseDBTest
         $filter = new CatalogFilter(new Material_Type());
         $propsMapping = [
             '0' => [
-                '1' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                '2' => [2, 4, 6, 8, 10],
-                '3' => [3, 6, 9],
-                '4' => [4, 8],
-                '5' => [5, 10],
-                '6' => [6],
+                '1' => [
+                    '1' => 1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
+                    '6' => 6,
+                    '7' => 7,
+                    '8' => 8,
+                    '9' => 9,
+                    '10' => 10
+                ],
+                '2' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '3' => ['3' => 3, '6' => 6, '9' => 9],
+                '4' => ['4' => 4, '8' => 8],
+                '5' => ['5' => 5, '10' => 10],
+                '6' => ['6' => 6],
             ],
             '1' => [
-                '1' => [2, 4, 6, 8, 10],
-                '2' => [3, 6, 9],
-                '3' => [4, 8],
-                '4' => [5, 10],
-                '5' => [6],
+                '1' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '2' => ['3' => 3, '6' => 6, '9' => 9],
+                '3' => ['4' => 4, '8' => 8],
+                '4' => ['5' => 5, '10' => 10],
+                '5' => ['6' => 6],
             ],
             '2' => [
-                '1' => [3, 6, 9],
-                '2' => [4, 8],
-                '3' => [5, 10],
-                '4' => [6],
+                '1' => ['3' => 3, '6' => 6, '9' => 9],
+                '2' => ['4' => 4, '8' => 8],
+                '3' => ['5' => 5, '10' => 10],
+                '4' => ['6' => 6],
             ],
             '3' => [
-                '1' => [4, 8],
-                '2' => [5, 10],
-                '3' => [6],
+                '1' => ['4' => 4, '8' => 8],
+                '2' => ['5' => 5, '10' => 10],
+                '3' => ['6' => 6],
             ],
             '4' => [
-                '1' => [5, 10],
-                '2' => [6],
+                '1' => ['5' => 5, '10' => 10],
+                '2' => ['6' => 6],
             ],
             '5' => [
-                '1' => [6],
+                '1' => ['6' => 6],
             ]
         ];
         $filterData = ['0' => ['from' => 3, 'to' => 5], '1' => [2]];
@@ -328,11 +471,11 @@ class CatalogFilterTest extends BaseDBTest
         $result = $filter->applyFilter($propsMapping, $filterData);
         $this->assertEquals([
             '0' => [
-                '3' => [3, 6, 9],
-                '4' => [4, 8],
-                '5' => [5, 10],
+                '3' => ['3' => 3, '6' => 6, '9' => 9],
+                '4' => ['4' => 4, '8' => 8],
+                '5' => ['5' => 5, '10' => 10],
             ],
-            '1' => ['2' => [3, 6, 9]],
+            '1' => ['2' => ['3' => 3, '6' => 6, '9' => 9]],
         ], $result);
     }
 
@@ -345,19 +488,34 @@ class CatalogFilterTest extends BaseDBTest
         $filter = new CatalogFilter(new Material_Type());
         $propsMapping = [
             '0' => [
-                'sdjkfl;jksd;' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                's;dkfjweopji' => [2, 4, 6, 8, 10],
-                'd;fjxcviope' => [3, 6, 9],
-                'sldfppwer' => [4, 8],
-                'sd;dkfjw' => [5, 10],
-                'sd;vxpodft' => [6],
+                'sdjkfl;jksd;' => [
+                    '1' => 1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
+                    '6' => 6,
+                    '7' => 7,
+                    '8' => 8,
+                    '9' => 9,
+                    '10' => 10
+                ],
+                's;dkfjweopji' => [
+                    '2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10
+                ],
+                'd;fjxcviope' => ['3' => 3, '6' => 6, '9' => 9],
+                'sldfppwer' => ['4' => 4, '8' => 8],
+                'sd;dkfjw' => ['5' => 5, '10' => 10],
+                'sd;vxpodft' => ['6' => 6],
             ],
             '1' => [
-                'sdf;oibvb' => [2, 4, 6, 8, 10],
-                'sgfhvbghjgji' => [3, 6, 9],
-                'xcvxcvbt;gkljg' => [4, 8],
-                'dfkljgdkh' => [5, 10],
-                'xcvxikoprf' => [6],
+                'sdf;oibvb' => [
+                    '2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10
+                ],
+                'sgfhvbghjgji' => ['3' => 3, '6' => 6, '9' => 9],
+                'xcvxcvbt;gkljg' => ['4' => 4, '8' => 8],
+                'dfkljgdkh' => ['5' => 5, '10' => 10],
+                'xcvxikoprf' => ['6' => 6],
             ],
         ];
         $filterData = ['0' => ['like' => 'dkfjw']];
@@ -365,8 +523,10 @@ class CatalogFilterTest extends BaseDBTest
         $result = $filter->applyFilter($propsMapping, $filterData);
         $this->assertEquals([
             '0' => [
-                's;dkfjweopji' => [2, 4, 6, 8, 10],
-                'sd;dkfjw' => [5, 10],
+                's;dkfjweopji' => [
+                    '2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10
+                ],
+                'sd;dkfjw' => ['5' => 5, '10' => 10],
             ],
         ], $result);
     }
@@ -380,49 +540,88 @@ class CatalogFilterTest extends BaseDBTest
         $filter = new CatalogFilter(new Material_Type());
         $propsMapping = [
             '0' => [
-                '1' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                '2' => [2, 4, 6, 8, 10],
-                '3' => [3, 6, 9],
-                '4' => [4, 8],
-                '5' => [5, 10],
-                '6' => [6],
+                '1' => [
+                    '1' => 1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
+                    '6' => 6,
+                    '7' => 7,
+                    '8' => 8,
+                    '9' => 9,
+                    '10' => 10
+                ],
+                '2' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '3' => ['3' => 3, '6' => 6, '9' => 9],
+                '4' => ['4' => 4, '8' => 8],
+                '5' => ['5' => 5, '10' => 10],
+                '6' => ['6' => 6],
             ],
             '1' => [
-                '1' => [2, 4, 6, 8, 10],
-                '2' => [3, 6, 9],
-                '3' => [4, 8],
-                '4' => [5, 10],
-                '5' => [6],
+                '1' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '2' => ['3' => 3, '6' => 6, '9' => 9],
+                '3' => ['4' => 4, '8' => 8],
+                '4' => ['5' => 5, '10' => 10],
+                '5' => ['6' => 6],
             ],
             '2' => [
-                '1' => [3, 6, 9],
-                '2' => [4, 8],
-                '3' => [5, 10],
-                '4' => [6],
+                '1' => ['3' => 3, '6' => 6, '9' => 9],
+                '2' => ['4' => 4, '8' => 8],
+                '3' => ['5' => 5, '10' => 10],
+                '4' => ['6' => 6],
             ],
             '3' => [
-                '1' => [4, 8],
-                '2' => [5, 10],
-                '3' => [6],
+                '1' => ['4' => 4, '8' => 8],
+                '2' => ['5' => 5, '10' => 10],
+                '3' => ['6' => 6],
             ],
             '4' => [
-                '1' => [5, 10],
-                '2' => [6],
+                '1' => ['5' => 5, '10' => 10],
+                '2' => ['6' => 6],
             ],
             '5' => [
-                '1' => [6],
+                '1' => ['6' => 6],
             ]
         ];
 
         $result = $filter->reduceMappingToGoodsIds($propsMapping);
 
         $this->assertEquals([
-            '0' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            '1' => [2, 4, 6, 8, 10, 3, 9, 5],
-            '2' => [3, 6, 9, 4, 8, 5, 10],
-            '3' => [4, 8, 5, 10, 6],
-            '4' => [5, 10, 6],
-            '5' => [6],
+            '0' => [
+                '1' => 1,
+                '2' => 2,
+                '3' => 3,
+                '4' => 4,
+                '5' => 5,
+                '6' => 6,
+                '7' => 7,
+                '8' => 8,
+                '9' => 9,
+                '10' => 10
+            ],
+            '1' => [
+                '2' => 2,
+                '4' => 4,
+                '6' => 6,
+                '8' => 8,
+                '10' => 10,
+                '3' => 3,
+                '9' => 9,
+                '5' => 5
+            ],
+            '2' => [
+                '3' => 3,
+                '6' => 6,
+                '9' => 9,
+                '4' => 4,
+                '8' => 8,
+                '5' => 5,
+                '10' => 10
+            ],
+            '3' => ['4' => 4, '8' => 8, '5' => 5, '10' => 10, '6' => 6],
+            '4' => ['5' => 5, '10' => 10, '6' => 6],
+            '5' => ['6' => 6],
         ], $result);
     }
 
@@ -435,19 +634,41 @@ class CatalogFilterTest extends BaseDBTest
     {
         $filter = new CatalogFilter(new Material_Type());
         $goodsIdsMapping = [
-            '1' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-            '2' => [2, 4, 6, 8, 10],
-            '3' => [3, 6, 9],
+            '1' => [
+                '1' => 1,
+                '2' => 2,
+                '3' => 3,
+                '4' => 4,
+                '5' => 5,
+                '6' => 6,
+                '7' => 7,
+                '8' => 8,
+                '9' => 9,
+                '10' => 10
+            ],
+            '2' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+            '3' => ['3' => 3, '6' => 6, '9' => 9],
         ];
-        $categoryGoodsIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+        $categoryGoodsIds = [
+            '1' => 1,
+            '2' => 2,
+            '3' => 3,
+            '4' => 4,
+            '5' => 5,
+            '6' => 6,
+            '7' => 7,
+            '8' => 8,
+            '9' => 9,
+            '10' => 10
+        ];
 
         $result = $filter->applyCrossFilter($goodsIdsMapping, $categoryGoodsIds);
 
         $this->assertEquals([
-            '1' => [6],
-            '2' => [3, 6, 9],
-            '3' => [2, 4, 6, 8, 10],
-            '' => [6]
+            '1' => ['6' => 6],
+            '2' => ['3' => 3, '6' => 6, '9' => 9],
+            '3' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+            '' => ['6' => 6]
         ], $result);
     }
 
@@ -460,18 +681,54 @@ class CatalogFilterTest extends BaseDBTest
         $filter = new CatalogFilter(new Material_Type());
         $propsMapping = [
             '0' => [
-                '2' => [10, 8, 6, 4, 2],
-                '4' => [4, 8, 11],
-                '3' => [3, 6, 9, 12],
+                '2' => ['10' => 10, '8' => 8, '6' => 6, '4' => 4, '2' => 2],
+                '4' => ['4' => 4, '8' => 8, '11' => 11],
+                '3' => ['3' => 3, '6' => 6, '9' => 9, '12' => 12],
             ],
         ];
-        $goodsIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        $goodsIds = [
+            '1' => 1,
+            '2' => 2,
+            '3' => 3,
+            '4' => 4,
+            '5' => 5,
+            '6' => 6,
+            '7' => 7,
+            '8' => 8,
+            '9' => 9,
+            '10' => 10,
+            '11' => 11,
+            '12' => 12
+        ];
 
         $result = $filter->getSortMapping($propsMapping, $goodsIds);
 
         $this->assertEquals([
-            '0' => [10, 8, 6, 4, 2, 3, 9, 12, 11],
-            '' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            '0' => [
+                '10' => 10,
+                '8' => 8,
+                '6' => 6,
+                '4' => 4,
+                '2' => 2,
+                '3' => 3,
+                '9' => 9,
+                '12' => 12,
+                '11' => 11
+            ],
+            '' => [
+                '1' => 1,
+                '2' => 2,
+                '3' => 3,
+                '4' => 4,
+                '5' => 5,
+                '6' => 6,
+                '7' => 7,
+                '8' => 8,
+                '9' => 9,
+                '10' => 10,
+                '11' => 11,
+                '12' => 12
+            ],
         ], $result);
     }
 
@@ -484,47 +741,112 @@ class CatalogFilterTest extends BaseDBTest
         $filter = new CatalogFilter(new Material_Type());
         $propsMapping = [
             '26' => [
-                '1' => [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                '2' => [2, 4, 6, 8, 10],
-                '3' => [3, 6, 9],
-                '4' => [4, 8],
-                '5' => [5, 10],
-                '6' => [6],
+                '1' => [
+                    '1' => 1,
+                    '2' => 2,
+                    '3' => 3,
+                    '4' => 4,
+                    '5' => 5,
+                    '6' => 6,
+                    '7' => 7,
+                    '8' => 8,
+                    '9' => 9,
+                    '10' => 10
+                ],
+                '2' => [
+                    '2' => 2,
+                    '4' => 4,
+                    '6' => 6,
+                    '8' => 8,
+                    '10' => 10
+                ],
+                '3' => [
+                    '3' => 3,
+                    '6' => 6,
+                    '9' => 9
+                ],
+                '4' => [
+                    '4' => 4,
+                    '8' => 8
+                ],
+                '5' => [
+                    '5' => 5,
+                    '10' => 10
+                ],
+                '6' => [
+                    '6' => 6
+                ],
             ],
             '30' => [
-                '1' => [2, 4, 6, 8, 10],
-                '2' => [3, 6, 9],
-                '3' => [4, 8],
-                '4' => [5, 10],
-                '5' => [6],
+                '1' => ['2' => 2, '4' => 4, '6' => 6, '8' => 8, '10' => 10],
+                '2' => ['3' => 3, '6' => 6, '9' => 9],
+                '3' => ['4' => 4, '8' => 8],
+                '4' => ['5' => 5, '10' => 10],
+                '5' => ['6' => 6],
             ],
             '31' => [
-                '1' => [3, 6, 9],
-                '2' => [4, 8],
-                '3' => [5, 10],
-                '4' => [6],
+                '1' => ['3' => 3, '6' => 6, '9' => 9],
+                '2' => ['4' => 4, '8' => 8],
+                '3' => ['5' => 5, '10' => 10],
+                '4' => ['6' => 6],
             ],
             '32' => [
-                '1' => [4, 8],
-                '2' => [5, 10],
-                '3' => [6],
+                '1' => ['4' => 4, '8' => 8],
+                '2' => ['5' => 5, '10' => 10],
+                '3' => ['6' => 6],
             ],
             '33' => [
-                '1' => [5, 10],
-                '2' => [6],
+                '1' => ['5' => 5, '10' => 10],
+                '2' => ['6' => 6],
             ],
             '34' => [
-                '1' => [6],
-            ]
+                '1' => ['6' => 6],
+            ],
+            '47' => [
+                'value1' => ['10' => 10]
+            ],
         ];
         $filterData = ['26' => ['from' => 3, 'to' => 5], '30' => [2]];
         $crossFilter = [
-            '26' => [3, 6, 9],
-            '30' => [3, 4, 5, 6, 8, 9, 10],
-            '' => [3, 4, 5, 6, 8, 9, 10]
+            '26' => ['3' => 3, '6' => 6, '9' => 9],
+            '30' => [
+                '3' => 3,
+                '4' => 4,
+                '5' => 5,
+                '6' => 6,
+                '8' => 8,
+                '9' => 9,
+                '10' => 10
+            ],
+            '47' => [
+                '3' => 3,
+                '4' => 4,
+                '5' => 5,
+                '6' => 6,
+                '8' => 8,
+                '9' => 9,
+                '10' => 10
+            ],
+            '' => [
+                '3' => 3,
+                '4' => 4,
+                '5' => 5,
+                '6' => 6,
+                '8' => 8,
+                '9' => 9,
+                '10' => 10
+            ]
         ];
+        $numericFieldsIds = ['26' => 26, '32' => 32, '34' => 34];
+        $richValues = ['47' => ['value1' => 'Запись 1']];
 
-        $result = $filter->getAvailableProperties($propsMapping, $crossFilter, $filterData);
+        $result = $filter->getAvailableProperties(
+            $propsMapping,
+            $crossFilter,
+            $filterData,
+            $numericFieldsIds,
+            $richValues
+        );
         $result = array_map(function ($fieldData) {
             return array_map(function ($valueData) {
                 $newValueData = $valueData;
@@ -541,6 +863,9 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertEquals(true, $result['30']['1']['doRich']);
         $this->assertTrue($result['30']['2']['checked']);
         $this->assertFalse($result['30']['1']['checked']);
+        $this->assertEquals('Запись 1', $result['47']['value1']['doRich']);
+        $this->assertEquals('Минимальное количество', $result['32']['1']['prop']);
+        $this->assertEmpty($result['32']['1']['doRich']);
     }
 
 
@@ -549,7 +874,11 @@ class CatalogFilterTest extends BaseDBTest
      */
     public function testBuild()
     {
-        $filter = new CatalogFilter(new Material_Type(4), true, ['article', new Material_Field(33)]);
+        $filter = new CatalogFilter(
+            new Material_Type(4),
+            true,
+            ['article', new Material_Field(33)]
+        );
 
         $filter->build();
 
@@ -560,8 +889,58 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertNull($filter->properties[25]);
         $this->assertNull($filter->propertiesByURNs['article']);
         $this->assertTrue($filter->withChildrenGoods);
-        $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $filter->propsMapping['pages_ids'][15]);
-        $this->assertEquals([11, 12, 13, 15, 16, 17, 19], $filter->propsMapping['31'][1]);
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $filter->propsMapping['pages_ids'][15]
+        );
+        $this->assertEquals(
+            [
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '19' => 19
+            ],
+            $filter->propsMapping['31'][1]
+        );
+        $this->assertEquals([
+            '47' => [
+                'value1' => 'Запись 1',
+            ],
+        ], $filter->richValues);
+        $this->assertEquals(
+            ['26' => 26, '32' => 32, '34' => 34],
+            $filter->numericFieldsIds
+        );
+        $this->assertEquals([
+          5609,
+          25712,
+          30450,
+          49651,
+          54096,
+          61245,
+          67175,
+          71013,
+          83620,
+          85812,
+        ], array_keys($filter->propsMapping[26]));
+        $this->assertEquals(10, $filter->counter[16]);
+        $this->assertEquals(10, $filter->counter[24]);
+        $this->assertEquals(0, $filter->selfCounter[16]);
+        $this->assertEquals(10, $filter->selfCounter[24]);
     }
 
 
@@ -634,6 +1013,44 @@ class CatalogFilterTest extends BaseDBTest
         $result = $filter->getFilter($filterData);
     }
 
+    /**
+     * Тест формирования rich-значений для свойств, у которых они заведомо могут
+     * отличаться от сырых значений
+     */
+    public function testGetRichValues()
+    {
+        $filter = new CatalogFilter(new Material_Type(4));
+        $propsMapping = [
+            '25' => [
+                'aaa' => ['1' => 1, '2' => 2, '3' => 3],
+                'bbb' => ['1' => 1, '2' => 2, '3' => 3],
+                'ccc' => ['1' => 1, '2' => 2, '3' => 3],
+            ],
+            '30' => [
+                '0' => ['1' => 1, '2' => 2],
+                '1' => ['3' => 3, '4' => 4],
+            ],
+            '47' => [
+                'value1' => ['1' => 1],
+                'value2' => ['2' => 2],
+            ],
+        ];
+        $properties = [
+            '25' => new Material_Field(25),
+            '30' => new Material_Field(30),
+            '47' => new Material_Field(47),
+        ];
+
+        $result = $filter->getRichValues($propsMapping, $properties);
+
+        $this->assertEquals([
+            '47' => [
+                'value1' => 'Запись 1',
+                'value2' => 'Запись 2',
+            ],
+        ], $result);
+    }
+
 
     /**
      * Тест применения фильтра и каталога
@@ -657,12 +1074,38 @@ class CatalogFilterTest extends BaseDBTest
             '31' => [1]
         ], $filter->filter);
         $this->assertTrue($filter->filterHasCheckedOptions);
-        $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $filter->categoryGoodsIds);
-        $this->assertEquals([16, 13, 15], $filter->sortMapping[25]);
-        $this->assertEquals([13, 16, 15], $filter->sortMapping[26]);
-        $this->assertEquals([13, 15, 16], $filter->sortMapping['']);
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $filter->categoryGoodsIds
+        );
+        $this->assertEquals(
+            ['16' => 16, '13' => 13, '15' => 15],
+            $filter->sortMapping[25]
+        );
+        $this->assertEquals(
+            ['13' => 13, '16' => 16, '15' => 15],
+            $filter->sortMapping[26]
+        );
+        $this->assertEquals(
+            ['13' => 13, '15' => 15, '16' => 16],
+            $filter->sortMapping['']
+        );
         $this->assertTrue($filter->availableProperties[31][1]['checked']);
-        $this->assertEquals('В наличии', $filter->availableProperties[31][1]['prop']->name);
+        $this->assertEquals(
+            'В наличии',
+            $filter->availableProperties[31][1]['prop']->name
+        );
         $this->assertNull($filter->nonExistingProp);
     }
 
@@ -928,8 +1371,46 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertNull($result['properties'][25]);
         $this->assertNull($result['propertiesByURNs']['article']);
         $this->assertTrue($result['withChildrenGoods']);
-        $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result['propsMapping']['pages_ids'][15]);
-        $this->assertEquals([11, 12, 13, 15, 16, 17, 19], $result['propsMapping']['31'][1]);
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $result['propsMapping']['pages_ids'][15]
+        );
+        $this->assertEquals(
+            [
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '19' => 19
+            ],
+            $result['propsMapping']['31'][1]
+        );
+        $this->assertEquals([
+            '47' => [
+                'value1' => 'Запись 1',
+            ],
+        ], $result['richValues']);
+        $this->assertEquals(
+            ['26' => 26, '32' => 32, '34' => 34],
+            $result['numericFieldsIds']
+        );
+        $this->assertEquals(10, $result['counter'][16]);
+        $this->assertEquals(10, $result['counter'][24]);
+        $this->assertEquals(0, $result['selfCounter'][16]);
+        $this->assertEquals(10, $result['selfCounter'][24]);
     }
 
 
@@ -939,16 +1420,64 @@ class CatalogFilterTest extends BaseDBTest
     public function testImport()
     {
         $filterData = [
-            'materialType' => new Material_Type(['id' => 4, 'name' => 'Каталог продукции']),
+            'materialType' => new Material_Type(
+                ['id' => 4, 'name' => 'Каталог продукции']
+            ),
             'withChildrenGoods' => true,
             'ignoredFields' => ['article', 33],
             'materialTypesIds' => [4, 5],
-            'properties' => [26 => new Material_Field(['id' => 26, 'name' => 'Стоимость', 'urn' => 'price'])],
-            'catalogGoodsIds' => [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
-            'propsMapping' => [
-                '31' => [1 => [11, 12, 13, 15, 16, 17, 19]],
-                'pages_ids' => [15 => [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]],
+            'properties' => [
+                26 => new Material_Field(
+                    ['id' => 26, 'name' => 'Стоимость', 'urn' => 'price']
+                )
             ],
+            'catalogGoodsIds' => [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            'propsMapping' => [
+                '31' => [
+                    1 => [
+                        '11' => 11,
+                        '12' => 12,
+                        '13' => 13,
+                        '15' => 15,
+                        '16' => 16,
+                        '17' => 17,
+                        '19' => 19
+                    ]
+                ],
+                'pages_ids' => [
+                    15 => [
+                        '10' => 10,
+                        '11' => 11,
+                        '12' => 12,
+                        '13' => 13,
+                        '14' => 14,
+                        '15' => 15,
+                        '16' => 16,
+                        '17' => 17,
+                        '18' => 18,
+                        '19' => 19
+                    ]
+                ],
+            ],
+            'richValues' => [
+                '47' => [
+                    'value1' => 'Запись 1',
+                ],
+            ],
+            'numericFieldsIds' => ['26' => 26, '32' => 32, '34' => 34],
+            'counter' => [16 => 10, 24 => 10],
+            'selfCounter' => [16 => 0, 24 => 10],
         ];
 
         $result = CatalogFilter::import($filterData);
@@ -961,8 +1490,46 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertNull($result->properties[25]);
         $this->assertNull($result->propertiesByURNs['article']);
         $this->assertTrue($result->withChildrenGoods);
-        $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result->propsMapping['pages_ids'][15]);
-        $this->assertEquals([11, 12, 13, 15, 16, 17, 19], $result->propsMapping['31'][1]);
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $result->propsMapping['pages_ids'][15]
+        );
+        $this->assertEquals(
+            [
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '19' => 19
+            ],
+            $result->propsMapping['31'][1]
+        );
+        $this->assertEquals([
+            '47' => [
+                'value1' => 'Запись 1',
+            ],
+        ], $result->richValues);
+        $this->assertEquals(
+            ['26' => 26, '32' => 32, '34' => 34],
+            $result->numericFieldsIds
+        );
+        $this->assertEquals(10, $result->counter[16]);
+        $this->assertEquals(10, $result->counter[24]);
+        $this->assertEquals(0, $result->selfCounter[16]);
+        $this->assertEquals(10, $result->selfCounter[24]);
     }
 
 
@@ -1018,8 +1585,33 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertEquals([4, 5], $result['materialTypesIds']);
         $this->assertEquals('Стоимость', $result['properties'][26]['name']);
         $this->assertTrue($result['withChildrenGoods']);
-        $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result['propsMapping']['pages_ids'][15]);
-        $this->assertEquals([11, 12, 13, 15, 16, 17, 19], $result['propsMapping']['31'][1]);
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $result['propsMapping']['pages_ids'][15]
+        );
+        $this->assertEquals(
+            [
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '19' => 19
+            ],
+            $result['propsMapping']['31'][1]
+        );
     }
 
 
@@ -1049,8 +1641,33 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertEquals('Стоимость', $result->properties[26]->name);
         $this->assertEquals('Стоимость', $result->propertiesByURNs['price']->name);
         $this->assertTrue($result->withChildrenGoods);
-        $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result->propsMapping['pages_ids'][15]);
-        $this->assertEquals([11, 12, 13, 15, 16, 17, 19], $result->propsMapping['31'][1]);
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $result->propsMapping['pages_ids'][15]
+        );
+        $this->assertEquals(
+            [
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '19' => 19
+            ],
+            $result->propsMapping['31'][1]
+        );
     }
 
 
@@ -1060,7 +1677,11 @@ class CatalogFilterTest extends BaseDBTest
      */
     public function testLoadWithInvalidFilepath()
     {
-        $result = CatalogFilter::load(new Material_Type(4), false, $this->getResourcesDir . '/aaa.php');
+        $result = CatalogFilter::load(
+            new Material_Type(4),
+            false,
+            $this->getResourcesDir . '/aaa.php'
+        );
     }
 
 
@@ -1082,17 +1703,71 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertEquals('Стоимость', $result->properties[26]->name);
         $this->assertEquals('Стоимость', $result->propertiesByURNs['price']->name);
         $this->assertTrue($result->withChildrenGoods);
-        $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result->propsMapping['pages_ids'][15]);
-        $this->assertEquals([11, 12, 13, 15, 16, 17, 19], $result->propsMapping['31'][1]);
+        $this->assertEquals(
+            [
+                '10' => 10,
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '14' => 14,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '18' => 18,
+                '19' => 19
+            ],
+            $result->propsMapping['pages_ids'][15]
+        );
+        $this->assertEquals(
+            [
+                '11' => 11,
+                '12' => 12,
+                '13' => 13,
+                '15' => 15,
+                '16' => 16,
+                '17' => 17,
+                '19' => 19
+            ],
+            $result->propsMapping['31'][1]
+        );
+    }
+
+
+    /**
+     * Провайдер данных для метода testCount
+     * @return array<[
+     *             bool фильтр с учетом дочерних категорий
+     *             int ID# категории
+     *             bool счетчик с учетом дочерних категорий
+     *             int ожидаемое количество товаров
+     *         ]>
+     */
+    public function countDataProvider()
+    {
+        return [
+            [true, 17, true, 10],
+            [true, 17, false, 0],
+            [false, 17, true, 10],
+            [false, 17, false, 0],
+        ];
     }
 
 
     /**
      * Тест счетчика товаров
+     * @param bool $filterWithChildren фильтр с учетом дочерних категорий
+     * @param int $pageId ID# категории
+     * @param bool $counterWithChildren счетчик с учетом дочерних категорий
+     * @param int $expected ожидаемое количество товаров
+     * @dataProvider countDataProvider
      */
-    public function testCount()
-    {
-        $filter = new CatalogFilter(new Material_Type(4), true);
+    public function testCount(
+        $filterWithChildren,
+        $pageId,
+        $counterWithChildren,
+        $expected
+    ) {
+        $filter = new CatalogFilter(new Material_Type(4), $filterWithChildren);
         $catalog = new Page(15);
         $filterData = [
             'price_from' => 10000,
@@ -1102,29 +1777,8 @@ class CatalogFilterTest extends BaseDBTest
 
         $filter->build();
         $filter->apply($catalog, $filterData);
-        $result = $filter->count(new Page(17));
+        $result = $filter->count(new Page($pageId), $counterWithChildren);
 
-        $this->assertEquals(10, $result);
-    }
-
-
-    /**
-     * Тест счетчика товара - без дочерних категорий
-     */
-    public function testCountWithoutChildrenCats()
-    {
-        $filter = new CatalogFilter(new Material_Type(4), false);
-        $catalog = new Page(15);
-        $filterData = [
-            'price_from' => 10000,
-            'price_to' => 60000,
-            'available' => 1
-        ];
-
-        $filter->build();
-        $filter->apply($catalog, $filterData);
-        $result = $filter->count(new Page(17));
-
-        $this->assertEquals(0, $result);
+        $this->assertEquals($expected, $result);
     }
 }
