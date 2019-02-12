@@ -933,7 +933,7 @@ class CatalogFilter
             $prop = $this->properties ? $this->properties[$propId] : new Material_Field($propId);
             $crossFilterGoodsIds = $crossFilterMapping[$propId] ?: $crossFilterMapping[''];
             $filterPropValuesFlipped = [];
-            if (isset($filter[$propId])) {
+            if (isset($filter[$propId]) && !isset($numericFieldsIds[$propId])) {
                 $filterPropValuesFlipped = array_flip((array)$filter[$propId]);
             }
             foreach ($propValues as $propValue => $goodsIds) {
