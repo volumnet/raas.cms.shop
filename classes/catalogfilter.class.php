@@ -477,9 +477,10 @@ class CatalogFilter
         $sqlQuery = "SELECT *
                        FROM " . Material_Field::_tablename()
                   . " WHERE classname = ?
-                        AND datatype NOT IN (?, ?, ?)
+                        AND datatype NOT IN (?, ?)
                         AND pid IN (" . implode(", ", array_fill(0, count($materialTypesIds), '?')) . ") ";
-        $sqlBind = array_merge([Material_Type::class, 'file', 'image', 'material'], $materialTypesIds);
+        // 2019-02-12, AVS: убрал тип material, чтобы была возможность искать по бренду
+        $sqlBind = array_merge([Material_Type::class, 'file', 'image'], $materialTypesIds);
         if ($ignoredIds) {
             $sqlQuery .= " AND id NOT IN (" . implode(", ", array_fill(0, count($ignoredIds), '?')) . ") ";
             $sqlBind = array_merge($sqlBind, $ignoredIds);

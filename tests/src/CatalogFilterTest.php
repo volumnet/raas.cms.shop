@@ -44,9 +44,9 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertNotContains(34, $ids);
         $this->assertContains(31, $ids);
         $this->assertContains(16, $ids);
+        $this->assertContains(35, $ids);
         $this->assertNotContains(27, $ids);
         $this->assertNotContains(29, $ids);
-        $this->assertNotContains(35, $ids);
         $this->assertNotContains(17, $ids);
         $this->assertNotContains(48, $ids);
     }
