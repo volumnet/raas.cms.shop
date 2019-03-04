@@ -1,8 +1,10 @@
 <?php
 namespace RAAS\CMS\Shop;
 
-use \RAAS\CMS\Feedback;
-use \RAAS\CMS\Material;
+use Mustache_Engine;
+use RAAS\Application;
+use RAAS\CMS\Feedback;
+use RAAS\CMS\Material;
 
 class Order extends Feedback
 {
@@ -45,6 +47,12 @@ class Order extends Feedback
 
     public function commit()
     {
+        if (($this->updates['status_id'] !== null) &&
+            ($this->properties['status_id'] != $this->updates['status_id']) &&
+            $this->status->do_notify
+        ) {
+            $this->notifyStatus();
+        }
         parent::commit();
         if ($this->meta_items) {
             $SQL_query = "DELETE FROM " . static::_dbprefix() . "cms_shop_orders_goods WHERE order_id = " . (int)$this->id;
@@ -127,5 +135,36 @@ class Order extends Feedback
             }
         }
         return $arr;
+    }
+
+
+    /**
+     * Уведомить пользователя об изменении статуса
+     */
+    public function notifyStatus()
+    {
+        $dataArr = ['ID' => (int)$this->id];
+        $emails = [];
+        foreach ($this->fields as $field) {
+            if (!in_array($field->datatype, ['material', 'file', 'image']) && !$field->multiple) {
+                $val = $field->doRich();
+                $dataArr[mb_strtoupper($field->urn)] = $val;
+                if (($field->datatype == 'email') || ($field->urn == 'email')) {
+                    $emails[] = $val;
+                }
+            }
+        }
+        $mustache = new Mustache_Engine();
+        if ($emails) {
+            $subject = $mustache->render($this->status->notification_title, $dataArr);
+            $message = $mustache->render($this->status->notification, $dataArr);
+            Application::i()->sendmail(
+                $emails,
+                $subject,
+                $message,
+                ViewSub_Orders::i()->_('ADMINISTRATION_OF_SITE') . ' ' . $_SERVER['HTTP_HOST'],
+                'info@' . $_SERVER['HTTP_HOST']
+            );
+        }
     }
 }
