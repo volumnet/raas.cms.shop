@@ -480,6 +480,9 @@ class PriceloaderInterface extends AbstractInterface
             return null;
         }
         $field = $item->fields[$col->Field->urn];
+        if (!$field->id) {
+            return null;
+        }
         $affectsField = false;
         $oldVal = $field->getValues(true);
         // 2015-06-01, AVS: добавляем поддержку множественных значений:
