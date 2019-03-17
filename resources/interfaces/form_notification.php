@@ -1,7 +1,19 @@
 <?php
+/**
+ * Стандартное уведомление о заказе
+ * @param bool $SMS Уведомление отправляется по SMS
+ * @param Order $Item Уведомление формы обратной связи
+ */
 namespace RAAS\CMS\Shop;
 
-$smsField = function ($field) {
+use RAAS\CMS\Form_Field;
+
+/**
+ * Получает представление поля для отправки по SMS
+ * @param Form_Field $field Поле для получения представления
+ * @return string
+ */
+$smsField = function (Form_Field $field) {
     $values = $field->getValues(true);
     $arr = array();
     foreach ($values as $key => $val) {
@@ -35,7 +47,12 @@ $smsField = function ($field) {
     return $field->name . ': ' . implode(', ', $arr) . "\n";
 };
 
-$emailField = function ($field) {
+/**
+ * Получает представление поля для отправки по электронной почте
+ * @param Form_Field $field Поле для получения представления
+ * @return string
+ */
+$emailField = function (Form_Field $field) {
     $values = $field->getValues(true);
     $arr = array();
     foreach ($values as $key => $val) {
