@@ -4,11 +4,12 @@
  */
 namespace RAAS\CMS\Shop;
 
-use RAAS\Exception;
 use SimpleXMLElement;
-use RAAS\CMS\Snippet;
-use RAAS\CMS\Page;
 use RAAS\Application;
+use RAAS\Exception;
+use RAAS\CMS\Material;
+use RAAS\CMS\Page;
+use RAAS\CMS\Snippet;
 
 /**
  * Класс интерфейса электронной оплаты через Уральский банк реконструкции и развития
@@ -56,22 +57,22 @@ class UBRRInterface extends EPayInterface
     /**
      * Обработка интерфейса
      * @param Order $order Текущий заказ, для которого осуществляем обработку
-     * @return array(
+     * @return [
      *             'epayWidget' ?=> Snippet Виджет оплаты
      *             'Item' ?=> Order Текущий заказ
      *             'success' ?=> array<int[] ID# блока => сообщение об успешной операции>,
      *             'localError' ?=> array<string[] URN поля ошибки => сообщение об ошибке>,
      *             'paymentURL' ?=> string Платежный URL,
-     *         )
+     *         ]
      */
     public function process(Order $order = null)
     {
-        $out = array();
+        $out = [];
         try {
-            if (in_array($this->get['action'], array('result', 'fail')) ||
+            if (in_array($this->get['action'], ['result', 'fail']) ||
                 ($order->id && $this->post['epay'])
             ) {
-                if (in_array($this->get['action'], array('result', 'fail'))) {
+                if (in_array($this->get['action'], ['result', 'fail'])) {
                     if (!($order && $order->id) && $this->session['orderId']) {
                         $order = new Order($this->session['orderId']);
                     }
@@ -93,7 +94,14 @@ class UBRRInterface extends EPayInterface
                 }
             }
         } catch (Exception $exception) {
-            $out['localError'] = array('order' => $exception->getMessage() . ' #' . $exception->getCode());
+            $out['localError'] = [
+                'order' => $exception->getMessage()
+                        .  (
+                                $exception->getCode() ?
+                                ' #' . $exception->getCode() :
+                                ''
+                            )
+            ];
         }
         return $out;
     }
@@ -105,12 +113,12 @@ class UBRRInterface extends EPayInterface
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
      * @param array $session Данные сессии
-     * @return array(
+     * @return [
      *             'success' ?=> array<int[] ID# блока => сообщение об успешной операции>,
      *             'localError' ?=> array<string[] URN поля ошибки => сообщение об ошибке>
-     *         )
+     *         ]
      */
-    public function result(Order $order, Block_Cart $block, Page $page, array $session = array())
+    public function result(Order $order, Block_Cart $block, Page $page, array $session = [])
     {
         if ($session['ubrrOrderId'] && $session['ubrrSession'] && $order->id) {
             if ($block->epay_test) {
@@ -143,10 +151,10 @@ class UBRRInterface extends EPayInterface
                 $order->commit();
                 $out['success'][(int)$block->id] = sprintf(ORDER_SUCCESSFULLY_PAID, $order->id);
             } else {
-                $out['localError'] = array('order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id));
+                $out['localError'] = ['order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)];
             }
         } else {
-            $out['localError'] = array('order' => INVALID_CRC);
+            $out['localError'] = ['order' => INVALID_CRC];
         }
         return $out;
     }
@@ -158,11 +166,11 @@ class UBRRInterface extends EPayInterface
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
      * @param array $session Данные сессии
-     * @return array(
+     * @return [
      *             'localError' ?=> array<string[] URN поля ошибки => сообщение об ошибке>
-     *         )
+     *         ]
      */
-    public function fail(Order $order, Block_Cart $block, Page $page, array $session = array())
+    public function fail(Order $order, Block_Cart $block, Page $page, array $session = [])
     {
         if ($block->epay_test) {
             file_put_contents(
@@ -179,7 +187,7 @@ class UBRRInterface extends EPayInterface
                 $session
             );
         }
-        $out = array();
+        $out = [];
         $out['localError']['order'] = sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id);
         return $out;
     }
@@ -190,13 +198,13 @@ class UBRRInterface extends EPayInterface
      * @param Order $order Заказ для проверки
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
-     * @return array(
+     * @return [
      *             'paymentURL' ?=> string Платежный URL,
-     *         )
+     *         ]
      */
     public function init(Order $order, Block_Cart $block, Page $page)
     {
-        $out = array();
+        $out = [];
         $_SESSION['orderId'] = $order->id;
         $response = $this->registerOrder($order, $block, $page);
         $orderId = $response['Order']['OrderID'];
@@ -339,10 +347,11 @@ class UBRRInterface extends EPayInterface
     /**
      * Является ли статус успешным
      * @param string $status Внутреннее представление статуса
+     * @return bool
      */
     public function isSuccessfulStatus($status)
     {
-        return in_array($status, array('APPROVED', 'PREAUTH-APPROVED'));
+        return in_array($status, ['APPROVED', 'PREAUTH-APPROVED']);
     }
 
 
@@ -371,7 +380,7 @@ class UBRRInterface extends EPayInterface
              .       '<ApproveURL>' . htmlspecialchars($this->getCurrentHostURL() . $page->url) . '?action=result</ApproveURL>'
              .       '<CancelURL>' . htmlspecialchars($this->getCurrentHostURL() . $page->url) . '?action=fail</CancelURL>'
              .       '<DeclineURL>' . htmlspecialchars($this->getCurrentHostURL() . $page->url) . '?action=fail</DeclineURL>';
-        $faData = array();
+        $faData = [];
         if ($emailField && ($email = $order->$emailField)) {
             $xml .=  '<email>' . htmlspecialchars($email) . '</email>';
             $faData[] = 'Email=' . htmlspecialchars($email);
@@ -469,7 +478,7 @@ class UBRRInterface extends EPayInterface
      */
     public function sxeToArray(SimpleXMLElement $sxe)
     {
-        $out = array();
+        $out = [];
         foreach ((array)$sxe as $index => $node) {
             $out[$index] = is_object($node) ? $this->sxeToArray($node) : trim($node);
         }
@@ -543,7 +552,7 @@ class UBRRInterface extends EPayInterface
      * @return bool Заказ успешно оплачен
      * @throws Exception Ошибка при выполнении
      */
-    public function getOrderIsPaid(Order $order, Block_Cart $block, Page $page, array $session = array())
+    public function getOrderIsPaid(Order $order, Block_Cart $block, Page $page, array $session = [])
     {
         $xml = $this->getOrderStatusXML(
             $session['ubrrOrderId'],
