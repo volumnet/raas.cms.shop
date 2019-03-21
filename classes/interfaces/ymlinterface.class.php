@@ -485,7 +485,7 @@ class YMLInterface extends AbstractInterface
                     $offerTxt .= $this->getOfferCategoriesBlock($material, $mtype->global_type, $catalogCatsIds);
                     break;
                 case 'oldprice':
-                    $offerTxt .= $this->getOfferOldPriceBlock($material, $mtype->settings['fields'][$key]);
+                    $offerTxt .= $this->getOfferOldPriceBlock($material, (array)$mtype->settings['fields'][$key]);
                     break;
                 default:
                     $offerTxt .= $this->getOfferCustomFieldBlock(
