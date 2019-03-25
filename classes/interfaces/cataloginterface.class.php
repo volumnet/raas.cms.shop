@@ -340,7 +340,6 @@ class CatalogInterface extends MaterialInterface
     {
         $result = [];
         parse_str(trim($block->params), $blockParams);
-        $materialTypeId = $block->Material_Type->id;
         if (isset($blockParams['commentFormBlock'])) {
             $commentFormBlock = Block::spawn($blockParams['commentFormBlock']);
             if (($commentFormBlock->id == $blockParams['commentFormBlock']) &&
