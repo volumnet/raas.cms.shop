@@ -246,6 +246,21 @@ class Sync1CInterfaceTest extends BaseDBTest
 
 
     /**
+     * Тест получения сообщения действия по сущности (случай с удалением)
+     */
+    public function testLogEntityMessageWithOrphan()
+    {
+        $interface = new Sync1CInterface();
+        $entity = new Page(2);
+        $entity->orphan = true;
+
+        $result = $interface->logEntityMessage($entity, 30, 40);
+
+        $this->assertEquals('Orphan skipped Page #2 (О компании) - 30/40', $result);
+    }
+
+
+    /**
      * Тест загрузки маппинга
      */
     public function testLoadMapping()
@@ -1856,6 +1871,35 @@ class Sync1CInterfaceTest extends BaseDBTest
         foreach ($mappingTest as $key => $val) {
             $this->assertEquals($val, $mapping[Page::class][$key], $key);
         }
+    }
+
+
+    /**
+     * Тест обработки полученных данных по странице — случай с категорией вне каталога
+     *
+     * (она не должна создаваться)
+     */
+    public function testProcessPageWithOrphanPage()
+    {
+        $interface = new Sync1CInterface();
+        $mapping = [];
+
+        $result = $interface->processPage([
+            'id' => 'orphan',
+            'pid' => '',
+            'name' => 'Orphan page',
+            'urn' => 'orphan-page',
+            '@config' => [
+                'map' => ['id' => true],
+                'create' => ['pid' => true, 'name' => true, 'urn' => true],
+                'update' => ['pid' => true, 'name' => false, 'urn' => true]
+            ]
+        ], $mapping, new Page(1), $this->getResourcesDir() . '/');
+
+        $this->assertEmpty($result->id);
+        $this->assertEquals('Orphan page', $result->name);
+        $this->assertEquals('orphan-page', $result->urn);
+        $this->assertEmpty($mapping[Page::class]['orphan']);
     }
 
 

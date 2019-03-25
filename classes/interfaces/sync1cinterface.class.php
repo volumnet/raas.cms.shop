@@ -203,12 +203,15 @@ class Sync1CInterface extends AbstractInterface
         $message = '';
         if ($entity->deleted) {
             $message .= 'Deleted ';
+        } elseif ($entity->orphan) {
+            $message .= 'Orphan skipped ';
         } elseif ($entity->new) {
             $message .= 'Created ';
         } else {
             $message .= 'Updated ';
         }
-        $message .= Namespaces::getClass($entity) . ' #' . $entity->id
+        $message .= Namespaces::getClass($entity)
+                 . ($entity->id ? ' #' . $entity->id : '')
                  .  ' (' . $entity->name . ')';
         if ($i && $c) {
             $message .= ' - ' . $i . '/' . $c;
@@ -703,7 +706,8 @@ class Sync1CInterface extends AbstractInterface
      *        >> $mapping Полный маппинг по всем классам
      * @param Page $defaultParent Родительская страница по умолчанию для вновь создаваемых типов
      * @param string $dir Путь к папке с файлами для медиа-полей
-     * @return Page Найденная или созданная страница (со свойством deleted, если удален или new, если новый)
+     * @return Page Найденная или созданная страница
+     *              (со свойством deleted, если удален, new, если новый и orphan, если не входит в каталог)
      */
     public function processPage(array $data, array &$mapping, Page $defaultParent, $dir)
     {
@@ -717,8 +721,12 @@ class Sync1CInterface extends AbstractInterface
         $new = !$entity->id;
         $this->updateEntity($entity, $data, $mapping);
         if ($new) {
-            $this->inheritPageNativeFields($entity); // Вызываем после updateEntity, т.к. до этого родитель не установлен
             $entity->new = true;
+            if (!$entity->pid) {
+                $entity->orphan = true;
+                return $entity;
+            }
+            $this->inheritPageNativeFields($entity); // Вызываем после updateEntity, т.к. до этого родитель не установлен
         }
         $entity->commit();
         if ($new) {
