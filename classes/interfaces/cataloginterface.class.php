@@ -26,6 +26,30 @@ class CatalogInterface extends MaterialInterface
     }
 
 
+    /**
+     * Обрабатывает один материал
+     * @param Block_Material $block Блок, для которого применяется интерфейс
+     * @param Page $page Страница, для которой применяется интерфейс
+     * @param Material $item Материал для обработки
+     * @param array $get Поля $_GET параметров
+     * @param array $server Поля $_SERVER параметров
+     * @return [
+     *             'Item' => Material Обрабатываемый материал,
+     *             'prev' ?=> Material Предыдущий материал,
+     *             'next' ?=> Material Следующий материал,
+     *             'commentFormBlock' ?=> Block_Form блок формы комментариев,
+     *             'commentsListBlock' ?=> Block_Material блок списка комментариев,
+     *             'comments' ?=> array<Material> список комментариев
+     *             'commentsListText' ?=> string результат отработки блока
+     *                                    списка комментариев
+     *             'rating' => int Рейтинг товара
+     *             'faqFormBlock' ?=> Block_Form блок формы вопрос-ответ,
+     *             'faqListBlock' ?=> Block_Material блок списка вопросов и ответов,
+     *             'faq' ?=> array<Material> список вопросов и ответов
+     *             'faqListText' ?=> string результат отработки блока
+     *                               списка вопросов и ответов
+     *         ]
+     */
     public function processMaterial(Block_Material $block, Page $page, Material $item, array $get = [], array $server = [])
     {
         $legacy = $this->checkLegacyArbitraryMaterialAddress($block, $page, $item, $server);
@@ -53,6 +77,18 @@ class CatalogInterface extends MaterialInterface
                     $result[$keyTo] = $resultComments[$keyFrom];
                 }
             }
+            $rating = 0;
+            $ratedReviews = 0;
+            foreach ($result['comments'] as $comment) {
+                if ($r = (int)$comment->rating) {
+                    $rating += $r;
+                    $ratedReviews++;
+                }
+            }
+            if ($ratedReviews) {
+                $rating /= $ratedReviews;
+            }
+            $result['rating'] = $rating;
         }
         if ($resultComments = $this->processComments($block, $page, $item, 'faqFormBlock', 'faqListBlock')) {
             foreach ([

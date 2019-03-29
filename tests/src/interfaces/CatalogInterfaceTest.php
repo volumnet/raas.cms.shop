@@ -597,6 +597,9 @@ class CatalogInterfaceTest extends BaseDBTest
 
         $this->assertEquals(7, $result['commentFormBlock']->id);
         $this->assertEquals(13, $result['commentsListBlock']->id);
+        $this->assertCount(3, $result['comments']);
+        $this->assertEquals('Клиент-ориентированный подход', $result['comments'][0]->name);
+        $this->assertContains('class="features-main-item', $result['commentsListText']);
     }
 
 
@@ -719,7 +722,7 @@ class CatalogInterfaceTest extends BaseDBTest
         $form->material_type = 1;
         $form->commit();
         $block = Block::spawn(34);
-        $block->params = 'commentFormBlock=7&commentsListBlock=13&metaTemplates=template';
+        $block->params = 'metaTemplates=template&withChildrenGoods=1&commentFormBlock=52&commentsListBlock=51&faqFormBlock=53&faqListBlock=50';
         $page = new Page(18);
         $page->initialURL = '/catalog/category1/category11/category111/tovar_3/';
         $page->parent->meta_title_template = 'Купить {{name}}';
@@ -736,6 +739,19 @@ class CatalogInterfaceTest extends BaseDBTest
         $this->assertEquals($item, $result['Item']);
         $this->assertEquals(11, $result['prev']->id);
         $this->assertEquals(13, $result['next']->id);
+
+        $this->assertEquals(52, $result['commentFormBlock']->id);
+        $this->assertEquals(51, $result['commentsListBlock']->id);
+        $this->assertCount(3, $result['comments']);
+        $this->assertEquals('Отзыв 1', $result['comments'][0]->name);
+        $this->assertContains('class="goods-reviews', $result['commentsListText']);
+        $this->assertEquals(2, $result['rating']);
+        $this->assertEquals(53, $result['faqFormBlock']->id);
+        $this->assertEquals(50, $result['faqListBlock']->id);
+        $this->assertCount(3, $result['faq']);
+        $this->assertEquals('Вопрос 1', $result['faq'][0]->name);
+        $this->assertContains('class="goods-faq', $result['faqListText']);
+
         $this->assertEquals('Купить Товар 3', $page->meta_title);
         $this->assertEquals(['visited' => [12]], $interface->session);
     }
