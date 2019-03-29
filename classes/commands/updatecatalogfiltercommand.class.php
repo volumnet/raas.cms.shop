@@ -54,6 +54,7 @@ class UpdateCatalogFilterCommand extends LockCommand
             $this->lock();
             $catalogFilter->build();
             $catalogFilter->save();
+            Package::i()->clearCache(true);
             $this->controller->doLog('Completed');
         }
         $this->unlock();
