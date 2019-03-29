@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\LockCommand;
+use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Type;
