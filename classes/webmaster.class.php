@@ -567,6 +567,7 @@ class Webmaster extends CMSWebmaster
                         $this->resourcesDir . '/' . $val,
                         $Item->fields['files']
                     );
+
                     $Item->fields['files']->addValue(json_encode([
                         'vis' => 1,
                         'name' => '',
