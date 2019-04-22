@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<data xmlns:i="urn:1C.ru:commerceml_2" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <materials>
+    <Material>
+      <id>b323ca07-96e9-11e8-9a9f-6cf04909dac2</id>
+      <fields>
+        <field urn="price">104</field>
+        <field urn="available">0</field>
+      </fields>
+    </Material>
+    <Material>
+      <id>b323ca0b-96e9-11e8-9a9f-6cf04909dac2</id>
+      <fields>
+        <field urn="price">154</field>
+        <field urn="available">0</field>
+      </fields>
+    </Material>
+    <Material>
+      <id>b323ca16-96e9-11e8-9a9f-6cf04909dac2</id>
+      <fields>
+        <field urn="price">352</field>
+        <field urn="available">0</field>
+      </fields>
+    </Material>
+    <Material>
+      <id>b323ca17-96e9-11e8-9a9f-6cf04909dac2</id>
+      <fields>
+        <field urn="price">252</field>
+        <field urn="available">0</field>
+      </fields>
+    </Material>
+    <Material>
+      <id>b323ca94-96e9-11e8-9a9f-6cf04909dac2</id>
+      <fields>
+        <field urn="price">1067</field>
+        <field urn="available">0</field>
+      </fields>
+    </Material>
+    <Material>
+      <id>b323ca95-96e9-11e8-9a9f-6cf04909dac2</id>
+      <fields>
+        <field urn="price">299</field>
+        <field urn="available">0</field>
+      </fields>
+    </Material>
+    <Material>
+      <id>d6bb8a12-d694-11e8-9aa9-6cf04909dac2</id>
+      <fields>
+        <field urn="price">0</field>
+        <field urn="available">0</field>
+      </fields>
+    </Material>
+  </materials>
+</data>

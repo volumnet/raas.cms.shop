@@ -96,7 +96,13 @@ if ($_GET['AJAX']) {
             </tbody>
           </table>
         </div>
-        <?php if ($Form->id) { ?>
+        <?php if ($Form->id) {
+            foreach ($Form->fields as $fieldUrn => $field) {
+                if (!$DATA[$fieldUrn] && ($userVal = Controller_Frontend::i()->user->{$fieldUrn})) {
+                    $DATA[$fieldUrn] = $userVal;
+                }
+            }
+            ?>
             <div class="form-horizontal">
               <?php include Package::i()->resourcesDir . '/form2.inc.php'?>
               <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>
@@ -155,6 +161,14 @@ if ($_GET['AJAX']) {
       </form>
     </div>
     <script src="/js/cart.js"></script>
+<?php } elseif ($localError) { ?>
+  <div class="alert alert-danger">
+    <ul>
+      <?php foreach ((array)$localError as $key => $val) { ?>
+          <li><?php echo htmlspecialchars($val)?></li>
+      <?php } ?>
+    </ul>
+  </div>
 <?php
 } else {
     if ($Form->id) {

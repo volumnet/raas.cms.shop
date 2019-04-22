@@ -5,7 +5,7 @@ class PriceLoader_Column extends \SOME\SOME
 {
     protected static $tablename = 'cms_shop_priceloaders_columns';
     protected static $defaultOrderBy = "priority";
-    protected static $cognizableVars = array('Callback', 'CallbackDownload');
+    protected static $cognizableVars = array('Callback', 'CallbackDownload', 'isNative');
     protected static $references = array(
         'Parent' => array('FK' => 'pid', 'classname' => 'RAAS\\CMS\\Shop\\PriceLoader', 'cascade' => true),
         'Field' => array('FK' => 'fid', 'classname' => 'RAAS\\CMS\\Material_Field', 'cascade' => true),
@@ -28,5 +28,15 @@ class PriceLoader_Column extends \SOME\SOME
             $f = $this->callback_download;
             return function($x, $row) use ($f, $column) { return eval($f); };
         }
+    }
+
+
+    /**
+     * Нативное ли поле
+     * @return bool
+     */
+    public function _isNative()
+    {
+        return (!$this->Field->id && $this->fid);
     }
 }

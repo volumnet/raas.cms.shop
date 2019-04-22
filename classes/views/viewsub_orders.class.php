@@ -40,6 +40,24 @@ class ViewSub_Orders extends \RAAS\Abstract_Sub_View
     }
 
 
+    /**
+     * Перенос товаров в другой заказ
+     * @param array $IN Входные данные
+     */
+    public function moveOrderGoods(array $IN = array())
+    {
+        $this->assignVars($IN);
+        $this->title = $IN['Form']->caption;
+        $this->path[] = array('name' => $this->_('ORDERS'), 'href' => $this->url);
+        $this->path[] = array('name' => $IN['Item']->parent->name, 'href' => $this->url . '&id=' . $IN['Item']->pid);
+        $this->path[] = array('name' => sprintf($this->_('ORDER_N'), $IN['Item']->id), 'href' => $this->url . '&action=edit&id=' . $IN['Item']->id);
+        // $this->js[] = $this->publicURL . '/field.inc.js';
+        // $this->js[] = $this->publicURL . '/edit_order.js';
+        // $this->contextmenu = $this->getOrderContextMenu($IN['Item']);
+        $this->template = $IN['Form']->template;
+    }
+
+
     public function getOrderContextMenu(Order $Item)
     {
         $arr = array();

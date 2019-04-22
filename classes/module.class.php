@@ -15,27 +15,27 @@ class Module extends \RAAS\Module
     {
         switch ($var) {
             case 'formTemplateFile':
-                return $this->resourcesDir . '/form_fields.php';
+                return $this->resourcesDir . '/interfaces/form_notification.php';
                 break;
             case 'stdFormTemplate':
                 $text = file_get_contents($this->formTemplateFile);
                 return $text;
             case 'stdPriceLoaderInterfaceFile':
-                return $this->resourcesDir . '/priceloader_interface.php';
+                return $this->resourcesDir . '/interfaces/priceloader_interface.php';
                 break;
             case 'stdPriceLoaderInterface':
                 $text = file_get_contents($this->stdPriceLoaderInterfaceFile);
                 return $text;
                 break;
             case 'stdImageLoaderInterfaceFile':
-                return $this->resourcesDir . '/imageloader_interface.php';
+                return $this->resourcesDir . '/interfaces/imageloader_interface.php';
                 break;
             case 'stdImageLoaderInterface':
                 $text = file_get_contents($this->stdImageLoaderInterfaceFile);
                 return $text;
                 break;
             case 'stdCartInterfaceFile':
-                return $this->resourcesDir . '/cart_interface.php';
+                return $this->resourcesDir . '/interfaces/cart_interface.php';
                 break;
             case 'stdCartInterface':
                 $text = file_get_contents($this->stdCartInterfaceFile);
@@ -89,6 +89,9 @@ class Module extends \RAAS\Module
         }
         if (isset($this->controller->nav['status_id']) && ((string)$this->controller->nav['status_id'] !== '')) {
             $SQL_query .= " AND tOr.status_id = " . (int)$this->controller->nav['status_id'];
+        }
+        if (isset($this->controller->nav['paid']) && ($paid = $this->controller->nav['paid'])) {
+            $SQL_query .= " AND " . ($paid > 0 ? "" : "NOT") . " tOr.paid";
         }
         if (isset($this->controller->nav['from']) && $this->controller->nav['from']) {
             $t = strtotime($this->controller->nav['from']);

@@ -47,6 +47,9 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
             case 'edit':
                 $this->edit();
                 break;
+            case 'move_order_goods':
+                $this->moveOrderGoods();
+                break;
             default:
                 $this->orders();
                 break;
@@ -85,6 +88,42 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
         }
         $Form = new EditOrderForm(array('Item' => $Item, 'Parent' => $Parent));
         $this->view->edit($Form->process());
+    }
+
+
+    /**
+     * Перенос товаров в новый заказ
+     */
+    protected function moveOrderGoods()
+    {
+        $order =  new Order($_GET['order_id']);
+        $goods = [];
+        $idsMetas = [];
+        if ($_GET['id'] == 'all') {
+            $goods = $order->items;
+        } else {
+            $idsMetas = array_map(function ($x) {
+                $y = explode('_', $x, 2);
+                $result = ['id' => (int)$y[0], 'meta' => trim($y[1])];
+                return $result;
+            }, (array)$_GET['id']);
+            foreach ($order->items as $cartItem) {
+                foreach ($idsMetas as $idMeta) {
+                    if (($cartItem->id == $idMeta['id']) && ($cartItem->meta == $idMeta['meta'])) {
+                        $goods[] = $cartItem;
+                    }
+                }
+            }
+        }
+        if (!Module::i()->registryGet('allow_order_edit') || !$order->id || !$goods) {
+            new Redirector($this->url);
+        }
+        $form = new MoveOrderGoodsForm(array(
+            'order' => $order,
+            'goods' => $goods,
+            'new' => (bool)$_GET['new']
+        ));
+        $this->view->moveOrderGoods(array_merge($form->process(), array('Item' => $order)));
     }
 
 
