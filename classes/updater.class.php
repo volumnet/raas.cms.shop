@@ -12,6 +12,7 @@ class Updater extends \RAAS\Updater
         $this->update20150511();
         $this->update20151129();
         $this->update20160119();
+        $this->update20180530();
     }
 
 
@@ -79,5 +80,13 @@ class Updater extends \RAAS\Updater
                             ADD INDEX (priority)";
             $this->SQL->query($SQL_query);
         }
+    }
+
+
+    public function update20180530()
+    {
+        $sqlQuery = "ALTER TABLE " . \SOME\SOME::_dbprefix() . "cms_shop_orders_goods
+                    CHANGE `meta` `meta` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Meta data'; ";
+        $this->SQL->query($sqlQuery);
     }
 }
