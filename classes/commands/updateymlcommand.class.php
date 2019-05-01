@@ -16,11 +16,13 @@ class UpdateYMLCommand extends LockCommand
 {
     /**
      * Выполнение команды
-     * @param string|null $ymlPageURL URN типа материалов кэша
-     * @param int|null $lockFileExpiration Время, через которое блокировка становится неактуальной, в секундах
+     * @param string|null $ymlPageURL URL страницы Яндекс.Маркета
+     * @param string $outputFile Файл для вывода
      * @param bool $https Включен ли HTTPS
-     * @param bool $forceUpdate Принудительно выполнить обновление, даже если материалы не были обновлены
-     * @param bool $forceLockUpdate Принудительно выполнить обновление, даже если есть параллельный процесс
+     * @param bool $forceUpdate Принудительно выполнить обновление,
+     *                          даже если материалы не были обновлены
+     * @param bool $forceLockUpdate Принудительно выполнить обновление,
+     *                              даже если есть параллельный процесс
      * @param int $limit Лимит обновляемых товаров (для отладки)
      */
     public function process(
@@ -45,7 +47,10 @@ class UpdateYMLCommand extends LockCommand
                       . " WHERE 1";
             $lastModifiedPageTimestamp = Material::_SQL()->getvalue($sqlQuery);
             if (is_file($outputFile)) {
-                if (filemtime($outputFile) >= max($lastModifiedMaterialTimestamp, $lastModifiedPageTimestamp)) {
+                if (filemtime($outputFile) >= max(
+                    $lastModifiedMaterialTimestamp,
+                    $lastModifiedPageTimestamp
+                )) {
                     $this->controller->doLog('Data is actual');
                     return;
                 }
@@ -78,10 +83,10 @@ class UpdateYMLCommand extends LockCommand
                 );
             }
         );
-        $blocks = Block_YML::getSet(array(
+        $blocks = Block_YML::getSet([
             'where' => 'block_type = "' . Block_YML::_SQL()->real_escape_string(Block_YML::class) . '"',
             'orderBy' => 'id'
-        ));
+        ]);
         foreach ($blocks as $block) {
             $page = $block->parent;
             if ($page->url == $ymlPageURL) {
@@ -94,7 +99,16 @@ class UpdateYMLCommand extends LockCommand
         }
         $_SERVER['HTTP_HOST'] = parse_url($page->domain, PHP_URL_HOST);
         if ($page->id && $block) {
-            $interface = new YMLInterface($block, $page, array(), array(), array(), array(), $_SERVER, $limit);
+            $interface = new YMLInterface(
+                $block,
+                $page,
+                [],
+                [],
+                [],
+                [],
+                $_SERVER,
+                $limit
+            );
             $text = $interface->process(false, null, true);
             file_put_contents($outputFile, $text);
         } else {
