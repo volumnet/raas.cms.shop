@@ -87,9 +87,11 @@ class Updater extends \RAAS\Updater
 
     public function update20180530()
     {
-        $sqlQuery = "ALTER TABLE " . \SOME\SOME::_dbprefix() . "cms_shop_orders_goods
-                    CHANGE `meta` `meta` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Meta data'; ";
-        $this->SQL->query($sqlQuery);
+        if (in_array(SOME::_dbprefix() . "cms_shop_orders_goods", $this->tables)) {
+            $sqlQuery = "ALTER TABLE " . \SOME\SOME::_dbprefix() . "cms_shop_orders_goods
+                        CHANGE `meta` `meta` VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Meta data'; ";
+            $this->SQL->query($sqlQuery);
+        }
     }
 
 
