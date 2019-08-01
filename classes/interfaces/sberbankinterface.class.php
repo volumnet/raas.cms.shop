@@ -484,20 +484,20 @@ class SberbankInterface extends EPayInterface
             'password' => $block->epay_pass1,
             'orderId' => $get['orderId'] ?: $session['sberbankOrderId'],
         );
-        $json = $this->exec('getOrderStatus', $requestData, $block->isTest);
+        $json = $this->exec('getOrderStatus', $requestData, $block->epay_test);
 
         if (!$json) {
             $errorText = 'Не удалось получить результат запроса состояния заказа';
             throw new Exception($errorText);
-        } elseif ($json['ErrorCode']) {
+        } elseif ($json['errorCode']) {
             $errorText = 'В процессе оплаты заказа'
                        . (
                             $json['OrderNumber'] ?
                             ' #' . (int)$json['OrderNumber'] :
                             ''
                         )
-                       . ' возникла ошибка: (' . $json['ErrorCode'] . ') '
-                       . $json['ErrorMessage'];
+                       . ' возникла ошибка: (' . $json['errorCode'] . ') '
+                       . $json['errorMessage'];
             if ($json['OrderNumber']) {
                 $order = new Order((int)$json['OrderNumber']);
                 $history = new Order_History();
@@ -509,8 +509,28 @@ class SberbankInterface extends EPayInterface
                 $history->description = $errorText;
                 $history->commit();
             }
+            if ($block->epay_test) {
+                file_put_contents(
+                    'sberbank.log',
+                    date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
+                    var_export($requestData, true) . "\n" .
+                    var_export($json, true) . "\n" .
+                    'Error: ' . $errorText,
+                    FILE_APPEND
+                );
+            }
             throw new Exception($errorText);
         } elseif (!$json['OrderNumber'] || !$json['OrderStatus']) {
+            if ($block->epay_test) {
+                file_put_contents(
+                    'sberbank.log',
+                    date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
+                    var_export($requestData, true) . "\n" .
+                    var_export($json, true) . "\n" .
+                    'Error: Не удалось получить адрес для оплаты',
+                    FILE_APPEND
+                );
+            }
             throw new Exception('Не удалось получить адрес для оплаты');
         }
 
