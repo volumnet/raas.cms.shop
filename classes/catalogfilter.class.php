@@ -369,7 +369,7 @@ class CatalogFilter
             $this->filter
         );
         // Получим список товаров в данной категории (без учета фильтра)
-        $this->categoryGoodsIds = $this->propsMapping['pages_ids'][$catalog->id];
+        $this->categoryGoodsIds = (array)$this->propsMapping['pages_ids'][$catalog->id];
 
         // Отфильтруем $this->propsMapping, оставив только те товары, которые есть
         // в данной категории ($this->categoryGoodsIds), попутно уберем из него
@@ -674,7 +674,7 @@ class CatalogFilter
         $filteredMapping = $propsMapping;
         unset($filteredMapping['pages_ids']);
         if ($catalogId) {
-            $catalogGoodsIds = $propsMapping['pages_ids'][$catalogId];
+            $catalogGoodsIds = (array)$propsMapping['pages_ids'][$catalogId];
             // $catalogGoodsIdsFlipped = array_flip($catalogGoodsIds);
             foreach ($filteredMapping as $propVar => $propValues) {
                 $filteredMapping[$propVar] = array_map(
