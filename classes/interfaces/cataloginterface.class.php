@@ -18,6 +18,11 @@ use RAAS\CMS\Page;
  */
 class CatalogInterface extends MaterialInterface
 {
+    /**
+     * Класс фильтра каталога
+     */
+    const FILTER_CLASS = CatalogFilter::class;
+
     public function process()
     {
         $this->setCatalogFilter($this->block, $this->page, $this->get);
@@ -602,7 +607,8 @@ class CatalogInterface extends MaterialInterface
             $withChildrenGoods = isset($blockParams['withChildrenGoods'])
                                ? (bool)$blockParams['withChildrenGoods']
                                : false;
-            $catalogFilter = CatalogFilter::loadOrBuild(
+            $classname = static::FILTER_CLASS;
+            $catalogFilter = $classname::loadOrBuild(
                 $block->Material_Type,
                 $withChildrenGoods,
                 []
