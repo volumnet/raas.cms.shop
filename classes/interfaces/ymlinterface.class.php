@@ -32,9 +32,25 @@ class YMLInterface extends AbstractInterface
      * @param array $server Поля $_SERVER параметров
      * @param int $limit Ограничение по товарам (для отладки)
      */
-    public function __construct(Block_YML $block, Page $page = null, array $get = array(), array $post = array(), array $cookie = array(), array $session = array(), array $server = array(), $limit = 0)
-    {
-        parent::__construct($block, $page, $get, $post, $cookie, $session, $server);
+    public function __construct(
+        Block_YML $block,
+        Page $page = null,
+        array $get = [],
+        array $post = [],
+        array $cookie = [],
+        array $session = [],
+        array $server = [],
+        $limit = 0
+    ) {
+        parent::__construct(
+            $block,
+            $page,
+            $get,
+            $post,
+            $cookie,
+            $session,
+            $server
+        );
         $this->limit = $limit;
     }
 
@@ -42,12 +58,17 @@ class YMLInterface extends AbstractInterface
     /**
      * Выводит данные в формате Яндекс.Маркет XML
      * @param bool $appendHeader Добавить заголовок типа страницы
-     * @param int|null $maxExecutionTime Установить время выполнения интерфейса в секундах
-     * @param bool $return Вернуть результат как строку (если false, выводит в stdOut)
+     * @param int|null $maxExecutionTime Установить время выполнения интерфейса
+     *                                   в секундах
+     * @param bool $return Вернуть результат как строку
+     *                     (если false, выводит в stdOut)
      * @return string|null Возвращает текст, если установлен $return
      */
-    public function process($appendHeader = false, $maxExecutionTime = null, $return = false)
-    {
+    public function process(
+        $appendHeader = false,
+        $maxExecutionTime = null,
+        $return = false
+    ) {
 
         if ($maxExecutionTime) {
             ini_set('max_execution_time', (int)$maxExecutionTime);
@@ -55,8 +76,8 @@ class YMLInterface extends AbstractInterface
         if ($appendHeader) {
             header('Content-Type: application/xml');
         }
-        $headerText = '<' . '?xml version="1.0" encoding="UTF-8"?' . '>' . "\n" .
-                      '<yml_catalog date="' . date('Y-m-d H:i') . '">';
+        $headerText = '<' . '?xml version="1.0" encoding="UTF-8"?' . '>' . "\n"
+                    . '<yml_catalog date="' . date('Y-m-d H:i') . '">';
         $footerText = '</yml_catalog>';
         $memoryText = $this->getMemoryUsageBlock();
         if ($return) {
@@ -76,7 +97,8 @@ class YMLInterface extends AbstractInterface
     /**
      * Выводит блок <shop>
      * @param Block_YML $block Блок для обработки
-     * @param bool $return Вернуть результат как строку (если false, выводит в stdOut)
+     * @param bool $return Вернуть результат как строку
+     *                     (если false, выводит в stdOut)
      */
     public function outputShopBlock(Block_YML $block, $return = false)
     {
@@ -84,14 +106,19 @@ class YMLInterface extends AbstractInterface
         $footerText = '</shop>';
         $shopMetaText = $this->getShopBlockMeta($block);
         if ($return) {
-            $text = $headerText
-                  . $shopMetaText
-                  . $this->outputOffersBlock($block->catalog_cats_ids, $block->types, true)
-                  . $footerText;
+            $text = $headerText . $shopMetaText . $this->outputOffersBlock(
+                $block->catalog_cats_ids,
+                $block->types,
+                true
+            ) . $footerText;
             return $text;
         } else {
             echo $headerText . $shopMetaText;
-            $this->outputOffersBlock($block->catalog_cats_ids, $block->types, false);
+            $this->outputOffersBlock(
+                $block->catalog_cats_ids,
+                $block->types,
+                false
+            );
             echo $footerText;
         }
     }
@@ -103,7 +130,9 @@ class YMLInterface extends AbstractInterface
      */
     public function getMemoryUsageBlock()
     {
-        $text = '<!-- Memory used: ' . number_format(memory_get_peak_usage(), 0, '.', ' ') . ' -->';
+        $text = '<!-- Memory used: '
+              . number_format(memory_get_peak_usage(), 0, '.', ' ')
+              . ' -->';
         return $text;
     }
 
@@ -139,7 +168,9 @@ class YMLInterface extends AbstractInterface
     {
         $text = '';
         if (isset($block->config['shop_name'])) {
-            $text .= '<name>' . htmlspecialchars(trim($block->config['shop_name'])) . '</name>';
+            $text .= '<name>'
+                  .     htmlspecialchars(trim($block->config['shop_name']))
+                  .  '</name>';
         }
         return $text;
     }
@@ -188,7 +219,11 @@ class YMLInterface extends AbstractInterface
         $text .= '<currencies>'
               .    '<currency id="' . htmlspecialchars($block->config['default_currency']) . '" rate="1" />';
         foreach ((array)$block->currencies as $key => $row) {
-            $text .= $this->getShopCurrencyBlock($key, $row['rate'], isset($row['plus']) ? $row['plus'] : null);
+            $text .= $this->getShopCurrencyBlock(
+                $key,
+                $row['rate'],
+                isset($row['plus']) ? $row['plus'] : null
+            );
         }
         $text .= '</currencies>';
         return $text;
@@ -204,14 +239,14 @@ class YMLInterface extends AbstractInterface
      */
     public function getShopCurrencyBlock($currencyId, $rate, $plus = null)
     {
-        $attrs = array(
+        $attrs = [
             'id' => $currencyId,
             'rate' => $this->canonizeFloat($rate),
-        );
+        ];
         if ($plus !== null) {
             $attrs['plus'] = trim(number_format((float)$plus, 2, '.', ''));
         }
-        $temp = array();
+        $temp = [];
         foreach ($attrs as $key => $val) {
             $temp[] = $key . '="' . htmlspecialchars($val) . '"';
         }
@@ -243,15 +278,15 @@ class YMLInterface extends AbstractInterface
      * @param Page $page Категория
      * @param array<int> $catalogCatsIds ID# всех категорий YML-блока
      */
-    public function getShopCategoryBlock(Page $page, array $catalogCatsIds = array())
+    public function getShopCategoryBlock(Page $page, array $catalogCatsIds = [])
     {
-        $attrs = array(
+        $attrs = [
             'id' => $page->id,
-        );
+        ];
         if ($page->pid && in_array($page->pid, $catalogCatsIds)) {
             $attrs['parentId'] = (int)$page->pid;
         }
-        $temp = array();
+        $temp = [];
         foreach ($attrs as $key => $val) {
             $temp[] = $key . '="' . htmlspecialchars($val) . '"';
         }
@@ -271,8 +306,9 @@ class YMLInterface extends AbstractInterface
     {
         $text = '';
         if (isset($block->config['local_delivery_cost'])) {
+            $val = $this->canonizeFloat($block->config['local_delivery_cost']);
             $text .= '<local_delivery_cost>'
-                  .     htmlspecialchars($this->canonizeFloat($block->config['local_delivery_cost']))
+                  .     htmlspecialchars($val)
                   .  '</local_delivery_cost>';
         }
         return $text;
@@ -291,7 +327,9 @@ class YMLInterface extends AbstractInterface
     {
         $text = '';
         if (isset($block->config[$key])) {
-            $text .= '<' . $key . '>' . htmlspecialchars(trim($block->config[$key])) . '</' . $key . '>';
+            $text .= '<' . $key . '>'
+                  .     htmlspecialchars(trim($block->config[$key]))
+                  .  '</' . $key . '>';
         }
         return $text;
     }
@@ -299,12 +337,18 @@ class YMLInterface extends AbstractInterface
 
     /**
      * Выводит блок предложений <offers>
-     * @param array<int> $catalogCatsIds ID# страниц, на которые распространяется действие блока
-     * @param array<Material_Type> $types Массив типов материалов, покрываемых блоком, с доп. полями от блока
-     * @param bool $return Вернуть результат как строку (если false, выводит в stdOut)
+     * @param array<int> $catalogCatsIds ID# страниц, на которые
+     *                                   распространяется действие блока
+     * @param array<Material_Type> $types Массив типов материалов, покрываемых
+     *                                    блоком, с доп. полями от блока
+     * @param bool $return Вернуть результат как строку
+     *                     (если false, выводит в stdOut)
      */
-    public function outputOffersBlock(array $catalogCatsIds = array(), array $types = array(), $return = false)
-    {
+    public function outputOffersBlock(
+        array $catalogCatsIds = [],
+        array $types = [],
+        $return = false
+    ) {
         $headerText = '<offers>';
         $footerText = '</offers>';
         $text = '';
@@ -317,13 +361,19 @@ class YMLInterface extends AbstractInterface
             $ignoredFields = $this->getMTypeIgnoredFields($mtype);
             $stdFieldsNames = $this->getMTypeStdFields($mtype);
             $sqlResult = $this->getMaterialsCursor($mtype, $catalogCatsIds);
-            EventProcessor::emit('starttype', $mtype, array(
+            EventProcessor::emit('starttype', $mtype, [
                 'size' => $sqlResult->rowCount(),
-            ));
+            ]);
             $i = 0;
             foreach ($sqlResult as $sqlRow) {
                 $material = new Material($sqlRow);
-                $offerBlock = $this->getOfferBlock($material, $mtype, $catalogCatsIds, $stdFieldsNames, $ignoredFields);
+                $offerBlock = $this->getOfferBlock(
+                    $material,
+                    $mtype,
+                    $catalogCatsIds,
+                    $stdFieldsNames,
+                    $ignoredFields
+                );
                 if ($return) {
                     $text .= $offerBlock;
                 } else {
@@ -353,13 +403,16 @@ class YMLInterface extends AbstractInterface
      */
     public function getMTypeIgnoredFields(Material_Type $mtype)
     {
-        $ignoredFields = array();
+        $ignoredFields = [];
         foreach ($mtype->settings['fields'] as $fieldArr) {
-            $ignoredFields[] = ($fieldArr['field']->id ?: $fieldArr['field_id']);
+            $ignoredFields[] = $fieldArr['field']->id ?: $fieldArr['field_id'];
         }
-        if ($mtype->settings['params'] || $mtype->settings['param_exceptions']) {
+        if ($mtype->settings['params'] ||
+            $mtype->settings['param_exceptions']
+        ) {
             foreach ($mtype->settings['params'] as $paramArr) {
-                $ignoredFields[] = ($paramArr['field']->id ?: $paramArr['field_id']);
+                $ignoredFields[] =  $paramArr['field']->id
+                                 ?: $paramArr['field_id'];
             }
             if ($mtype->settings['param_exceptions']) {
                 foreach ((array)$mtype->settings['ignored'] as $ignored) {
@@ -397,15 +450,20 @@ class YMLInterface extends AbstractInterface
     /**
      * Получает указатель на список товаров по типу материалов
      * @param Material_Type $mtype Тип материала
-     * @param array<int> $catalogCatsIds ID# страниц, на которые распространяется действие блока
+     * @param array<int> $catalogCatsIds ID# страниц, на которые
+     *                                   распространяется действие блока
      * @return PDOStatement
      */
-    public function getMaterialsCursor(Material_Type $mtype, array $catalogCatsIds = array())
-    {
+    public function getMaterialsCursor(
+        Material_Type $mtype,
+        array $catalogCatsIds = []
+    ) {
         $sqlQuery = "SELECT tM.*
                        FROM " . Material::_tablename() . " AS tM ";
         if (!$mtype->global_type) {
-            $sqlQuery .= " JOIN " . Material::_dbprefix() . "cms_materials_pages_assoc AS tMPA ON tMPA.id = tM.id";
+            $sqlQuery .= " JOIN " . Material::_dbprefix() . "cms_materials_pages_assoc
+                             AS tMPA
+                             ON tMPA.id = tM.id";
         }
         $sqlQuery .= " WHERE tM.vis
                          AND tM.pid IN (" . implode(", ", $mtype->selfAndChildrenIds) . ") ";
@@ -421,19 +479,39 @@ class YMLInterface extends AbstractInterface
     /**
      * Получает блок предложения <offer>
      * @param Material $material Материал, для которого строится предложение
-     * @param Material_Type $mtype Тип материала с дополнительными полями от YML-блока
-     * @param array<int> $catalogCatsIds ID# страниц, на которые распространяется действие блока
-     * @param array<string> $stdFieldsNames Набор стандартных полей для Яндекс.Маркета
+     * @param Material_Type $mtype Тип материала с дополнительными полями
+     *                             от YML-блока
+     * @param array<int> $catalogCatsIds ID# страниц, на которые
+     *                                   распространяется действие блока
+     * @param array<string> $stdFieldsNames Набор стандартных полей
+     *                                      для Яндекс.Маркета
      * @param array<string> $ignoredFields Игнорируемые поля
      * @return string
      */
-    public function getOfferBlock(Material $material, Material_Type $mtype, array $catalogCatsIds = array(), array $stdFieldsNames = array(), array $ignoredFields = array())
-    {
+    public function getOfferBlock(
+        Material $material,
+        Material_Type $mtype,
+        array $catalogCatsIds = [],
+        array $stdFieldsNames = [],
+        array $ignoredFields = []
+    ) {
         $text = '';
-        $attrsStdFields = array_intersect($stdFieldsNames, array('available', 'bid', 'cbid'));
+        $attrsStdFields = array_intersect(
+            $stdFieldsNames,
+            ['available', 'bid', 'cbid']
+        );
         $offerAttrs = $this->getOfferAttrs($material, $mtype, $attrsStdFields);
-        $blocksStdFields = array_diff($stdFieldsNames, array('available', 'bid', 'cbid'));
-        $offerTxt = $this->getOfferParamsBlocks($material, $mtype, $blocksStdFields, $ignoredFields, $catalogCatsIds);
+        $blocksStdFields = array_diff(
+            $stdFieldsNames,
+            ['available', 'bid', 'cbid']
+        );
+        $offerTxt = $this->getOfferParamsBlocks(
+            $material,
+            $mtype,
+            $blocksStdFields,
+            $ignoredFields,
+            $catalogCatsIds
+        );
         $text = '<offer' . $offerAttrs . '>' . $offerTxt . '</offer>';
         EventProcessor::emit('', $material);
         return $text;
@@ -443,14 +521,21 @@ class YMLInterface extends AbstractInterface
     /**
      * Получить атрибуты для блока предложения
      * @param Material $material Материал, для которого строится предложение
-     * @param Material_Type $mtype Тип материала с дополнительными полями от YML-блока
-     * @param array<string> $attrsStdFields Набор стандартных полей для отображения атрибутами
+     * @param Material_Type $mtype Тип материала с дополнительными полями
+     *                             от YML-блока
+     * @param array<string> $attrsStdFields Набор стандартных полей
+     *                                      для отображения атрибутами
      */
-    public function getOfferAttrs(Material $material, Material_Type $mtype, array $attrsStdFields = array())
-    {
+    public function getOfferAttrs(
+        Material $material,
+        Material_Type $mtype,
+        array $attrsStdFields = []
+    ) {
         $offerAttrs = ' id="' . (int)$material->id . '"';
         if ($mtype->settings['type']) {
-            $offerAttrs .= ' type="' . htmlspecialchars($mtype->settings['type']) . '"';
+            $offerAttrs .= ' type="'
+                        .      htmlspecialchars($mtype->settings['type'])
+                        .  '"';
         }
         foreach ($attrsStdFields as $key) {
             $offerAttrs .= $this->getOfferCustomFieldBlock(
@@ -468,13 +553,20 @@ class YMLInterface extends AbstractInterface
     /**
      * Получить блочные характеристики для блока предложения
      * @param Material $material Материал, для которого строится предложение
-     * @param Material_Type $mtype Тип материала с дополнительными полями от YML-блока
+     * @param Material_Type $mtype Тип материала с дополнительными полями
+     *                             от YML-блока
      * @param array<string> $ignoredFields Игнорируемые поля
-     * @param array<string> $blocksStdFields Набор стандартных полей для отображения блоками
+     * @param array<string> $blocksStdFields Набор стандартных полей
+     *                                       для отображения блоками
      * @param array<int> $catalogCatsIds ID# всех категорий YML-блока
      */
-    public function getOfferParamsBlocks(Material $material, Material_Type $mtype, array $blocksStdFields = array(), array $ignoredFields = array(), array $catalogCatsIds = array())
-    {
+    public function getOfferParamsBlocks(
+        Material $material,
+        Material_Type $mtype,
+        array $blocksStdFields = [],
+        array $ignoredFields = [],
+        array $catalogCatsIds = []
+    ) {
         $offerTxt = '';
         foreach ($blocksStdFields as $key) {
             switch ($key) {
@@ -482,10 +574,17 @@ class YMLInterface extends AbstractInterface
                     $offerTxt .= $this->getOfferURLBlock($material);
                     break;
                 case 'categoryId':
-                    $offerTxt .= $this->getOfferCategoriesBlock($material, $mtype->global_type, $catalogCatsIds);
+                    $offerTxt .= $this->getOfferCategoriesBlock(
+                        $material,
+                        $mtype->global_type,
+                        $catalogCatsIds
+                    );
                     break;
                 case 'oldprice':
-                    $offerTxt .= $this->getOfferOldPriceBlock($material, $mtype->settings['fields'][$key]);
+                    $offerTxt .= $this->getOfferOldPriceBlock(
+                        $material,
+                        (array)$mtype->settings['fields'][$key]
+                    );
                     break;
                 default:
                     $offerTxt .= $this->getOfferCustomFieldBlock(
@@ -499,7 +598,9 @@ class YMLInterface extends AbstractInterface
             }
         }
 
-        if ($mtype->settings['params'] || $mtype->settings['param_exceptions']) {
+        if ($mtype->settings['params'] ||
+            $mtype->settings['param_exceptions']
+        ) {
             $params = $this->getMTypeParams($mtype, $ignoredFields);
             foreach ($params as $param) {
                 $offerTxt .= $this->getOfferParamBlock($key, $material, $param);
@@ -516,7 +617,9 @@ class YMLInterface extends AbstractInterface
      */
     public function getOfferURLBlock(Material $material)
     {
-        $text = '<url>' . $this->getCurrentHostURL() . $material->url . '</url>';
+        $text = '<url>'
+              .    $this->getCurrentHostURL() . $material->url
+              . '</url>';
         return $text;
     }
 
@@ -528,8 +631,11 @@ class YMLInterface extends AbstractInterface
      * @param array<int> $catalogCatsIds ID# всех категорий YML-блока
      * @return string
      */
-    public function getOfferCategoriesBlock(Material $material, $isGlobal, array $catalogCatsIds = array())
-    {
+    public function getOfferCategoriesBlock(
+        Material $material,
+        $isGlobal,
+        array $catalogCatsIds = []
+    ) {
         if ($isGlobal) {
             $cats = array_intersect($material->parents_ids, $catalogCatsIds);
             $cats = array_values($cats);
@@ -560,19 +666,22 @@ class YMLInterface extends AbstractInterface
     /**
      * Получает блок старой цены предложения
      * @param Material $material Материал предложения
-     * @param array(
+     * @param [
      *            'field' => Material_Field Привязанное поле типа материала,
-     *            'field_id' => string URN системного поля
-     *                              (используется, когда не задано поле типа материала),
+     *            'field_id' => string URN системного поля (используется,
+     *                                 когда не задано поле типа материала),
      *            'value' => string Значение по умолчанию,
-     *            'callback' => string Текст обработчика поля с текущими переменными,
-     *                              также $x - результирующее значение поля,
-     *                                    $Field - то же что $settings['field']
-     *        ) $settings Настройки поля
+     *            'callback' => string Текст обработчика поля с текущими
+     *                                 переменными,
+     *                                 также $x - результирующее значение поля,
+     *                                 $Field - то же что $settings['field']
+     *        ] $settings Настройки поля
      * @return string
      */
-    public function getOfferOldPriceBlock(Material $material, array $settings = array())
-    {
+    public function getOfferOldPriceBlock(
+        Material $material,
+        array $settings = []
+    ) {
         if (!$settings) {
             return '';
         }
@@ -589,21 +698,27 @@ class YMLInterface extends AbstractInterface
      * Получает блок произвольного поля предложения
      * @param string $key Наименование поля в системе Яндекс.Маркета
      * @param Material $material Материал предложения
-     * @param array(
+     * @param [
      *            'field' => Material_Field Привязанное поле типа материала,
-     *            'field_id' => string URN системного поля
-     *                              (используется, когда не задано поле типа материала),
+     *            'field_id' => string URN системного поля (используется, когда
+     *                                 не задано поле типа материала),
      *            'value' => string Значение по умолчанию,
-     *            'callback' => string Текст обработчика поля с текущими переменными,
-     *                              также $x - результирующее значение поля,
-     *                                    $Field - то же что $settings['field']
-     *        ) $settings Настройки поля
+     *            'callback' => string Текст обработчика поля с текущими
+     *                                 переменными,
+     *                                 также $x - результирующее значение поля,
+     *                                 $Field - то же что $settings['field']
+     *        ] $settings Настройки поля
      * @param bool $asDescription Обработать как описание предложения
      * @param bool $asAttr Вернуть как атрибут (если false, то как блок)
      * @return string
      */
-    public function getOfferCustomFieldBlock($key, Material $material, array $settings = array(), $asDescription = false, $asAttr = false)
-    {
+    public function getOfferCustomFieldBlock(
+        $key,
+        Material $material,
+        array $settings = [],
+        $asDescription = false,
+        $asAttr = false
+    ) {
         if (!$settings) {
             return '';
         }
@@ -631,24 +746,27 @@ class YMLInterface extends AbstractInterface
      * Получает массив настроек параметров по типу материалов
      * @param Material_Type $mtype Тип материала
      * @param array<string> $ignoredFields Игнорируемые поля
-     * @return array<string[] Наименование параметра => array(
+     * @return array<string[] Наименование параметра => [
      *             'name' => string Заголовок параметра
      *             'field' => Material_Field Привязанное поле типа материала,
-     *             'field_id' => string URN системного поля
-     *                               (используется, когда не задано поле типа материала),
+     *             'field_id' => string URN системного поля (используется, когда
+     *                                  не задано поле типа материала),
      *             'value' => string Значение по умолчанию,
-     *             'callback' => string Текст обработчика поля с текущими переменными,
-     *                               также $x - результирующее значение поля,
-     *                                     $Field - то же что $settings['field']
-     *         )>
+     *             'callback' => string Текст обработчика поля с текущими
+     *                                  переменными,
+     *                                  также $x - результирующее значение поля,
+     *                                  $Field - то же что $settings['field']
+     *         ]>
      */
-    public function getMTypeParams(Material_Type $mtype, array $ignoredFields = array())
-    {
+    public function getMTypeParams(
+        Material_Type $mtype,
+        array $ignoredFields = []
+    ) {
         $params = $mtype->settings['params'];
         if ($mtype->settings['param_exceptions']) {
-            foreach (array('name', 'description') as $key) {
+            foreach (['name', 'description'] as $key) {
                 if (!in_array($key, $ignoredFields)) {
-                    $param = array('field_id' => $key, 'auto' => true);
+                    $param = ['field_id' => $key, 'auto' => true];
                     if ($mtype->settings['params_callback']) {
                         $param['params_callback'] = $mtype->settings['params_callback'];
                     }
@@ -657,7 +775,7 @@ class YMLInterface extends AbstractInterface
             }
             foreach ($mtype->fields as $f) {
                 if (!in_array($f->id, $ignoredFields)) {
-                    $param = array('field' => $f, 'auto' => true);
+                    $param = ['field' => $f, 'auto' => true];
                     if ($mtype->settings['params_callback']) {
                         $param['params_callback'] = $mtype->settings['params_callback'];
                     }
@@ -673,20 +791,24 @@ class YMLInterface extends AbstractInterface
      * Получает блок произвольного дополнительного параметра предложения
      * @param string $key Наименование параметра
      * @param Material $material Материал предложения
-     * @param array(
+     * @param [
      *            'name' => string Заголовок параметра
      *            'field' => Material_Field Привязанное поле типа материала,
-     *            'field_id' => string URN системного поля
-     *                              (используется, когда не задано поле типа материала),
+     *            'field_id' => string URN системного поля (используется, когда
+     *                                 не задано поле типа материала),
      *            'value' => string Значение по умолчанию,
-     *            'callback' => string Текст обработчика поля с текущими переменными,
-     *                              также $x - результирующее значение поля,
-     *                                    $Field - то же что $settings['field']
-     *        ) $settings Настройки параметра
+     *            'callback' => string Текст обработчика поля с текущими
+     *                                 переменными,
+     *                                 также $x - результирующее значение поля,
+     *                                 $Field - то же что $settings['field']
+     *        ] $settings Настройки параметра
      * @return string
      */
-    public function getOfferParamBlock($key, Material $material, array $settings = array())
-    {
+    public function getOfferParamBlock(
+        $key,
+        Material $material,
+        array $settings = []
+    ) {
         if (!$settings) {
             return '';
         }
@@ -697,20 +819,30 @@ class YMLInterface extends AbstractInterface
         }
         $paramAttrs = '';
         if ($settings['name']) {
-            $paramAttrs .= ' name="' . htmlspecialchars($settings['name']) . '"';
+            $paramAttrs .= ' name="'
+                        .      htmlspecialchars($settings['name'])
+                        .  '"';
         } elseif ($settings['field']->id) {
-            $paramAttrs .= ' name="' . htmlspecialchars($settings['field']->name) . '"';
+            $paramAttrs .= ' name="'
+                        .      htmlspecialchars($settings['field']->name)
+                        .  '"';
         } elseif ($settings['field_id'] == 'name') {
             $paramAttrs .= ' name="' . htmlspecialchars(NAME) . '"';
         } elseif ($settings['field_id'] == 'description') {
             $paramAttrs .= ' name="' . htmlspecialchars(DESCRIPTION) . '"';
         } else {
-            $paramAttrs .= ' name="' . htmlspecialchars($settings['field_id']) . '"';
+            $paramAttrs .= ' name="'
+                        .      htmlspecialchars($settings['field_id'])
+                        .  '"';
         }
         if ($settings['unit']) {
-            $paramAttrs .= ' unit="' . htmlspecialchars($settings['unit']) . '"';
+            $paramAttrs .= ' unit="'
+                        .      htmlspecialchars($settings['unit'])
+                        .  '"';
         }
-        $text = '<param' . $paramAttrs . '>' . htmlspecialchars($v) . '</param>';
+        $text = '<param' . $paramAttrs . '>'
+              .    htmlspecialchars($v)
+              . '</param>';
         return $text;
     }
 
@@ -719,18 +851,19 @@ class YMLInterface extends AbstractInterface
      * Получает значение поля по его URN в системе Яндекс.Маркета
      * @param Material $Item Материал для обработки
      * @param string $key URN поля в системе Яндекс.Маркета
-     * @param array(
+     * @param [
      *            'field' => Material_Field Привязанное поле типа материала,
-     *            'field_id' => string URN системного поля
-     *                              (используется, когда не задано поле типа материала),
+     *            'field_id' => string URN системного поля (используется, когда
+     *                                 не задано поле типа материала),
      *            'value' => string Значение по умолчанию,
-     *            'callback' => string Текст обработчика поля с текущими переменными,
-     *                              также $x - результирующее значение поля,
-     *                                    $Field - то же что $settings['field']
-     *        ) $settings Настройки поля
+     *            'callback' => string Текст обработчика поля с текущими
+     *                                 переменными,
+     *                                 также $x - результирующее значение поля,
+     *                                 $Field - то же что $settings['field']
+     *        ] $settings Настройки поля
      * @return string;
      */
-    public function getValue(Material $item, $key, array $settings = array())
+    public function getValue(Material $item, $key, array $settings = [])
     {
         $Item = $item;
         $x = $this->getRawValue($item, $settings);
@@ -749,18 +882,19 @@ class YMLInterface extends AbstractInterface
     /**
      * Получает сырое (не обработанное обработчиком) значение поля
      * @param Material $Item Материал для обработки
-     * @param array(
+     * @param [
      *            'field' => Material_Field Привязанное поле типа материала,
-     *            'field_id' => string URN системного поля
-     *                              (используется, когда не задано поле типа материала),
+     *            'field_id' => string URN системного поля (используется, когда
+     *                                 не задано поле типа материала),
      *            'value' => string Значение по умолчанию,
-     *            'callback' => string Текст обработчика поля с текущими переменными,
-     *                              также $x - результирующее значение поля,
-     *                                    $Field - то же что $settings['field']
-     *        ) $settings Настройки поля
+     *            'callback' => string Текст обработчика поля с текущими
+     *                                 переменными,
+     *                                 также $x - результирующее значение поля,
+     *                                 $Field - то же что $settings['field']
+     *        ] $settings Настройки поля
      * @return string|null;
      */
-    public function getRawValue(Material $item, array $settings = array())
+    public function getRawValue(Material $item, array $settings = [])
     {
         $x = null;
         if ($settings['field']->id) {
@@ -786,25 +920,30 @@ class YMLInterface extends AbstractInterface
     /**
      * Получает код обработчика
      * @param string $key URN поля в системе Яндекс.Маркета
-     * @param array(
+     * @param [
      *            'field' => Material_Field Привязанное поле типа материала,
-     *            'field_id' => string URN системного поля
-     *                              (используется, когда не задано поле типа материала),
+     *            'field_id' => string URN системного поля (используется, когда
+     *                                 не задано поле типа материала),
      *            'value' => string Значение по умолчанию,
-     *            'callback' => string Текст обработчика поля с текущими переменными,
-     *                              также $x - результирующее значение поля,
-     *                                    $Field - то же что $settings['field']
-     *        ) $settings Настройки поля
+     *            'callback' => string Текст обработчика поля с текущими
+     *                                 переменными,
+     *                                 также $x - результирующее значение поля,
+     *                                 $Field - то же что $settings['field']
+     *        ] $settings Настройки поля
      * @return string|null
      */
-    public function getCallbackCode($key, array $settings = array())
+    public function getCallbackCode($key, array $settings = [])
     {
         $f = null;
         if (isset($settings['callback']) && $settings['callback']) {
             $f = $settings['callback'];
-        } elseif (isset(Block_YML::$ymlFields[$key]['callback']) && Block_YML::$ymlFields[$key]['callback']) {
+        } elseif (isset(Block_YML::$ymlFields[$key]['callback']) &&
+            Block_YML::$ymlFields[$key]['callback']
+        ) {
             $f = Block_YML::$ymlFields[$key]['callback'];
-        } elseif (isset(Block_YML::$ymlFields[$key]['type']) && (Block_YML::$ymlFields[$key]['type'] == 'number')) {
+        } elseif (isset(Block_YML::$ymlFields[$key]['type']) &&
+            (Block_YML::$ymlFields[$key]['type'] == 'number')
+        ) {
             $f = 'return $this->canonizeFloat($x);';
         }
         return $f;

@@ -26,6 +26,30 @@ class CatalogInterface extends MaterialInterface
     }
 
 
+    /**
+     * Обрабатывает один материал
+     * @param Block_Material $block Блок, для которого применяется интерфейс
+     * @param Page $page Страница, для которой применяется интерфейс
+     * @param Material $item Материал для обработки
+     * @param array $get Поля $_GET параметров
+     * @param array $server Поля $_SERVER параметров
+     * @return [
+     *             'Item' => Material Обрабатываемый материал,
+     *             'prev' ?=> Material Предыдущий материал,
+     *             'next' ?=> Material Следующий материал,
+     *             'commentFormBlock' ?=> Block_Form блок формы комментариев,
+     *             'commentsListBlock' ?=> Block_Material блок списка комментариев,
+     *             'comments' ?=> array<Material> список комментариев
+     *             'commentsListText' ?=> string результат отработки блока
+     *                                    списка комментариев
+     *             'rating' => int Рейтинг товара
+     *             'faqFormBlock' ?=> Block_Form блок формы вопрос-ответ,
+     *             'faqListBlock' ?=> Block_Material блок списка вопросов и ответов,
+     *             'faq' ?=> array<Material> список вопросов и ответов
+     *             'faqListText' ?=> string результат отработки блока
+     *                               списка вопросов и ответов
+     *         ]
+     */
     public function processMaterial(Block_Material $block, Page $page, Material $item, array $get = [], array $server = [])
     {
         $legacy = $this->checkLegacyArbitraryMaterialAddress($block, $page, $item, $server);
@@ -42,8 +66,41 @@ class CatalogInterface extends MaterialInterface
                 $result[$key] = $prevNext[$key];
             }
         }
-        if ($resultComments = $this->processComments($block)) {
-            $result = array_merge($result, $resultComments);
+        if ($resultComments = $this->processComments($block, $page, $item, 'commentFormBlock', 'commentsListBlock')) {
+            foreach ([
+                'commentFormBlock' => 'commentFormBlock',
+                'commentsListBlock' => 'commentsListBlock',
+                'comments' => 'comments',
+                'commentsListText' => 'commentsListText'
+            ] as $keyFrom => $keyTo) {
+                if (isset($resultComments[$keyFrom])) {
+                    $result[$keyTo] = $resultComments[$keyFrom];
+                }
+            }
+            $rating = 0;
+            $ratedReviews = 0;
+            foreach ($result['comments'] as $comment) {
+                if ($r = (int)$comment->rating) {
+                    $rating += $r;
+                    $ratedReviews++;
+                }
+            }
+            if ($ratedReviews) {
+                $rating /= $ratedReviews;
+            }
+            $result['rating'] = $rating;
+        }
+        if ($resultComments = $this->processComments($block, $page, $item, 'faqFormBlock', 'faqListBlock')) {
+            foreach ([
+                'commentFormBlock' => 'faqFormBlock',
+                'commentsListBlock' => 'faqListBlock',
+                'comments' => 'faq',
+                'commentsListText' => 'faqListText'
+            ] as $keyFrom => $keyTo) {
+                if (isset($resultComments[$keyFrom])) {
+                    $result[$keyTo] = $resultComments[$keyFrom];
+                }
+            }
         }
         $this->processVisited($item, $this->session);
         return $result;
@@ -331,32 +388,70 @@ class CatalogInterface extends MaterialInterface
     /**
      * Обрабатывает блоки комментариев к товару
      * @param Block_Material|null $block Блок, для которого применяется интерфейс
+     * @param Page $page Страница, для которой обрабатываются комментарии
+     * @param Material $item Материал, для которого обрабатываются комментарии
+     * @param string $formBlockVar Переменная в доп. параметрах,
+     *                             где задается ID# блока формы комментариев
+     * @param string $listBlockVar Переменная в доп. параметрах,
+     *                             где задается ID# блока списка комментариев
      * @return [
      *             'commentFormBlock' ?=> Block_Form блок формы комментариев,
      *             'commentsListBlock' ?=> Block_Material блок списка комментариев,
+     *             'comments' ?=> array<Material> список комментариев
+     *             'commentsListText' ?=> string результат отработки блока
+     *                                    списка комментариев
      *         ]
      */
-    public function processComments(Block_Material $block)
-    {
+    public function processComments(
+        Block_Material $block,
+        Page $page,
+        Material $item,
+        $formBlockVar = 'commentFormBlock',
+        $listBlockVar = 'commentsListBlock'
+    ) {
         $result = [];
         parse_str(trim($block->params), $blockParams);
-        $materialTypeId = $block->Material_Type->id;
-        if (isset($blockParams['commentFormBlock'])) {
-            $commentFormBlock = Block::spawn($blockParams['commentFormBlock']);
-            if (($commentFormBlock->id == $blockParams['commentFormBlock']) &&
+        if (isset($blockParams[$formBlockVar])) {
+            $commentFormBlock = Block::spawn($blockParams[$formBlockVar]);
+            if (($commentFormBlock->id == $blockParams[$formBlockVar]) &&
                 ($commentFormBlock instanceof Block_Form) &&
                 ($commentFormBlock->Form->Material_Type->id)
             ) {
                 $result['commentFormBlock'] = $commentFormBlock;
             }
         }
-        if (isset($blockParams['commentsListBlock'])) {
-            $commentsListBlock = Block::spawn($blockParams['commentsListBlock']);
-            if (($commentsListBlock->id == $blockParams['commentsListBlock']) &&
+        if (isset($blockParams[$listBlockVar])) {
+            $commentsListBlock = Block::spawn($blockParams[$listBlockVar]);
+            if (($commentsListBlock->id == $blockParams[$listBlockVar]) &&
                 ($commentsListBlock instanceof Block_Material) &&
                 ($commentsListBlock->Material_Type->id)
             ) {
                 $result['commentsListBlock'] = $commentsListBlock;
+
+                $commentsListParams = [
+                    'Page' => $page,
+                    'Block' => $commentsListBlock,
+                    'config' => $commentsListBlock->config,
+                ];
+                $commentsListData = [];
+                if ($commentsListBlock->Interface->id) {
+                    $commentsListData = $commentsListBlock->Interface->process($commentsListParams);
+                }
+                $commentsListData = array_merge($commentsListData, $commentsListParams);
+                $commentsListData['Set'] = array_values(
+                    array_filter(
+                        (array)$commentsListData['Set'],
+                        function ($x) use ($item) {
+                            return $x->material->id == $item->id;
+                        }
+                    )
+                );
+                $result['comments'] = $commentsListData['Set'];
+                if ($commentsListBlock->Widget->id) {
+                    ob_start();
+                    $commentsListBlock->Widget->process($commentsListData);
+                    $result['commentsListText'] = ob_get_clean();
+                }
             }
         }
         return $result;

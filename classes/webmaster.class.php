@@ -517,19 +517,16 @@ class Webmaster extends CMSWebmaster
                 }
             }
             foreach ($categories as $category) {
-                $row = $this->nextImage;
-                $att = $this->getAttachmentFromFilename(
-                    $row['filename'],
-                    $row['url'],
+                $att = Attachment::createFromFile(
+                    $this->nextImage,
                     $category->fields['image']
                 );
-                $row = [
+                $category->fields['image']->addValue(json_encode([
                     'vis' => 1,
                     'name' => '',
                     'description' => '',
                     'attachment' => (int)$att->id
-                ];
-                $category->fields['image']->addValue(json_encode($row));
+                ]));
             }
             $goods = [];
             for ($i = 0; $i < 10; $i++) {
@@ -566,37 +563,30 @@ class Webmaster extends CMSWebmaster
                 $Item->fields['min']->addValue($i % 4 ? 1 : 2);
                 $Item->fields['step']->addValue($i % 4 ? 1 : 2);
                 foreach (['test.doc', 'test.pdf'] as $val) {
-                    $att = new Attachment();
-                    $att->copy = true;
-                    $att->upload = $this->resourcesDir . '/' . $val;
-                    $att->filename = $val;
-                    $att->mime = 'application/binary';
-                    $att->parent = $Item->fields['files'];
-                    $att->image = 0;
-                    $att->commit();
-                    $row = [
+                    $att = Attachment::createFromFile(
+                        $this->resourcesDir . '/' . $val,
+                        $Item->fields['files']
+                    );
+
+                    $Item->fields['files']->addValue(json_encode([
                         'vis' => 1,
                         'name' => '',
                         'description' => '',
                         'attachment' => (int)$att->id
-                    ];
-                    $Item->fields['files']->addValue(json_encode($row));
+                    ]));
                 }
 
                 for ($j = 0; $j < (!$i ? 4 : 1); $j++) {
-                    $row = $this->nextImage;
-                    $att = $this->getAttachmentFromFilename(
-                        $row['filename'],
-                        $row['url'],
-                        $catalogType->fields['images']
+                    $att = Attachment::createFromFile(
+                        $this->nextImage,
+                        $category->fields['image']
                     );
-                    $row = [
+                    $Item->fields['images']->addValue(json_encode([
                         'vis' => 1,
                         'name' => '',
                         'description' => '',
                         'attachment' => (int)$att->id
-                    ];
-                    $Item->fields['images']->addValue(json_encode($row));
+                    ]));
                 }
                 $goods[] = $Item;
             }

@@ -149,7 +149,7 @@ class SberbankInterface extends EPayInterface
                     'sberbank.log',
                     date('Y-m-d H:i:s ') . 'result: ' .
                     $session['sberbankOrderNumber'] . ' / ' .
-                    $session['sberbankOrderId'] . "\n",
+                    $session['sberbankOrderId'] . "\n\n",
                     FILE_APPEND
                 );
             }
@@ -213,7 +213,7 @@ class SberbankInterface extends EPayInterface
             file_put_contents(
                 'sberbank.log',
                 date('Y-m-d H:i:s ') . 'fail: ' . $session['sberbankOrderId'] .
-                ' / ' . $session['sberbankOrderNumber'] . "\n",
+                ' / ' . $session['sberbankOrderNumber'] . "\n\n",
                 FILE_APPEND
             );
             $this->getOrderIsPaid($block, $page, $get, $session);
@@ -255,7 +255,7 @@ class SberbankInterface extends EPayInterface
                 file_put_contents(
                     'sberbank.log',
                     date('Y-m-d H:i:s ') . 'init: ' .
-                    var_export($localError, true) . "\n",
+                    var_export($localError, true) . "\n\n",
                     FILE_APPEND
                 );
             }
@@ -267,7 +267,7 @@ class SberbankInterface extends EPayInterface
                 file_put_contents(
                     'sberbank.log',
                     date('Y-m-d H:i:s ') . 'init: ' . (int)$order->id . ' / ' .
-                    $response['orderId'] . "\n",
+                    $response['orderId'] . "\n\n",
                     FILE_APPEND
                 );
             }
@@ -438,8 +438,8 @@ class SberbankInterface extends EPayInterface
             'failUrl' => $this->getCurrentHostURL() . $page->url . 'result/',
             'description' => $this->getOrderDescription($order),
             'jsonParams' => json_encode($jsonParams),
-            'taxSystem' => (trim($order->$taxSystem) !== '')
-                        ?  $order->$taxSystem
+            'taxSystem' => (trim($order->$taxSystemField) !== '')
+                        ?  $order->$taxSystemField
                         :  static::TAX_SYSTEM_SIMPLE,
             'orderBundle' => json_encode($orderBundle),
         ];
@@ -459,6 +459,15 @@ class SberbankInterface extends EPayInterface
     {
         $requestData = $this->getRegisterOrderData($order, $block, $page);
         $response = $this->exec('register', $requestData, $block->epay_test);
+        if ($block->epay_test) {
+            file_put_contents(
+                'sberbank.log',
+                date('Y-m-d H:i:s ') . 'registerOrder: ' .
+                var_export($requestData, true) . "\n" .
+                var_export($response, true) . "\n\n",
+                FILE_APPEND
+            );
+        }
         return $response;
     }
 
@@ -492,20 +501,20 @@ class SberbankInterface extends EPayInterface
             'password' => $block->epay_pass1,
             'orderId' => $get['orderId'] ?: $session['sberbankOrderId'],
         );
-        $json = $this->exec('getOrderStatus', $requestData, $block->isTest);
+        $json = $this->exec('getOrderStatus', $requestData, $block->epay_test);
 
         if (!$json) {
             $errorText = 'Не удалось получить результат запроса состояния заказа';
             throw new Exception($errorText);
-        } elseif ($json['ErrorCode']) {
+        } elseif ($json['errorCode']) {
             $errorText = 'В процессе оплаты заказа'
                        . (
                             $json['OrderNumber'] ?
                             ' #' . (int)$json['OrderNumber'] :
                             ''
                         )
-                       . ' возникла ошибка: (' . $json['ErrorCode'] . ') '
-                       . $json['ErrorMessage'];
+                       . ' возникла ошибка: (' . $json['errorCode'] . ') '
+                       . $json['errorMessage'];
             if ($json['OrderNumber']) {
                 $order = new Order((int)$json['OrderNumber']);
                 $history = new Order_History();
@@ -517,8 +526,28 @@ class SberbankInterface extends EPayInterface
                 $history->description = $errorText;
                 $history->commit();
             }
+            if ($block->epay_test) {
+                file_put_contents(
+                    'sberbank.log',
+                    date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
+                    var_export($requestData, true) . "\n" .
+                    var_export($json, true) . "\n" .
+                    'Error: ' . $errorText . "\n\n",
+                    FILE_APPEND
+                );
+            }
             throw new Exception($errorText);
         } elseif (!$json['OrderNumber'] || !$json['OrderStatus']) {
+            if ($block->epay_test) {
+                file_put_contents(
+                    'sberbank.log',
+                    date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
+                    var_export($requestData, true) . "\n" .
+                    var_export($json, true) . "\n" .
+                    'Error: Не удалось получить адрес для оплаты' . "\n\n",
+                    FILE_APPEND
+                );
+            }
             throw new Exception('Не удалось получить адрес для оплаты');
         }
 
@@ -526,7 +555,7 @@ class SberbankInterface extends EPayInterface
             file_put_contents(
                 'sberbank.log',
                 date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
-                var_export($requestData, true) . "\n",
+                var_export($requestData, true) . "\n\n",
                 FILE_APPEND
             );
         }
