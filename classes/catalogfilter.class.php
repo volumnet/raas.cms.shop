@@ -1162,7 +1162,7 @@ class CatalogFilter
             }
         }
         $materialType = $data['materialType'];
-        $filter = new CatalogFilter(
+        $filter = new static(
             $materialType,
             (bool)$data['withChildrenGoods'],
             (array)$data['ignoredFields']
