@@ -142,9 +142,9 @@ $emailField = function (Form_Field $field) {
                   <?php } ?>
                 </td>
                 <td><?php echo htmlspecialchars($row->__get('meta'))?>&nbsp;</td>
-                <td style="text-align: right"><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
+                <td style="text-align: right; white-space: nowrap;"><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
                 <td><?php echo (int)$row->amount?></td>
-                <td style="text-align: right"><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
+                <td style="text-align: right; white-space: nowrap;"><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
               </tr>
           <?php $sum += $row->amount * $row->realprice; } ?>
           <tr>
