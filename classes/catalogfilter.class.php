@@ -819,7 +819,7 @@ class CatalogFilter
     /**
      * Получает переменные окружения по фильтру
      * @param array<
-     *            string[] имя свойства => array<mixed>|
+     *            string[] ID# свойства => array<mixed>|
      *                                     ['from' => float, 'to' => float]|
      *                                     ['like' => string] значение или набор значений
      *        > $filter Фильтр для проверки
@@ -853,7 +853,7 @@ class CatalogFilter
     /**
      * Получает канонический URL из фильтра
      * @param array<
-     *            string[] имя свойства => array<mixed>|
+     *            string[] ID# свойства => array<mixed>|
      *                                     ['from' => float, 'to' => float]|
      *                                     ['like' => string] значение или набор значений
      *        > $filter Фильтр для проверки
@@ -1162,7 +1162,7 @@ class CatalogFilter
             }
         }
         $materialType = $data['materialType'];
-        $filter = new CatalogFilter(
+        $filter = new static(
             $materialType,
             (bool)$data['withChildrenGoods'],
             (array)$data['ignoredFields']
