@@ -433,9 +433,9 @@ class PriceloaderInterface extends AbstractInterface
             } elseif ($data || !in_array($fid, ['name', 'urn'])) {
                 $item->$fid = $data;
             }
-            if (!$item->id && $isUnique) { // 2015-11-20, AVS: добавили URN по артикулу
-                $item->urn = Text::beautify($data);
-            }
+        }
+        if (!$item->id && !$item->urn && $isUnique) { // 2015-11-20, AVS: добавили URN по артикулу
+            $item->urn = Text::beautify($data, '-');
         }
         return $item;
     }
