@@ -409,14 +409,22 @@ class SberbankInterface extends EPayInterface
                                   ?  $order->$taxTypeField
                                   :  static::TAX_TYPE_NO_VAT
                     ],
-                    // 'itemAttributes' => [
-                    //     'paymentMethod' => (trim($order->paymentMethodField) !== '')
-                    //                     ?  $order->paymentMethodField
-                    //                     : static::PAYMENT_METHOD_PREPAY,
-                    //     'paymentObject' => (trim($order->paymentObjectField) !== '')
-                    //                     ?  $order->paymentObjectField
-                    //                     : static::PAYMENT_OBJECT_PRODUCT,
-                    // ],
+                    'itemAttributes' => [
+                        'attributes' => [
+                            [
+                                'name' => 'paymentMethod',
+                                'value' => (trim($order->paymentMethodField) !== '')
+                                                ?  $order->paymentMethodField
+                                                : static::PAYMENT_METHOD_PREPAY,
+                            ],
+                            [
+                                'name' => 'paymentObject',
+                                'value' => (trim($order->paymentObjectField) !== '')
+                                                ?  $order->paymentObjectField
+                                                : static::PAYMENT_OBJECT_PRODUCT,
+                            ],
+                        ],
+                    ],
                 ];
                 $orderBundle['cartItems']['items'][] = $itemData;
             }

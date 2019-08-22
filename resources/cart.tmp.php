@@ -24,7 +24,7 @@ if ($_GET['AJAX']) {
             'price' => $row->realprice,
             'name' => $row->name,
             'url' => $row2->url,
-			      'image' => '/' . $row2->visImages[0]->smallURL,
+            'image' => '/' . $row2->visImages[0]->smallURL,
             'min' => $row2->min,
         );
     }
@@ -81,8 +81,8 @@ if ($_GET['AJAX']) {
                   </td>
                 </tr>
               <?php $sum += $row->amount * $row->realprice; $am += $row->amount; } ?>
-			</tbody>
-			<tbody>
+            </tbody>
+            <tbody>
               <?php if ($Form->id) { ?>
                   <tr>
                     <th colspan="<?php echo !$Cart->cartType->no_amount ? '3' : '2'?>"><?php echo TOTAL_SUM?>:</th>
@@ -125,12 +125,36 @@ if ($_GET['AJAX']) {
                       <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" value="<?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?>" style="position: absolute; left: -9999px" />
                 <?php } ?>
                 <?php foreach ($Form->fields as $row) { ?>
-                    <div class="form-group">
-                      <label<?php echo !$row->multiple ? ' for="' . htmlspecialchars($row->urn . $row->id . '_' . $Block->id) . '"' : ''?> class="control-label col-sm-3 col-md-2"><?php echo htmlspecialchars($row->name . ($row->required ? '*' : ''))?></label>
-                      <div class="col-sm-9 col-md-4">
-                        <?php $getField($row, $DATA); ?>
-                      </div>
-                    </div>
+                    <?php if ($row->urn == 'agree') { ?>
+                        <div class="form-group">
+                          <div class="col-sm-9 col-sm-offset-3 col-md-offset-2">
+                            <label>
+                              <?php $getField($row, $DATA);?>
+                              <a href="/privacy/" target="_blank">
+                                <?php echo htmlspecialchars($row->name)?>
+                              </a>
+                            </label>
+                          </div>
+                        </div>
+                    <?php } elseif ($row->datatype == 'checkbox') { ?>
+                        <div class="form-group">
+                          <div class="col-sm-9 col-sm-offset-3">
+                            <label>
+                              <?php $getField($row, $DATA);?>
+                              <?php echo htmlspecialchars($row->name . ($row->required ? '*' : ''))?>
+                            </label>
+                          </div>
+                        </div>
+                    <?php } else { ?>
+                        <div class="form-group">
+                          <label<?php echo !$row->multiple ? ' for="' . htmlspecialchars($row->urn . $row->id . '_' . $Block->id) . '"' : ''?> class="control-label col-sm-3 col-md-2">
+                            <?php echo htmlspecialchars($row->name . ($row->required ? '*' : ''))?>
+                          </label>
+                          <div class="col-sm-9 col-md-4">
+                            <?php $getField($row, $DATA);?>
+                          </div>
+                        </div>
+                    <?php } ?>
                 <?php } ?>
                 <?php if ($Form->antispam == 'captcha' && $Form->antispam_field_name) { ?>
                     <div class="form-group">
