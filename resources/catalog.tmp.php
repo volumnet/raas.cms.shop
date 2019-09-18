@@ -91,20 +91,38 @@ if ($Item) {
               }
               unset($temp);
               foreach ($Item->fields as $key => $val) {
-                  if (
-                      !in_array(
-                          $val->urn,
-                          array('images', 'brief', 'videos', 'videos_url', 'files', 'onmain', 'article', 'price', 'price_old', 'available', 'min', 'step')
-                      ) &&
-                      !in_array($val->datatype, array('image', 'file', 'material', 'checkbox'))
-                  ) {
+                  if (!in_array($val->urn, [
+                      'images',
+                      'brief',
+                      'videos',
+                      'videos_url',
+                      'files',
+                      'onmain',
+                      'article',
+                      'price',
+                      'price_old',
+                      'available',
+                      'min',
+                      'step'
+                  ]) && !in_array($val->datatype, [
+                      'image',
+                      'file',
+                      'material',
+                      'checkbox'
+                  ])) {
                       if ($val->doRich()) {
-                          $v = implode(', ', array_map(function($x) use ($val) { return $val->doRich($x); }, $val->getValues(true)));
+                          $v = implode(
+                              ', ',
+                              array_map(function ($x) use ($val) {
+                                  return $val->doRich($x);
+                              }, $val->getValues(true))
+                          );
                           switch ($key) {
-                              case 'width': case 'height':
+                              case 'width':
+                              case 'height':
                                   $propsText .= ' <tr>
                                                     <th>' . htmlspecialchars($val->name) . ': </th>
-                                                    <td itemprop="<?php echo $key?>" itemtype="http://schema.org/QuantitativeValue">
+                                                    <td itemprop="' . $key . '" itemtype="http://schema.org/QuantitativeValue">
                                                       <span itemprop="value">' . $v . '</span>
                                                     </td>
                                                   </tr>';
