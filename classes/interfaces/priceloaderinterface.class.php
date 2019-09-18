@@ -114,15 +114,25 @@ class PriceloaderInterface extends AbstractInterface
      *             'log' ?=> array<[
      *                 'time' => float Время, прошедшее с начала загрузки
      *                 'text' => string Текст записи,
-     *                 'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
-     *                 'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
+     *                 'row' ?=> int К какой строке относится запись
+     *                               (относительно смещений, начиная с 0),
+     *                 'realrow' ?=> int К какой строке относится запись
+     *                                   (абсолютно, без учета смещений,
+     *                                   начиная с 0),
      *             ]> Лог выполнения,
      *             'raw_data' ?=> array<array<string>> Массив сырых данных,
      *             'ok' ?=> true Обработка завершена
      *         ]
      */
-    public function upload($file, $type, Page $page, $test = true, $clear = 0, $rows = 0, $cols = 0)
-    {
+    public function upload(
+        $file,
+        $type,
+        Page $page,
+        $test = true,
+        $clear = 0,
+        $rows = 0,
+        $cols = 0
+    ) {
         $st = microtime(true);
         ini_set('max_execution_time', self::UPLOAD_MAX_TIME);
         // Загрузка прайса
@@ -175,7 +185,13 @@ class PriceloaderInterface extends AbstractInterface
                 $st
             );
         }
-        return ['log' => $log, 'raw_data' => $rawData, 'ok' => true];
+        return [
+            'log' => $log,
+            'raw_data' => $rawData,
+            'affectedMaterialsIds' => $affectedMaterialsIds,
+            'affectedPagesIds' => $affectedPagesIds,
+            'ok' => true
+        ];
     }
 
 
