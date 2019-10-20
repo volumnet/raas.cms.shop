@@ -120,15 +120,13 @@ class Webmaster extends CMSWebmaster
             'cart' => $this->view->_('CART'),
             'robokassa' => $this->view->_('ROBOKASSA'),
             'yml' => $this->view->_('YANDEX_MARKET'),
-            'item_inc' => $this->view->_('ITEM_INC'),
-            'category_inc' => $this->view->_('CATEGORY_INC'),
+            'catalog_item' => $this->view->_('CATALOG_ITEM'),
+            'catalog_category' => $this->view->_('CATEGORY_INC'),
             'catalog' => $this->view->_('CATALOG'),
             'catalog_filter' => $this->view->_('CATALOG_FILTER'),
             'cart_main' => $this->view->_('CART_MAIN'),
             'favorites_main' => $this->view->_('FAVORITES_MAIN'),
-            // 'menu_left' => $this->view->_('LEFT_MENU'),
-            'item_inc' => $this->view->_('ITEM_INC'),
-            'file_inc' => $this->view->_('FILE_INC'),
+            // 'file_inc' => $this->view->_('FILE_INC'),
             'spec' => $this->view->_('SPECIAL_OFFER'),
             'my_orders' => $this->view->_('MY_ORDERS'),
         ];
@@ -613,23 +611,6 @@ class Webmaster extends CMSWebmaster
                 true
             );
 
-            $B = new Block_Material([
-                'material_type' => (int)$catalogType->id,
-                'nat' => 0,
-                'pages_var_name' => '',
-                'rows_per_page' => 0,
-                'sort_field_default' => (int)$catalogType->fields['price']->id,
-                'sort_order_default' => 'asc',
-            ]);
-            $catalogMain = $this->createBlock(
-                $B,
-                'content',
-                'catalog_interface',
-                'catalog',
-                $this->Site,
-                false
-            );
-
             $B = new Block_PHP();
             $specBlock = $this->createBlock(
                 $B,
@@ -677,7 +658,14 @@ class Webmaster extends CMSWebmaster
             );
 
             $B = new Block_PHP();
-            $this->createBlock($B, 'left', '', 'cart_main', $this->Site, true);
+            $this->createBlock(
+                $B,
+                'menu_user',
+                '',
+                'cart_main',
+                $this->Site,
+                true
+            );
             $this->leftCartBlock = $B;
         }
 
@@ -745,7 +733,7 @@ class Webmaster extends CMSWebmaster
             $B = new Block_PHP();
             $this->createBlock(
                 $B,
-                'left',
+                'menu_user',
                 '',
                 'favorites_main',
                 $this->Site,
@@ -793,8 +781,6 @@ class Webmaster extends CMSWebmaster
                   . " WHERE location = 'left'";
         $c = $this->SQL->getvalue($sqlQuery);
         $this->leftMenuBlock->swap(-$c, $this->Site);
-        $this->leftFavoritesBlock->swap(-$c, $this->Site);
-        $this->leftCartBlock->swap(-$c, $this->Site);
     }
 
 

@@ -1,17 +1,14 @@
 <?php
+/**
+ * Виджет каталога
+ * @param Page $Page Текущая страница
+ * @param Block_Material $Block Текущий блок
+ * @param array<Material>|null $Set Набор материалов для отображения
+ * @param Material $Item Текущий материал для отображения
+ */
 namespace RAAS\CMS;
 
-use RAAS\CMS\Shop\Video;
 use RAAS\Attachment;
-
-eval('?' . '>' . Snippet::importByURN('category_inc')->description);
-eval('?' . '>' . Snippet::importByURN('item_inc')->description);
-eval('?' . '>' . Snippet::importByURN('file_inc')->description);
-$formatPrice = function($price) {
-    $remainder = (float)$price - (float)(int)$price;
-    return str_replace(' ', '&nbsp;', number_format((float)$price, ($remainder > 0) ? 2 : 0, ',', ' ' ));
-};
-
 
 if ($Item) {
     ?>
@@ -19,7 +16,10 @@ if ($Item) {
       <div class="catalog-article" itemscope itemtype="http://schema.org/Product">
         <meta itemprop="name" content="<?php echo htmlspecialchars($Item->name)?>" />
         <div class="catalog-article__article">
-          <?php echo ARTICLE_SHORT?> <span itemprop="productID"><?php echo htmlspecialchars($Item->article)?></span>
+          <?php echo ARTICLE_SHORT?>
+          <span itemprop="productID">
+            <?php echo htmlspecialchars($Item->article)?>
+          </span>
         </div>
         <div class="row">
           <?php if ($Item->visImages) { ?>
@@ -46,18 +46,8 @@ if ($Item) {
             <div class="catalog-article__details">
               <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
                 <div class="catalog-article__text">
-                  <div class="catalog-article__price-container" data-price="<?php echo (float)$Item->price?>">
-                    <?php if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
-                        <span class="catalog-article__price catalog-article__price_old"><?php echo $formatPrice((float)$Item->price_old)?></span>
-                    <?php } ?>
-                    <span class="catalog-article__price <?php echo ($Item->price_old && ($Item->price_old != $Item->price)) ? ' catalog-article__price_new' : ''?>">
-                      <span data-role="price-container" itemprop="price" content="<?php echo (float)$Item->price?>">
-                        <?php echo $formatPrice((float)$Item->price)?>
-                      </span>
-                      <i class="fa fa-rub" itemprop="priceCurrency" content="RUB"></i>
-                    </span>
-                  </div>
-                </div>
+                  <div cp if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
+                                        </div>
                 <div class="catalog-article__available">
                   <link itemprop="availability" href="http://schema.org/<?php echo $Item->available ? 'InStock' : 'PreOrder'?>" />
                   <?php echo $Item->available ? '<span class="text-success">' . AVAILABLE . '</span>' : '<span class="text-danger">' . AVAILABLE_CUSTOM . '</span>'?>
@@ -84,7 +74,7 @@ if ($Item) {
               <!--/noindex-->
               <?php
               $propsText = '';
-              $brands = $models = array();
+              $brands = $models = [];
               foreach ((array)$Item->model as $val) {
                   $brands[$val->brand->id] = $val->brand->name;
                   $models[$val->id] = $val->name;
@@ -162,8 +152,14 @@ if ($Item) {
           </div>
         </div>
         <?php
-        $tabs = array();
-        foreach (array('description', 'files', 'videos', 'reviews', 'related') as $key) {
+        $tabs = [];
+        foreach ([
+            'description',
+            'files',
+            'videos',
+            'reviews',
+            'related'
+        ] as $key) {
             $text = '';
             $name = $Item->fields[$key]->name;
             switch ($key) {
@@ -173,16 +169,17 @@ if ($Item) {
                     break;
                 case 'files':
                     if ($Item->files) {
-                        $text = '<div class="catalog-article__files">';
+                        $text = '<div class="catalog-article__files-list">
+                                   <div class="catalog-article-files-list">';
                         foreach ($Item->files as $file) {
-                            $text .= '<div class="catalog-article__file">
-                                        <a href="/' . htmlspecialchars($file->fileURL) . '">'
-                                  .  '    <span class="fa ' . $getFileIcon($file) . '"></span> '
+                            $text .= '<div class="catalog-article-files-list__item">
+                                        <a href="/' . htmlspecialchars($file->fileURL) . '" class="catalog-article-files-item catalog-article-files-item_' . mb_strtolower(pathinfo($file->fileURL, PATHINFO_EXTENSION)) . '">'
                                   .       htmlspecialchars($file->name ?: basename($file->fileURL))
                                   . '   </a>
                                       </div>';
                         }
-                        $text .= '</div>';
+                        $text .= ' </div>
+                                 </div>';
                     }
                     break;
                 case 'videos':
@@ -237,7 +234,9 @@ if ($Item) {
                         foreach ($Item->related as $row) {
                             $text .= '<div class="catalog-list__item">';
                             ob_start();
-                            $showItem($row);
+                            Snippet::importByURN('catalog_item')->process([
+                                'item' => $row
+                            ]);
                             $text .= ob_get_clean();
                             $text .= '</div>';
                         }
@@ -246,7 +245,7 @@ if ($Item) {
                     break;
             }
             if ($text) {
-                $tabs[$key] = array('name' => $name, 'description' => $text);
+                $tabs[$key] = ['name' => $name, 'description' => $text];
             }
         }
         if ($tabs) {
@@ -262,7 +261,9 @@ if ($Item) {
             </ul>
             <div class="tab-content" style="padding: 15px 0;">
               <?php $i = 0; foreach ($tabs as $key => $row) { ?>
-                  <div class="tab-pane<?php echo !$i ? ' active' : ''?>" id="<?php echo $key?>"><?php echo $row['description']?></div>
+                  <div class="tab-pane<?php echo !$i ? ' active' : ''?>" id="<?php echo $key?>">
+                    <?php echo $row['description']?>
+                  </div>
               <?php $i++; } ?>
             </div>
         <?php } ?>
@@ -274,9 +275,7 @@ if ($Item) {
           <div class="catalog__filter">
             <?php eval('?' . '>' . Snippet::importByURN('catalog_filter')->description)?>
           </div>
-          <?php
-      }
-      ?>
+      <?php } ?>
       <div class="catalog__inner">
         <?php
         if ($Set || $subCats) {
@@ -286,7 +285,7 @@ if ($Item) {
                   <div class="catalog-categories-list">
                     <?php foreach ($subCats as $row) { ?>
                         <div class="catalog-categories-list__item">
-                          <?php $showCategory($row);?>
+                          <?php Snippet::importByURN('catalog_category')->process(['page' => $row])?>
                         </div>
                     <?php } ?>
                   </div>
@@ -299,7 +298,7 @@ if ($Item) {
                   <div class="catalog-list">
                     <?php foreach ($Set as $row) { ?>
                         <div class="catalog-list__item">
-                          <?php $showItem($row)?>
+                          <?php Snippet::importByURN('catalog_item')->process(['item' => $row])?>
                         </div>
                     <?php } ?>
                   </div>
@@ -319,11 +318,11 @@ if ($Item) {
                   <?php
                   echo $outputNav(
                       $Pages,
-                      array(
+                      [
                           'pattern' => '<li><a href="' . \SOME\HTTP::queryString('page={link}') . '">{text}</a></li>',
                           'pattern_active' => '<li class="active"><a>{text}</a></li>',
                           'ellipse' => '<li class="disabled"><a>...</a></li>'
-                      )
+                      ]
                   );
                   ?>
                 </ul>
