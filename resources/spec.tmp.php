@@ -25,7 +25,7 @@ $set = Material::getSQLSet($sqlQuery);
         <?php echo htmlspecialchars($Block->name)?>
       </div>
       <div class="spec__inner">
-        <div class="spec__list" data-role="slider" data-slider-carousel="jcarousel" data-slider-duration="800" data-slider-interval="3000" data-slider-autoscroll="true">
+        <div class="spec__list" data-role="slider" data-slider-carousel="jcarousel" data-slider-wrap="circular" data-slider-duration="800" data-slider-interval="3000" data-slider-autoscroll="true">
           <div class="spec-list">
             <?php foreach ((array)$set as $row) { ?>
                 <div class="spec-list__item">
