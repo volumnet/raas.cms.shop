@@ -1,14 +1,12 @@
 <?php
 namespace RAAS\CMS\Shop;
 
-use RAAS\Application;
 use RAAS\Attachment;
 use RAAS\CMS\Block;
 use RAAS\CMS\Block_Material;
 use RAAS\CMS\Block_Menu;
 use RAAS\CMS\Block_PHP;
 use RAAS\CMS\Form;
-use RAAS\CMS\Form_Field;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Material_Type;
@@ -24,8 +22,6 @@ class Webmaster extends CMSWebmaster
     protected static $instance;
 
     protected $leftMenuBlock;
-    protected $leftCartBlock;
-    protected $leftFavoritesBlock;
 
     public function __get($var)
     {
@@ -34,6 +30,8 @@ class Webmaster extends CMSWebmaster
             case 'nextText':
             case 'nextUser':
             case 'Site':
+            case 'interfacesFolder':
+            case 'widgetsFolder':
                 return parent::__get($var);
                 break;
             default:
@@ -49,58 +47,54 @@ class Webmaster extends CMSWebmaster
      */
     public function checkStdInterfaces()
     {
-        $interfacesFolder = Snippet_Folder::importByURN('__raas_interfaces');
         $interfaces = [];
         $interfacesData = [
             '__raas_shop_cart_interface' => [
                 'name' => 'CART_STANDARD_INTERFACE',
-                'description' => $this->stdCartInterface
+                'filename' => 'cart_interface',
             ],
             '__raas_shop_order_notify' => [
                 'name' => 'ORDER_STANDARD_NOTIFICATION',
-                'description' => $this->stdFormTemplate
+                'filename' => 'form_notification',
             ],
             '__raas_shop_imageloader_interface' => [
                 'name' => 'IMAGELOADER_STANDARD_INTERFACE',
-                'description' => $this->stdImageLoaderInterface
+                'filename' => 'imageloader_interface',
             ],
             '__raas_shop_priceloader_interface' => [
                 'name' => 'PRICELOADER_STANDARD_INTERFACE',
-                'description' => $this->stdPriceLoaderInterface
+                'filename' => 'priceloader_interface',
             ],
             '__raas_shop_yml_interface' => [
                 'name' => 'YML_STANDARD_INTERFACE',
-                'description' => file_get_contents(
-                    $this->resourcesDir . '/interfaces/yml_interface.php'
-                )
+                'filename' => 'yml_interface',
             ],
             '__raas_robokassa_interface' => [
                 'name' => 'ROBOKASSA_INTERFACE',
-                'description' => file_get_contents(
-                    $this->resourcesDir . '/interfaces/robokassa_interface.php'
-                )
+                'filename' => 'robokassa_interface',
             ],
             '__raas_my_orders_interface' => [
                 'name' => 'MY_ORDERS_STANDARD_INTERFACE',
-                'description' => file_get_contents(
-                    $this->resourcesDir . '/interfaces/my_orders_interface.php'
-                )
+                'filename' => 'my_orders_interface',
             ],
         ];
         foreach ($interfacesData as $interfaceURN => $interfaceData) {
             $interfaces[$interfaceURN] = $this->checkSnippet(
-                $interfacesFolder,
+                $this->interfacesFolder,
                 $interfaceURN,
                 $interfaceData['name'],
-                $interfaceData['description']
+                file_get_contents(
+                    Module::i()->resourcesDir .
+                    '/interfaces/' . $interfaceData['filename'] . '.php'
+                )
             );
         }
         $interfaces['catalog_interface'] = $this->checkSnippet(
-            $interfacesFolder,
+            $this->interfacesFolder,
             'catalog_interface',
             'CATALOG_INTERFACE',
             file_get_contents(
-                $this->resourcesDir . '/interfaces/catalog_interface.php'
+                Module::i()->resourcesDir . '/interfaces/catalog_interface.php'
             ),
             false
         );
@@ -115,34 +109,41 @@ class Webmaster extends CMSWebmaster
      */
     public function createWidgets()
     {
-        // Добавим виджеты
-        $snippets = [
-            'cart' => $this->view->_('CART'),
-            'robokassa' => $this->view->_('ROBOKASSA'),
-            'yml' => $this->view->_('YANDEX_MARKET'),
-            'catalog_item' => $this->view->_('CATALOG_ITEM'),
-            'catalog_category' => $this->view->_('CATEGORY_INC'),
-            'catalog' => $this->view->_('CATALOG'),
-            'catalog_filter' => $this->view->_('CATALOG_FILTER'),
-            'cart_main' => $this->view->_('CART_MAIN'),
-            'favorites_main' => $this->view->_('FAVORITES_MAIN'),
-            // 'file_inc' => $this->view->_('FILE_INC'),
-            'spec' => $this->view->_('SPECIAL_OFFER'),
-            'my_orders' => $this->view->_('MY_ORDERS'),
+        $widgets = [];
+        $widgetsData = [
+            'cart/cart' => View_Web::i()->_('CART'),
+            'epay/robokassa' => View_Web::i()->_('ROBOKASSA'),
+            'yml/yml' => View_Web::i()->_('YANDEX_MARKET'),
+            'materials/catalog/catalog_item' => View_Web::i()->_('CATALOG_ITEM'),
+            'materials/catalog/catalog_category' => View_Web::i()->_('CATEGORY_INC'),
+            'materials/catalog/catalog' => View_Web::i()->_('CATALOG'),
+            'materials/catalog/catalog_filter' => View_Web::i()->_('CATALOG_FILTER'),
+            'cart/cart_main' => View_Web::i()->_('CART_MAIN'),
+            'cart/favorites_main' => View_Web::i()->_('FAVORITES_MAIN'),
+            'materials/catalog/spec' => View_Web::i()->_('SPECIAL_OFFER'),
+            'cart/my_orders' => View_Web::i()->_('MY_ORDERS'),
         ];
-        $VF = Snippet_Folder::importByURN('__raas_views');
-        foreach ($snippets as $urn => $name) {
-            $temp = Snippet::importByURN($urn);
-            if (!$temp->id) {
-                $S = new Snippet();
-                $S->name = $this->view->_($name);
-                $S->urn = $urn;
-                $S->pid = $VF->id;
-                $f = $this->resourcesDir . '/' . $urn . '.tmp.php';
-                $S->description = file_get_contents($f);
-                $S->commit();
+        foreach ($widgetsData as $url => $name) {
+            $urn = explode('/', $url);
+            $urn = $urn[count($urn) - 1];
+            $widget = Snippet::importByURN($urn);
+            if (!$widget->id) {
+                $widget = $this->createSnippet(
+                    $urn,
+                    $name,
+                    (int)$this->widgetsFolder->id,
+                    Module::i()->resourcesDir . '/widgets/' . $url . '.tmp.php',
+                    [
+                        'WIDGET_NAME' => $name,
+                        'WIDGET_URN' => $urn,
+                        'WIDGET_CSS_CLASSNAME' => str_replace('_', '-', $urn)
+                    ]
+                );
             }
+            $widgets[$urn] = $widget;
         }
+
+        return $widgets;
     }
 
 
@@ -562,7 +563,7 @@ class Webmaster extends CMSWebmaster
                 $Item->fields['step']->addValue($i % 4 ? 1 : 2);
                 foreach (['test.doc', 'test.pdf'] as $val) {
                     $att = Attachment::createFromFile(
-                        $this->resourcesDir . '/' . $val,
+                        Module::i()->resourcesDir . '/' . $val,
                         $Item->fields['files']
                     );
 
@@ -666,7 +667,6 @@ class Webmaster extends CMSWebmaster
                 $this->Site,
                 true
             );
-            $this->leftCartBlock = $B;
         }
 
         $temp = Page::getSet([
@@ -739,7 +739,6 @@ class Webmaster extends CMSWebmaster
                 $this->Site,
                 true
             );
-            $this->leftFavoritesBlock = $B;
         }
 
         $temp = Page::getSet([

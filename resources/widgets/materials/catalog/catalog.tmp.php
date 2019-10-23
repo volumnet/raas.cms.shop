@@ -46,8 +46,18 @@ if ($Item) {
             <div class="catalog-article__details">
               <div itemprop="offers" itemscope itemtype="http://schema.org/Offer">
                 <div class="catalog-article__text">
-                  <div cp if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
-                                        </div>
+                  <div class="catalog-article__price-container" data-price="<?php echo (float)$Item->price?>">
+                    <?php if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
+                        <span class="catalog-article__price catalog-article__price_old"><?php echo $formatPrice((float)$Item->price_old)?></span>
+                    <?php } ?>
+                    <span class="catalog-article__price <?php echo ($Item->price_old && ($Item->price_old != $Item->price)) ? ' catalog-article__price_new' : ''?>">
+                      <span data-role="price-container" itemprop="price" content="<?php echo (float)$Item->price?>">
+                        <?php echo $formatPrice((float)$Item->price)?>
+                      </span>
+                      <i class="fa fa-rub" itemprop="priceCurrency" content="RUB"></i>
+                    </span>
+                  </div>
+                </div>
                 <div class="catalog-article__available">
                   <link itemprop="availability" href="http://schema.org/<?php echo $Item->available ? 'InStock' : 'PreOrder'?>" />
                   <?php echo $Item->available ? '<span class="text-success">' . AVAILABLE . '</span>' : '<span class="text-danger">' . AVAILABLE_CUSTOM . '</span>'?>
