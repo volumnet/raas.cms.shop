@@ -19,6 +19,7 @@ use RAAS\CMS\Snippet;
 $cartData = [];
 $cartData['count'] = (int)$Cart->count;
 $cartData['sum'] = (float)$Cart->sum;
+$cartData['items'] = [];
 foreach ($Cart->items as $cartItem) {
     $item = new Material($cartItem->id);
     $cartData['items'][] = [

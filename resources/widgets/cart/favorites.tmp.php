@@ -13,6 +13,7 @@ use RAAS\CMS\Package;
 
 $cartData = [];
 $cartData['count'] = (int)$Cart->count;
+$cartData['items'] = [];
 foreach ($Cart->items as $cartItem) {
     $item = new Material($cartItem->id);
     $cartData['items'][] = [
