@@ -1,16 +1,16 @@
 <?php
 namespace RAAS\CMS\Shop;
-use \RAAS\Field as RAASField;
-use \RAAS\Option;
-use \RAAS\CMS\Material_Type;
-use \RAAS\CMS\Material_Field;
-use \RAAS\CMS\Form as CMSForm;
-use \RAAS\FieldSet;
-use \RAAS\CMS\Snippet_Folder;
-use \RAAS\CMS\Snippet;
-use \RAAS\CMS\Page;
 
-class EditPriceLoaderForm extends \RAAS\Form
+use RAAS\Field as RAASField;
+use RAAS\FieldSet;
+use RAAS\Form as RAASForm;
+use RAAS\Option;
+use RAAS\CMS\Material_Type;
+use RAAS\CMS\Page;
+use RAAS\CMS\Snippet;
+use RAAS\CMS\Snippet_Folder;
+
+class EditPriceLoaderForm extends RAASForm
 {
     const CATALOG_OFFSET_BY_CELLS = 0;
     const CATALOG_OFFSET_BY_SPACES = 4;
@@ -30,22 +30,29 @@ class EditPriceLoaderForm extends \RAAS\Form
 
     protected function getInterfaceField()
     {
-        $wf = function(Snippet_Folder $x) use (&$wf) {
-            $temp = array();
+        $wf = function (Snippet_Folder $x) use (&$wf) {
+            $temp = [];
             foreach ($x->children as $row) {
                 if (strtolower($row->urn) != '__raas_views') {
-                    $o = new Option(array('value' => '', 'caption' => $row->name, 'disabled' => 'disabled'));
+                    $o = new Option([
+                        'value' => '',
+                        'caption' => $row->name,
+                        'disabled' => 'disabled'
+                    ]);
                     $o->__set('children', $wf($row));
                     $temp[] = $o;
                 }
             }
             foreach ($x->snippets as $row) {
-                $temp[] = new Option(array('value' => $row->id, 'caption' => $row->name));
+                $temp[] = new Option([
+                    'value' => $row->id,
+                    'caption' => $row->name
+                ]);
             }
             return $temp;
         };
         $snippet = Snippet::importByURN('__raas_shop_priceloader_interface');
-        $field = new RAASField(array(
+        $field = new RAASField([
             'type' => 'select',
             'class' => 'input-xxlarge',
             'name' => 'interface_id',
@@ -54,95 +61,179 @@ class EditPriceLoaderForm extends \RAAS\Form
             'placeholder' => $this->view->_('_NONE'),
             'children' => $wf(new Snippet_Folder()),
             'default' => (int)$snippet->id
-        ));
+        ]);
         return $field;
     }
 
 
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         $view = $this->view;
         $t = Module::i();
-        $Item = isset($params['Item']) ? $params['Item'] : null;
-        $CONTENT = array();
+        $item = isset($params['Item']) ? $params['Item'] : null;
+        $content = [];
         $mt = new Material_Type();
-        $CONTENT['material_types'] = array('Set' => $mt->children);
-        $CONTENT['fields'] = array(
-            array('value' => 'urn', 'caption' => $this->view->_('URN')),
-            array('value' => 'vis', 'caption' => $this->view->_('VISIBILITY')),
-            array('value' => 'name', 'caption' => $this->view->_('NAME')),
-            array('value' => 'description', 'caption' => $this->view->_('DESCRIPTION')),
-            array('value' => 'meta_title', 'caption' => $this->view->_('META_TITLE')),
-            array('value' => 'meta_description', 'caption' => $this->view->_('META_DESCRIPTION')),
-            array('value' => 'meta_keywords', 'caption' => $this->view->_('META_KEYWORDS')),
-            array('value' => 'priority', 'caption' => $this->view->_('PRIORITY')),
-        );
-        if ($Item->id) {
-            $Material_Type = $Item->Material_Type;
+        $content['material_types'] = ['Set' => $mt->children];
+        $content['fields'] = [
+            [
+                'value' => 'urn',
+                'caption' => $this->view->_('URN')
+            ],
+            [
+                'value' => 'vis',
+                'caption' => $this->view->_('VISIBILITY')
+            ],
+            [
+                'value' => 'name',
+                'caption' => $this->view->_('NAME')
+            ],
+            [
+                'value' => 'description',
+                'caption' => $this->view->_('DESCRIPTION')
+            ],
+            [
+                'value' => 'meta_title',
+                'caption' => $this->view->_('META_TITLE')
+            ],
+            [
+                'value' => 'meta_description',
+                'caption' => $this->view->_('META_DESCRIPTION')
+            ],
+            [
+                'value' => 'meta_keywords',
+                'caption' => $this->view->_('META_KEYWORDS')
+            ],
+            [
+                'value' => 'priority',
+                'caption' => $this->view->_('PRIORITY')
+            ],
+        ];
+        if ($item->id) {
+            $Material_Type = $item->Material_Type;
         } elseif (isset($_POST['mtype'])) {
             $Material_Type = new Material_Type($_POST['mtype']);
         } else {
-            $Material_Type = $CONTENT['material_types']['Set'][0];
+            $Material_Type = $content['material_types']['Set'][0];
         }
         foreach ((array)$Material_Type->fields as $row) {
-            // 2015-06-01, AVS: убрали условие !$row->multiple, т.к. из прайсов могут загружаться и множественные поля
-            // 2016-10-04, AVS: убрали ограничение !(in_array($row->datatype, array('file', 'image'))), т.к. был запрос на "хитрую" загрузку картинок из прайсов
-            $CONTENT['fields'][] = array('value' => (int)$row->id, 'caption' => $row->name);
+            // 2015-06-01, AVS: убрали условие !$row->multiple, т.к.
+            // из прайсов могут загружаться и множественные поля
+            // 2016-10-04, AVS: убрали ограничение
+            // !(in_array($row->datatype, ['file', 'image'])),
+            // т.к. был запрос на "хитрую" загрузку картинок из прайсов
+            $content['fields'][] = [
+                'value' => (int)$row->id,
+                'caption' => $row->name
+            ];
         }
         $p = new Page();
-        $CONTENT['pages'] = array('Set' => $p->children);
+        $content['pages'] = ['Set' => $p->children];
 
-        $defaultParams = array(
-            'caption' => $Item->id ? $Item->name : $view->_('EDIT_PRICELOADER'),
+        $defaultParams = [
+            'caption' => $item->id ? $item->name : $view->_('EDIT_PRICELOADER'),
             'parentUrl' => Sub_Dev::i()->url . '&action=priceloaders',
-            'meta' => array('CONTENT' => $CONTENT),
-            'children' => array(
-                array('name' => 'name', 'caption' => $this->view->_('NAME')),
-                array('name' => 'urn', 'caption' => $this->view->_('URN')),
-                array('type' => 'select', 'name' => 'mtype', 'caption' => $this->view->_('MATERIAL_TYPE'), 'children' => $CONTENT['material_types'], 'required' => true, ),
-                array('type' => 'select', 'name' => 'cat_id', 'caption' => $this->view->_('ROOT_CATEGORY'), 'children' => $CONTENT['pages'], 'required' => true, ),
-                $this->getInterfaceField(),
-                array('type' => 'checkbox', 'name' => 'create_pages', 'caption' => $this->view->_('ALLOW_TO_CREATE_PAGES')),
-                array('type' => 'checkbox', 'name' => 'create_materials', 'caption' => $this->view->_('ALLOW_TO_CREATE_MATERIALS'), 'default' => 1),
-                array(
+            'meta' => ['CONTENT' => $content],
+            'children' => [
+                'name' => [
+                    'name' => 'name',
+                    'caption' => $this->view->_('NAME')
+                ],
+                'urn' => [
+                    'name' => 'urn',
+                    'caption' => $this->view->_('URN')
+                ],
+                'mtype' => [
+                    'type' => 'select',
+                    'name' => 'mtype',
+                    'caption' => $this->view->_('MATERIAL_TYPE'),
+                    'children' => $content['material_types'],
+                    'required' => true,
+                ],
+                'cat_id' => [
+                    'type' => 'select',
+                    'name' => 'cat_id',
+                    'caption' => $this->view->_('ROOT_CATEGORY'),
+                    'children' => $content['pages'],
+                    'required' => true,
+                ],
+                'interface_id' => $this->getInterfaceField(),
+                'create_pages' => [
+                    'type' => 'checkbox',
+                    'name' => 'create_pages',
+                    'caption' => $this->view->_('ALLOW_TO_CREATE_PAGES')
+                ],
+                'create_materials' => [
+                    'type' => 'checkbox',
+                    'name' => 'create_materials',
+                    'caption' => $this->view->_('ALLOW_TO_CREATE_MATERIALS'),
+                    'default' => 1
+                ],
+                'catalog_offset' => [
                     'type' => 'radio',
                     'name' => 'catalog_offset',
                     'caption' => $this->view->_('CATALOG_OFFSET'),
-                    'children' => array(
-                        array('value' => static::CATALOG_OFFSET_BY_CELLS, 'caption' => $this->view->_('CATALOG_OFFSET_BY_CELLS')),
-                        array('value' => static::CATALOG_OFFSET_BY_SPACES, 'caption' => $this->view->_('CATALOG_OFFSET_BY_SPACES')),
-                    )
-                ),
-                array('type' => 'number', 'min' => 0, 'name' => 'rows', 'caption' => $this->view->_('OFFSET') . ', ' . $this->view->_('ROWS_FROM_TOP'), 'default' => 0),
-                array('type' => 'number', 'min' => 0, 'name' => 'cols', 'caption' => $this->view->_('OFFSET') . ', ' . $this->view->_('COLS_FROM_LEFT'), 'default' => 0),
-                new FieldSet(array(
+                    'children' => [
+                        [
+                            'value' => static::CATALOG_OFFSET_BY_CELLS,
+                            'caption' => $this->view->_(
+                                'CATALOG_OFFSET_BY_CELLS'
+                            )
+                        ],
+                        [
+                            'value' => static::CATALOG_OFFSET_BY_SPACES,
+                            'caption' => $this->view->_(
+                                'CATALOG_OFFSET_BY_SPACES'
+                            )
+                        ],
+                    ]
+                ],
+                'rows' => [
+                    'type' => 'number',
+                    'min' => 0,
+                    'name' => 'rows',
+                    'caption' => $this->view->_('OFFSET') . ', '
+                              .  $this->view->_('ROWS_FROM_TOP'),
+                    'default' => 0
+                ],
+                'cols' => [
+                    'type' => 'number',
+                    'min' => 0,
+                    'name' => 'cols',
+                    'caption' => $this->view->_('OFFSET') . ', '
+                              .  $this->view->_('COLS_FROM_LEFT'),
+                    'default' => 0
+                ],
+                'columns' => new FieldSet([
                     'template' => 'dev_edit_priceloader.columns.php',
                     'caption' => $this->view->_('COLUMNS'),
-                    'import' => function($FieldSet) {
-                        $DATA = array();
-                        if ($FieldSet->Form->Item->columns) {
-                            foreach ((array)$FieldSet->Form->Item->columns as $row) {
+                    'import' => function ($fieldSet) {
+                        $DATA = [];
+                        if ($fieldSet->Form->Item->columns) {
+                            foreach ((array)$fieldSet->Form->Item->columns as $row) {
                                 $DATA['column_id'][] = (int)$row->id;
                                 $DATA['column_fid'][] = (string)$row->fid;
                                 $DATA['column_callback'][] = (string)$row->callback;
                                 $DATA['column_download_callback'][] = (string)$row->callback_download;
                             }
                         }
-                        $DATA['ufid'] = $FieldSet->Form->Item->ufid;
+                        $DATA['ufid'] = $fieldSet->Form->Item->ufid;
                         return $DATA;
                     },
-                    'oncommit' => function($FieldSet) {
-                        $todelete = $FieldSet->Form->Item->columns_ids;
-                        $Set = array();
-                        $temp = array();
+                    'oncommit' => function ($fieldSet) {
+                        $todelete = $fieldSet->Form->Item->columns_ids;
+                        $Set = [];
+                        $temp = [];
                         if (isset($_POST['column_id'])) {
                             $i = 0;
                             foreach ((array)$_POST['column_id'] as $key => $val) {
                                 $row = new PriceLoader_Column((int)$val);
                                 if ($row->id) {
-                                    $todelete = array_diff($todelete, array($row->id));
+                                    $todelete = array_diff(
+                                        $todelete,
+                                        [$row->id]
+                                    );
                                 } else {
-                                    $row->pid = (int)$FieldSet->Form->Item->id;
+                                    $row->pid = (int)$fieldSet->Form->Item->id;
                                 }
                                 $row->fid = (string)$_POST['column_fid'][$key];
                                 $row->callback = (string)$_POST['column_callback'][$key];
@@ -153,7 +244,9 @@ class EditPriceLoaderForm extends \RAAS\Form
                         }
                         if ($todelete) {
                             foreach ($todelete as $val) {
-                                PriceLoader::delete(new PriceLoader_Column((int)$val));
+                                PriceLoader::delete(
+                                    new PriceLoader_Column((int)$val)
+                                );
                             }
                         }
                         if ($Set) {
@@ -162,16 +255,37 @@ class EditPriceLoaderForm extends \RAAS\Form
                             }
                         }
                     },
-                    'children' => array(
-                        'ufid' => array('type' => 'radio', 'name' => 'ufid'),
-                        'column_id' => array('type' => 'hidden', 'name' => 'column_id', 'multiple' => true),
-                        'column_fid' => array('type' => 'select', 'name' => 'column_fid', 'children' => $CONTENT['fields'], 'class' => 'span2', 'multiple' => true),
-                        'column_callback' => array('type' => 'textarea', 'name' => 'column_callback', 'multiple' => true),
-                        'column_download_callback' => array('type' => 'textarea', 'name' => 'column_download_callback', 'multiple' => true),
-                    )
-                ))
-            )
-        );
+                    'children' => [
+                        'ufid' => [
+                            'type' => 'radio',
+                            'name' => 'ufid'
+                        ],
+                        'column_id' => [
+                            'type' => 'hidden',
+                            'name' => 'column_id',
+                            'multiple' => true
+                        ],
+                        'column_fid' => [
+                            'type' => 'select',
+                            'name' => 'column_fid',
+                            'children' => $content['fields'],
+                            'class' => 'span2',
+                            'multiple' => true
+                        ],
+                        'column_callback' => [
+                            'type' => 'textarea',
+                            'name' => 'column_callback',
+                            'multiple' => true
+                        ],
+                        'column_download_callback' => [
+                            'type' => 'textarea',
+                            'name' => 'column_download_callback',
+                            'multiple' => true
+                        ],
+                    ]
+                ])
+            ]
+        ];
         $arr = array_merge($defaultParams, $params);
         parent::__construct($arr);
     }
