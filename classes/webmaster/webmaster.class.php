@@ -112,8 +112,8 @@ class Webmaster extends CMSWebmaster
         $widgets = [];
         $widgetsData = [
             'cart/cart' => View_Web::i()->_('CART'),
+            'cart/favorites' => View_Web::i()->_('FAVORITES'),
             'epay/robokassa' => View_Web::i()->_('ROBOKASSA'),
-            'yml/yml' => View_Web::i()->_('YANDEX_MARKET'),
             'materials/catalog/catalog_item' => View_Web::i()->_('CATALOG_ITEM'),
             'materials/catalog/catalog_category' => View_Web::i()->_('CATEGORY_INC'),
             'materials/catalog/catalog' => View_Web::i()->_('CATALOG'),
@@ -726,7 +726,7 @@ class Webmaster extends CMSWebmaster
                 $B,
                 'content',
                 '__raas_shop_cart_interface',
-                'cart',
+                'favorites',
                 $favorites
             );
 
@@ -803,6 +803,7 @@ class Webmaster extends CMSWebmaster
                 [
                     'name' => $this->view->_('YANDEX_MARKET'),
                     'urn' => 'yml',
+                    'mime' => 'application/xml',
                     'template' => 0,
                     'response_code' => 200
                 ],
@@ -816,7 +817,7 @@ class Webmaster extends CMSWebmaster
                 'meta_cats' => $catalog->selfAndChildrenIds,
                 'local_delivery_cost' => 0,
             ]);
-            $this->createBlock($B, '', '__raas_shop_yml_interface', 'yml', $yml);
+            $this->createBlock($B, '', '__raas_shop_yml_interface', null, $yml);
             $B->addType(
                 $catalogType,
                 '',
