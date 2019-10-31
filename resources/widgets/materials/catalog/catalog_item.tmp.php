@@ -5,50 +5,49 @@
  */
 namespace RAAS\CMS\Shop;
 
-$formatPrice = function($price) {
-    $remainder = (float)$price - (float)(int)$price;
-    return str_replace(' ', '&nbsp;', number_format((float)$price, ($remainder > 0) ? 2 : 0, ',', ' ' ));
-};
+use SOME\Text;
 
 ?>
-<div class="catalog-item">
+<div class="catalog-item" data-id="<?php echo (int)$item->id?>" data-price="<?php echo (float)$item->price?>" data-price-old="<?php echo (float)($item->price_old ?: $item->price)?>" data-min="<?php echo $item->min || 1?>" data-step="<?php echo $item->step || 1?>">
   <a href="<?php echo $item->url?>" class="catalog-item__image<?php echo !$item->visImages ? ' catalog-item__image_nophoto' : ''?>">
     <?php if ($item->visImages) { ?>
         <img src="/<?php echo htmlspecialchars(addslashes($item->visImages[0]->smallURL))?>" alt="<?php echo htmlspecialchars($item->visImages[0]->name ?: $item->name)?>" />
     <?php } ?>
   </a>
   <div class="catalog-item__title">
-    <a href="<?php echo $item->url?>"><?php echo htmlspecialchars($item->name)?></a>
+    <a href="<?php echo $item->url?>">
+      <?php echo htmlspecialchars($item->name)?>
+    </a>
   </div>
-  <div class="catalog-item__price-container" data-price="<?php echo (float)$item->price?>">
+  <div class="catalog-item__price-container">
     <span class="catalog-item__price <?php echo ($item->price_old && ($item->price_old != $item->price)) ? ' catalog-item__price_new' : ''?>">
-      <span data-role="price-container">
-        <?php echo $formatPrice((float)$item->price)?>
+      <span data-v-html="formatPrice(price * amount)">
+        <?php echo Text::formatPrice((float)$item->price)?>
       </span> ₽
     </span>
     <?php if ($item->price_old && ($item->price_old != $item->price)) { ?>
-        <span class="catalog-item__price catalog-item__price_old"><?php echo $formatPrice((float)$item->price_old)?></span>
+        <span class="catalog-item__price catalog-item__price_old" data-v-html="formatPrice(priceold * amount)">
+          <?php echo Text::formatPrice((float)$item->price_old)?>
+        </span>
     <?php } ?>
   </div>
   <div class="catalog-item__controls-outer">
     <div class="catalog-item__available catalog-item__available_<?php echo $item->available ? '' : 'not-'?>available">
       <?php echo $item->available ? 'В наличии' : 'Под заказ'?>
     </div>
-    <form action="/cart/" class="catalog-item__controls" data-role="add-to-cart-form" data-id="<?php echo (int)$item->id?>" data-price="<?php echo (int)$item->price?>">
+    <div class="catalog-item__controls">
       <!--noindex-->
       <?php if ($item->available) { ?>
-          <input type="hidden" name="action" value="add" />
-          <input type="hidden" name="id" value="<?php echo (int)$item->id?>" />
-          <input type="hidden" name="back" value="1" />
           <div class="catalog-item__amount-block">
-            <a class="catalog-item__decrement" data-role="amount-decrement">–</a>
-            <input type="number" class="catalog-item__amount" autocomplete="off" name="amount" min="<?php echo (int)$item->min ?: 1?>" step="<?php echo (int)$item->step ?: 1?>" value="<?php echo (int)$item->min ?: 1?>" />
-            <a class="catalog-item__increment" data-role="amount-increment">+</a>
+            <a class="catalog-item__decrement" data-v-on_click="amount -= step; checkAmount();">–</a>
+            <input type="number" class="catalog-item__amount" autocomplete="off" name="amount" min="<?php echo (int)$item->min ?: 1?>" step="<?php echo (int)$item->step ?: 1?>" value="<?php echo (int)$item->min ?: 1?>" data-v-model="amount" data-v-on_change="checkAmount()" />
+            <a class="catalog-item__increment" data-v-on_click="amount = parseInt(amount) + parseInt(step); checkAmount();">+</a>
           </div>
-          <button type="submit" class="catalog-item__add-to-cart" title="<?php echo TO_CART?>"></button>
+          <button type="button" data-v-on_click="addToCart()" class="catalog-item__add-to-cart" title="<?php echo TO_CART?>"></button>
+          <!-- <button type="button" data-v-on_click="toggleCart()" class="catalog-item__add-to-cart" data-v-bind_class="{ 'catalog-item__add-to-cart_active': inCart}" data-v-bind_title="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'"></button> -->
       <?php } ?>
-      <a href="/favorites/?action=add&id=<?php echo (int)$item->id?>" class="catalog-item__add-to-favorites" data-role="add-to-favorites-trigger" data-id="<?php echo (int)$item->id?>" title="<?php echo TO_FAVORITES?>" data-active-title="<?php echo DELETE_FROM_FAVORITES?>" rel="nofollow"></a>
+      <button type="button" data-v-on_click="toggleFavorites()" class="catalog-item__add-to-favorites" data-v-bind_class="{ 'catalog-item__add-to-favorites_active': inFavorites}" data-v-bind_title="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'"></button>
       <!--/noindex-->
-    </form>
+    </div>
   </div>
 </div>

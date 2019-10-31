@@ -98,11 +98,13 @@ if ($Item) {
                   <button type="button" data-v-on_click="addToCart()" class="catalog-article__add-to-cart">
                     <?php echo TO_CART?>
                   </button>
-                  <!-- <button type="button" data-v-on_click="toggleCart()" class="catalog-article__add-to-cart" data-v-bind_class="{active: inCart}" data-v-bind_title="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'" data-v-html="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'">
+                  <!--
+                  <button type="button" data-v-on_click="toggleCart()" class="catalog-article__add-to-cart" data-v-bind_class="{ 'catalog-article__add-to-cart_active': inCart}" data-v-bind_title="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'" data-v-html="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'">
                     <?php echo TO_CART?>
-                  </button> -->
+                  </button>
+                  -->
               <?php } ?>
-              <button type="button" data-v-on_click="toggleFavorites()" data-v-bind_class="{active: inFavorites}" class="catalog-article__add-to-favorites" data-v-bind_title="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'" data-v-html="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'">
+              <button type="button" data-v-on_click="toggleFavorites()" class="catalog-article__add-to-favorites" data-v-bind_class="{ 'catalog-article__add-to-favorites_active': inFavorites}" data-v-bind_title="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'" data-v-html="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'">
                 <?php echo TO_FAVORITES?>
               </button>
             </div>
@@ -332,76 +334,15 @@ if ($Item) {
         'min' => (int)$Item->min ?: 1,
         'step' => (int)$Item->step ?: 1,
         'selectedImage' => 0,
-        'inCart' => false,
-        'inFavorites' => false,
     ];
     ?>
     <script>
     jQuery(document).ready(function($) {
         raasShopCatalogArticle = new Vue({
             el: '.catalog-article',
+            mixins: [RAASCatalogItemMixin],
             data: function () {
                 return <?php echo json_encode($vueData)?>;
-            },
-            mounted: function () {
-                var self = this;
-                window.setTimeout(function () {
-                    window.lightBoxInit(true)
-                }, 0);
-                $(document).on('raas.shop.cart-updated', function (e, data) {
-                    if (data.id == 'cart') {
-                        var inCart = false;
-                        if ((data.data.items)) {
-                            for (var item of data.data.items) {
-                                if ((item.id == self.id) && (item.meta == self.meta)) {
-                                    inCart = true;
-                                    break;
-                                }
-                            }
-                        }
-                        self.inCart = inCart;
-                    } else if (data.id == 'favorites') {
-                        var inFavorites = false;
-                        if ((data.data.items)) {
-                            for (var item of data.data.items) {
-                                if (item.id == self.id) {
-                                    inFavorites = true;
-                                    break;
-                                }
-                            }
-                        }
-                        self.inFavorites = inFavorites;
-                    }
-                })
-            },
-            methods: {
-                formatPrice: window.formatPrice,
-                checkAmount: function () {
-                    this.amount = Math.max(this.min, this.amount);
-                },
-                toggleFavorites: function () {
-                    if (!this.inFavorites) {
-                        $.RAAS.Shop.itemAddedToFavoritesModal.modal('show');
-                    } else {
-                        $.RAAS.Shop.itemDeletedFromFavoritesModal.modal('show');
-                    }
-                    $.RAAS.Shop.ajaxFavorites.set(this.id, this.inFavorites ? 0 : 1, '');
-                    return false;
-                },
-                addToCart: function () {
-                    $.RAAS.Shop.itemAddedToCartModal.modal('show');
-                    $.RAAS.Shop.ajaxCart.add(this.id, this.amount, this.meta, this.price);
-                    return false;
-                },
-                toggleCart: function () {
-                    if (!this.inCart) {
-                        $.RAAS.Shop.itemAddedToCartModal.modal('show');
-                    } else {
-                        $.RAAS.Shop.itemDeletedFromCartModal.modal('show');
-                    }
-                    $.RAAS.Shop.ajaxCart.set(this.id, this.inCart ? 0 : 1, '');
-                    return false;
-                },
             },
         })
     });
