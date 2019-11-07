@@ -16,7 +16,7 @@ namespace RAAS\CMS\Shop;
     <span class="cart-main__text">
       <span class="cart-main__title"><?php echo CART?></span>
       <span class="cart-main__sum-outer">
-        <span class="cart-main__sum" data-role="cart-block-sum">
+        <span class="cart-main__sum">
           {{ formatPrice(sum) }}
         </span>
         <span class="cart-main__sum-currency">₽</span>
@@ -27,41 +27,3 @@ namespace RAAS\CMS\Shop;
 
 <div data-vue-role="raas-cart-main"></div>
 <!--/noindex-->
-
-<script>
-jQuery(document).ready(function($) {
-    raasShopCartMain = new Vue({
-        el: 'raas-cart-main',
-        template: '#raas-cart-main-template',
-        data: function () {
-            return {
-                dataLoaded: false,
-                amount: 0,
-                sum: 0,
-            }
-        },
-        mounted: function () {
-            var self = this;
-            $(document).on('raas.shop.cart-updated', function (e, data) {
-                if ((data.id == 'cart') && data.remote) {
-                    self.sum = data.data.sum;
-                    self.amount = data.data.count;
-                    self.dataLoaded = true;
-                }
-            });
-        },
-        methods: {
-            formatPrice: window.formatPrice,
-            numTxt: window.numTxt,
-        },
-        computed: {
-            amountText: function () {
-                return window.numTxt(
-                    this.amount,
-                    ['товаров', 'товар', 'товара']
-                );
-            },
-        },
-    });
-});
-</script>

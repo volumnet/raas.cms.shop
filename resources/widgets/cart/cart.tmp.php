@@ -40,8 +40,7 @@ if ($_GET['AJAX']) {
     exit;
 } elseif ($epayWidget && ($epayWidget instanceof Snippet)) {
     eval('?' . '>' . $epayWidget->description);
-} elseif ($success[(int)$Block->id]) {
-    ?>
+} elseif ($success[(int)$Block->id]) { ?>
     <div class="notifications">
       <div class="alert alert-success">
         <?php echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id)?>
@@ -234,89 +233,28 @@ if ($_GET['AJAX']) {
     </div>
     <script>
     jQuery(document).ready(function($) {
-        RAASShopCartItemComponent = Vue.component('raas-shop-cart-item', {
-            props: ['item'],
-            template: '#raas-shop-cart-item-template',
-            methods: {
-                formatPrice: window.formatPrice,
-                checkAmount: function ($event) {
-                    this.item.amount = Math.max(this.item.min, this.item.amount);
-                    this.$emit('change', this.item);
-                }
-            }
-        });
-        RAASShopCartListComponent = Vue.component('raas-shop-cart-list', {
-            props: ['items', 'cart'],
-            template: '#raas-shop-cart-list-template',
-            methods: {
-                formatPrice: window.formatPrice,
-                itemUpdate: function (item) {
-                    this.cart.set(item.id, item.amount, item.meta, item.price);
-                },
-            },
-            computed: {
-                amount: function () {
-                    var amount = this.items.reduce(function (acc, item) {
-                        return acc + (parseInt(item.amount) || 1);
-                    }, 0);
-                    return amount;
-                },
-                sum: function () {
-                    var sum = this.items.reduce(function (acc, item) {
-                        return acc + (
-                            (parseFloat(item.price) || 0) *
-                            (parseInt(item.amount) || 1)
-                        );
-                    }, 0);
-                    return sum;
-                },
-            },
-        });
-        raasShopCart = new Vue({
-            el: '.cart',
-            data: function () {
-                return {
-                    items: <?php echo json_encode($cartData['items'])?>,
-                    cart: $.RAAS.Shop.ajax<?php echo $Cart->cartType->no_amount ? 'Favorites' : 'Cart'?>,
-                }
-            },
-            mounted: function () {
-                // $('input[name="phone"]').inputmask('+9 (999) 999-99-99', { showMaskOnHover: false });
-            },
-            methods: {
-                requestItemDelete: function (item) {
-                    var self = this;
-                    $.RAASConfirm('Вы действительно хотите удалить этот товар?')
-                        .then(function () {
-                            self.items = self.items.filter(function (x) {
-                                return (x.id != item.id) ||
-                                       (x.meta != item.meta);
-                            });
-                            self.cart.set(item.id, 0, item.meta, item.price);
-                        });
-                },
-                requestClear: function () {
-                    var self = this;
-                    $.RAASConfirm('Вы действительно хотите очистить корзину?')
-                        .then(function () {
-                            self.cart.clear();
-                            self.items = [];
-                        });
-                },
-            },
-        });
+        raasShopCartData = {
+            items: <?php echo json_encode($cartData['items'])?>,
+            cart: $.RAAS.Shop.ajax<?php echo $Cart->cartType->no_amount ? 'Favorites' : 'Cart'?>,
+        };
     });
     </script>
+    <?php echo Package::i()->asset([
+        '/js/raas-shop-cart-item-mixin.vue.js',
+        '/js/raas-shop-cart-list-mixin.vue.js',
+        '/js/raas-shop-cart-mixin.vue.js',
+        '/js/cart.js'
+    ]); ?>
 <?php } elseif ($localError) { ?>
-  <div class="cart">
-    <div class="alert alert-danger">
-      <ul>
-        <?php foreach ((array)$localError as $key => $val) { ?>
-            <li><?php echo htmlspecialchars($val)?></li>
-        <?php } ?>
-      </ul>
+    <div class="cart">
+      <div class="alert alert-danger">
+        <ul>
+          <?php foreach ((array)$localError as $key => $val) { ?>
+              <li><?php echo htmlspecialchars($val)?></li>
+          <?php } ?>
+        </ul>
+      </div>
     </div>
-  </div>
 <?php } else { ?>
     <div class="cart">
       <div class="cart__empty">

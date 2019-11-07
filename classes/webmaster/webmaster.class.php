@@ -98,6 +98,15 @@ class Webmaster extends CMSWebmaster
             ),
             false
         );
+        $interfaces['hidden_props'] = $this->checkSnippet(
+            $this->interfacesFolder,
+            'hidden_props',
+            'HIDDEN_PROPERTIES',
+            file_get_contents(
+                Module::i()->resourcesDir . '/interfaces/hidden_props.php'
+            ),
+            false
+        );
 
         return $interfaces;
     }
@@ -771,6 +780,57 @@ class Webmaster extends CMSWebmaster
 
 
     /**
+     * Создает фильтр
+     */
+    public function createFilter()
+    {
+        $ajax = array_shift(Page::getSet([
+            'where' => "urn = 'ajax' AND pid = " . (int)$this->Site->id
+        ]));
+        $catalogFilterPages = Page::getSet([
+            'where' => ["pid = " . (int)$ajax->id, "urn = 'catalog_filter'"]
+        ]);
+        if ($catalogFilterPages) {
+            $catalogFilterPage = $catalogFilterPages[0];
+        } else {
+            $catalogFilterPage = $this->createPage(
+                [
+                    'name' => $this->view->_('CATALOG_FILTER'),
+                    'urn' => 'catalog_filter',
+                    'template' => 0,
+                    'cache' => 1,
+                    'mime' => 'application/json',
+                    'response_code' => 200
+                ],
+                $ajax
+            );
+            $this->createBlock(
+                new Block_PHP(),
+                '',
+                null,
+                'catalog_filter',
+                $catalogFilterPage
+            );
+        }
+
+        $catalogPages = Page::getSet([
+            'where' => ["pid = " . (int)$this->Site->id, "urn = 'catalog'"]
+        ]);
+        if ($catalogPages) {
+            $catalogPage = $catalogPages[0];
+            $this->createBlock(
+                new Block_PHP(['vis_material' => Block::BYMATERIAL_WITHOUT]),
+                'left',
+                null,
+                'catalog_filter',
+                $catalogPage,
+                true
+            );
+        }
+    }
+
+
+    /**
      * Выравниваем левые блоки
      */
     public function adjustBlocks()
@@ -959,6 +1019,7 @@ class Webmaster extends CMSWebmaster
         $loaders = $this->createLoaders($catalogType, $catalog);
         $cart = $this->createCart($cartTypes['cart'], $ajax);
         $favorites = $this->createFavorites($cartTypes['favorites'], $ajax);
+        $this->createFilter();
         $this->adjustBlocks();
         $yml = $this->createYandexMarket($catalogType, $catalog);
     }

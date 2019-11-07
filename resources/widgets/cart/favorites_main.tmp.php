@@ -21,38 +21,3 @@ namespace RAAS\CMS\Shop;
 
 <div data-vue-role="raas-favorites-main"></div>
 <!--/noindex-->
-
-<script>
-jQuery(document).ready(function($) {
-    raasShopFavoritesMain = new Vue({
-        el: 'raas-favorites-main',
-        template: '#raas-favorites-main-template',
-        data: function () {
-            return {
-                dataLoaded: false,
-                amount: 0,
-            }
-        },
-        mounted: function () {
-            var self = this;
-            $(document).on('raas.shop.cart-updated', function (e, data) {
-                if ((data.id == 'favorites') && data.remote) {
-                    self.amount = data.data.count;
-                    self.dataLoaded = true;
-                }
-            });
-        },
-        methods: {
-            numTxt: window.numTxt,
-        },
-        computed: {
-            amountText: function () {
-                return window.numTxt(
-                    this.amount,
-                    ['товаров', 'товар', 'товара']
-                );
-            },
-        },
-    });
-});
-</script>

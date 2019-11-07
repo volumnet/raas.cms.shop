@@ -91,47 +91,16 @@ if ($_GET['AJAX']) {
     </div>
     <script>
     jQuery(document).ready(function($) {
-        RAASShopFavoritesItemComponent = Vue.component('raas-shop-favorites-item', {
-            props: ['item'],
-            template: '#raas-shop-favorites-item-template',
-            methods: {
-                formatPrice: window.formatPrice,
-            }
-        });
-        RAASShopFavoritesListComponent = Vue.component('raas-shop-favorites-list', {
-            props: ['items', 'cart'],
-            template: '#raas-shop-favorites-list-template',
-        });
-        raasShopFavorites = new Vue({
-            el: '.favorites',
-            data: function () {
-                return {
-                    items: <?php echo json_encode($cartData['items'])?>,
-                    cart: $.RAAS.Shop.ajax<?php echo $Cart->cartType->no_amount ? 'Favorites' : 'Cart'?>,
-                }
-            },
-            methods: {
-                requestItemDelete: function (item) {
-                    var self = this;
-                    $.RAASConfirm('Вы действительно хотите удалить этот товар?')
-                        .then(function () {
-                            self.items = self.items.filter(function (x) {
-                                return (x.id != item.id) ||
-                                       (x.meta != item.meta);
-                            });
-                            self.cart.set(item.id, 0, item.meta, item.price);
-                        });
-                },
-                requestClear: function () {
-                    var self = this;
-                    $.RAASConfirm('Вы действительно хотите очистить избранное?')
-                        .then(function () {
-                            self.items = [];
-                            self.cart.clear();
-                        });
-                },
-            },
-        });
+        raasShopFavoritesData = {
+            items: <?php echo json_encode($cartData['items'])?>,
+            cart: $.RAAS.Shop.ajax<?php echo $Cart->cartType->no_amount ? 'Favorites' : 'Cart'?>,
+        };
     });
     </script>
+    <?php echo Package::i()->asset([
+        '/js/raas-shop-cart-item-mixin.vue.js',
+        '/js/raas-shop-cart-list-mixin.vue.js',
+        '/js/raas-shop-cart-mixin.vue.js',
+        '/js/favorites.js'
+    ]); ?>
 <?php }
