@@ -8,8 +8,8 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<template id="raas-favorites-main-template">
-  <a href="/favorites/" class="favorites-main" rel="nofollow" v-bind:class="{ 'favorites-main_active': dataLoaded }" rel="nofollow">
+<script type="text/html" id="raas-favorites-main-template">
+  <a href="/favorites/" class="favorites-main" rel="nofollow" :class="{ 'favorites-main_active': dataLoaded }">
     <span class="favorites-main__amount" v-if="amount > 0">
       {{ amount }}
     </span>
@@ -17,7 +17,7 @@ namespace RAAS\CMS\Shop;
       <span class="favorites-main__title"><?php echo FAVORITES?></span>
     </span>
   </a>
-</template>
+</script>
 
 <div data-vue-role="raas-favorites-main"></div>
 <!--/noindex-->

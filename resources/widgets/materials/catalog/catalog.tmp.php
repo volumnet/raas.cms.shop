@@ -126,7 +126,7 @@ if ($Item) {
             <!--/noindex-->
             <!--noindex-->
             <div class="catalog-article__share">
-              <script type="text/javascript" src="//yastatic.net/share/share.js" charset="utf-8"></script>
+              <script src="//yastatic.net/share/share.js"></script>
               <?php echo SHARE?>: <div class="yashare-auto-init" style="display: inline-block; vertical-align: middle" data-yashareL10n="ru" data-yashareQuickServices="vkontakte,facebook,twitter,odnoklassniki,moimir" data-yashareTheme="counter"></div>
             </div>
             <!--/noindex-->
@@ -279,8 +279,6 @@ if ($Item) {
                                           </a>
                                         </div>
                                       </div>';
-
-                            $text .= '</div>';
                         }
                         $text .= ' </div>
                                  </div>';
@@ -336,7 +334,7 @@ if ($Item) {
                   </li>
               <?php $i++; } ?>
             </ul>
-            <div class="tab-content catalog-article__tabs-list catalog-article-tabs-list" style="padding: 15px 0;">
+            <div class="tab-content catalog-article__tabs-list catalog-article-tabs-list">
               <?php $i = 0; foreach ($tabs as $key => $row) { ?>
                   <div class="catalog-article-tabs-list__item catalog-article-tabs-item tab-pane<?php echo !$i ? ' active' : ''?>" id="<?php echo $key?>">
                     <?php echo $row['description']?>

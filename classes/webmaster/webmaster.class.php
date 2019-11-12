@@ -13,6 +13,7 @@ use RAAS\CMS\Material_Type;
 use RAAS\CMS\Menu;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
+use RAAS\CMS\Page_Field;
 use RAAS\CMS\Snippet;
 use RAAS\CMS\Snippet_Folder;
 use RAAS\CMS\Webmaster as CMSWebmaster;
@@ -122,6 +123,7 @@ class Webmaster extends CMSWebmaster
         $widgetsData = [
             'cart/cart' => View_Web::i()->_('CART'),
             'cart/favorites' => View_Web::i()->_('FAVORITES'),
+            'cart/order' => View_Web::i()->_('VIEW_ORDER'),
             'epay/robokassa' => View_Web::i()->_('ROBOKASSA'),
             'materials/catalog/catalog_item' => View_Web::i()->_('CATALOG_ITEM'),
             'materials/catalog/catalog_category' => View_Web::i()->_('CATEGORY_INC'),
@@ -485,7 +487,20 @@ class Webmaster extends CMSWebmaster
         ]);
         if ($temp) {
             $catalog = $temp[0];
+            $catalog->trust();
         } else {
+            foreach (['title', 'description', 'keywords'] as $key) {
+                $urn = 'meta_' . $key . '_template';
+                $field = new Page_Field([
+                    'classname' => Material_Type::class,
+                    'pid' => 0,
+                    'datatype' => 'text',
+                    'urn' => $urn,
+                    'name' => $this->view->_(mb_strtoupper($urn)),
+                ]);
+                $field->commit();
+            }
+
             $categories = [];
             $catalog = $this->createPage(
                 ['name' => $this->view->_('CATALOG'), 'urn' => 'catalog'],
@@ -544,7 +559,6 @@ class Webmaster extends CMSWebmaster
                     'vis' => 1,
                     'name' => $this->view->_('GOODS_ITEM') . ' ' . ($i + 1),
                     'description' => $temp['text'],
-                    'priority' => ($i + 1) * 10,
                     'sitemaps_priority' => 0.5
                 ]);
                 $cats = [];
@@ -611,6 +625,9 @@ class Webmaster extends CMSWebmaster
                 'rows_per_page' => 20,
                 'sort_field_default' => (int)$catalogType->fields['price']->id,
                 'sort_order_default' => 'asc',
+                'sort_var_name' => 'sort',
+                'order_var_name' => 'order',
+                'params' => 'metaTemplates=template&withChildrenGoods=1&commentFormBlock=&commentsListBlock='
             ]);
             $catalogBlock = $this->createBlock(
                 $B,
@@ -620,6 +637,29 @@ class Webmaster extends CMSWebmaster
                 $catalog,
                 true
             );
+            $B->filter = [
+                [
+                    'id' => (int)$B->id,
+                    'var' => 'search_string',
+                    'relation' => 'FULLTEXT',
+                    'field' => (int)$catalogType->fields['article']->id,
+                ]
+            ];
+            $B->sort = [
+                [
+                    'id' => (int)$B->id,
+                    'var' => 'price',
+                    'field' => (int)$catalogType->fields['price']->id,
+                    'relation' => 'asc',
+                ],
+                [
+                    'id' => (int)$B->id,
+                    'var' => 'name',
+                    'field' => 'name',
+                    'relation' => 'asc',
+                ],
+            ];
+            $B->commit();
 
             $B = new Block_PHP();
             $specBlock = $this->createBlock(
@@ -648,6 +688,7 @@ class Webmaster extends CMSWebmaster
         ]);
         if ($temp) {
             $cart = $temp[0];
+            $cart->trust();
         } else {
             $cart = $this->createPage(
                 [
@@ -683,6 +724,7 @@ class Webmaster extends CMSWebmaster
         ]);
         if ($temp) {
             $ajaxCart = $temp[0];
+            $ajaxCart->trust();
         } else {
             $ajaxCart = $this->createPage(
                 [
@@ -720,6 +762,7 @@ class Webmaster extends CMSWebmaster
         ]);
         if ($temp) {
             $favorites = $temp[0];
+            $favorites->trust();
         } else {
             $favorites = $this->createPage(
                 [
@@ -755,6 +798,7 @@ class Webmaster extends CMSWebmaster
         ]);
         if ($temp) {
             $ajaxFavorites = $temp[0];
+            $ajaxFavorites->trust();
         } else {
             $ajaxFavorites = $this->createPage(
                 [
@@ -792,6 +836,7 @@ class Webmaster extends CMSWebmaster
         ]);
         if ($catalogFilterPages) {
             $catalogFilterPage = $catalogFilterPages[0];
+            $catalogFilterPage->trust();
         } else {
             $catalogFilterPage = $this->createPage(
                 [
@@ -818,6 +863,7 @@ class Webmaster extends CMSWebmaster
         ]);
         if ($catalogPages) {
             $catalogPage = $catalogPages[0];
+            $catalogPage->trust();
             $this->createBlock(
                 new Block_PHP(['vis_material' => Block::BYMATERIAL_WITHOUT]),
                 'left',
@@ -858,6 +904,7 @@ class Webmaster extends CMSWebmaster
         ]);
         if ($temp) {
             $yml = $temp[0];
+            $yml->trust();
         } else {
             $yml = $this->createPage(
                 [

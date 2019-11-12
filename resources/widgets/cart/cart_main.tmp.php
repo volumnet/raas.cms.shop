@@ -8,8 +8,8 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<template id="raas-cart-main-template">
-  <a href="/cart/" class="cart-main" rel="nofollow" v-bind:class="{ 'cart-main_active': dataLoaded }" rel="nofollow">
+<script type="text/html" id="raas-cart-main-template">
+  <a href="/cart/" class="cart-main" rel="nofollow" :class="{ 'cart-main_active': dataLoaded }">
     <span class="cart-main__amount" v-if="amount > 0">
       {{ amount }}
     </span>
@@ -23,7 +23,7 @@ namespace RAAS\CMS\Shop;
       </span>
     </span>
   </a>
-</template>
+</script>
 
 <div data-vue-role="raas-cart-main"></div>
 <!--/noindex-->

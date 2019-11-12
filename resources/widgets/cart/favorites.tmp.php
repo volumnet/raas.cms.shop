@@ -30,16 +30,16 @@ if ($_GET['AJAX']) {
     echo json_encode($cartData);
     exit;
 } else { ?>
-    <template id="raas-shop-favorites-item-template">
+    <script type="text/html" id="raas-shop-favorites-item-template">
       <div class="favorites-list__item">
         <div class="favorites-item">
           <div class="favorites-item__image">
-            <a v-bind:href="item.url" v-if="item.image">
-              <img v-bind:src="item.image" alt="">
+            <a :href="item.url" v-if="item.image">
+              <img :src="item.image" alt="">
             </a>
           </div>
           <div class="favorites-item__title">
-            <a v-bind:href="item.url">
+            <a :href="item.url">
               {{ item.name }}
             </a>
           </div>
@@ -51,8 +51,8 @@ if ($_GET['AJAX']) {
           </div>
         </div>
       </div>
-    </template>
-    <template id="raas-shop-favorites-list-template">
+    </script>
+    <script type="text/html" id="raas-shop-favorites-list-template">
       <div class="favorites-list">
         <div class="favorites-list__header">
           <div class="favorites-list__item favorites-list__item_header">
@@ -71,7 +71,7 @@ if ($_GET['AJAX']) {
           </div>
         </div>
         <div class="favorites-list__list">
-          <raas-shop-favorites-item v-for="item in items" v-bind:item="item" v-on:delete="$emit('delete', item)"></raas-shop-favorites-item>
+          <raas-shop-favorites-item v-for="item in items" :item="item" v-on:delete="$emit('delete', item)"></raas-shop-favorites-item>
         </div>
         <div class="favorites-list__actions">
           <a class="favorites-list__clear" v-on:click="$emit('clear')">
@@ -79,13 +79,13 @@ if ($_GET['AJAX']) {
           </a>
         </div>
       </div>
-    </template>
+    </script>
 
     <div class="favorites">
-      <div class="favorites__list" v-if="items.length">
-        <raas-shop-favorites-list v-bind:items="items" v-bind:cart="cart" v-on:clear="requestClear()" v-on:delete="requestItemDelete($event)"></raas-shop-favorites-list>
+      <div class="favorites__list" data-v-if="items.length">
+        <raas-shop-favorites-list data-v-bind_items="items" data-v-bind_cart="cart" data-v-on_clear="requestClear()" data-v-on_delete="requestItemDelete($event)"></raas-shop-favorites-list>
       </div>
-      <div class="favorites__empty" v-if="!items.length">
+      <div class="favorites__empty" data-v-if="!items.length">
         <?php echo htmlspecialchars(YOUR_FAVORITES_IS_EMPTY)?>
       </div>
     </div>
