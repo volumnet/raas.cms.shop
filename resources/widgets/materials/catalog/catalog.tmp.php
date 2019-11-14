@@ -381,6 +381,13 @@ if ($Item) {
             }
             if ($Set) {
                 ?>
+                <div class="catalog__sort">
+                  <?php Snippet::importByURN('catalog_sort')->process([
+                      'sort' => $sort,
+                      'order' => $order,
+                      'Block' => $Block,
+                  ])?>
+                </div>
                 <div class="catalog__list">
                   <div class="catalog-list">
                     <?php foreach ($Set as $row) { ?>

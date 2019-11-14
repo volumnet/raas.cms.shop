@@ -21,9 +21,6 @@ namespace RAAS\CMS\Shop;
 use RAAS\Application;
 use \RAAS\CMS\Page;
 
-// @todo Убрать после перехода на Composer
-require_once Application::i()->includeDir . '/phpexcel/Classes/PHPExcel.php';
-
 $interface = new PriceloaderInterface($Loader);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $type = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));

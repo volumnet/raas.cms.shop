@@ -129,6 +129,7 @@ class Webmaster extends CMSWebmaster
             'materials/catalog/catalog_category' => View_Web::i()->_('CATEGORY_INC'),
             'materials/catalog/catalog' => View_Web::i()->_('CATALOG'),
             'materials/catalog/catalog_filter' => View_Web::i()->_('CATALOG_FILTER'),
+            'materials/catalog/catalog_sort' => View_Web::i()->_('CATALOG_SORT'),
             'cart/cart_main' => View_Web::i()->_('CART_MAIN'),
             'cart/favorites_main' => View_Web::i()->_('FAVORITES_MAIN'),
             'materials/catalog/spec' => View_Web::i()->_('SPECIAL_OFFER'),
