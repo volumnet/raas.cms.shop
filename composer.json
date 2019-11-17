@@ -2,6 +2,7 @@
     "name": "volumnet/raas.cms.shop",
     "description": "RAAS.CMS.Shop",
     "version": "4.2.1",
+    "license": "GPL-3.0-or-later",
     "require": {
         "php": ">=5.6",
         "ext-session": "*",
