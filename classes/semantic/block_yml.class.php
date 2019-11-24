@@ -1,9 +1,10 @@
 <?php
 namespace RAAS\CMS\Shop;
 
-use \RAAS\CMS\Block;
-use \RAAS\CMS\Material_Type;
-use \RAAS\CMS\Material_Field;
+use RAAS\CMS\Block;
+use RAAS\CMS\Material_Type;
+use RAAS\CMS\Material_Field;
+use RAAS\CMS\Page;
 
 class Block_YML extends Block
 {
@@ -348,5 +349,30 @@ class Block_YML extends Block
             }
         }
         return $Set;
+    }
+
+
+    /**
+     * Обработчик события сохранения страницы
+     *
+     * Добавляет в обработку новую страницу, если родительская там уже была
+     * @param Page $page Сохраненная страница
+     * @param mixed $data Дополнительные данные
+     */
+    public static function pageCommitEventListener(Page $page, $data)
+    {
+        if ($data['new']) {
+            $sqlQuery = "SELECT id
+                           FROM cms_shop_blocks_yml_pages_assoc
+                          WHERE page_id = ?";
+            $blocksIds = static::$SQL->getcol([$sqlQuery, (int)$page->pid]);
+            $sqlArr = [];
+            foreach ($blocksIds as $blockId) {
+                $sqlArr[] = ['id' => $blockId, 'page_id' => $page->id];
+            }
+            if ($sqlArr) {
+                static::$SQL->add('cms_shop_blocks_yml_pages_assoc', $sqlArr);
+            }
+        }
     }
 }

@@ -1,13 +1,17 @@
 <?php
 namespace RAAS\CMS\Shop;
 
+use SOME\EventProcessor;
 use SOME\Pages;
+use SOME\SOME;
 use RAAS\Application;
 use RAAS\Module as RAASModule;
 use RAAS\CMS\Block_Type;
 use RAAS\CMS\Field;
 use RAAS\CMS\Form;
 use RAAS\CMS\Form_Field;
+use RAAS\CMS\Material_Type;
+use RAAS\CMS\Page;
 
 class Module extends RAASModule
 {
@@ -20,6 +24,17 @@ class Module extends RAASModule
                 return parent::__get($var);
                 break;
         }
+    }
+
+
+    public function init()
+    {
+        EventProcessor::on(
+            SOME::class . ':commit:commit',
+            Page::class,
+            [Block_YML::class, 'pageCommitEventListener']
+        );
+        parent::init();
     }
 
 
