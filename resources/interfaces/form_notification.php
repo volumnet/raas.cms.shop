@@ -3,6 +3,7 @@
  * Стандартное уведомление о заказе
  * @param bool $SMS Уведомление отправляется по SMS
  * @param Order $Item Уведомление формы обратной связи
+ * @param bool $forUser Отправка для пользователя
  */
 namespace RAAS\CMS\Shop;
 

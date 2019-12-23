@@ -14,6 +14,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Page;
+use RAAS\CMS\Snippet;
 
 if ($success[(int)$Block->id] || $localError) {
     ?>

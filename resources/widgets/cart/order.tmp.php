@@ -87,7 +87,13 @@ use SOME\Text;
               <?php echo htmlspecialchars($field->name)?>
             </label>
             <div class="col-sm-9 col-md-4">
-              <?php echo htmlspecialchars($Item->fields[$field->urn]->doRich())?>
+              <?php
+              if ($field->datatype == 'checkbox' && !$field->multiple) {
+                  echo ($field->getValue() ? 'да' : 'нет');
+              } else {
+                  echo htmlspecialchars($order->fields[$fieldURN]->doRich());
+              }
+              ?>
             </div>
           </div>
       <?php } ?>

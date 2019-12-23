@@ -214,8 +214,8 @@ if ($Item) {
             if ($propsArr) {
                 $propsArr = array_map(function ($x) {
                     return str_replace(
-                        'catalog-article-props-item',
-                        'catalog-article-props-list__item catalog-article-props-item',
+                        'catalog-article-props-item"',
+                        'catalog-article-props-list__item catalog-article-props-item"',
                         $x
                     );
                 }, $propsArr); ?>
@@ -273,12 +273,26 @@ if ($Item) {
                                 $ytid = trim($regs[10]);
                             }
                             $text .= '<div class="catalog-article-videos-list__item">
-                                        <div class="catalog-article-videos-item">
-                                          <a class="catalog-article-videos-item__image" href="https://youtube.com/embed/' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
-                                            <img src="https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
+                                        <div class="catalog-article-videos-item" itemscope itemtype="http://schema.org/VideoObject">
+                                          <meta itemprop="name" content="' . htmlspecialchars($Item->name) . '" />
+                                          <meta itemprop="description" content="' . htmlspecialchars($Item->name) . '" />
+                                          <meta itemprop="uploadDate" content="' . date('Y-m-d', strtotime($Item->modify_date)) . '" />
+                                          <meta itemprop="thumbnailUrl" content="https://i.ytimg.com/vi/' . htmlspecialchars(addslashes($ytid)) . '/hqdefault.jpg" />
+                                          <a itemprop="url" class="catalog-article-videos-item__image" href="https://youtube.com/embed/' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
+                                            <img itemprop="thumbnail" src="https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
                                           </a>
                                         </div>
                                       </div>';
+                            $jsonLd = [
+                                '@context' => 'http://schema.org',
+                                '@type' => 'VideoObject',
+                                'name' => $Item->name,
+                                'description' => $Item->name,
+                                'url' => 'https://youtube.com/embed/' . $ytid,
+                                'thumbnailUrl' => 'https://i.ytimg.com/vi/' . addslashes($ytid) . '/hqdefault.jpg',
+                                'uploadDate' => date('Y-m-d', strtotime($Item->modify_date)),
+                            ];
+                            $text .= '<script type="application/ld+json">' . json_encode($jsonLd) . '</script>';
                         }
                         $text .= ' </div>
                                  </div>';
