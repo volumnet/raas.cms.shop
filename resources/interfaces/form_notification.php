@@ -150,7 +150,7 @@ $emailField = function (Form_Field $field) {
           <?php $sum += $row->amount * $row->realprice; } ?>
           <tr>
             <th colspan="4" style="text-align: right"><?php echo TOTAL_SUM?>:</th>
-            <th style="text-align: right"><?php echo number_format($sum, 2, '.', ' ')?></th>
+            <th style="text-align: right; white-space: nowrap;"><?php echo number_format($sum, 2, '.', ' ')?></th>
           </tr>
         </tbody>
       </table>
