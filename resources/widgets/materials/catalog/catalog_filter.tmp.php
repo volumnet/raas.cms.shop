@@ -19,9 +19,10 @@ if (!$DATA['sort']) {
     $DATA['sort'] = ''; // Иначе в JavaScript будет подставляться функция сортировки массивов
 }
 
+$pageMime = $Page->mime;
 $catalogBlock = Block::spawn(37);
 $catalogInterface = new CatalogInterface();
-if ($Page->mime == 'application/json') {
+if ($pageMime == 'application/json') {
     $catalog = new Page($DATA['id']);
     unset($DATA['block_id'], $DATA['id']);
 } else {
@@ -44,7 +45,7 @@ $availableProperties = array_filter(
 );
 
 $result = [
-    'counter' => count($catalogInterface->getIdsList($catalogBlock, $catalog, $DATA)),
+    'counter' => count($catalog->catalogFilter->getIds()),
     'filter' => $catalog->catalogFilter->filter,
     'data' => $DATA,
     'properties' => [],
@@ -66,7 +67,9 @@ foreach ($availableProperties as $propId => $availableProperty) {
         if (((trim($valueData['value']) !== '') && (trim($valueData['doRich']) !== '')) ||
             ($prop->datatype == 'number')
         ) {
-            $result['properties'][trim($propId)]['values'][trim($value)] = $valueData;
+            if (($pageMime == 'application/json') || ($valueData['checked'])) {
+                $result['properties'][trim($propId)]['values'][trim($value)] = $valueData;
+            }
         }
     }
 }
@@ -82,7 +85,7 @@ usort($properties, function ($a, $b) {
 });
 $result['properties'] = $properties;
 
-if ($Page->mime == 'application/json') {
+if ($pageMime == 'application/json') {
     echo json_encode($result);
     exit;
 } elseif ($catalog->visChildren) {

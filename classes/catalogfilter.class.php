@@ -762,13 +762,12 @@ class CatalogFilter
     {
         $propsToGoodsIds = [];
         foreach ($propsMapping as $propsVar => $propsValues) {
-            $propsToGoodsIds[$propsVar] = array_reduce(
-                $propsValues,
-                function ($a, $b) {
-                    return $a + $b;
-                },
-                []
-            );
+            if (!isset($propsToGoodsIds[$propsVar])) {
+                $propsToGoodsIds[$propsVar] = [];
+            }
+            foreach ($propsValues as $propValue => $propValueIds) {
+                $propsToGoodsIds[$propsVar] += (array)$propValueIds;
+            }
             // $propsToGoodsIds[$propsVar] = array_values(array_unique($propsToGoodsIds[$propsVar]));
         }
         return $propsToGoodsIds;
