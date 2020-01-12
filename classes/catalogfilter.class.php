@@ -856,17 +856,49 @@ class CatalogFilter
      *                                     ['from' => float, 'to' => float]|
      *                                     ['like' => string] значение или набор значений
      *        > $filter Фильтр для проверки
-     * @param array<int[] ID# свойства => Material_Field свойство> $properties Все свойства
-     * @param Catalog $catalog Текущий каталог
+     * @param string|null $additionalPropertyURN URN дополнительного свойства
+     *                                           для установки/снятия
+     * @param mixed $additionalValue Дополнительное значение
+     *                               для установки/снятия
+     * @param bool $exclusive Использовать только дополнительное свойство
      * @return string
      * @throws Exception Выбрасывает исключение, если категория каталога не установлена
      */
-    public function getCanonicalURLFromFilter(array $filter = [])
-    {
+    public function getCanonicalURLFromFilter(
+        array $filter = [],
+        $additionalPropertyURN = null,
+        $additionalValue = null,
+        $exclusive = false
+    ) {
         if (!$this->catalog->id) {
             throw new Exception('Catalog is not set');
         }
         $params = $this->getURLParamsFromFilter($filter);
+
+        if ($additionalPropertyURN) {
+            $params[$additionalPropertyURN] = (array)$params[$additionalPropertyURN];
+            $additionalKeys = array_keys(
+                (array)$params[$additionalPropertyURN],
+                $additionalValue
+            );
+            if ($exclusive) {
+                unset($params[$additionalPropertyURN]);
+                if (!$additionalKeys) {
+                    $params[$additionalPropertyURN][] = $additionalValue;
+                }
+            } else {
+                if ($additionalKeys) {
+            // ob_end_clean(); var_dump($additionalKeys); exit;
+                    foreach ($additionalKeys as $key) {
+                        unset($params[$additionalPropertyURN][$key]);
+                    }
+                    $params[$additionalPropertyURN] = array_values($params[$additionalPropertyURN]);
+                } else {
+                    $params[$additionalPropertyURN][] = $additionalValue;
+                }
+            }
+        }
+
         if (!count($params)) {
             return $this->catalog->url;
         }
@@ -877,7 +909,9 @@ class CatalogFilter
         $urlArray = array_filter(array_merge($urlArray, $params), function ($x) {
             return $x !== '';
         });
-        return $this->catalog->url . '?' . http_build_query($urlArray);
+        $urlSuffix = http_build_query($urlArray);
+        $urlSuffix = $urlSuffix ? '?' . $urlSuffix : '';
+        return $this->catalog->url . $urlSuffix;
     }
 
 
