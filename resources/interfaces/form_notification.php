@@ -103,9 +103,13 @@ $emailField = function (Form_Field $field) {
 };
 ?>
 <?php if ($SMS) {
-    echo date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER_USER, $Item->id, $_SERVER['HTTP_HOST']) . "\n";
-    foreach ($Item->fields as $field) {
-        echo $smsField($field);
+    if ($forUser) {
+        echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id);
+    } else {
+        echo date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER_USER, $Item->id, $_SERVER['HTTP_HOST']) . "\n";
+        foreach ($Item->fields as $field) {
+            echo $smsField($field);
+        }
     }
 } else { ?>
     <div>

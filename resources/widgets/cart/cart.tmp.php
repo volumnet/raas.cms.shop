@@ -65,7 +65,7 @@ if ($_GET['AJAX']) {
           </div>
           <div class="cart-item__amount-block">
             <a class="cart-item__decrement" v-on:click="item.amount = (parseInt(item.amount) || 1) - (parseInt(item.step) || 1); checkAmount();">–</a>
-            <input type="number" class="cart-item__amount" autocomplete="off" name="amount[]" :min="item.min" :step="item.step" v-model="item.amount" v-on:change="checkAmount();" />
+            <input type="number" class="cart-item__amount" autocomplete="new-password" :name="'amount[' + item.id + '_' + item.meta + ']'" :min="item.min" :step="item.step" v-model="item.amount" v-on:change="checkAmount();" />
             <a class="cart-item__increment" v-on:click="item.amount = (parseInt(item.amount) || 1) + (parseInt(item.step) || 1); checkAmount();">+</a>
           </div>
           <div class="cart-item__sum">
