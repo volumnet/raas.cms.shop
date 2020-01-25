@@ -8,6 +8,7 @@ use PHPExcel_IOFactory;
 use SOME\CSV;
 use SOME\SOME;
 use SOME\Text;
+use SOME\EventProcessor;
 use RAAS\Exception;
 use RAAS\Attachment;
 use RAAS\CMS\AbstractInterface;
@@ -676,17 +677,19 @@ class PriceloaderInterface extends AbstractInterface
     ) {
         foreach ($fieldsToClearIds as $fieldId) {
             $field = new Material_Field($fieldId);
-            $log[] = [
+            $logEntry = [
                 'time' => (microtime(true) - $st),
                 'text' => sprintf(
                     Module::i()->view->_('LOG_DELETE_FIELDS'),
                     $field->name
                 )
             ];
+            $log[] = $logEntry;
+            EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
         }
         foreach ($attachmentsToClearIds as $attachmentId) {
             $attachment = new Attachment($attachmentId);
-            $log[] = [
+            $logEntry = [
                 'time' => (microtime(true) - $st),
                 'text' => sprintf(
                     Module::i()->view->_('LOG_DELETE_ATTACHMENTS'),
@@ -694,6 +697,8 @@ class PriceloaderInterface extends AbstractInterface
                     $attachment->realname
                 )
             ];
+            $log[] = $logEntry;
+            EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
         }
     }
 
@@ -710,6 +715,7 @@ class PriceloaderInterface extends AbstractInterface
     {
         $converter = PriceloaderDataConverter::spawn($type);
         $data = $converter->load($file);
+        EventProcessor::emit('priceLoaderDataParsed', $this, []);
         return $data;
     }
 
@@ -883,7 +889,7 @@ class PriceloaderInterface extends AbstractInterface
         foreach ($itemSet as $item) {
             $this->processItem($loader, $item, $root, $context, $dataRow, $uniqueIndex, $test);
             $affectedMaterialsIds[] = (int)$item->id;
-            $log[] = [
+            $logEntry = [
                 'time' => (microtime(true) - $st),
                 'text' => sprintf(
                     Module::i()->view->_('LOG_MATERIAL_' . ($new ? 'CREATED' : 'UPDATED')),
@@ -893,6 +899,8 @@ class PriceloaderInterface extends AbstractInterface
                 'row' => $i,
                 'realrow' => $i + $rows,
             ];
+            $log[] = $logEntry;
+            EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
             $item->rollback();
             unset($item);
         }
@@ -972,6 +980,7 @@ class PriceloaderInterface extends AbstractInterface
                 );
             }
             $log[] = $logEntry;
+            EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
         }
     }
 
@@ -1091,7 +1100,7 @@ class PriceloaderInterface extends AbstractInterface
         } else {
             foreach ($materialsToClearIds as $materialId) {
                 $material = new Material($materialId);
-                $log[] = [
+                $logEntry = [
                     'time' => (microtime(true) - $st),
                     'text' => sprintf(
                         Module::i()->view->_('LOG_DELETE_MATERIALS'),
@@ -1099,6 +1108,8 @@ class PriceloaderInterface extends AbstractInterface
                         $material->name
                     )
                 ];
+                $log[] = $logEntry;
+                EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
             }
             $this->logDeleteFieldsAndAttachments($log, $fieldsToClearIds, $attachmentsToClearIds, $st);
         }
@@ -1136,7 +1147,7 @@ class PriceloaderInterface extends AbstractInterface
         } else {
             foreach ($pagesToClearIds as $pageId) {
                 $page = new Page($pageId);
-                $log[] = [
+                $logEntry = [
                     'time' => (microtime(true) - $st),
                     'text' => sprintf(
                         Module::i()->view->_('LOG_DELETE_PAGES'),
@@ -1144,6 +1155,8 @@ class PriceloaderInterface extends AbstractInterface
                         $page->name
                     )
                 ];
+                $log[] = $logEntry;
+                EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
             }
             $this->logDeleteFieldsAndAttachments($log, $fieldsToClearIds, $attachmentsToClearIds, $st);
         }
@@ -1197,7 +1210,7 @@ class PriceloaderInterface extends AbstractInterface
             $this->clearPages($deleteRoot, $log, $affectedPagesIds, $test, $st);
         }
 
-        $log[] = [
+        $logEntry = [
             'time' => (microtime(true) - $st),
             'text' => sprintf(
                 Module::i()->view->_('LOG_OLD_MATERIALS_CLEARED'),
@@ -1206,6 +1219,8 @@ class PriceloaderInterface extends AbstractInterface
                 $page->name
             )
         ];
+        $log[] = $logEntry;
+        EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
     }
 
 
