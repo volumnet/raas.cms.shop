@@ -17,6 +17,7 @@ use RAAS\CMS\Page;
 use RAAS\CMS\Material;
 use RAAS\CMS\Sub_Main as Package_Sub_Main;
 use RAAS\CMS\Material_Field;
+use RAAS\CMS\Material_Type;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page_Field;
 use RAAS\CMS\Field;
