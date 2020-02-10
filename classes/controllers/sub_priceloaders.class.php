@@ -19,6 +19,7 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
                 $Page = isset($_GET['cat_id']) ? (new Page((int)$_GET['cat_id'])) : $Loader->Page;
                 $type = isset($_GET['type']) ? trim($_GET['type']) : '';
                 $encoding = isset($_GET['encoding']) ? trim($_GET['encoding']) : '';
+                ini_set('max_execution_time', 3600);
                 $IN = $Loader->download($Page, $rows, $cols, $type, $encoding);
             }
             $OUT['DATA']['rows'] = (int)$_GET['rows'];

@@ -131,7 +131,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                 'show_data' => array('type' => 'checkbox', 'name' => 'show_data', 'caption' => $this->view->_('DATA'), 'style' => 'margin: 0;', 'default' => 1),
             ),
             'template' => 'loaders.tmp.php',
-            'commit' => function($Form) {
+            'commit' => function ($Form) {
                 $Loader = new PriceLoader((int)$_POST['loader']);
                 $Form->meta['OUT'] = array();
                 if ($Loader->id) {
@@ -144,6 +144,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                     $Page = new Page(isset($_POST['cat_id']) ? (int)$_POST['cat_id'] : 0);
                     $rows = isset($_POST['rows']) ? (int)$_POST['rows'] : 0;
                     $cols = isset($_POST['cols']) ? (int)$_POST['cols'] : 0;
+                    ini_set('max_execution_time', 3600);
                     $IN = $Loader->upload($file, $Page, $test, $clear, $rows, $cols);
                     $Form->meta['OUT'] = $IN;
                 }
