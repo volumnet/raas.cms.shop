@@ -646,6 +646,8 @@ class PriceloaderInterface extends AbstractInterface
         $context = new Page($arr);
         $this->inheritPageNativeFields($context);
         if (!$test) {
+            // 2020-02-10, AVS: для ускорения не обновляем связанные страницы
+            $context->dontUpdateAffectedPages = true;
             $context->commit();
             $this->inheritPageCustomFields($context);
             $context->rollback();
@@ -849,6 +851,8 @@ class PriceloaderInterface extends AbstractInterface
         $new = !$item->id;
         $this->applyNativeFields($loader, $item, $dataRow, $uniqueIndex);
         if (!$test) {
+            // 2020-02-10, AVS: для ускорения не обновляем связанные страницы
+            $context->dontUpdateAffectedPages = true;
             $item->commit();
             $this->checkAssoc($item, $root, $context, $new);
             $this->applyCustomFields($loader, $item, $dataRow, $new, $uniqueIndex);
@@ -1075,6 +1079,9 @@ class PriceloaderInterface extends AbstractInterface
             }
             $rawData[] = $dataRow;
         }
+        // 2020-02-10, AVS: для ускорения обновим связанные страницы здесь
+        Material_Type::updateAffectedPagesForSelf();
+        Material_Type::updateAffectedPagesForMaterials();
     }
 
 
