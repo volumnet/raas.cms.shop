@@ -32,11 +32,13 @@ class PriceloaderInterface extends AbstractInterface
 
     /**
      * Максимальное время загрузки прайса
+     * @deprecated
      */
     const UPLOAD_MAX_TIME = 3600;
 
     /**
      * Максимальное время выгрузки прайса
+     * @deprecated
      */
     const DOWNLOAD_MAX_TIME = 900;
 
@@ -135,7 +137,6 @@ class PriceloaderInterface extends AbstractInterface
         $cols = 0
     ) {
         $st = microtime(true);
-        ini_set('max_execution_time', self::UPLOAD_MAX_TIME);
         // Загрузка прайса
         $affectedPagesIds = $affectedMaterialsIds = $log = $rawData = [];
         if (!$file || !is_file($file)) {
@@ -331,13 +332,23 @@ class PriceloaderInterface extends AbstractInterface
                 if ($val instanceof SOME) {
                     $data[$k] = (int)$val->id;
                 } elseif (!is_object($val) && !is_array($val)) {
-                    if ($val = $col->Field->fromRich(trim($val))) {
+                    // 2020-02-10, AVS: добавили fallback без fromRich,
+                    // на случай если данные грузятся явно
+                    if ($valFR = $col->Field->fromRich(trim($val))) {
+                        $data[$k] = $valFR;
+                    } else {
                         $data[$k] = $val;
                     }
                 }
             }
         } else {
-            $data = $col->Field->fromRich(trim($data));
+            // 2020-02-10, AVS: добавили fallback без fromRich,
+            // на случай если данные грузятся явно
+            if ($valFR = $col->Field->fromRich(trim($data))) {
+                $data = $valFR;
+            } else {
+                $data = trim($data);
+            }
         }
         return $data;
     }
