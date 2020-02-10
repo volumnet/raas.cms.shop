@@ -853,7 +853,7 @@ class PriceloaderInterface extends AbstractInterface
         $this->applyNativeFields($loader, $item, $dataRow, $uniqueIndex);
         if (!$test) {
             // 2020-02-10, AVS: для ускорения не обновляем связанные страницы
-            $context->dontUpdateAffectedPages = true;
+            $item->dontUpdateAffectedPages = true;
             $item->commit();
             $this->checkAssoc($item, $root, $context, $new);
             $this->applyCustomFields($loader, $item, $dataRow, $new, $uniqueIndex);
