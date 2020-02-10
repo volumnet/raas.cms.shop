@@ -18,6 +18,7 @@ use RAAS\CMS\Material;
 use RAAS\CMS\Sub_Main as Package_Sub_Main;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Material_Type;
+use RAAS\CMS\MaterialTypeRecursiveCache;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page_Field;
 use RAAS\CMS\Field;
@@ -48,6 +49,12 @@ class PriceloaderInterface extends AbstractInterface
      * @var PriceLoader
      */
     protected $loader;
+
+    /**
+     * Ассоциации уникального поля с товарами
+     * @var array<string[] Значение уникального поля => int[] ID# товаров>
+     */
+    public $assoc = [];
 
     public function __get($var)
     {
@@ -363,22 +370,37 @@ class PriceloaderInterface extends AbstractInterface
      */
     public function getItemsByUniqueField(PriceLoader $loader, $text)
     {
-        if (trim($text) && $loader->ufid) {
-            $sqlQuery = " SELECT tM.* FROM " . Material::_tablename() . " AS tM ";
-            $sqlBind = [];
-            if ($loader->Unique_Field->id) {
-                $sqlQuery .= " JOIN " . Material::_dbprefix() . "cms_data
-                                 AS tD
-                                 ON tD.pid = tM.id AND tD.fid = ?
-                              WHERE TRIM(tD.value)";
-                $sqlBind[] = (int)$loader->Unique_Field->id;
-            } elseif ($loader->ufid) {
-                $sqlQuery .= " WHERE TRIM(tM." . $loader->ufid . ")";
+        if ($ufid = $loader->ufid) {
+            // Получим ассоциации
+            if (!$this->assoc) {
+                $sqlBind = [];
+                $uniqueFieldId = $loader->Unique_Field->id;
+                $sqlQuery = "SELECT tM.id,
+                                    " . ($uniqueFieldId ? "tD.value" : "tM." . $ufid) . " AS priceloader_unique_field
+                               FROM " . Material::_tablename() . " AS tM";
+                if ($uniqueFieldId) {
+                    $sqlQuery .= " JOIN " . Material::_dbprefix() . "cms_data AS tD ON tD.pid = tM.id AND tD.fid = ?";
+                    $sqlBind[] = (int)$uniqueFieldId;
+                }
+                $mtypesIds = MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($loader->mtype);
+                if (!$mtypesIds) {
+                    $mtypesIds = [0];
+                }
+                $sqlQuery .= " WHERE tM.pid IN (" . implode(", ", $mtypesIds) . ")
+                            GROUP BY tM.id";
+                $sqlResult = Material::_SQL()->get([$sqlQuery, $sqlBind]);
+                foreach ($sqlResult as $sqlRow) {
+                    $this->assoc[trim($sqlRow['priceloader_unique_field'])][] = (int)$sqlRow['id'];
+                }
             }
-            $sqlQuery .= " = ? ORDER BY tM.id";
-            $sqlBind[] = trim($text);
-            $sqlResult = Material::getSQLSet([$sqlQuery, $sqlBind]);
-            return $sqlResult;
+
+            if (trim($text) && isset($this->assoc[trim($text)])) {
+                $result = [];
+                foreach ((array)$this->assoc[trim($text)] as $materialId) {
+                    $result[] = new Material($materialId);
+                }
+                return $result;
+            }
         }
         return [];
     }
@@ -508,7 +530,8 @@ class PriceloaderInterface extends AbstractInterface
         if (!$col->Field->id) {
             return null;
         }
-        $field = $item->fields[$col->Field->urn];
+        $field = $col->Field->deepClone();
+        $field->Owner = $item;
         if (!$field->id) {
             return null;
         }
@@ -854,6 +877,7 @@ class PriceloaderInterface extends AbstractInterface
         if (!$test) {
             // 2020-02-10, AVS: для ускорения не обновляем связанные страницы
             $item->dontUpdateAffectedPages = true;
+            $item->dontCheckPages = true;
             $item->commit();
             $this->checkAssoc($item, $root, $context, $new);
             $this->applyCustomFields($loader, $item, $dataRow, $new, $uniqueIndex);
