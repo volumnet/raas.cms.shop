@@ -414,14 +414,14 @@ class SberbankInterface extends EPayInterface
                             [
                                 'name' => 'paymentMethod',
                                 'value' => (trim($order->paymentMethodField) !== '')
-                                                ?  $order->paymentMethodField
-                                                : static::PAYMENT_METHOD_PREPAY,
+                                        ?  $order->paymentMethodField
+                                        :  static::PAYMENT_METHOD_PREPAY,
                             ],
                             [
                                 'name' => 'paymentObject',
                                 'value' => (trim($order->paymentObjectField) !== '')
-                                                ?  $order->paymentObjectField
-                                                : static::PAYMENT_OBJECT_PRODUCT,
+                                        ?  $order->paymentObjectField
+                                        :  static::PAYMENT_OBJECT_PRODUCT,
                             ],
                         ],
                     ],
@@ -479,7 +479,11 @@ class SberbankInterface extends EPayInterface
      */
     public function getOrderDescription(Order $order)
     {
-        $text = sprintf(ORDER_NUM, (int)$order->id, $this->getCurrentHostName());
+        $text = sprintf(
+            ORDER_NUM,
+            (int)$order->id,
+            $this->getCurrentHostName()
+        );
         return $text;
     }
 
@@ -494,8 +498,12 @@ class SberbankInterface extends EPayInterface
      * @return bool Статус оплаты заказа
      * @throws Exception Ошибка при выполнении
      */
-    public function getOrderIsPaid(Block_Cart $block, Page $page, array $get = [], array $session = [])
-    {
+    public function getOrderIsPaid(
+        Block_Cart $block,
+        Page $page,
+        array $get = [],
+        array $session = []
+    ) {
         $requestData = array(
             'userName' => $block->epay_login,
             'password' => $block->epay_pass1,

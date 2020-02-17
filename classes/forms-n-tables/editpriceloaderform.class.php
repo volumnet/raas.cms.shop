@@ -107,6 +107,18 @@ class EditPriceLoaderForm extends RAASForm
                 'value' => 'priority',
                 'caption' => $this->view->_('PRIORITY')
             ],
+            [
+                'value' => 'h1',
+                'caption' => $this->view->_('H1')
+            ],
+            [
+                'value' => 'menu_name',
+                'caption' => $this->view->_('MENU_NAME')
+            ],
+            [
+                'value' => 'breadcrumbs_name',
+                'caption' => $this->view->_('BREADCRUMBS_NAME')
+            ],
         ];
         if ($item->id) {
             $Material_Type = $item->Material_Type;

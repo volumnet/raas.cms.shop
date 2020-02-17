@@ -79,10 +79,20 @@ class UBRRInterface extends EPayInterface
                 }
                 switch ($this->get['action']) {
                     case 'result':
-                        $out = $this->result($order, $this->block, $this->page, $this->session);
+                        $out = $this->result(
+                            $order,
+                            $this->block,
+                            $this->page,
+                            $this->session
+                        );
                         break;
                     case 'fail':
-                        $out = $this->fail($order, $this->block, $this->page, $this->session);
+                        $out = $this->fail(
+                            $order,
+                            $this->block,
+                            $this->page,
+                            $this->session
+                        );
                         break;
                     default:
                         $out = $this->init($order, $this->block, $this->page);
@@ -118,8 +128,12 @@ class UBRRInterface extends EPayInterface
      *             'localError' ?=> array<string[] URN поля ошибки => сообщение об ошибке>
      *         ]
      */
-    public function result(Order $order, Block_Cart $block, Page $page, array $session = [])
-    {
+    public function result(
+        Order $order,
+        Block_Cart $block,
+        Page $page,
+        array $session = []
+    ) {
         if ($session['ubrrOrderId'] && $session['ubrrSession'] && $order->id) {
             if ($block->epay_test) {
                 file_put_contents(
@@ -144,14 +158,21 @@ class UBRRInterface extends EPayInterface
                 $history->paid = 1;
                 $history->post_date = date('Y-m-d H:i:s');
                 $history->description = 'Оплачено через интернет-эквайринг УБРиР'
-                                      . ' (ID# заказа в системе банка: ' . $session['ubrrOrderId'] . ')';
+                                      . ' (ID# заказа в системе банка: '
+                                      . $session['ubrrOrderId']
+                                      . ')';
                 $history->commit();
 
                 $order->paid = 1;
                 $order->commit();
-                $out['success'][(int)$block->id] = sprintf(ORDER_SUCCESSFULLY_PAID, $order->id);
+                $out['success'][(int)$block->id] = sprintf(
+                    ORDER_SUCCESSFULLY_PAID,
+                    $order->id
+                );
             } else {
-                $out['localError'] = ['order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)];
+                $out['localError'] = [
+                    'order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)
+                ];
             }
         } else {
             $out['localError'] = ['order' => INVALID_CRC];
@@ -170,8 +191,12 @@ class UBRRInterface extends EPayInterface
      *             'localError' ?=> array<string[] URN поля ошибки => сообщение об ошибке>
      *         ]
      */
-    public function fail(Order $order, Block_Cart $block, Page $page, array $session = [])
-    {
+    public function fail(
+        Order $order,
+        Block_Cart $block,
+        Page $page,
+        array $session = []
+    ) {
         if ($block->epay_test) {
             file_put_contents(
                 'ubrr.log',
@@ -188,7 +213,10 @@ class UBRRInterface extends EPayInterface
             );
         }
         $out = [];
-        $out['localError']['order'] = sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id);
+        $out['localError']['order'] = sprintf(
+            ORDER_HAS_NOT_BEEN_PAID,
+            $order->id
+        );
         return $out;
     }
 
@@ -364,8 +392,13 @@ class UBRRInterface extends EPayInterface
      * @param string $phoneField URN поля Телефон
      * @return string
      */
-    public function getRegisterOrderXML(Order $order, Block_Cart $block, Page $page, $emailField = 'email', $phoneField = 'phone')
-    {
+    public function getRegisterOrderXML(
+        Order $order,
+        Block_Cart $block,
+        Page $page,
+        $emailField = 'email',
+        $phoneField = 'phone'
+    ) {
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
              . '<TKKPG>'
              .   '<Request>'
@@ -373,13 +406,30 @@ class UBRRInterface extends EPayInterface
              .     '<Language>' . mb_strtoupper($page->lang) . '</Language>'
              .     '<Order>'
              .       '<OrderType>Purchase</OrderType>'
-             .       '<Merchant>' . htmlspecialchars($block->epay_login) . '</Merchant>'
-             .       '<Amount>' . ceil($order->sum * 100) . '</Amount>'
-             .       '<Currency>' . $this->getCurrency($block->epay_currency) . '</Currency>'
-             .       '<Description>' . htmlspecialchars($this->getOrderDescription($order)) . '</Description>'
-             .       '<ApproveURL>' . htmlspecialchars($this->getCurrentHostURL() . $page->url) . '?action=result</ApproveURL>'
-             .       '<CancelURL>' . htmlspecialchars($this->getCurrentHostURL() . $page->url) . '?action=fail</CancelURL>'
-             .       '<DeclineURL>' . htmlspecialchars($this->getCurrentHostURL() . $page->url) . '?action=fail</DeclineURL>';
+             .       '<Merchant>'
+             .         htmlspecialchars($block->epay_login)
+             .       '</Merchant>'
+             .       '<Amount>'
+             .         ceil($order->sum * 100)
+             .       '</Amount>'
+             .       '<Currency>'
+             .         $this->getCurrency($block->epay_currency)
+             .       '</Currency>'
+             .       '<Description>'
+             .         htmlspecialchars($this->getOrderDescription($order))
+             .       '</Description>'
+             .       '<ApproveURL>'
+             .         htmlspecialchars($this->getCurrentHostURL() . $page->url)
+             .         '?action=result'
+             .       '</ApproveURL>'
+             .       '<CancelURL>'
+             .         htmlspecialchars($this->getCurrentHostURL() . $page->url)
+             .         '?action=fail'
+             .       '</CancelURL>'
+             .       '<DeclineURL>'
+             .         htmlspecialchars($this->getCurrentHostURL() . $page->url)
+             .         '?action=fail'
+             .       '</DeclineURL>';
         $faData = [];
         if ($emailField && ($email = $order->$emailField)) {
             $xml .=  '<email>' . htmlspecialchars($email) . '</email>';
@@ -444,7 +494,11 @@ class UBRRInterface extends EPayInterface
      */
     public function getOrderDescription(Order $order)
     {
-        $text = sprintf(ORDER_NUM, (int)$order->id, $this->getCurrentHostName());
+        $text = sprintf(
+            ORDER_NUM,
+            (int)$order->id,
+            $this->getCurrentHostName()
+        );
         return $text;
     }
 
@@ -463,7 +517,9 @@ class UBRRInterface extends EPayInterface
             unset($data['Status'], $data['Operation']);
             return $data;
         } else {
-            $errorMessage = $this->getRequestStatusMessage(trim($response->Status));
+            $errorMessage = $this->getRequestStatusMessage(
+                trim($response->Status)
+            );
             throw new Exception($errorMessage, (int)$response->Status);
         }
     }
@@ -480,7 +536,9 @@ class UBRRInterface extends EPayInterface
     {
         $out = [];
         foreach ((array)$sxe as $index => $node) {
-            $out[$index] = is_object($node) ? $this->sxeToArray($node) : trim($node);
+            $out[$index] = is_object($node)
+                         ? $this->sxeToArray($node)
+                         : trim($node);
         }
         return $out;
     }
@@ -488,7 +546,8 @@ class UBRRInterface extends EPayInterface
 
     /**
      * Получает текстовое сообщение об ошибке по статусу ответа
-     * @param string $requestStatus Код статуса ответа в константах static::REQUEST_STATUS_
+     * @param string $requestStatus Код статуса ответа
+     *                              в константах static::REQUEST_STATUS_
      * @return string
      */
     public function getRequestStatusMessage($requestStatus)
@@ -525,18 +584,31 @@ class UBRRInterface extends EPayInterface
      * @param string $sessionId ID# сессии
      * @return string
      */
-    public function getOrderStatusXML($orderId, $merchantName, $language, $sessionId)
+    public function getOrderStatusXML(
+        $orderId,
+        $merchantName,
+        $language,
+        $sessionId
+    )
     {
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
              . '<TKKPG>'
              .   '<Request>'
              .     '<Operation>GetOrderStatus</Operation>'
-             .     '<Language>' . mb_strtoupper($language) . '</Language>'
+             .     '<Language>'
+             .       mb_strtoupper($language)
+             .     '</Language>'
              .     '<Order>'
-             .       '<Merchant>' . htmlspecialchars($merchantName) . '</Merchant>'
-             .       '<OrderID>' . htmlspecialchars($orderId) . '</OrderID>'
+             .       '<Merchant>'
+             .         htmlspecialchars($merchantName)
+             .       '</Merchant>'
+             .       '<OrderID>'
+             .         htmlspecialchars($orderId)
+             .       '</OrderID>'
              .     '</Order>'
-             .     '<SessionID>' . htmlspecialchars($sessionId) . '</SessionID>'
+             .     '<SessionID>'
+             .       htmlspecialchars($sessionId)
+             .     '</SessionID>'
              .   '</Request>'
              . '</TKKPG>';
         return $xml;
@@ -552,8 +624,12 @@ class UBRRInterface extends EPayInterface
      * @return bool Заказ успешно оплачен
      * @throws Exception Ошибка при выполнении
      */
-    public function getOrderIsPaid(Order $order, Block_Cart $block, Page $page, array $session = [])
-    {
+    public function getOrderIsPaid(
+        Order $order,
+        Block_Cart $block,
+        Page $page,
+        array $session = []
+    ) {
         $xml = $this->getOrderStatusXML(
             $session['ubrrOrderId'],
             $block->epay_login,
@@ -565,7 +641,8 @@ class UBRRInterface extends EPayInterface
         if ($block->epay_test) {
             file_put_contents(
                 'ubrr.log',
-                date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' . $session['ubrrOrderId'] . ' / ' .
+                date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
+                $session['ubrrOrderId'] . ' / ' .
                 $session['ubrrSession'] . ' = ' . $responseXML . "\n",
                 FILE_APPEND
             );
