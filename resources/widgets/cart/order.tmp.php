@@ -134,7 +134,20 @@ $getField = function($row) {
               <?php echo STATUS?>:
             </label>
             <div class="col-sm-9 col-md-4">
-              <?php echo $Item->paid ? PAYMENT_PAID : PAYMENT_NOT_PAID?>
+              <?php if ($order->status->id) { ?>
+                  <div class="cart-form__self-status">
+                    <?php echo htmlspecialchars($order->status->name)?>
+                  </div>
+              <?php }
+              if ($order->paid) { ?>
+                  <div class="cart-form__payment-status cart-form__payment-status_paid">
+                    <?php echo PAYMENT_PAID?>
+                  </div>
+              <?php } else { ?>
+                  <div class="cart-form__payment-status cart-form__payment-status_not-paid">
+                    <?php echo PAYMENT_NOT_PAID?>
+                  </div>
+              <?php } ?>
             </div>
           </div>
       <?php } ?>
