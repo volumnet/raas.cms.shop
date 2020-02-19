@@ -53,41 +53,33 @@ use RAAS\CMS\Snippet;
             <?php foreach ($Set as $order) { ?>
                 <div class="my-orders-list__item">
                   <div class="my-orders-item">
-                    <div class="my-orders-item__num">
-                      <a href="?id=<?php echo (int)$order->id?>">
-                        <?php echo (int)$order->id?>
-                      </a>
-                    </div>
-                    <div class="my-orders-item__date">
-                      <a href="?id=<?php echo (int)$order->id?>">
-                        <?php echo date(DATEFORMAT, strtotime($order->post_date))?>
-                      </a>
-                    </div>
-                    <div class="my-orders-item__title">
-                      <a href="?id=<?php echo (int)$order->id?>">
-                        <?php
-                        $temp = [];
-                        foreach ($order->items as $item) {
-                            $arr = $item->name;
-                            $itemPriceText = Text::formatPrice($item->realprice);
-                            if ($item->amount > 1) {
-                                $arr .= ' – ' . (int)$item->amount . 'x'
-                                     .  $itemPriceText .  ' ₽ = '
-                                     .  Text::formatPrice($item->amount * $item->realprice)
-                                     .  ' ₽';
-                            } else {
-                                $arr .= ' = ' . $itemPriceText . ' ₽';
-                            }
-                            $temp[] = $arr;
-                        }
-                        echo implode('<br />', $temp);
-                        ?>
-                      </a>
-                    </div>
-                    <div class="my-orders-item__status">
-                      <div class="my-orders-item__self-status">
+                    <a href="?id=<?php echo (int)$order->id?>" class="my-orders-item__num">
+                      <?php echo (int)$order->id?>
+                    </a>
+                    <a href="?id=<?php echo (int)$order->id?>" class="my-orders-item__date">
+                      <?php echo date(DATEFORMAT, strtotime($order->post_date))?>
+                    </a>
+                    <a href="?id=<?php echo (int)$order->id?>" class="my-orders-item__title">
                       <?php
-                      if ($order->status->id) { ?>
+                      $temp = [];
+                      foreach ($order->items as $item) {
+                          $arr = $item->name;
+                          $itemPriceText = Text::formatPrice($item->realprice);
+                          if ($item->amount > 1) {
+                              $arr .= ' – ' . (int)$item->amount . ' x '
+                                   .  $itemPriceText .  ' ₽ = '
+                                   .  Text::formatPrice($item->amount * $item->realprice)
+                                   .  ' ₽';
+                          } else {
+                              $arr .= ' = ' . $itemPriceText . ' ₽';
+                          }
+                          $temp[] = $arr;
+                      }
+                      echo implode('<br />', $temp);
+                      ?>
+                    </a>
+                    <a href="?id=<?php echo (int)$order->id?>" class="my-orders-item__status">
+                      <?php if ($order->status->id) { ?>
                           <div class="my-orders-item__self-status">
                             <?php echo htmlspecialchars($order->status->name)?>
                           </div>
@@ -105,12 +97,10 @@ use RAAS\CMS\Snippet;
                             <?php echo PAYMENT_NOT_PAID?>
                           </div>
                       <?php } ?>
-                    </div>
-                    <div class="my-orders-item__sum">
-                      <a href="?id=<?php echo (int)$order->id?>">
-                        <?php echo Text::formatPrice($order->sum)?> ₽
-                      </a>
-                    </div>
+                    </a>
+                    <a href="?id=<?php echo (int)$order->id?>" class="my-orders-item__sum">
+                      <?php echo Text::formatPrice($order->sum)?> ₽
+                    </a>
                     <div class="my-orders-item__actions">
                       <?php if (!$order->status_id && !$order->paid && !$order->vis) { ?>
                           <a href="#" class="my-orders-item__delete" data-role="delete-item" data-id="<?php echo (int)$order->id?>" data-back="true"></a>
@@ -133,7 +123,7 @@ jQuery(document).ready(function($) {
         .on('click', function() {
             var url = '?action=delete&id=' + parseInt($(this).attr('data-id'))
                     + ($(this).attr('data-back') ? '&back=1' : '');
-            $.RAASConfirm(<?php echo ARE_YOU_SURE_TO_DELETE_ORDER?>)
+            $.RAASConfirm('<?php echo ARE_YOU_SURE_TO_DELETE_ORDER?>')
                 .then(function () {
                     window.location.href = url;
                 });

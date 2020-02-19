@@ -712,7 +712,7 @@ class Webmaster extends CMSWebmaster
             $B = new Block_PHP();
             $this->createBlock(
                 $B,
-                'menu_user',
+                'cart',
                 '',
                 'cart_main',
                 $this->Site,
@@ -786,7 +786,7 @@ class Webmaster extends CMSWebmaster
             $B = new Block_PHP();
             $this->createBlock(
                 $B,
-                'menu_user',
+                'cart',
                 '',
                 'favorites_main',
                 $this->Site,

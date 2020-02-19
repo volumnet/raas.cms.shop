@@ -157,6 +157,7 @@ class MyOrdersInterface extends AbstractInterface
     public function processOrder(Order $order, Page $page)
     {
         $page->oldName = $page->name;
+        $page->breadcrumbs_name = $page->name;
         $page->Item = $order;
         $page->name = sprintf(
             View_Web::i()->_('ORDER_NUM_FROM'),

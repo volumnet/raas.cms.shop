@@ -127,7 +127,7 @@ $getField = function($row) {
   ob_start();
   ?>
   <div class="cart__form">
-    <div class="cart-form form-horizontal">
+    <div class="cart-form cart-form_proceed form-horizontal">
       <?php if ($showPaymentStatus) { ?>
           <div class="form-group">
             <label class="control-label col-sm-3 col-md-2">
