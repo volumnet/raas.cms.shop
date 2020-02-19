@@ -9,7 +9,6 @@
  * @param bool $requestForPayment Запрос на оплату
  * @param string $paymentURL URL для оплаты
  * @param string $crc Подпись
- *
  */
 namespace RAAS\CMS\Shop;
 

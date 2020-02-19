@@ -2,14 +2,58 @@
 /**
  * Виджет просмотра заказа
  * @param Order $order Заказ
+ * @param bool $orderDataFirst Отображать сначала данные полей
+ * @param bool $showPaymentStatus Отображать статус оплаты
+ *                                (для сервиса "Мои заказы")
  */
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
 
+$getField = function($row) {
+    $arr = array();
+    $val = $row->doRich();
+    switch ($row->datatype) {
+        case 'date':
+            $arr[$key] = date('d.m.Y', strtotime($val));
+            break;
+        case 'datetime-local':
+            $arr[$key] = date('d.m.Y H:i', strtotime($val));
+            break;
+        case 'color':
+            $arr[$key] = '<span style="display: inline-block; height: 16px; width: 16px; background-color: ' . htmlspecialchars($val) . '"></span>';
+            break;
+        case 'email':
+            $arr[$key] .= '<a href="mailto:' . htmlspecialchars($val) . '">' . htmlspecialchars($val) . '</a>';
+            break;
+        case 'url':
+            $arr[$key] .= '<a href="' . (!preg_match('/^http(s)?:\\/\\//umi', trim($val)) ? 'http://' : '') . htmlspecialchars($val) . '">' . htmlspecialchars($val) . '</a>';
+            break;
+        case 'file':
+            $arr[$key] .= '<a href="/' . $val->fileURL . '">' . htmlspecialchars($val->name) . '</a>';
+            break;
+        case 'image':
+            $arr[$key] .= '<a href="/' . $val->fileURL . '"><img src="/' . $val->tnURL. '" alt="' . htmlspecialchars($val->name) . '" title="' . htmlspecialchars($val->name) . '" /></a>';
+            break;
+        case 'htmlarea':
+            $arr[$key] = '<div>' . $val . '</div>';
+            break;
+        default:
+            if (!$row->multiple && ($row->datatype == 'checkbox')) {
+                $arr[$key] = $val ? _YES : _NO;
+            } else {
+                $arr[$key] = nl2br(htmlspecialchars($val));
+            }
+            break;
+    }
+    return implode(', ', $arr);
+};
+
 ?>
 <div class="cart">
-  <?php if ($order->items) { ?>
+  <?php
+  ob_start();
+  if ($order->items) { ?>
       <div class="cart__list">
         <div class="cart-list">
           <div class="cart-list__header">
@@ -78,25 +122,40 @@ use SOME\Text;
           </div>
         </div>
       </div>
-  <?php } ?>
+  <?php }
+  $itemsData = ob_get_clean();
+  ob_start();
+  ?>
   <div class="cart__form">
     <div class="cart-form form-horizontal">
+      <?php if ($showPaymentStatus) { ?>
+          <div class="form-group">
+            <label class="control-label col-sm-3 col-md-2">
+              <?php echo STATUS?>:
+            </label>
+            <div class="col-sm-9 col-md-4">
+              <?php echo $Item->paid ? PAYMENT_PAID : PAYMENT_NOT_PAID?>
+            </div>
+          </div>
+      <?php } ?>
       <?php foreach ($order->fields as $fieldURN => $field) { ?>
           <div class="form-group">
             <label class="control-label col-sm-3 col-md-2">
-              <?php echo htmlspecialchars($field->name)?>
+              <?php echo htmlspecialchars($field->name)?>:
             </label>
             <div class="col-sm-9 col-md-4">
-              <?php
-              if ($field->datatype == 'checkbox' && !$field->multiple) {
-                  echo ($field->getValue() ? 'да' : 'нет');
-              } else {
-                  echo htmlspecialchars($order->fields[$fieldURN]->doRich());
-              }
-              ?>
+              <?php echo $getField($field)?>
             </div>
           </div>
       <?php } ?>
     </div>
   </div>
+  <?php
+  $fieldsData = ob_get_clean();
+  if ($orderDataFirst) {
+      echo $fieldsData . $itemsData;
+  } else {
+      echo $itemsData . $fieldsData;
+  }
+  ?>
 </div>

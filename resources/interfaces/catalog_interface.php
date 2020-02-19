@@ -6,5 +6,14 @@
  */
 namespace RAAS\CMS\Shop;
 
-$interface = new CatalogInterface($Block, $Page, $_GET, $_POST, $_COOKIE, $_SESSION, $_SERVER, $_FILES);
+$interface = new CatalogInterface(
+    $Block,
+    $Page,
+    $_GET,
+    $_POST,
+    $_COOKIE,
+    $_SESSION,
+    $_SERVER,
+    $_FILES
+);
 return $interface->process();
