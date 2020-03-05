@@ -88,10 +88,11 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
      */
     public function getDataFromExcelWorkbook(PHPExcel $workbook)
     {
-        $data = array();
-        foreach ($workbook->getAllSheets() as $sheet) {
-            $data = array_merge($data, $this->getDataFromExcelSheet($sheet));
-        }
+        // 2020-03-05, AVS: исключили листы кроме первого
+        // т.к. в них редко бывает продолжение прайса,
+        // а часто вспомогательные данные
+        $sheet = $workbook->getSheet(0);
+        $data = $this->getDataFromExcelSheet($sheet);
         return $data;
     }
 
