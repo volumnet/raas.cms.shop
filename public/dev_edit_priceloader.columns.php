@@ -1,13 +1,14 @@
-<?php 
-$_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_Tabbed, &$_RAASForm_Form_Plain) { 
+<?php
+$_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_Tabbed, &$_RAASForm_Form_Plain) {
     $DATA = $FieldSet->Form->DATA;
     $CONTENT = $FieldSet->Form->meta['CONTENT'];
     ?>
     <fieldset>
       <legend><?php echo htmlspecialchars($FieldSet->caption)?></legend>
-      <table class="table table-striped table-condensed" data-role="raas-repo-block">
+      <table class="table table-striped table-condensed cms-shop-edit-priceloader-columns-table" data-role="raas-repo-block">
         <thead>
           <tr>
+            <th class="span1"></th>
             <th class="span4"><?php echo CMS\MATERIAL_FIELD?></th>
             <th class="span4"><?php echo CMS\Shop\COLUMN_CALLBACK?></th>
             <th class="span1"><?php echo CMS\Shop\UNIQUE?></th>
@@ -17,6 +18,7 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
         <tbody data-role="raas-repo-container">
           <?php foreach ((array)$DATA['column_id'] as $i => $temp) { ?>
               <tr data-role="raas-repo-element">
+                <td></td>
                 <td>
                   <input type="hidden" name="column_id[]" value="<?php echo (int)$DATA['column_id'][$i]?>" />
                   <select name="column_fid[]" data-role="field-id-column">
@@ -45,6 +47,7 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
         </tbody>
         <tbody>
           <tr data-role="raas-repo">
+            <td></td>
             <td>
               <input type="hidden" name="column_id[]" value="" disabled="disabled" />
               <select name="column_fid[]" data-role="field-id-column" disabled="disabled">

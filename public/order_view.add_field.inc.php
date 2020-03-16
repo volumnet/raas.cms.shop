@@ -1,23 +1,52 @@
 <?php
-$_RAASForm_Control = function(\RAAS\Field $Field) use (&$_RAASForm_Attrs, &$_RAASForm_Options, &$_RAASForm_Checkbox, &$_RAASForm_Control) {
+namespace RAAS\CMS\Shop;
+
+use RAAS\Application;
+use RAAS\Field as RAASField;
+use RAAS\CMS\Sub_Dev as CMSSubDev;
+
+$_RAASForm_Control = function (RAASField $Field) use (
+    &$_RAASForm_Attrs,
+    &$_RAASForm_Options,
+    &$_RAASForm_Checkbox,
+    &$_RAASForm_Control
+) {
     $Item = $Field->Form->Item;
     switch ($Field->name) {
         case 'status_id':
-            echo '<strong>' . htmlspecialchars($Item->status->id ? $Item->status->name : \RAAS\CMS\Shop\Module::i()->view->_('ORDER_STATUS_NEW')) . '</strong>';
+            echo '<strong>' .
+                    htmlspecialchars($Item->status->id ? $Item->status->name : Module::i()->view->_('ORDER_STATUS_NEW')) .
+                 '</strong>';
             break;
         case 'paid':
             if ($Item->paid) {
-                echo '<strong class="text-success">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_PAID');
+                echo '<strong class="text-success">' . Module::i()->view->_('PAYMENT_PAID');
             } else {
-                echo '<strong class="text-error">' . \RAAS\CMS\Shop\Module::i()->view->_('PAYMENT_NOT_PAID');
+                echo '<strong class="text-error">' . Module::i()->view->_('PAYMENT_NOT_PAID');
             }
             echo '</strong>';
             break;
         case 'pid':
-            if (\RAAS\Application::i()->user->root) { 
-                echo '<a href="' . \RAAS\CMS\Shop\Sub_Dev::i()->url . '&action=edit_cart_type&id=' . (int)$Item->pid . '">' . htmlspecialchars($Item->parent->name) . '</a>';
+            if (Application::i()->user->root) {
+                echo '<a href="' . Sub_Dev::i()->url . '&action=edit_cart_type&id=' . (int)$Item->pid . '" target="_blank">' .
+                        htmlspecialchars($Item->parent->name) .
+                     '</a>';
             } else {
-                echo '<a href="' . \RAAS\CMS\Shop\Sub_Orders::i()->url . '&id=' . (int)$Item->pid . '">' . htmlspecialchars($Item->parent->name) . '</a>';
+                echo '<a href="' . Sub_Orders::i()->url . '&id=' . (int)$Item->pid . '" target="_blank">' .
+                        htmlspecialchars($Item->parent->name) .
+                     '</a>';
+            }
+            break;
+        case 'payment_interface_id':
+            if ($Item->paymentInterface->id) {
+                echo '<a href="' . CMSSubDev::i()->url . '&action=edit_snippet&id=' . (int)$Item->payment_interface_id . '" target="_blank">' .
+                        htmlspecialchars($Item->paymentInterface->name) .
+                     '</a>';
+            }
+            break;
+        case 'payment_id':
+            if ($Item->paymentInterface->id) {
+                echo $Item->payment_id;
             }
             break;
     }

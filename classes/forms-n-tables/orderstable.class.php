@@ -18,46 +18,48 @@ class OrdersTable extends Table
     }
 
 
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         $view = $this->view;
-        $columns = array();
-        $columns['id'] = array(
-            'caption' => '#',
+        $columns = [];
+        $columns['id'] = [
+            'caption' => $this->view->_('ID'),
             'callback' => function ($row) use ($view) {
-                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . (int)$row->id . '</a>';
+                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' .
+                          (int)$row->id .
+                       '</a>';
             }
-        );
-        $columns['post_date'] = array(
+        ];
+        $columns['post_date'] = [
             'caption' => $this->view->_('POST_DATE'),
             'callback' => function ($row) use ($view) {
                 return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . date(DATETIMEFORMAT, strtotime($row->post_date)) . '</a>';
             }
-        );
+        ];
         if (!$params['Item']->id) {
-            $columns['pid'] = array(
+            $columns['pid'] = [
                 'caption' => $this->view->_('CART_TYPE'),
                 'callback' => function ($row) use ($view) {
                     return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . htmlspecialchars($row->parent->name) . '</a>';
                 }
-            );
+            ];
         }
-        $columns['name'] = array(
+        $columns['name'] = [
             'caption' => $this->view->_('PAGE'),
             'callback' => function ($row) use ($view) {
                 return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . htmlspecialchars($row->page->name) . '</a>';
             }
-        );
-        $columns['ip'] = array(
+        ];
+        $columns['ip'] = [
             'caption' => $this->view->_('IP_ADDRESS'),
             'callback' => function ($row) use ($view) {
                 return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '" title="' . htmlspecialchars($row->description) . '">'
                      .    htmlspecialchars($row->ip)
                      . '</a>';
             }
-        );
+        ];
         foreach ($params['columns'] as $key => $col) {
-            $columns[$col->urn] = array(
+            $columns[$col->urn] = [
                 'caption' => $col->name,
                 'callback' => function ($row) use ($col) {
                     if (isset($row->fields[$col->urn])) {
@@ -65,9 +67,9 @@ class OrdersTable extends Table
                     }
                     return $y ? $y : '';
                 }
-            );
+            ];
         }
-        $columns['status'] = array(
+        $columns['status'] = [
             'caption' => $this->view->_('STATUS'),
             'callback' => function ($row) use ($view) {
                 $text = '<span class="text-' . ($row->paid ? 'success' : 'error') . '" title="' . $view->_($row->paid ? 'PAYMENT_PAID' : 'PAYMENT_NOT_PAID') . '">'
@@ -75,14 +77,16 @@ class OrdersTable extends Table
                       . '</span>';
                 return $text;
             }
-        );
-        $columns['c'] = array('caption' => $this->view->_('GOODS_COUNT'));
-        $columns['total_sum'] = array('caption' => $this->view->_('SUM'));
-        $columns[' '] = array('callback' => function ($row) use ($view) {
-            return rowContextMenu($view->getOrderContextMenu($row));
-        });
+        ];
+        $columns['c'] = ['caption' => $this->view->_('GOODS_COUNT')];
+        $columns['total_sum'] = ['caption' => $this->view->_('SUM')];
+        $columns[' '] = [
+            'callback' => function ($row) use ($view) {
+                return rowContextMenu($view->getOrderContextMenu($row));
+            }
+        ];
 
-        $defaultParams = array(
+        $defaultParams = [
             'caption' => $params['Item']->name ? $params['Item']->name : $this->view->_('ORDERS'),
             'columns' => $columns,
             'emptyString' => $this->view->_('NO_NOTES_FOUND'),
@@ -94,12 +98,11 @@ class OrdersTable extends Table
             'Set' => $params['Set'],
             'Pages' => $params['Pages'],
             'data-role' => 'multitable',
-            'meta' => array(
+            'meta' => [
                 'allContextMenu' => $view->getAllOrdersContextMenu(),
                 'allValue' => 'all&pid=' . (int)$Item->id,
-            ),
-
-        );
+            ],
+        ];
         unset($params['columns']);
 
         // $arr = array_merge($defaultParams, $params);

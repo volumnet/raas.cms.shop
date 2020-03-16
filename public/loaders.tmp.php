@@ -8,7 +8,7 @@
 <?php include $VIEW->tmp('/field.inc.php')?>
 <form<?php echo $_RAASForm_Attrs($Form)?>>
   <div class="control-group">
-    <label class="control-label" for="loader"><?php echo $Form->children['loader']->caption?>:</label> 
+    <label class="control-label" for="loader"><?php echo $Form->children['loader']->caption?>:</label>
     <div class="controls">
       <div class="row">
         <div class="span4"><?php echo $_RAASForm_Control($Form->children['loader'])?></div>
@@ -29,32 +29,39 @@
   </div>
   <?php if (isset($Form->children['cat_id']) && ($f = $Form->children['cat_id'])) { ?>
       <div class="control-group">
-        <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label> 
+        <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label>
         <div class="controls"><div class="row"><div class="span4"><?php echo $_RAASForm_Control($f)?></div></div></div>
       </div>
   <?php } ?>
   <div class="control-group">
-    <label class="control-label"><?php echo CMS\MATERIAL_TYPE?>:</label> 
+    <label class="control-label"><?php echo CMS\MATERIAL_TYPE?>:</label>
     <div class="controls"><div class="row"><div class="span7"><span data-role="material-type-container"></span></div></div></div>
   </div>
   <?php if ($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) { ?>
       <div class="control-group" data-role="headers-table__container" style="display: none">
-        <label class="control-label"><?php echo CMS\Shop\COLUMNS?>:</label> 
+        <label class="control-label"><?php echo CMS\Shop\COLUMNS?>:</label>
         <div class="controls">
           <div class="row">
-            <div class="span7"><table class="table cms-shop-headers-table" data-role="headers-table"><thead><tr></tr></thead></table></div>
+            <div class="span7">
+              <table class="table cms-shop-headers-table">
+                <thead>
+                  <tr data-role="headers-letters"></tr>
+                  <tr data-role="headers-table"></tr>
+                </thead>
+              </table>
+            </div>
           </div>
         </div>
       </div>
       <div class="control-group">
-        <label class="control-label"><?php echo CMS\Shop\OFFSET?>:</label> 
+        <label class="control-label"><?php echo CMS\Shop\OFFSET?>:</label>
         <div class="controls">
           <div class="row">
             <div class="span4">
               <?php $f = $Form->children['rows']?>
               <label style="display: inline" for="<?php echo htmlspecialchars($f->name)?>">
                 <?php echo $_RAASForm_Control($f) . ' ' . htmlspecialchars($f->caption)?>
-              </label>, 
+              </label>,
               <?php $f = $Form->children['cols']?>
               <label style="display: inline" for="<?php echo htmlspecialchars($f->name)?>">
                 <?php echo $_RAASForm_Control($f) . ' ' . htmlspecialchars($f->caption)?>
@@ -65,32 +72,32 @@
       </div>
   <?php } elseif ($Form instanceof \RAAS\CMS\Shop\ProcessImageLoaderForm) { ?>
       <div class="control-group" data-role="image-field__container" style="display: none">
-        <label class="control-label"><?php echo CMS\Shop\IMAGE_FIELD?>:</label> 
+        <label class="control-label"><?php echo CMS\Shop\IMAGE_FIELD?>:</label>
         <div class="controls"><div class="row"><div class="span7" data-role="image-field"></div></div></div>
       </div>
       <div class="control-group" data-role="file-format__container" style="display: none">
-        <label class="control-label"><?php echo CMS\Shop\FILENAME_FORMAT?>:</label> 
+        <label class="control-label"><?php echo CMS\Shop\FILENAME_FORMAT?>:</label>
         <div class="controls"><div class="row"><div class="span7" data-role="file-format"></div></div></div>
       </div>
   <?php } ?>
   <?php $f = $Form->children['test']?>
   <div class="control-group">
-    <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label> 
+    <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label>
     <div class="controls"><div class="row"><div class="span4"><?php echo $_RAASForm_Control($f)?></div></div></div>
   </div>
   <?php $f = $Form->children['clear']?>
   <div class="control-group">
-    <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label> 
+    <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label>
     <div class="controls"><div class="row"><div class="span4"><?php echo $_RAASForm_Control($f)?></div></div></div>
   </div>
   <?php $f = $Form->children['file']?>
   <div class="control-group">
-    <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label> 
+    <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label>
     <div class="controls"><div class="row"><div class="span4"><input<?php echo $_RAASForm_Attrs($f, array())?> /></div></div></div>
   </div>
   <?php if ($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) { ?>
       <div class="control-group">
-        <label class="control-label"><?php echo CMS\Shop\SHOW?>:</label> 
+        <label class="control-label"><?php echo CMS\Shop\SHOW?>:</label>
         <div class="controls">
           <div class="row">
             <div class="span4">
@@ -110,7 +117,7 @@
   <?php } else { ?>
       <?php $f = $Form->children['show_log']?>
       <div class="control-group">
-        <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label> 
+        <label class="control-label" for="<?php echo htmlspecialchars($f->name)?>"><?php echo htmlspecialchars($f->caption)?>:</label>
         <div class="controls"><div class="row"><div class="span4"><?php echo $_RAASForm_Control($f)?></div></div></div>
       </div>
   <?php } ?>
@@ -124,15 +131,15 @@
       </div>
     </div>
   </div>
-  <?php 
+  <?php
   ?>
 
   <script type="text/javascript">
   <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && $raw_data) { ?>
       var raw_data = <?php echo json_encode($raw_data)?>;
-      <?php 
+      <?php
   }
-  if ($log) { 
+  if ($log) {
       $log = array_map(function($x) { $y = $x; $y['time'] = number_format($y['time'], 3, '.', ' '); return $y; }, $log);
       ?>
       var log = <?php echo json_encode($log)?>;

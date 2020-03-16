@@ -8,9 +8,9 @@ class ViewBlockCart extends ViewBlock
 {
     const blockListItemClass = 'cms-block-shop-cart';
 
-    public function renderLegend()
+    public function renderBlockTypeName()
     {
-        return parent::renderLegend($this->view->_('BLOCK_LEGEND_CART'));
+        return $this->view->_('BLOCK_LEGEND_CART');
     }
 
 

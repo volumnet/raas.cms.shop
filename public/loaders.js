@@ -6,10 +6,12 @@ jQuery(document).ready(function($) {
         } catch(e) {
             col_names = '';
         }
-        $('table[data-role="headers-table"] tr').empty();
+        $('[data-role="headers-table"]').empty();
+        $('[data-role="headers-letters"]').empty();
         if (col_names) {
             for (var i = 0; i < col_names.length; i++) {
-                $('table[data-role="headers-table"] tr').append('<th' + (col_names[i].unique ? ' class="unique"' : '') + '>' + col_names[i].text + '</th>');
+                $('[data-role="headers-letters"]').append('<th' + (col_names[i].unique ? ' class="unique"' : '') + '></th>');
+                $('[data-role="headers-table"]').append('<th' + (col_names[i].unique ? ' class="unique"' : '') + '>' + col_names[i].text + '</th>');
             }
             $('[data-role="headers-table__container"]').show();
         } else {

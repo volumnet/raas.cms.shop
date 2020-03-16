@@ -22,7 +22,7 @@ class ViewOrderForm extends ViewFeedbackForm
     }
 
 
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         parent::__construct($params);
         $this->caption = sprintf($this->view->_('ORDER_N'), (int)$this->Item->id);
@@ -63,59 +63,105 @@ class ViewOrderForm extends ViewFeedbackForm
 
     protected function getChildrenWithStatuses()
     {
-        $arr = array();
-        $arr['common'] = new FormTab(array(
+        $arr = [];
+        $arr['common'] = new FormTab([
             'name' => 'common',
             'caption' => $this->view->_('ORDER_DETAILS'),
             'children' => $this->getDetails()
-        ));
-        $arr['history'] = new FormTab(array(
+        ]);
+        $arr['history'] = new FormTab([
             'name' => 'history',
             'caption' => $this->view->_('ORDER_HISTORY'),
-            'meta' => array('Table' => new OrderHistoryTable(array('Item' => $this->Item))),
+            'meta' => [
+                'Table' => new OrderHistoryTable([
+                    'Item' => $this->Item
+                ])
+            ],
             'template' => 'order_view.history.inc.php',
-            'children' => array(
-                'status_id' => array(
-                    'type' => 'select', 
+            'children' => [
+                'status_id' => [
+                    'type' => 'select',
                     'class' => 'span2',
                     'style' => 'margin: 0',
-                    'name' => 'status_id', 
+                    'name' => 'status_id',
                     'caption' => $this->view->_('ORDER_STATUS'),
                     'placeholder' => $this->view->_('ORDER_STATUS_NEW'),
-                    'children' => array('Set' => Order_Status::getSet()),
+                    'children' => ['Set' => Order_Status::getSet()],
                     'default' => $this->Item->status_id,
-                ),
-                'paid' => array(
-                    'type' => 'checkbox', 
-                    'name' => 'paid', 
+                ],
+                'paid' => [
+                    'type' => 'checkbox',
+                    'name' => 'paid',
                     'caption' => $this->view->_('PAYMENT_STATUS'),
                     'default' => $this->Item->paid,
-                ),
-                'description' => array('name' => 'description', 'caption' => $this->view->_('COMMENT'), 'required' => true, 'style' => 'margin: 0',),
-            )
-        ));
+                ],
+                'description' => [
+                    'name' => 'description',
+                    'caption' => $this->view->_('COMMENT'),
+                    'required' => true,
+                    'style' => 'margin: 0',
+                ],
+            ]
+        ]);
         return $arr;
     }
 
 
     protected function getDetails()
     {
-        $arr = array();
-        $arr['post_date'] = $this->getFeedbackField(array('name' => 'post_date', 'caption' => $this->view->_('POST_DATE')));
+        $arr = [];
+        $arr['post_date'] = $this->getFeedbackField([
+            'name' => 'post_date',
+            'caption' => $this->view->_('POST_DATE')
+        ]);
         if (Order_Status::getSet()) {
-            $arr['status_id'] = array('name' => 'status_id', 'caption' => $this->view->_('ORDER_STATUS'), 'template' => 'order_view.add_field.inc.php');
-            $arr['paid'] = array('name' => 'paid', 'caption' => $this->view->_('PAYMENT_STATUS'), 'template' => 'order_view.add_field.inc.php');
+            $arr['status_id'] = [
+                'name' => 'status_id',
+                'caption' => $this->view->_('ORDER_STATUS'),
+                'template' => 'order_view.add_field.inc.php'
+            ];
+            $arr['paid'] = [
+                'name' => 'paid',
+                'caption' => $this->view->_('PAYMENT_STATUS'),
+                'template' => 'order_view.add_field.inc.php'
+            ];
         }
         $arr = array_merge($arr, $this->getDetailsFields());
-        $arr['items'] = new FieldSet(array(
-            'name' => 'items', 
-            'template' => 'order_view.items.inc.php', 
-            'meta' => array('Table' => new OrderItemsTable(array('Item' => $this->Item, 'items' => $this->meta['items'])))
-        ));
-        $arr['pid'] = array('name' => 'pid', 'caption' => $this->view->_('CART_TYPE'), 'template' => 'order_view.add_field.inc.php');
+        $arr['items'] = new FieldSet([
+            'name' => 'items',
+            'template' => 'order_view.items.inc.php',
+            'meta' => [
+                'Table' => new OrderItemsTable([
+                    'Item' => $this->Item,
+                    'items' => $this->meta['items']
+                ])
+            ]
+        ]);
+        $arr['pid'] = [
+            'name' => 'pid',
+            'caption' => $this->view->_('CART_TYPE'),
+            'template' => 'order_view.add_field.inc.php'
+        ];
         $arr = array_merge($arr, $this->getStat());
         return $arr;
     }
 
 
+    protected function getStat()
+    {
+        $arr = parent::getStat();
+        if ($this->Item->paymentInterface->id) {
+            $arr['payment_interface_id'] = [
+                'name' => 'payment_interface_id',
+                'caption' => $this->view->_('PAID_VIA'),
+                'template' => 'order_view.add_field.inc.php',
+            ];
+            $arr['payment_id'] = [
+                'name' => 'payment_id',
+                'caption' => $this->view->_('PAYMENT_ID'),
+                'template' => 'order_view.add_field.inc.php',
+            ];
+        }
+        return $arr;
+    }
 }

@@ -16,37 +16,44 @@ class ImageLoadersTable extends \RAAS\Table
     }
 
 
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         $view = $this->view;
-        $defaultParams = array(
+        $defaultParams = [
             'caption' => $this->view->_('IMAGELOADERS'),
-            'columns' => array(
-                'name' => array(
-                    'caption' => $this->view->_('NAME'), 
-                    'callback' => function($row) use ($view) { 
+            'columns' => [
+                'id' => [
+                    'caption' => $this->view->_('ID'),
+                    'callback' => function ($row) use ($view) {
+                        return '<a href="' . $view->url . '&action=edit_imageloader&id=' . (int)$row->id . '">' .
+                                  (int)$row->id .
+                               '</a>';
+                    }
+                ],
+                'name' => [
+                    'caption' => $this->view->_('NAME'),
+                    'callback' => function ($row) use ($view) {
                         return '<a href="' . $view->url . '&action=edit_imageloader&id=' . (int)$row->id . '">
                                   ' . htmlspecialchars($row->name) . '
                                 </a>';
                     }
-                ),
-                'urn' => array(
-                    'caption' => $this->view->_('URN'), 
-                    'callback' => function($row) use ($view, $Item) { 
+                ],
+                'urn' => [
+                    'caption' => $this->view->_('URN'),
+                    'callback' => function ($row) use ($view, $Item) {
                         return '<a href="' . $view->url . '&action=edit_imageloader&id=' . (int)$row->id . '">
                                   ' . htmlspecialchars($row->urn) . '
                                 </a>';
                     }
-                ),
-                ' ' => array(
-                    'callback' => function ($row, $i) use ($view, $contextMenuName, $IN) { 
-                        return rowContextMenu($view->getImageLoaderContextMenu($row, $i, count($IN['Set']))); 
+                ],
+                ' ' => [
+                    'callback' => function ($row, $i) use ($view, $contextMenuName, $IN) {
+                        return rowContextMenu($view->getImageLoaderContextMenu($row, $i, count($IN['Set'])));
                     }
-                )
-
-            ),
+                ]
+            ],
             'emptyString' => $this->view->_('NO_IMAGELOADERS_FOUND'),
-        );
+        ];
         $arr = array_merge($defaultParams, $params);
         parent::__construct($arr);
     }

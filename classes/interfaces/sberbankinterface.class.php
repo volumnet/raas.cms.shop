@@ -70,28 +70,24 @@ class SberbankInterface extends EPayInterface
             ) {
                 if (in_array($addURN, ['result', 'fail'])) {
                     if (!($order && $order->id) &&
-                        $this->session['sberbankOrderNumber']
+                        $this->get['orderId']
                     ) {
-                        $order = new Order($this->session['sberbankOrderNumber']);
+                        $order = Order::importByPayment(
+                            $this->get['orderId'],
+                            $this->block->EPay_Interface
+                        );
                     }
                 }
                 switch ($addURN) {
                     case 'result':
-                        $out = $this->result(
-                            $order,
-                            $this->block,
-                            $this->page,
-                            $this->get,
-                            $this->session
-                        );
+                        $out = $this->result($order, $this->block, $this->page);
                         break;
                     case 'fail':
                         $out = $this->fail(
                             $order,
                             $this->block,
                             $this->page,
-                            $this->get,
-                            $this->session
+                            $this->get
                         );
                         break;
                     default:
@@ -122,8 +118,6 @@ class SberbankInterface extends EPayInterface
      * @param Order $order Заказ для проверки
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
-     * @param array $get Данные GET-запроса
-     * @param array $session Данные сессии
      * @return [
      *             'success' ?=> array<
      *                 int[] ID# блока => сообщение об успешной операции
@@ -133,42 +127,30 @@ class SberbankInterface extends EPayInterface
      *             >
      *         ]
      */
-    public function result(
-        Order $order,
-        Block_Cart $block,
-        Page $page,
-        array $get = [],
-        array $session = []
-    ) {
-        if ($session['sberbankOrderNumber'] &&
-            $session['sberbankOrderId'] &&
-            $order->id
-        ) {
+    public function result(Order $order, Block_Cart $block, Page $page)
+    {
+        if ($order->id) {
             if ($block->epay_test) {
                 file_put_contents(
                     'sberbank.log',
                     date('Y-m-d H:i:s ') . 'result: ' .
-                    $session['sberbankOrderNumber'] . ' / ' .
-                    $session['sberbankOrderId'] . "\n\n",
+                    $order->id . ' / ' .
+                    $order->payment_id . "\n\n",
                     FILE_APPEND
                 );
             }
-            $orderIsPaid = $this->getOrderIsPaid(
-                $block,
-                $page,
-                $get,
-                $session
-            );
+            $orderIsPaid = $this->getOrderIsPaid($order, $block, $page);
             if ($orderIsPaid) {
-                $history = new Order_History();
-                $history->uid = Application::i()->user->id;
-                $history->order_id = (int)$order->id;
-                $history->status_id = (int)$order->status_id;
-                $history->paid = 1;
-                $history->post_date = date('Y-m-d H:i:s');
-                $history->description = 'Оплачено через Сбербанк'
-                                      . ' (ID# заказа в системе банка: '
-                                      . $session['sberbankOrderId'] . ')';
+                $history = new Order_History([
+                    'uid' => Application::i()->user->id,
+                    'order_id' => (int)$order->id,
+                    'status_id' => (int)$order->status_id,
+                    'paid' => 1,
+                    'post_date' => date('Y-m-d H:i:s'),
+                    'description' => 'Оплачено через Сбербанк'
+                                  .  ' (ID# заказа в системе банка: '
+                                  .  $order->payment_id . ')'
+                ]);
                 $history->commit();
 
                 $order->paid = 1;
@@ -195,7 +177,6 @@ class SberbankInterface extends EPayInterface
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
      * @param array $get Данные GET-запроса
-     * @param array $session Данные сессии
      * @return [
      *             'localError' ?=> array<
      *                 string[] URN поля ошибки => сообщение об ошибке
@@ -206,17 +187,19 @@ class SberbankInterface extends EPayInterface
         Order $order,
         Block_Cart $block,
         Page $page,
-        array $get = [],
-        array $session = []
+        array $get = []
     ) {
         if ($block->epay_test) {
-            file_put_contents(
-                'sberbank.log',
-                date('Y-m-d H:i:s ') . 'fail: ' . $session['sberbankOrderId'] .
-                ' / ' . $session['sberbankOrderNumber'] . "\n\n",
-                FILE_APPEND
-            );
-            $this->getOrderIsPaid($block, $page, $get, $session);
+            $logMessage = date('Y-m-d H:i:s ') . 'fail: ';
+            if ($order->id) {
+                $logMessage .= $order->id . ' / ' . $order->payment_id . "\n\n";
+            } else {
+                $logMessage .= "order " . $get['orderId'] . " not found\n\n";
+            }
+            file_put_contents('sberbank.log', $logMessage, FILE_APPEND);
+            if ($order->id) {
+                $this->getOrderIsPaid($order, $block, $page);
+            }
         }
         return ['localError' => [
             'order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)
@@ -261,8 +244,20 @@ class SberbankInterface extends EPayInterface
             }
             return ['localError' => $localError];
         } else {
-            $_SESSION['sberbankOrderNumber'] = (int)$order->id;
-            $_SESSION['sberbankOrderId'] = $response['orderId'];
+            $order->payment_id = $response['orderId'];
+            $order->payment_interface_id = (int)$block->EPay_Interface->id;
+            $order->commit();
+            $history = new Order_History([
+                'uid' => Application::i()->user->id,
+                'order_id' => (int)$order->id,
+                'status_id' => (int)$order->status_id,
+                'paid' => (int)$order->paid,
+                'post_date' => date('Y-m-d H:i:s'),
+                'description' => 'Зарегистрировано в системе Сбербанка'
+                              .  ' (ID# заказа в системе банка: '
+                              .  $order->payment_id . ')'
+            ]);
+            $history->commit();
             if ($block->epay_test) {
                 file_put_contents(
                     'sberbank.log',
@@ -493,21 +488,15 @@ class SberbankInterface extends EPayInterface
      * @param Order $order Заказ для проверки
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
-     * @param array $get Данные GET-запроса
-     * @param array $session Данные сессии
      * @return bool Статус оплаты заказа
      * @throws Exception Ошибка при выполнении
      */
-    public function getOrderIsPaid(
-        Block_Cart $block,
-        Page $page,
-        array $get = [],
-        array $session = []
-    ) {
+    public function getOrderIsPaid(Order $order, Block_Cart $block, Page $page)
+    {
         $requestData = array(
             'userName' => $block->epay_login,
             'password' => $block->epay_pass1,
-            'orderId' => $get['orderId'] ?: $session['sberbankOrderId'],
+            'orderId' => $order->payment_id,
         );
         $json = $this->exec('getOrderStatus', $requestData, $block->epay_test);
 
@@ -525,13 +514,14 @@ class SberbankInterface extends EPayInterface
                        . $json['errorMessage'];
             if ($json['OrderNumber']) {
                 $order = new Order((int)$json['OrderNumber']);
-                $history = new Order_History();
-                $history->uid = Application::i()->user->id;
-                $history->order_id = (int)$order->id;
-                $history->status_id = (int)$order->status_id;
-                $history->paid = 0;
-                $history->post_date = date('Y-m-d H:i:s');
-                $history->description = $errorText;
+                $history = new Order_History([
+                    'uid' => Application::i()->user->id,
+                    'order_id' => (int)$order->id,
+                    'status_id' => (int)$order->status_id,
+                    'paid' => 0,
+                    'post_date' => date('Y-m-d H:i:s'),
+                    'description' => $errorText,
+                ]);
                 $history->commit();
             }
             if ($block->epay_test) {
@@ -568,7 +558,6 @@ class SberbankInterface extends EPayInterface
             );
         }
 
-        $_SESSION['sberbankOrderNumber'] = (int)$json['OrderNumber'];
         return $this->isSuccessfulStatus($json['OrderStatus']);
     }
 

@@ -126,6 +126,7 @@ class ViewSub_Dev extends RAASAbstractSubView
     public function edit_cart_type(array $in = [])
     {
         $this->js[] = $this->publicURL . '/dev_edit_cart_type.js';
+        $this->subtitle = $this->getCartTypeSubtitle($in['Item']);
         return $this->stdDictionaryEdit(
             $in,
             'CART_TYPES',
@@ -137,6 +138,7 @@ class ViewSub_Dev extends RAASAbstractSubView
 
     public function edit_order_status(array $in = [])
     {
+        $this->subtitle = $this->getOrderStatusSubtitle($in['Item']);
         return $this->stdDictionaryEdit(
             $in,
             'ORDER_STATUSES',
@@ -149,6 +151,7 @@ class ViewSub_Dev extends RAASAbstractSubView
     public function edit_priceloader(array $in = [])
     {
         $this->js[] = $this->publicURL . '/dev_edit_priceloader.js';
+        $this->subtitle = $this->getPriceLoaderSubtitle($in['Item']);
         return $this->stdDictionaryEdit(
             $in,
             'PRICELOADERS',
@@ -161,6 +164,7 @@ class ViewSub_Dev extends RAASAbstractSubView
     public function edit_imageloader(array $in = [])
     {
         $this->js[] = $this->publicURL . '/dev_edit_imageloader.js';
+        $this->subtitle = $this->getImageLoaderSubtitle($in['Item']);
         return $this->stdDictionaryEdit(
             $in,
             'IMAGELOADERS',
@@ -333,5 +337,69 @@ class ViewSub_Dev extends RAASAbstractSubView
             'href' => $this->url . '&action=' . $showListAction
         ];
         $this->stdView->stdEdit($in, $contextMenuName);
+    }
+
+
+    /**
+     * Получает подзаголовок типа корзины
+     * @param Cart_Type $cartType Тип корзины для получения
+     * @return string HTML-код подзаголовка
+     */
+    public function getCartTypeSubtitle(Cart_Type $cartType)
+    {
+        $subtitleArr = [];
+        if ($cartType->id) {
+            $subtitleArr[] = $this->_('ID') . ': ' . (int)$cartType->id;
+            return implode('; ', $subtitleArr);
+        }
+        return '';
+    }
+
+
+    /**
+     * Получает подзаголовок статуса заказов
+     * @param Order_Status $orderStatus Статус заказов для получения
+     * @return string HTML-код подзаголовка
+     */
+    public function getOrderStatusSubtitle(Order_Status $orderStatus)
+    {
+        $subtitleArr = [];
+        if ($orderStatus->id) {
+            $subtitleArr[] = $this->_('ID') . ': ' . (int)$orderStatus->id;
+            return implode('; ', $subtitleArr);
+        }
+        return '';
+    }
+
+
+    /**
+     * Получает подзаголовок загрузчика прайсов
+     * @param PriceLoader $priceLoader Загрузчик прайсов для получения
+     * @return string HTML-код подзаголовка
+     */
+    public function getPriceLoaderSubtitle(PriceLoader $priceLoader)
+    {
+        $subtitleArr = [];
+        if ($priceLoader->id) {
+            $subtitleArr[] = $this->_('ID') . ': ' . (int)$priceLoader->id;
+            return implode('; ', $subtitleArr);
+        }
+        return '';
+    }
+
+
+    /**
+     * Получает подзаголовок загрузчика изображений
+     * @param ImageLoader $imageLoader Загрузчик изображений для получения
+     * @return string HTML-код подзаголовка
+     */
+    public function getImageLoaderSubtitle(ImageLoader $imageLoader)
+    {
+        $subtitleArr = [];
+        if ($imageLoader->id) {
+            $subtitleArr[] = $this->_('ID') . ': ' . (int)$imageLoader->id;
+            return implode('; ', $subtitleArr);
+        }
+        return '';
     }
 }

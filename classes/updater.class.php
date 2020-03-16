@@ -10,11 +10,17 @@ class Updater extends \RAAS\Updater
 {
     public function preInstall()
     {
-        $this->update20150511();
-        $this->update20151129();
-        $this->update20160119();
-        $this->update20180530();
-        $this->update20190304();
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.2.28'
+        ) < 0) {
+            $this->update20150511();
+            $this->update20151129();
+            $this->update20160119();
+            $this->update20180530();
+            $this->update20190304();
+            $this->update20200316();
+        }
     }
 
 
@@ -156,6 +162,26 @@ class Updater extends \RAAS\Updater
                     'canceled',
                 ],
             ]);
+        }
+    }
+
+
+    /**
+     * Добавляем в заказ сведения о присвоенном платежном номере банка
+     */
+    public function update20200316()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_orders", $this->tables) &&
+            !in_array(
+                'payment_id',
+                $this->columns(SOME::_dbprefix() . "cms_shop_orders")
+            )
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders
+                           ADD payment_interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Payment interface ID#',
+                           ADD payment_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment ID#',
+                           ADD INDEX (payment_id)";
+            $this->SQL->query($sqlQuery);
         }
     }
 }
