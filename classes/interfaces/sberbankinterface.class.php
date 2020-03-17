@@ -142,7 +142,7 @@ class SberbankInterface extends EPayInterface
             $orderIsPaid = $this->getOrderIsPaid($order, $block, $page);
             if ($orderIsPaid) {
                 $history = new Order_History([
-                    'uid' => Application::i()->user->id,
+                    'uid' => (int)Application::i()->user->id,
                     'order_id' => (int)$order->id,
                     'status_id' => (int)$order->status_id,
                     'paid' => 1,
@@ -248,7 +248,7 @@ class SberbankInterface extends EPayInterface
             $order->payment_interface_id = (int)$block->EPay_Interface->id;
             $order->commit();
             $history = new Order_History([
-                'uid' => Application::i()->user->id,
+                'uid' => (int)Application::i()->user->id,
                 'order_id' => (int)$order->id,
                 'status_id' => (int)$order->status_id,
                 'paid' => (int)$order->paid,
@@ -515,7 +515,7 @@ class SberbankInterface extends EPayInterface
             if ($json['OrderNumber']) {
                 $order = new Order((int)$json['OrderNumber']);
                 $history = new Order_History([
-                    'uid' => Application::i()->user->id,
+                    'uid' => (int)Application::i()->user->id,
                     'order_id' => (int)$order->id,
                     'status_id' => (int)$order->status_id,
                     'paid' => 0,
