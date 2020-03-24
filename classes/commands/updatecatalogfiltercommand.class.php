@@ -37,11 +37,11 @@ class UpdateCatalogFilterCommand extends LockCommand
             $catalogFilter = new CatalogFilter($materialType, $withChildrenGoods, []);
             $outputFile = $catalogFilter->getDefaultFilename($materialType->id, $withChildrenGoods);
             if (!$forceUpdate) {
-                $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(modify_date))
+                $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(last_modified))
                                FROM " . Material::_tablename()
                           . " WHERE 1";
                 $lastModifiedMaterialTimestamp = Material::_SQL()->getvalue($sqlQuery);
-                $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(modify_date))
+                $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(last_modified))
                                FROM " . Page::_tablename()
                           . " WHERE 1";
                 $lastModifiedPageTimestamp = Material::_SQL()->getvalue($sqlQuery);
