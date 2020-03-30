@@ -142,8 +142,14 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
         for ($i = 0; $i < count($data); $i++) {
             $maxcol = max($maxcol, count($data[$i]) - 1);
             for ($j = 0; $j < count($data[$i]); $j++) {
+                $val = $data[$i][$j];
+                if (is_float($val) || is_int($val)) {
+                    $type = PHPExcel_Cell_DataType::TYPE_NUMERIC;
+                } else {
+                    $type = PHPExcel_Cell_DataType::TYPE_STRING;
+                }
                 $cell = $sheet->getCellByColumnAndRow($j, $i + 1);
-                $cell->setValueExplicit($data[$i][$j], PHPExcel_Cell_DataType::TYPE_STRING);
+                $cell->setValueExplicit($val, $type);
             }
         }
         if ($rows) {

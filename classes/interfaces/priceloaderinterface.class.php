@@ -1329,10 +1329,17 @@ class PriceloaderInterface extends AbstractInterface
             if ($column->Field->multiple) {
                 $x = $material->fields[$column->Field->urn]->getValues(true);
                 $x = array_map(function ($y) use ($column) {
-                    return $column->Field->doRich($y);
+                    $z = $column->Field->doRich($y);
+                    if (in_array($column->Field->datatype, ['number', 'range'])) {
+                        $z = (float)$z;
+                    }
+                    return $z;
                 }, $x);
             } else {
                 $x = $material->fields[$column->Field->urn]->doRich();
+                if (in_array($column->Field->datatype, ['number', 'range'])) {
+                    $x = (float)$x;
+                }
             }
         } elseif ($column->fid) {
             $x = $material->{$column->fid};
@@ -1345,7 +1352,9 @@ class PriceloaderInterface extends AbstractInterface
         if (is_array($x)) {
             $x = implode(', ', $x);
         }
-        $x = trim($x);
+        if (is_string($x)) {
+            $x = trim($x);
+        }
         return $x;
     }
 
