@@ -143,8 +143,8 @@ class CartInterface extends FormInterface
                                 $this->server,
                                 $this->files
                             ));
-                            $cart->clear();
                             if ($this->post['epay'] != 1) {
+                                $cart->clear();
                                 $result['success'][(int)$this->block->id] = true;
                             }
                         }
@@ -190,6 +190,9 @@ class CartInterface extends FormInterface
                 ],
                 $result
             ));
+            if ($epayResult['success'][$this->block->id]) {
+                $cart->clear();
+            }
             $result = array_merge($result, $epayResult);
         }
         return $result;
