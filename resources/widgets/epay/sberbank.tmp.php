@@ -16,6 +16,13 @@ if ($success[(int)$Block->id] || $localError) {
               <?php } ?>
             </ul>
           </div>
+          <?php if ($Item->payment_url) { ?>
+              <div>
+                <a href="<?php echo htmlspecialchars($Item->payment_url)?>" class="btn btn-primary">
+                  <?php echo htmlspecialchars(TRY_AGAIN)?>
+                </a>
+              </div>
+          <?php } ?>
       <?php } ?>
     </div>
 <?php } ?>

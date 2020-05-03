@@ -38,13 +38,15 @@ class ViewOrderForm extends ViewFeedbackForm
             $history->uid = Application::i()->user->id;
             $history->order_id = (int)$Form->Item->id;
             $history->status_id = (int)$_POST['status_id'];
-            $history->paid = (int)$_POST['paid'];
+            if ((int)$_POST['paid']) {
+                $Form->Item->paid = ((int)$_POST['paid'] + 1) / 2;
+            }
+            $history->paid = (int)$Form->Item->paid;
             $history->post_date = date('Y-m-d H:i:s');
             $history->description = trim($_POST['description']);
             $history->commit();
 
             $Form->Item->status_id = (int)$_POST['status_id'];
-            $Form->Item->paid = (int)$_POST['paid'];
             $Form->Item->commit();
         };
         return $arr;
@@ -90,10 +92,24 @@ class ViewOrderForm extends ViewFeedbackForm
                     'default' => $this->Item->status_id,
                 ],
                 'paid' => [
-                    'type' => 'checkbox',
+                    'type' => 'select',
                     'name' => 'paid',
                     'caption' => $this->view->_('PAYMENT_STATUS'),
-                    'default' => $this->Item->paid,
+                    'default' => '',
+                    'style' => 'margin: 0',
+                    'children' => [
+                        ['value' => '', 'caption' => $this->view->_('DONT_CHANGE')],
+                        ['value' => '1', 'caption' => $this->view->_('_YES')],
+                        ['value' => '-1', 'caption' => $this->view->_('_NO')],
+                    ],
+                    'import' => function ($field) {
+                        return '';
+                    },
+                    'export' => function ($field) {
+                        if ($_POST[$field->name]) {
+                            $field->Form->Item->paid = (($_POST[$field->name] + 1) / 2);
+                        }
+                    }
                 ],
                 'description' => [
                     'name' => 'description',
@@ -123,7 +139,8 @@ class ViewOrderForm extends ViewFeedbackForm
             $arr['paid'] = [
                 'name' => 'paid',
                 'caption' => $this->view->_('PAYMENT_STATUS'),
-                'template' => 'order_view.add_field.inc.php'
+                'template' => 'order_view.add_field.inc.php',
+                'import' => 'is_null',
             ];
         }
         $arr = array_merge($arr, $this->getDetailsFields());

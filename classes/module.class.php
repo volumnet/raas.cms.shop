@@ -11,6 +11,7 @@ use RAAS\CMS\Field;
 use RAAS\CMS\Form;
 use RAAS\CMS\Form_Field;
 use RAAS\CMS\Material_Type;
+use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 
 class Module extends RAASModule
@@ -33,6 +34,11 @@ class Module extends RAASModule
             SOME::class . ':commit:commit',
             Page::class,
             [Block_YML::class, 'pageCommitEventListener']
+        );
+        EventProcessor::on(
+            Package::class . ':clearCache:clearCache',
+            Package::class,
+            [CatalogFilter::class, 'clearCaches']
         );
         parent::init();
     }

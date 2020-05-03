@@ -65,7 +65,7 @@ if ($_GET['AJAX']) {
           </div>
           <div class="cart-item__amount-block">
             <a class="cart-item__decrement" v-on:click="item.amount = (parseInt(item.amount) || 1) - (parseInt(item.step) || 1); checkAmount();">–</a>
-            <input type="number" class="cart-item__amount" autocomplete="new-password" :name="'amount[' + item.id + '_' + item.meta + ']'" :min="item.min" :step="item.step" v-model="item.amount" v-on:change="checkAmount();" />
+            <input type="number" class="cart-item__amount" autocomplete="off" :name="'amount[' + item.id + '_' + item.meta + ']'" :min="item.min" :step="item.step" v-model="item.amount" v-on:change="checkAmount();" />
             <a class="cart-item__increment" v-on:click="item.amount = (parseInt(item.amount) || 1) + (parseInt(item.step) || 1); checkAmount();">+</a>
           </div>
           <div class="cart-item__sum">
@@ -161,7 +161,7 @@ if ($_GET['AJAX']) {
                       <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
                   <?php }
                   if ($Form->antispam == 'hidden' && $Form->antispam_field_name) { ?>
-                      <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" value="<?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?>" style="position: absolute; left: -9999px" />
+                      <textarea autocomplete="off" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" style="position: absolute; left: -9999px"><?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?></textarea>
                   <?php }
                   foreach ($Form->fields as $fieldURN => $field) {
                       if ($fieldURN == 'agree') { ?>
@@ -200,7 +200,7 @@ if ($_GET['AJAX']) {
                         <label for="<?php echo htmlspecialchars($Form->antispam_field_name)?>" class="control-label col-sm-3 col-md-2"><?php echo CAPTCHA?></label>
                         <div class="col-sm-9 col-md-4">
                           <img src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
-                          <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
+                          <input type="text" autocomplete="off" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
                         </div>
                       </div>
                   <?php } ?>

@@ -21,6 +21,12 @@ class Updater extends \RAAS\Updater
             $this->update20190304();
             $this->update20200316();
         }
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.2.32'
+        ) < 0) {
+            $this->update20200503();
+        }
     }
 
 
@@ -180,7 +186,26 @@ class Updater extends \RAAS\Updater
             $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders
                            ADD payment_interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Payment interface ID#',
                            ADD payment_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment ID#',
+                           ADD KEY (payment_interface_id),
                            ADD INDEX (payment_id)";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     * Добавляет поле для сохранения платежного URL
+     */
+    public function update20200503()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_orders", $this->tables) &&
+            !in_array(
+                'payment_url',
+                $this->columns(SOME::_dbprefix() . "cms_shop_orders")
+            )
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders
+                           ADD payment_url VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment URL'";
             $this->SQL->query($sqlQuery);
         }
     }

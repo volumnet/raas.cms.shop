@@ -2,6 +2,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\Attachment;
+use RAAS\Crontab;
 use RAAS\CMS\Block;
 use RAAS\CMS\Block_Material;
 use RAAS\CMS\Block_Menu;
@@ -671,6 +672,8 @@ class Webmaster extends CMSWebmaster
                 $this->Site,
                 false
             );
+
+            $this->createCron();
         }
         return $catalog;
     }
@@ -1070,5 +1073,37 @@ class Webmaster extends CMSWebmaster
         $this->createFilter();
         $this->adjustBlocks();
         $yml = $this->createYandexMarket($catalogType, $catalog);
+    }
+
+
+    /**
+     * Создает cron-задачи
+     */
+    public function createCron()
+    {
+        $updateCatalogFilterTask = new Crontab([
+            'name' => $this->view->_('UPDATING_CATALOG_FILTER_CACHE'),
+            'vis' => 1,
+            'once' => 0,
+            'minutes' => '*',
+            'hours' => '*',
+            'days' => '*',
+            'weekdays' => '*',
+            'command_classname' => UpdateCatalogFilterCommand::class,
+            'args' => '[]'
+        ]);
+        $updateCatalogFilterTask->commit();
+        $updateYMLTask = new Crontab([
+            'name' => $this->view->_('UPDATING_YANDEX_MARKET'),
+            'vis' => 1,
+            'once' => 0,
+            'minutes' => '*',
+            'hours' => '*',
+            'days' => '*',
+            'weekdays' => '*',
+            'command_classname' => UpdateYMLCommand::class,
+            'args' => '[]'
+        ]);
+        $updateYMLTask->commit();
     }
 }

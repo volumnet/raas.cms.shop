@@ -141,20 +141,22 @@ class SberbankInterface extends EPayInterface
             }
             $orderIsPaid = $this->getOrderIsPaid($order, $block, $page);
             if ($orderIsPaid) {
-                $history = new Order_History([
-                    'uid' => (int)Application::i()->user->id,
-                    'order_id' => (int)$order->id,
-                    'status_id' => (int)$order->status_id,
-                    'paid' => 1,
-                    'post_date' => date('Y-m-d H:i:s'),
-                    'description' => 'Оплачено через Сбербанк'
-                                  .  ' (ID# заказа в системе банка: '
-                                  .  $order->payment_id . ')'
-                ]);
-                $history->commit();
+                if (!$order->paid) {
+                    $history = new Order_History([
+                        'uid' => (int)Application::i()->user->id,
+                        'order_id' => (int)$order->id,
+                        'status_id' => (int)$order->status_id,
+                        'paid' => 1,
+                        'post_date' => date('Y-m-d H:i:s'),
+                        'description' => 'Оплачено через Сбербанк'
+                                      .  ' (ID# заказа в системе банка: '
+                                      .  $order->payment_id . ')'
+                    ]);
+                    $history->commit();
 
-                $order->paid = 1;
-                $order->commit();
+                    $order->paid = 1;
+                    $order->commit();
+                }
                 $out['success'][(int)$block->id] = sprintf(
                     ORDER_SUCCESSFULLY_PAID,
                     $order->id
@@ -246,6 +248,7 @@ class SberbankInterface extends EPayInterface
         } else {
             $order->payment_id = $response['orderId'];
             $order->payment_interface_id = (int)$block->EPay_Interface->id;
+            $order->payment_url = $response['formUrl'];
             $order->commit();
             $history = new Order_History([
                 'uid' => (int)Application::i()->user->id,
@@ -255,7 +258,8 @@ class SberbankInterface extends EPayInterface
                 'post_date' => date('Y-m-d H:i:s'),
                 'description' => 'Зарегистрировано в системе Сбербанка'
                               .  ' (ID# заказа в системе банка: '
-                              .  $order->payment_id . ')'
+                              .  $order->payment_id . ', платежный URL: '
+                              .  $order->payment_url . ')'
             ]);
             $history->commit();
             if ($block->epay_test) {
@@ -266,8 +270,7 @@ class SberbankInterface extends EPayInterface
                     FILE_APPEND
                 );
             }
-            $redirectURL = $response['formUrl'];
-            new Redirector($redirectURL);
+            new Redirector($order->payment_url);
             exit;
         }
     }

@@ -1320,4 +1320,16 @@ class CatalogFilter
         }
         return $filter;
     }
+
+
+    /**
+     * Очищает кэши фильтров
+     */
+    public static function clearCaches()
+    {
+        $glob = glob(Package::i()->cacheDir . '/system/catalogfilter*.*');
+        foreach ($glob as $file) {
+            unlink($file);
+        }
+    }
 }

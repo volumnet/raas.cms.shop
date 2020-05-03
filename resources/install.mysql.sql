@@ -48,13 +48,18 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders (
   user_agent VARCHAR(255) NOT NULL DEFAULT '0.0.0.0' COMMENT 'User Agent',
   status_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Status ID#',
   paid TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Payment status',
+  payment_interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Payment interface ID#',
+  payment_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment ID#',
+  payment_url VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment URL',
   
   PRIMARY KEY (id),
   KEY (uid),
   KEY (pid),
   KEY (page_id),
   KEY (status_id),
-  INDEX (paid)
+  INDEX (paid),
+  KEY (payment_interface_id),
+  INDEX (payment_id)
 ) COMMENT 'Orders';
 
 
