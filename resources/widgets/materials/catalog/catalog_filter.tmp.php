@@ -51,24 +51,32 @@ $result = [
     'properties' => [],
 ];
 foreach ($availableProperties as $propId => $availableProperty) {
-    $prop = $catalog->catalogFilter->properties[$propId];
-    $result['properties'][trim($propId)] = [
-        'id' => (int)$propId,
-        'urn' => $prop->urn,
-        'datatype' => $prop->datatype,
-        'multiple' => (int)$prop->multiple,
-        'name' => $prop->name,
-        'stdSource' => $prop->stdSource,
-        'priority' => (int)$prop->priority,
-        'values' => []
-    ];
-    foreach ($availableProperty as $value => $valueData) {
-        unset($valueData['prop']);
-        if (((trim($valueData['value']) !== '') && (trim($valueData['doRich']) !== '')) ||
-            ($prop->datatype == 'number')
-        ) {
-            if (($pageMime == 'application/json') || ($valueData['checked'])) {
-                $result['properties'][trim($propId)]['values'][trim($value)] = $valueData;
+    if (count($availableProperty) > 1) { // Чтобы не было свойств с одним значением
+        $prop = $catalog->catalogFilter->properties[$propId];
+        $result['properties'][trim($propId)] = [
+            'id' => (int)$propId,
+            'urn' => $prop->urn,
+            'datatype' => $prop->datatype,
+            'multiple' => (int)$prop->multiple,
+            'name' => $prop->name,
+            'stdSource' => $prop->stdSource,
+            'priority' => (int)$prop->priority,
+            'values' => []
+        ];
+        foreach ($availableProperty as $value => $valueData) {
+            unset($valueData['prop']);
+            if (((trim($valueData['value']) !== '') && (trim($valueData['doRich']) !== '')) ||
+                ($prop->datatype == 'number')
+            ) {
+                if (($pageMime == 'application/json') || // Чтобы не перегружать код всеми значениями
+                    ($valueData['checked']) ||
+                    ($prop->datatype == 'number')
+                ) {
+                    // 2020-05-11, AVS: добавлено условие ($prop->datatype == 'number'),
+                    // чтобы цена подгружалась сразу - иначе (т.к. слайдеры не меняются)
+                    // слайдер цены (и прочих числовых полей) не работает
+                    $result['properties'][trim($propId)]['values'][trim($value)] = $valueData;
+                }
             }
         }
     }
@@ -198,27 +206,37 @@ if ($pageMime == 'application/json') {
 
 
 <script type="text/html" id="raas-shop-catalog-filter-template">
-  <form action="" method="get" class="catalog-filter">
+  <form action="" method="get" class="catalog-filter__inner">
     <input type="hidden" name="sort" v-bind:value="data.sort || ''">
     <input type="hidden" name="order" v-bind:value="data.order || ''">
-    <div class="catalog-filter__inner">
-      <div class="catalog-filter__list">
-        <raas-shop-catalog-filter-properties-list v-bind:data="data" v-bind:filter="filter" v-bind:properties="properties" v-bind:multiple="multiple" v-on:change="change($event)"></raas-shop-catalog-filter-properties-list>
-      </div>
-      <raas-shop-catalog-filter-preview-marker v-bind:counter="counter" v-bind:active="previewTimeoutId" v-bind:lastactiveelement="lastActiveElement" v-bind:float="floatingMarker" v-on:submit="submit()"></raas-shop-catalog-filter-preview-marker>
-      <div class="catalog-filter__controls">
-        <button type="submit" class="btn btn-primary" v-on:click="submit($event);">
-          <?php echo DO_SEARCH?>
-        </button>
-        <a href="<?php echo htmlspecialchars($Page->url)?>" class="btn btn-default">
-          <?php echo RESET?>
-        </a>
-      </div>
+    <div class="catalog-filter__list">
+      <raas-shop-catalog-filter-properties-list v-bind:data="data" v-bind:filter="filter" v-bind:properties="properties" v-bind:multiple="multiple" v-on:change="change($event)"></raas-shop-catalog-filter-properties-list>
+    </div>
+    <raas-shop-catalog-filter-preview-marker v-bind:counter="counter" v-bind:active="previewTimeoutId" v-bind:lastactiveelement="lastActiveElement" v-bind:float="floatingMarker" v-on:submit="submit()"></raas-shop-catalog-filter-preview-marker>
+    <div class="catalog-filter__controls">
+      <button type="submit" class="btn btn-primary" v-on:click="submit($event);">
+        <?php echo DO_SEARCH?>
+      </button>
+      <a href="<?php echo htmlspecialchars($Page->url)?>" class="btn btn-default">
+        <?php echo RESET?>
+      </a>
     </div>
   </form>
 </script>
 
-<div class="catalog-filter"></div>
+<div class="catalog-filter__outer">
+  <div class="catalog-filter">
+    <div class="catalog-filter__header">
+      <div class="catalog-filter__title">
+        <?php echo htmlspecialchars($Block->name)?>
+      </div>
+      <div class="catalog-filter__close">
+        <a class="catalog-filter__close-link"></a>
+      </div>
+    </div>
+    <div class="catalog-filter__inner" data-role="catalog-filter"></div>
+  </div>
+</div>
 <?php
 $vueData = array_merge($result, [
     'catalogId' => (int)$catalog->id,
