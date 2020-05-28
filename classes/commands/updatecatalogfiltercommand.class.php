@@ -11,7 +11,7 @@ use RAAS\CMS\Material;
 use RAAS\CMS\Material_Type;
 
 /**
- * Класс команды обновления фильтра каталога
+ * Команда обновления фильтра каталога
  */
 class UpdateCatalogFilterCommand extends LockCommand
 {

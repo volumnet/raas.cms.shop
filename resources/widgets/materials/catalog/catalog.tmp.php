@@ -152,6 +152,7 @@ if ($Item) {
                                 $jsonLd[$fieldURN] = [
                                     '@type' => 'QuantitativeValue',
                                     'value' => $textValue,
+                                    'unitCode' => 'CMT',
                                 ];
                                 $propsArr[] = '<div class="catalog-article-props-item">
                                                  <span class="catalog-article-props-item__title">'
@@ -161,6 +162,7 @@ if ($Item) {
                                                    <span itemprop="value">'
                                             .        htmlspecialchars($textValue)
                                             .     '</span>
+                                                   <meta itemprop="unitCode" content="CMT">
                                                  </span>
                                                </div>';
                                 break;

@@ -10,7 +10,7 @@ use RAAS\CMS\Material_Type;
 use RAAS\Exception;
 
 /**
- * Класс команды синхронизации товаров с 1С из пары файлов
+ * Команда синхронизации товаров с 1С из пары файлов
  */
 class Sync1CFileCommand extends Command
 {

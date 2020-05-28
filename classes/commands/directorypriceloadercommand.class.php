@@ -11,7 +11,7 @@ use RAAS\CMS\Page;
 use RAAS\CMS\Material;
 
 /**
- * Класс команды загрузки прайсов из папки
+ * Команда загрузки прайсов из папки
  */
 class DirectoryPriceLoaderCommand extends LockCommand
 {

@@ -10,7 +10,7 @@ use RAAS\CMS\Page;
 use RAAS\CMS\Material;
 
 /**
- * Класс команды обновления файла Яндекс-Маркета
+ * Команда обновления файла Яндекс-Маркета
  */
 class UpdateYMLCommand extends LockCommand
 {
