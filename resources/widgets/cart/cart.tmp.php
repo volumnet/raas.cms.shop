@@ -244,7 +244,7 @@ if ($_GET['AJAX']) {
     <?php echo Package::i()->asset([
         '/js/raas-shop-cart-item-mixin.vue.js',
         '/js/raas-shop-cart-list-mixin.vue.js',
-        '/js/raas-shop-cart-mixin.vue.js',
+        '/js/raas-shop-cart.mixin.vue.js',
         '/js/cart.js'
     ]); ?>
 <?php } elseif ($localError) { ?>

@@ -51,8 +51,10 @@ $result = [
     'properties' => [],
 ];
 foreach ($availableProperties as $propId => $availableProperty) {
-    if (count($availableProperty) > 1) { // Чтобы не было свойств с одним значением
-        $prop = $catalog->catalogFilter->properties[$propId];
+    $prop = $catalog->catalogFilter->properties[$propId];
+    if ((count($availableProperty) > 1) ||
+        (($prop->datatype == 'checkbox') && !$prop->multiple)
+    ) { // Чтобы не было свойств с одним значением
         $result['properties'][trim($propId)] = [
             'id' => (int)$propId,
             'urn' => $prop->urn,
