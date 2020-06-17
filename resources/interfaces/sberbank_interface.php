@@ -20,4 +20,7 @@ $interface = new SberbankInterface(
     $_FILES
 );
 $sberbankOut = $interface->process($Item);
-$OUT = array_merge($OUT, $sberbankOut);
+if (isset($OUT)) {
+    $OUT = array_merge((array)$OUT, $sberbankOut);
+}
+return $sberbankOut;

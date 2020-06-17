@@ -100,6 +100,12 @@ class CartInterface extends FormInterface
             case 'clear':
                 $cart->clear();
                 break;
+            case 'success':
+                $result = array_merge(
+                    $result,
+                    $this->success($this->block, $this->get)
+                );
+                break;
             default:
                 $form = $cartType->Form;
                 if (isset($this->post['amount'])) {
@@ -147,6 +153,11 @@ class CartInterface extends FormInterface
                                 $cart->clear();
                                 $result['success'][(int)$this->block->id] = true;
                             }
+                            new Redirector(
+                                '?action=success&id=' . (int)$result['Item']->id .
+                                '&crc=' . Application::i()->md5It($result['Item']->id) .
+                                ($this->post['epay'] ? ('&epay=' . $this->post['epay']) : '')
+                            );
                         }
                         $result['DATA'] = $this->post;
                         $result['localError'] = $localError;
@@ -194,6 +205,40 @@ class CartInterface extends FormInterface
                 $cart->clear();
             }
             $result = array_merge($result, $epayResult);
+        }
+        return $result;
+    }
+
+
+    /**
+     * Обрабатывает страницу успешной отправки заказа
+     * (для предотвращения повторной отправки)
+     * @param Block_Cart $block Текущий блок
+     * @param array $get Данные $_GET-полей
+     */
+    public function success(Block_Cart $block, array $get)
+    {
+        $result = [];
+        $localError = [];
+        if (!$get['id']) {
+            $localError['id'] = View_Web::i()->_('ORDER_NOT_FOUND');
+        } elseif ($get['crc'] != Application::i()->md5It($get['id'])) {
+            $localError['id'] = View_Web::i()->_('ORDER_CRC_IS_INVALID');
+        } else {
+            $order = new Order($get['id']);
+            if ($order->id != $get['id']) {
+                $localError['id'] = View_Web::i()->_('ORDER_NOT_FOUND');
+            }
+        }
+        if ($localError) {
+            $result['localError'] = $localError;
+        } else {
+            $result['Item'] = $order;
+            if ($get['epay']) {
+                $_POST['epay'] = $this->post['epay'] = $get['epay'];
+            } else {
+                $result['success'][(int)$block->id] = true;
+            }
         }
         return $result;
     }
