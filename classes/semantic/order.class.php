@@ -138,7 +138,9 @@ class Order extends Feedback
 
     protected function _items()
     {
-        $sqlQuery = "SELECT tM.*, tOG.meta, tOG.realprice, tOG.amount
+        // 2020-06-25, AVS: добавил tOG.name, чтобы доставка в письме значилась
+        // под произвольным именем, а не под именем материала
+        $sqlQuery = "SELECT tM.*, tOG.meta, tOG.name, tOG.realprice, tOG.amount
                         FROM " . Material::_tablename() . " AS tM
                         JOIN " . self::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.material_id = tM.id
                        WHERE tOG.order_id = " . (int)$this->id . "
