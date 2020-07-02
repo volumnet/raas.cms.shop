@@ -27,6 +27,13 @@ class Updater extends \RAAS\Updater
         ) < 0) {
             $this->update20200503();
         }
+
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.2.41'
+        ) < 0) {
+            $this->update20200702();
+        }
     }
 
 
@@ -206,6 +213,25 @@ class Updater extends \RAAS\Updater
         ) {
             $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders
                            ADD payment_url VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment URL'";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     * Добавляет поля для обновления материалов и медиа-полей загрузчиками прайсов
+     */
+    public function update20200702()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_priceloaders", $this->tables) &&
+            !in_array(
+                'update_materials',
+                $this->columns(SOME::_dbprefix() . "cms_shop_priceloaders")
+            )
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_priceloaders
+                           ADD update_materials TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Allow to update materials' AFTER create_materials,
+                           ADD media_action TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Media fields action'";
             $this->SQL->query($sqlQuery);
         }
     }

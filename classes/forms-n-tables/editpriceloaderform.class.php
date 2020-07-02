@@ -1,4 +1,7 @@
 <?php
+/**
+ * Форма редактирования загрузчика прайсов
+ */
 namespace RAAS\CMS\Shop;
 
 use RAAS\Field as RAASField;
@@ -10,9 +13,19 @@ use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
 use RAAS\CMS\Snippet_Folder;
 
+/**
+ * Класс формы редактирования загрузчика прайсов
+ */
 class EditPriceLoaderForm extends RAASForm
 {
+    /**
+     * "Отбивка" категорий производится ячейками
+     */
     const CATALOG_OFFSET_BY_CELLS = 0;
+
+    /**
+     * "Отбивка" категорий производится пробелами
+     */
     const CATALOG_OFFSET_BY_SPACES = 4;
 
     public function __get($var)
@@ -28,6 +41,10 @@ class EditPriceLoaderForm extends RAASForm
     }
 
 
+    /**
+     * Получает поле интерфейса
+     * @return RAASField
+     */
     protected function getInterfaceField()
     {
         $wf = function (Snippet_Folder $x) use (&$wf) {
@@ -179,6 +196,36 @@ class EditPriceLoaderForm extends RAASForm
                     'name' => 'create_materials',
                     'caption' => $this->view->_('ALLOW_TO_CREATE_MATERIALS'),
                     'default' => 1
+                ],
+                'update_materials' => [
+                    'type' => 'checkbox',
+                    'name' => 'update_materials',
+                    'caption' => $this->view->_('ALLOW_TO_UPDATE_MATERIALS'),
+                    'default' => 1
+                ],
+                'media_action' => [
+                    'type' => 'select',
+                    'name' => 'media_action',
+                    'caption' => $this->view->_('WHAT_TO_DO_WITH_MEDIA_FIELDS'),
+                    'default' => PriceLoader::MEDIA_FIELDS_APPEND_IF_EMPTY,
+                    'children' => [
+                        [
+                            'value' => PriceLoader::MEDIA_FIELDS_APPEND_IF_EMPTY,
+                            'caption' => $this->view->_('MEDIA_FIELDS_APPEND_IF_EMPTY'),
+                        ],
+                        [
+                            'value' => PriceLoader::MEDIA_FIELDS_APPEND_TO_NEW_ONLY,
+                            'caption' => $this->view->_('MEDIA_FIELDS_APPEND_TO_NEW_ONLY'),
+                        ],
+                        [
+                            'value' => PriceLoader::MEDIA_FIELDS_APPEND,
+                            'caption' => $this->view->_('MEDIA_FIELDS_APPEND'),
+                        ],
+                        [
+                            'value' => PriceLoader::MEDIA_FIELDS_REPLACE,
+                            'caption' => $this->view->_('MEDIA_FIELDS_REPLACE'),
+                        ],
+                    ],
                 ],
                 'catalog_offset' => [
                     'type' => 'radio',

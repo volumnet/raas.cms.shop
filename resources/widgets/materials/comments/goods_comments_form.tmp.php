@@ -8,13 +8,15 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
     if ($localError) {
         $result['localError'] = $localError;
     }
-    ob_clean();
+    while (ob_get_level()) {
+      ob_end_clean();
+    }
     echo json_encode($result);
     exit;
 } else { ?>
     <div class="feedback" id="feedback">
       <p>Вы можете оставить отзыв о данном товаре, заполнив форму ниже</p>
-      <p>Поля, помеченные звездочкой (*), обязательны для заполнения</p>
+      <p class="feedback__required-fields">Поля, помеченные звездочкой (*), обязательны для заполнения</p>
       <form class="form-horizontal" data-role="raas-ajaxform" action="/ajax/goods_comments/" method="post" enctype="multipart/form-data">
         <?php include \RAAS\CMS\Package::i()->resourcesDir . '/form2.inc.php'?>
         <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>

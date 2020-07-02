@@ -11,6 +11,7 @@ use SOME\Text;
 use SOME\EventProcessor;
 use RAAS\Exception;
 use RAAS\Attachment;
+use RAAS\Application;
 use RAAS\CMS\AbstractInterface;
 use RAAS\CMS\Block;
 use RAAS\CMS\Page;
@@ -90,6 +91,7 @@ class PriceloaderInterface extends AbstractInterface
         array $files = []
     ) {
         $this->loader = $loader;
+        $this->loader->loaderInterface = $this;
         parent::__construct($block, $page, $get, $post, $cookie, $session, $server, $files);
     }
 
@@ -530,41 +532,138 @@ class PriceloaderInterface extends AbstractInterface
         if (!$col->Field->id) {
             return null;
         }
+        $preprocessor = $col->Field->Preprocessor;
+        $postprocessor = $col->Field->Postprocessor;
+        $raasField = $col->Field->Field;
         $field = $col->Field->deepClone();
         $field->Owner = $item;
         if (!$field->id) {
             return null;
         }
         $affectsField = false;
-        $oldVal = $field->getValues(true);
+        $oldVal = [];
+        if (!$new) {
+            $oldVal = $field->getValues(true);
+        }
         // 2015-06-01, AVS: добавляем поддержку множественных значений:
         $dataArr = (array)$data;
-        $isFileField = in_array($field->datatype, ['file', 'image']);
-        // 2015-06-01, AVS: добавляем || $new , чтобы у новых товаров артикул тоже заполнялся
-        // 2016-02-01, AVS: закомментировали trim($data), т.к. пустые значения тоже должны вставляться
-        if (/*trim($data) && */(!$isUnique || $new)) {
-            if ($isFileField && !$dataArr) {
-                return null;
-            }
-            if ($isFileField) {
-                foreach ($oldVal as $att) {
-                    Attachment::delete($att);
+        // 2015-06-01, AVS: добавляем || $new , чтобы у новых товаров артикул
+        // тоже заполнялся
+        // 2016-02-01, AVS: закомментировали trim($data), т.к. пустые значения
+        // тоже должны вставляться
+        if (!$isUnique || $new) {
+            if ($isFileField = in_array($field->datatype, ['file', 'image'])) {
+                $mediaAction = $col->Parent->media_action;
+                $isImage = ($field->datatype == 'image');
+                if (($mediaAction == PriceLoader::MEDIA_FIELDS_APPEND_TO_NEW_ONLY) &&
+                    !$new
+                ) {
+                    return null;
                 }
-            }
-            if ($isFileField || ($dataArr != $oldVal)) {
-                $field->deleteValues();
+                if (($mediaAction == PriceLoader::MEDIA_FIELDS_APPEND_IF_EMPTY) &&
+                    $oldVal
+                ) {
+                    return null;
+                }
+                if ($mediaAction == PriceLoader::MEDIA_FIELDS_REPLACE) {
+                    foreach ($oldVal as $att) {
+                        Attachment::delete($att);
+                    }
+                    $field->deleteValues();
+                }
+
+                $addedAttachments = [];
+                $dataArr = $this->convertMediaData($dataArr, $addedAttachments);
+
+                if ($preprocessor->id) {
+                    $preprocessor->process([
+                        't' => $field,
+                        'postProcess' => false,
+                        'Field' => $raasField,
+                    ]);
+                }
                 foreach ($dataArr as $val) {
-                    if ($val !== null) {
-                        $field->addValue($val);
-                        $affectsField = true;
+                    $field->addValue($val);
+                    $affectsField = true;
+                }
+                if ($postprocessor->id) {
+                    $postprocessor->process([
+                        't' => $field,
+                        'postProcess' => true,
+                        'Field' => $raasField,
+                        'addedAttachments' => $addedAttachments
+                    ]);
+                }
+                $_FILES = [];
+            } else {
+                if ($dataArr != $oldVal) {
+                    $field->deleteValues();
+                    foreach ($dataArr as $val) {
+                        if ($val !== null) {
+                            $field->addValue($val);
+                            $affectsField = true;
+                        }
                     }
                 }
             }
         }
+
         if ($affectsField) {
             return $col->Field->urn;
         }
         return null;
+    }
+
+
+    /**
+     * Конвертирует данные для медиа-поля
+     * @param array $data Данные для поля
+     * @param array $addedAttachments Добавленные вложения
+     */
+    public function convertMediaData(array $data, array &$addedAttachments)
+    {
+        $newDataArr = [];
+        $addedAttachments = [];
+        foreach ($data as $val) {
+            if (!is_string($val) || !$val) {
+                continue;
+            }
+            $basename = $filename = null;
+            if (stristr($val, '://')) {
+                $text = file_get_contents($val);
+                if (!$text) {
+                    continue;
+                }
+                $basename = basename($val);
+                $filename = sys_get_temp_dir() . '/' . $basename;
+                file_put_contents($filename, $text);
+            } elseif (is_file(Application::i()->baseDir . $val)) {
+                $basename = basename($val);
+                $filename = Application::i()->baseDir . $val;
+            }
+            if ($filename) {
+                $mime = mime_content_type($filename);
+                $_FILES[$field->urn]['name'][] = $basename;
+                $_FILES[$field->urn]['tmp_name'][] = $filename;
+                $_FILES[$field->urn]['type'][] = $mime;
+                $att = Attachment::createFromFile(
+                    $filename,
+                    $field,
+                    (int)Package::i()->registryGet('maxsize'),
+                    (int)Package::i()->context->registryGet('tn'),
+                    $mime
+                );
+                $addedAttachments[] = $att;
+                $val = json_encode([
+                    'vis' => 1,
+                    'name' => '',
+                    'description' => '',
+                    'attachment' => $att->id
+                ]);
+            }
+            $newDataArr[] = $val;
+        }
+        return $newDataArr;
     }
 
 
@@ -924,6 +1023,8 @@ class PriceloaderInterface extends AbstractInterface
         if (!$itemSet && $loader->create_materials) {
             $itemSet = [$this->createItem($loader)];
             $new = true;
+        } elseif ($itemSet && !$loader->update_materials) {
+            $itemSet = [];
         }
 
         foreach ($itemSet as $item) {
