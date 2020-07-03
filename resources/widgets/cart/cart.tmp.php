@@ -47,7 +47,7 @@ if ($_GET['AJAX']) {
       </div>
     </div>
 <?php } elseif ($Cart->items) { ?>
-    <script type="text/html" id="raas-shop-cart-item-template">
+    <script type="text/html" data-v-pre id="raas-shop-cart-item-template">
       <div class="cart-list__item">
         <div class="cart-item">
           <div class="cart-item__image">
@@ -77,7 +77,7 @@ if ($_GET['AJAX']) {
         </div>
       </div>
     </script>
-    <script type="text/html" id="raas-shop-cart-list-template">
+    <script type="text/html" data-v-pre id="raas-shop-cart-list-template">
       <div class="cart-list">
         <div class="cart-list__header">
           <div class="cart-list__item cart-list__item_header">
@@ -124,113 +124,115 @@ if ($_GET['AJAX']) {
         </div>
       </div>
     </script>
-    <div class="cart">
-      <form action="#feedback" method="post" enctype="multipart/form-data" data-v-if="items.length">
-        <div class="cart__list">
-          <raas-shop-cart-list data-v-bind_items="items" data-v-bind_cart="cart" data-v-on_delete="requestItemDelete($event)" data-v-on_clear="requestClear()"></raas-shop-cart-list>
-        </div>
-        <?php if ($Form->id) {
-            foreach ($Form->fields as $fieldURN => $field) {
-                if (!$DATA[$fieldURN] &&
-                    ($userVal = Controller_Frontend::i()->user->{$fieldURN})
-                ) {
-                    $DATA[$fieldURN] = $userVal;
-                }
-            } ?>
-            <div class="cart__form">
-              <div class="cart-form form-horizontal">
-                <?php include Package::i()->resourcesDir . '/form2.inc.php'?>
-                <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>
-                  <div class="alert alert-success" <?php echo ($success[(int)$Block->id]) ? '' : 'style="display: none"'?>>
-                    <?php echo FEEDBACK_SUCCESSFULLY_SENT?>
+    <div class="cart" data-vue-role="raas-shop-cart" data-inline-template>
+      <div>
+        <form action="#feedback" method="post" enctype="multipart/form-data" data-v-if="items.length">
+          <div class="cart__list">
+            <raas-shop-cart-list data-v-bind_items="items" data-v-bind_cart="cart" data-v-on_delete="requestItemDelete($event)" data-v-on_clear="requestClear()"></raas-shop-cart-list>
+          </div>
+          <?php if ($Form->id) {
+              foreach ($Form->fields as $fieldURN => $field) {
+                  if (!$DATA[$fieldURN] &&
+                      ($userVal = Controller_Frontend::i()->user->{$fieldURN})
+                  ) {
+                      $DATA[$fieldURN] = $userVal;
+                  }
+              } ?>
+              <div class="cart__form">
+                <div class="cart-form form-horizontal">
+                  <?php include Package::i()->resourcesDir . '/form2.inc.php'?>
+                  <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>
+                    <div class="alert alert-success" <?php echo ($success[(int)$Block->id]) ? '' : 'style="display: none"'?>>
+                      <?php echo FEEDBACK_SUCCESSFULLY_SENT?>
+                    </div>
+                    <div class="alert alert-danger" <?php echo ($localError) ? '' : 'style="display: none"'?>>
+                      <ul>
+                        <?php foreach ((array)$localError as $key => $val) { ?>
+                            <li><?php echo htmlspecialchars($val)?></li>
+                        <?php } ?>
+                      </ul>
+                    </div>
                   </div>
-                  <div class="alert alert-danger" <?php echo ($localError) ? '' : 'style="display: none"'?>>
-                    <ul>
-                      <?php foreach ((array)$localError as $key => $val) { ?>
-                          <li><?php echo htmlspecialchars($val)?></li>
-                      <?php } ?>
-                    </ul>
-                  </div>
-                </div>
 
-                <div data-role="feedback-form" <?php echo $success[(int)$Block->id] ? 'style="display: none"' : ''?>>
-                  <p class="cart-form__required-fields">
-                    <?php echo ASTERISK_MARKED_FIELDS_ARE_REQUIRED?>
-                  </p>
-                  <?php if ($Form->signature) { ?>
-                      <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
-                  <?php }
-                  if ($Form->antispam == 'hidden' && $Form->antispam_field_name) { ?>
-                      <textarea autocomplete="off" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" style="position: absolute; left: -9999px"><?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?></textarea>
-                  <?php }
-                  foreach ($Form->fields as $fieldURN => $field) {
-                      if ($fieldURN == 'agree') { ?>
-                          <div class="form-group">
-                            <div class="col-sm-9 col-sm-offset-3 col-md-offset-2">
-                              <label>
-                                <?php $getField($field, $DATA);?>
-                                <a href="/privacy/" target="_blank">
-                                  <?php echo htmlspecialchars($field->name)?>
-                                </a>
-                              </label>
+                  <div data-role="feedback-form" <?php echo $success[(int)$Block->id] ? 'style="display: none"' : ''?>>
+                    <p class="cart-form__required-fields">
+                      <?php echo ASTERISK_MARKED_FIELDS_ARE_REQUIRED?>
+                    </p>
+                    <?php if ($Form->signature) { ?>
+                        <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
+                    <?php }
+                    if ($Form->antispam == 'hidden' && $Form->antispam_field_name) { ?>
+                        <textarea autocomplete="off" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" style="position: absolute; left: -9999px"><?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?></textarea>
+                    <?php }
+                    foreach ($Form->fields as $fieldURN => $field) {
+                        if ($fieldURN == 'agree') { ?>
+                            <div class="form-group">
+                              <div class="col-sm-9 col-sm-offset-3 col-md-offset-2">
+                                <label>
+                                  <?php $getField($field, $DATA);?>
+                                  <a href="/privacy/" target="_blank">
+                                    <?php echo htmlspecialchars($field->name)?>
+                                  </a>
+                                </label>
+                              </div>
                             </div>
-                          </div>
-                      <?php } elseif ($field->datatype == 'checkbox') { ?>
-                          <div class="form-group">
-                            <div class="col-sm-9 col-sm-offset-3 col-md-offset-2">
-                              <label>
-                                <?php $getField($field, $DATA);?>
+                        <?php } elseif ($field->datatype == 'checkbox') { ?>
+                            <div class="form-group">
+                              <div class="col-sm-9 col-sm-offset-3 col-md-offset-2">
+                                <label>
+                                  <?php $getField($field, $DATA);?>
+                                  <?php echo htmlspecialchars($field->name . ($field->required ? '*' : ''))?>
+                                </label>
+                              </div>
+                            </div>
+                        <?php } else { ?>
+                            <div class="form-group">
+                              <label<?php echo !$field->multiple ? ' for="' . htmlspecialchars($fieldURN . $field->id . '_' . $Block->id) . '"' : ''?> class="control-label col-sm-3 col-md-2">
                                 <?php echo htmlspecialchars($field->name . ($field->required ? '*' : ''))?>
                               </label>
+                              <div class="col-sm-9 col-md-4">
+                                <?php $getField($field, $DATA);?>
+                              </div>
                             </div>
+                        <?php } ?>
+                    <?php } ?>
+                    <?php if ($Form->antispam == 'captcha' && $Form->antispam_field_name) { ?>
+                        <div class="form-group">
+                          <label for="<?php echo htmlspecialchars($Form->antispam_field_name)?>" class="control-label col-sm-3 col-md-2"><?php echo CAPTCHA?></label>
+                          <div class="col-sm-9 col-md-4">
+                            <img src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
+                            <input type="text" autocomplete="off" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
                           </div>
-                      <?php } else { ?>
-                          <div class="form-group">
-                            <label<?php echo !$field->multiple ? ' for="' . htmlspecialchars($fieldURN . $field->id . '_' . $Block->id) . '"' : ''?> class="control-label col-sm-3 col-md-2">
-                              <?php echo htmlspecialchars($field->name . ($field->required ? '*' : ''))?>
+                        </div>
+                    <?php } ?>
+                    <?php if ($Block->EPay_Interface->id && !$Form->fields['epay']) { ?>
+                        <div class="form-group">
+                          <label for="name" class="control-label col-sm-3 col-md-2"><?php echo PAYMENT_METHOD?></label>
+                          <div class="col-sm-9 col-md-4">
+                            <label>
+                              <input type="radio" name="epay" value="0" <?php echo !$DATA['epay'] ? 'checked="checked"' : ''?> />
+                              <?php echo PAY_ON_DELIVERY?>
                             </label>
-                            <div class="col-sm-9 col-md-4">
-                              <?php $getField($field, $DATA);?>
-                            </div>
+                            <label>
+                              <input type="radio" name="epay" value="1" <?php echo $DATA['epay'] ? 'checked="checked"' : ''?> />
+                              <?php echo PAY_BY_EPAY?>
+                            </label>
                           </div>
-                      <?php } ?>
-                  <?php } ?>
-                  <?php if ($Form->antispam == 'captcha' && $Form->antispam_field_name) { ?>
-                      <div class="form-group">
-                        <label for="<?php echo htmlspecialchars($Form->antispam_field_name)?>" class="control-label col-sm-3 col-md-2"><?php echo CAPTCHA?></label>
-                        <div class="col-sm-9 col-md-4">
-                          <img src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
-                          <input type="text" autocomplete="off" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
                         </div>
-                      </div>
-                  <?php } ?>
-                  <?php if ($Block->EPay_Interface->id && !$Form->fields['epay']) { ?>
-                      <div class="form-group">
-                        <label for="name" class="control-label col-sm-3 col-md-2"><?php echo PAYMENT_METHOD?></label>
-                        <div class="col-sm-9 col-md-4">
-                          <label>
-                            <input type="radio" name="epay" value="0" <?php echo !$DATA['epay'] ? 'checked="checked"' : ''?> />
-                            <?php echo PAY_ON_DELIVERY?>
-                          </label>
-                          <label>
-                            <input type="radio" name="epay" value="1" <?php echo $DATA['epay'] ? 'checked="checked"' : ''?> />
-                            <?php echo PAY_BY_EPAY?>
-                          </label>
-                        </div>
-                      </div>
-                  <?php } ?>
-                  <div class="cart-form__controls col-sm-offset-3 col-md-offset-2">
-                    <button class="cart-form__submit btn btn-primary" type="submit">
-                      <?php echo SEND?>
-                    </button>
+                    <?php } ?>
+                    <div class="cart-form__controls col-sm-offset-3 col-md-offset-2">
+                      <button class="cart-form__submit btn btn-primary" type="submit">
+                        <?php echo SEND?>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-        <?php } ?>
-      </form>
-      <div class="cart__empty" data-v-if="!items.length">
-        <?php echo htmlspecialchars(YOUR_CART_IS_EMPTY)?>
+          <?php } ?>
+        </form>
+        <div class="cart__empty" data-v-if="!items.length">
+          <?php echo htmlspecialchars(YOUR_CART_IS_EMPTY)?>
+        </div>
       </div>
     </div>
     <script>
@@ -244,7 +246,7 @@ if ($_GET['AJAX']) {
     <?php echo Package::i()->asset([
         '/js/raas-shop-cart-item-mixin.vue.js',
         '/js/raas-shop-cart-list-mixin.vue.js',
-        '/js/raas-shop-cart.mixin.vue.js',
+        '/js/raas-shop-cart-mixin.vue.js',
         '/js/cart.js'
     ]); ?>
 <?php } elseif ($localError) { ?>

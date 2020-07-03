@@ -30,7 +30,7 @@ if ($_GET['AJAX']) {
     echo json_encode($cartData);
     exit;
 } else { ?>
-    <script type="text/html" id="raas-shop-favorites-item-template">
+    <script type="text/html" data-v-pre id="raas-shop-favorites-item-template">
       <div class="favorites-list__item">
         <div class="favorites-item">
           <div class="favorites-item__image">
@@ -52,7 +52,7 @@ if ($_GET['AJAX']) {
         </div>
       </div>
     </script>
-    <script type="text/html" id="raas-shop-favorites-list-template">
+    <script type="text/html" data-v-pre id="raas-shop-favorites-list-template">
       <div class="favorites-list">
         <div class="favorites-list__header">
           <div class="favorites-list__item favorites-list__item_header">
@@ -81,7 +81,7 @@ if ($_GET['AJAX']) {
       </div>
     </script>
 
-    <div class="favorites">
+    <div class="favorites" data-vue-role="raas-shop-favorites" data-inline-template>
       <div class="favorites__list" data-v-if="items.length">
         <raas-shop-favorites-list data-v-bind_items="items" data-v-bind_cart="cart" data-v-on_clear="requestClear()" data-v-on_delete="requestItemDelete($event)"></raas-shop-favorites-list>
       </div>

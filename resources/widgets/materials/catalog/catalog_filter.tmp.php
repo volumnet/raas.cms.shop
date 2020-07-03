@@ -103,20 +103,18 @@ if ($pageMime == 'application/json') {
 }
 
 ?>
-<script type="text/html" id="raas-shop-catalog-filter-property-value-template">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-property-value-template">
   <label class="catalog-filter-property-value" v-bind:class="{ 'catalog-filter-property-value_disabled': !value.enabled }">
     <input v-bind:type="((property.datatype == 'checkbox') && !property.multiple) ? 'radio' : 'checkbox'" class="catalog-filter-property-value__input" v-bind:name="property.urn + ((property.datatype == 'checkbox' && !property.multiple) ? '' : '[]')" v-bind:disabled="!value.enabled || false" v-bind:value="value.value" v-bind:checked="value.checked" v-on:click="$emit('change', $event);">
     {{ value.doRich }}
   </label>
 </script>
 
-
-<script type="text/html" id="raas-shop-catalog-filter-range-slider-template">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-range-slider-template">
   <div class="catalog-filter-range-slider" v-bind:data-from="valuefrom" v-bind:data-to="valueto"></div>
 </script>
 
-
-<script type="text/html" id="raas-shop-catalog-filter-range-template">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-range-template">
   <div class="catalog-filter-range">
     <div class="catalog-filter-range__controls">
       <div class="catalog-filter-range__control-label">от</div>
@@ -134,8 +132,7 @@ if ($pageMime == 'application/json') {
   </div>
 </script>
 
-
-<script type="text/html" id="raas-shop-catalog-filter-property-list-template">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-property-list-template">
   <div class="catalog-filter-property-values-list">
     <div class="catalog-filter-property-values-list__item" v-for="value of values">
       <raas-shop-catalog-filter-property-value v-bind:property="property" v-bind:value="value" v-on:change="$emit('change', $event);"></raas-shop-catalog-filter-property-value>
@@ -143,8 +140,7 @@ if ($pageMime == 'application/json') {
   </div>
 </script>
 
-
-<script type="text/html" id="raas-shop-catalog-filter-property-selector-template">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-property-selector-template">
   <select class="catalog-filter-property-selector" v-bind:name="property.urn" v-on:change="$emit('change', $event);">
     <option value="" v-bind:selected="!data[property.urn]">не важно</option>
     <option v-for="value of values" v-if="value.enabled" v-bind:value="value.value" v-bind:selected="value.checked">
@@ -153,8 +149,7 @@ if ($pageMime == 'application/json') {
   </select>
 </script>
 
-
-<script type="text/html" id="raas-shop-catalog-filter-property-template">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-property-template">
   <div class="catalog-filter-property" v-bind:class="{ 'catalog-filter-property_active': active }">
     <div class="catalog-filter-property__title" v-on:click="toggle()">
       {{ property.name }}
@@ -170,8 +165,7 @@ if ($pageMime == 'application/json') {
   </div>
 </script>
 
-
-<script type="text/html" id="raas-shop-catalog-filter-properties-list-template">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-properties-list-template">
   <div class="catalog-filter-properties-list">
     <div class="catalog-filter-properties-list__item">
       <div class="catalog-filter-property catalog-filter-property_fixed">
@@ -189,7 +183,7 @@ if ($pageMime == 'application/json') {
   </div>
 </script>
 
-<script type="text/html" id="raas-shop-catalog-filter-preview-marker">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-preview-marker">
   <div class="catalog-filter-preview-marker" v-bind:class="{ 'catalog-filter-preview-marker_floating': float, 'catalog-filter-preview-marker_static': !float, 'catalog-filter-preview-marker_active': active }">
     <span class="catalog-filter-preview-marker__results">
       Найдено
@@ -206,8 +200,7 @@ if ($pageMime == 'application/json') {
   </div>
 </script>
 
-
-<script type="text/html" id="raas-shop-catalog-filter-template">
+<script type="text/html" data-v-pre id="raas-shop-catalog-filter-template">
   <form action="" method="get" class="catalog-filter__inner">
     <input type="hidden" name="sort" v-bind:value="data.sort || ''">
     <input type="hidden" name="order" v-bind:value="data.order || ''">
@@ -226,6 +219,15 @@ if ($pageMime == 'application/json') {
   </form>
 </script>
 
+<?php
+$vueData = array_merge($result, [
+    'catalogId' => (int)$catalog->id,
+    'blockId' => (int)$catalogBlock->id,
+]);
+?>
+<script>
+var raasShopCatalogFilterData = <?php echo json_encode($vueData)?>;
+</script>
 <div class="catalog-filter__outer">
   <div class="catalog-filter">
     <div class="catalog-filter__header">
@@ -236,18 +238,9 @@ if ($pageMime == 'application/json') {
         <a class="catalog-filter__close-link"></a>
       </div>
     </div>
-    <div class="catalog-filter__inner" data-role="catalog-filter"></div>
+    <div class="catalog-filter__inner" data-role="raas-shop-catalog-filter" data-vue-role="raas-shop-catalog-filter"></div>
   </div>
 </div>
-<?php
-$vueData = array_merge($result, [
-    'catalogId' => (int)$catalog->id,
-    'blockId' => (int)$catalogBlock->id,
-]);
-?>
-<script>
-var raasShopCatalogFilterData = <?php echo json_encode($vueData)?>;
-</script>
 <?php echo Package::asset([
     '/js/raas-shop-catalog-filter-property-value-mixin.vue.js',
     '/js/raas-shop-catalog-filter-range-slider-mixin.vue.js',

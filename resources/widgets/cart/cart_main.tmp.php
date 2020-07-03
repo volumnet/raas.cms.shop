@@ -8,7 +8,7 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<script type="text/html" id="raas-cart-main-template">
+<script type="text/html" data-v-pre id="raas-cart-main-template">
   <a href="/cart/" class="cart-main" rel="nofollow" :class="{ 'cart-main_active': dataLoaded }">
     <span class="cart-main__amount" v-if="amount > 0">
       {{ amount }}

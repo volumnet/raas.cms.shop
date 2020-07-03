@@ -43,190 +43,192 @@ if ($Item) {
     <div class="catalog">
       <div class="catalog-article" itemscope itemtype="http://schema.org/Product">
         <meta itemprop="name" content="<?php echo htmlspecialchars($Item->name)?>" />
-        <div class="catalog-article__inner">
-          <?php if ($Item->visImages) { ?>
-              <div class="catalog-article__images-container">
-                <!--noindex-->
-                <?php if (count($Item->visImages) > 1) { ?>
-                    <div class="catalog-article__images-list">
-                      <div class="catalog-article-images-list">
-                        <a href="#" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev" data-role="slider-prev"></a>
-                        <div class="catalog-article-images-list__inner" data-role="slider" data-slider-carousel="jcarousel" data-slider-vertical="true" data-slider-wrap="circular" data-slider-duration="500">
-                          <div class="catalog-article-images-list__list">
-                            <?php for ($i = 0; $i < count($Item->visImages); $i++) { $row = $Item->visImages[$i]; ?>
-                                <div class="catalog-article-images-list__item" data-v-on_click="selectedImage = <?php echo (int)$i?>">
-                                  <img src="/<?php echo htmlspecialchars($row->smallURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></div>
-                            <?php } ?>
+        <div data-vue-role="raas-shop-catalog-article" data-inline-template  data-v-bind_id="<?php echo (int)$Item->id?>" data-v-bind_price="<?php echo (float)$Item->price?>" data-v-bind_priceold="<?php echo (float)($Item->price_old ?: $Item->price)?>" data-v-bind_min="<?php echo $Item->min || 1?>" data-v-bind_step="<?php echo $Item->step || 1?>">
+          <div class="catalog-article__inner">
+            <?php if ($Item->visImages) { ?>
+                <div class="catalog-article__images-container">
+                  <!--noindex-->
+                  <?php if (count($Item->visImages) > 1) { ?>
+                      <div class="catalog-article__images-list">
+                        <div class="catalog-article-images-list">
+                          <a href="#" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev" data-role="slider-prev"></a>
+                          <div class="catalog-article-images-list__inner" data-role="slider" data-slider-carousel="jcarousel" data-slider-vertical="true" data-slider-wrap="circular" data-slider-duration="500">
+                            <div class="catalog-article-images-list__list">
+                              <?php for ($i = 0; $i < count($Item->visImages); $i++) { $row = $Item->visImages[$i]; ?>
+                                  <div class="catalog-article-images-list__item" data-v-on_click="selectedImage = <?php echo (int)$i?>">
+                                    <img src="/<?php echo htmlspecialchars($row->smallURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></div>
+                              <?php } ?>
+                            </div>
                           </div>
+                          <a href="#" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next" data-role="slider-next"></a>
                         </div>
-                        <a href="#" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next" data-role="slider-next"></a>
                       </div>
-                    </div>
-                <?php } ?>
-                <!--/noindex-->
-                <div class="catalog-article__image">
-                  <?php for ($i = 0; $i < count($Item->visImages); $i++) {
-                      $jsonLd['image'][] = '/' . $Item->visImages[$i]->fileURL; ?>
-                      <a itemprop="image" href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((selectedImage == <?php echo $i?>) ? 'block' : 'none')}" data-lightbox-gallery="g">
-                        <img src="/<?php echo Package::i()->tn($Item->visImages[$i]->fileURL, 600, 600, 'frame')?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
                   <?php } ?>
-                </div>
-              </div>
-          <?php } ?>
-          <div class="catalog-article__details">
-            <div class="catalog-article__article">
-              <?php echo ARTICLE_SHORT?>
-              <span itemprop="productID">
-                <?php echo htmlspecialchars($Item->article)?>
-              </span>
-              <meta itemprop="sku" content="<?php echo htmlspecialchars($Item->article)?>" />
-            </div>
-            <div class="catalog-article__offer" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
-              <meta itemprop="sku" content="<?php echo htmlspecialchars($Item->article)?>" />
-              <link itemprop="url" href="<?php echo htmlspecialchars($host . $Item->url)?>" />
-              <div class="catalog-article__price-container" data-price="<?php echo (float)$Item->price?>">
-                <?php if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
-                    <span class="catalog-article__price catalog-article__price_old" data-v-html="formatPrice(priceold * amount)">
-                      <?php echo Text::formatPrice((float)$Item->price_old)?>
-                    </span>
-                <?php } ?>
-                <span class="catalog-article__price <?php echo ($Item->price_old && ($Item->price_old != $Item->price)) ? ' catalog-article__price_new' : ''?>">
-                  <span data-role="price-container" itemprop="price" content="<?php echo (float)$Item->price?>" data-v-html="formatPrice(price * amount)">
-                    <?php echo Text::formatPrice((float)$Item->price)?>
-                  </span>
-                  <span itemprop="priceCurrency" content="RUB" class="catalog-article__currency">₽</span>
-                </span>
-              </div>
-              <div class="catalog-article__available catalog-article__available_<?php echo $Item->available ? '' : 'not-'?>available">
-                <link itemprop="availability" href="http://schema.org/<?php echo $Item->available ? 'InStock' : 'PreOrder'?>" />
-                <?php echo $Item->available ? AVAILABLE : AVAILABLE_CUSTOM?>
-              </div>
-            </div>
-            <!--noindex-->
-            <div class="catalog-article__controls">
-              <?php if ($Item->available) { ?>
-                  <div class="catalog-article__amount-block">
-                    <a class="catalog-article__decrement" data-v-on_click="amount -= step; checkAmount();">–</a>
-                    <input type="number" class="catalog-article__amount" autocomplete="off" name="amount" min="<?php echo (int)$Item->min ?: 1?>" step="<?php echo (int)$Item->step ?: 1?>" value="<?php echo (int)$Item->min ?: 1?>" data-v-model="amount" data-v-on_change="checkAmount()" />
-                    <a class="catalog-article__increment" data-v-on_click="amount += step; checkAmount();">+</a>
-                  </div>
-                  <button type="button" data-v-on_click="addToCart()" class="catalog-article__add-to-cart">
-                    <?php echo TO_CART?>
-                  </button>
-                  <!--
-                  <button type="button" data-v-on_click="toggleCart()" class="catalog-article__add-to-cart" data-v-bind_class="{ 'catalog-article__add-to-cart_active': inCart}" data-v-bind_title="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'" data-v-html="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'">
-                    <?php echo TO_CART?>
-                  </button>
-                  -->
-              <?php } ?>
-              <button type="button" data-v-on_click="toggleFavorites()" class="catalog-article__add-to-favorites" data-v-bind_class="{ 'catalog-article__add-to-favorites_active': inFavorites}" data-v-bind_title="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'" data-v-html="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'">
-                <?php echo TO_FAVORITES?>
-              </button>
-            </div>
-            <!--/noindex-->
-            <!--noindex-->
-            <div class="catalog-article__share">
-              <script src="//yastatic.net/share/share.js"></script>
-              <?php echo SHARE?>: <div class="yashare-auto-init" style="display: inline-block; vertical-align: middle" data-yashareL10n="ru" data-yashareQuickServices="vkontakte,facebook,twitter,odnoklassniki,moimir" data-yashareTheme="counter"></div>
-            </div>
-            <!--/noindex-->
-            <?php
-            $propsArr = '';
-            foreach ($Item->fields as $fieldURN => $field) {
-                if (!in_array($field->urn, $hiddenProps) &&
-                    !in_array($field->datatype, [
-                        'image',
-                        'file',
-                        'material',
-                        'checkbox'
-                    ])
-                ) {
-                    if ($field->doRich()) {
-                        $richValues = array_map(function ($val) use ($field) {
-                            return $field->doRich($val);
-                        }, $field->getValues(true));
-                        $textValue = implode(', ', $richValues);
-                        switch ($fieldURN) {
-                            case 'width':
-                            case 'height':
-                                $jsonLd[$fieldURN] = [
-                                    '@type' => 'QuantitativeValue',
-                                    'value' => $textValue,
-                                    'unitCode' => 'CMT',
-                                ];
-                                $propsArr[] = '<div class="catalog-article-props-item">
-                                                 <span class="catalog-article-props-item__title">'
-                                            .      htmlspecialchars($field->name) . ':
-                                                 </span>
-                                                 <span class="catalog-article-props-item__value" itemprop="' . $fieldURN . '" itemscope itemtype="http://schema.org/QuantitativeValue">
-                                                   <span itemprop="value">'
-                                            .        htmlspecialchars($textValue)
-                                            .     '</span>
-                                                   <meta itemprop="unitCode" content="CMT">
-                                                 </span>
-                                               </div>';
-                                break;
-                            case 'article':
-                                $jsonLd['productID'] = $textValue;
-                                $jsonLd['sku'] = $textValue;
-                                $propsArr[] = '<div class="catalog-article-props-item">
-                                                 <span class="catalog-article-props-item__title">'
-                                            .      htmlspecialchars($field->name) . ':
-                                                 </span>
-                                                 <span class="catalog-article-props-item__value" itemprop="productID">'
-                                            .      htmlspecialchars($textValue)
-                                            .   '</span>
-                                               </div>';
-                                break;
-                            case 'brand':
-                                $jsonLd[$fieldURN] = [
-                                    '@type' => 'Brand',
-                                    'name' => $textValue,
-                                ];
-                                $propsArr[] = '<div class="catalog-article-props-item">
-                                                 <span class="catalog-article-props-item__title">'
-                                            .      htmlspecialchars($field->name) . ':
-                                                 </span>
-                                                 <span class="catalog-article-props-item__value" itemprop="brand" itemscope itemtype="http://schema.org/Brand">
-                                                   <span itemprop="name">'
-                                            .        htmlspecialchars($textValue)
-                                            .     '</span>
-                                                 </span>
-                                               </div>';
-                                break;
-                            default:
-                                $jsonLd['additionalProperty'][] = [
-                                    '@type' => 'PropertyValue',
-                                    'name' => $field->name,
-                                    'value' => $textValue
-                                ];
-                                $propsArr[] = ' <div class="catalog-article-props-item" itemprop="additionalProperty" itemscope itemtype="http://schema.org/PropertyValue">
-                                                  <span class="catalog-article-props-item__title" itemprop="name">'
-                                            .       htmlspecialchars($field->name) . ':
-                                                  </span>
-                                                  <span class="catalog-article-props-item__value" itemprop="value">'
-                                            .       htmlspecialchars($textValue)
-                                            .    '</span>
-                                                </div>';
-                                break;
-                        }
-                    }
-                }
-            }
-            if ($propsArr) {
-                $propsArr = array_map(function ($x) {
-                    return str_replace(
-                        'catalog-article-props-item"',
-                        'catalog-article-props-list__item catalog-article-props-item"',
-                        $x
-                    );
-                }, $propsArr); ?>
-                <div class="catalog-article__props-list">
-                  <div class="catalog-article-props-list">
-                    <?php echo implode("\n", $propsArr)?>
+                  <!--/noindex-->
+                  <div class="catalog-article__image">
+                    <?php for ($i = 0; $i < count($Item->visImages); $i++) {
+                        $jsonLd['image'][] = '/' . $Item->visImages[$i]->fileURL; ?>
+                        <a itemprop="image" href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((selectedImage == <?php echo $i?>) ? 'block' : 'none')}" data-lightbox-gallery="g">
+                          <img src="/<?php echo Package::i()->tn($Item->visImages[$i]->fileURL, 600, 600, 'frame')?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
+                    <?php } ?>
                   </div>
                 </div>
             <?php } ?>
+            <div class="catalog-article__details">
+              <div class="catalog-article__article">
+                <?php echo ARTICLE_SHORT?>
+                <span itemprop="productID">
+                  <?php echo htmlspecialchars($Item->article)?>
+                </span>
+                <meta itemprop="sku" content="<?php echo htmlspecialchars($Item->article)?>" />
+              </div>
+              <div class="catalog-article__offer" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+                <meta itemprop="sku" content="<?php echo htmlspecialchars($Item->article)?>" />
+                <link itemprop="url" href="<?php echo htmlspecialchars($host . $Item->url)?>" />
+                <div class="catalog-article__price-container" data-price="<?php echo (float)$Item->price?>">
+                  <?php if ($Item->price_old && ($Item->price_old != $Item->price)) { ?>
+                      <span class="catalog-article__price catalog-article__price_old" data-v-html="formatPrice(priceold * amount)">
+                        <?php echo Text::formatPrice((float)$Item->price_old)?>
+                      </span>
+                  <?php } ?>
+                  <span class="catalog-article__price <?php echo ($Item->price_old && ($Item->price_old != $Item->price)) ? ' catalog-article__price_new' : ''?>">
+                    <span data-role="price-container" itemprop="price" content="<?php echo (float)$Item->price?>" data-v-html="formatPrice(price * amount)">
+                      <?php echo Text::formatPrice((float)$Item->price)?>
+                    </span>
+                    <span itemprop="priceCurrency" content="RUB" class="catalog-article__currency">₽</span>
+                  </span>
+                </div>
+                <div class="catalog-article__available catalog-article__available_<?php echo $Item->available ? '' : 'not-'?>available">
+                  <link itemprop="availability" href="http://schema.org/<?php echo $Item->available ? 'InStock' : 'PreOrder'?>" />
+                  <?php echo $Item->available ? AVAILABLE : AVAILABLE_CUSTOM?>
+                </div>
+              </div>
+              <!--noindex-->
+              <div class="catalog-article__controls">
+                <?php if ($Item->available) { ?>
+                    <div class="catalog-article__amount-block">
+                      <a class="catalog-article__decrement" data-v-on_click="amount -= step; checkAmount();">–</a>
+                      <input type="number" class="catalog-article__amount" autocomplete="off" name="amount" min="<?php echo (int)$Item->min ?: 1?>" step="<?php echo (int)$Item->step ?: 1?>" value="<?php echo (int)$Item->min ?: 1?>" data-v-model="amount" data-v-on_change="checkAmount()" />
+                      <a class="catalog-article__increment" data-v-on_click="amount += step; checkAmount();">+</a>
+                    </div>
+                    <button type="button" data-v-on_click="addToCart()" class="catalog-article__add-to-cart">
+                      <?php echo TO_CART?>
+                    </button>
+                    <!--
+                    <button type="button" data-v-on_click="toggleCart()" class="catalog-article__add-to-cart" data-v-bind_class="{ 'catalog-article__add-to-cart_active': inCart}" data-v-bind_title="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'" data-v-html="inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'">
+                      <?php echo TO_CART?>
+                    </button>
+                    -->
+                <?php } ?>
+                <button type="button" data-v-on_click="toggleFavorites()" class="catalog-article__add-to-favorites" data-v-bind_class="{ 'catalog-article__add-to-favorites_active': inFavorites}" data-v-bind_title="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'" data-v-html="inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'">
+                  <?php echo TO_FAVORITES?>
+                </button>
+              </div>
+              <!--/noindex-->
+              <!--noindex-->
+              <div class="catalog-article__share">
+                <script src="//yastatic.net/share/share.js"></script>
+                <?php echo SHARE?>: <div class="yashare-auto-init" style="display: inline-block; vertical-align: middle" data-yashareL10n="ru" data-yashareQuickServices="vkontakte,facebook,twitter,odnoklassniki,moimir" data-yashareTheme="counter"></div>
+              </div>
+              <!--/noindex-->
+              <?php
+              $propsArr = '';
+              foreach ($Item->fields as $fieldURN => $field) {
+                  if (!in_array($field->urn, $hiddenProps) &&
+                      !in_array($field->datatype, [
+                          'image',
+                          'file',
+                          'material',
+                          'checkbox'
+                      ])
+                  ) {
+                      if ($field->doRich()) {
+                          $richValues = array_map(function ($val) use ($field) {
+                              return $field->doRich($val);
+                          }, $field->getValues(true));
+                          $textValue = implode(', ', $richValues);
+                          switch ($fieldURN) {
+                              case 'width':
+                              case 'height':
+                                  $jsonLd[$fieldURN] = [
+                                      '@type' => 'QuantitativeValue',
+                                      'value' => $textValue,
+                                      'unitCode' => 'CMT',
+                                  ];
+                                  $propsArr[] = '<div class="catalog-article-props-item">
+                                                   <span class="catalog-article-props-item__title">'
+                                              .      htmlspecialchars($field->name) . ':
+                                                   </span>
+                                                   <span class="catalog-article-props-item__value" itemprop="' . $fieldURN . '" itemscope itemtype="http://schema.org/QuantitativeValue">
+                                                     <span itemprop="value">'
+                                              .        htmlspecialchars($textValue)
+                                              .     '</span>
+                                                     <meta itemprop="unitCode" content="CMT">
+                                                   </span>
+                                                 </div>';
+                                  break;
+                              case 'article':
+                                  $jsonLd['productID'] = $textValue;
+                                  $jsonLd['sku'] = $textValue;
+                                  $propsArr[] = '<div class="catalog-article-props-item">
+                                                   <span class="catalog-article-props-item__title">'
+                                              .      htmlspecialchars($field->name) . ':
+                                                   </span>
+                                                   <span class="catalog-article-props-item__value" itemprop="productID">'
+                                              .      htmlspecialchars($textValue)
+                                              .   '</span>
+                                                 </div>';
+                                  break;
+                              case 'brand':
+                                  $jsonLd[$fieldURN] = [
+                                      '@type' => 'Brand',
+                                      'name' => $textValue,
+                                  ];
+                                  $propsArr[] = '<div class="catalog-article-props-item">
+                                                   <span class="catalog-article-props-item__title">'
+                                              .      htmlspecialchars($field->name) . ':
+                                                   </span>
+                                                   <span class="catalog-article-props-item__value" itemprop="brand" itemscope itemtype="http://schema.org/Brand">
+                                                     <span itemprop="name">'
+                                              .        htmlspecialchars($textValue)
+                                              .     '</span>
+                                                   </span>
+                                                 </div>';
+                                  break;
+                              default:
+                                  $jsonLd['additionalProperty'][] = [
+                                      '@type' => 'PropertyValue',
+                                      'name' => $field->name,
+                                      'value' => $textValue
+                                  ];
+                                  $propsArr[] = ' <div class="catalog-article-props-item" itemprop="additionalProperty" itemscope itemtype="http://schema.org/PropertyValue">
+                                                    <span class="catalog-article-props-item__title" itemprop="name">'
+                                              .       htmlspecialchars($field->name) . ':
+                                                    </span>
+                                                    <span class="catalog-article-props-item__value" itemprop="value">'
+                                              .       htmlspecialchars($textValue)
+                                              .    '</span>
+                                                  </div>';
+                                  break;
+                          }
+                      }
+                  }
+              }
+              if ($propsArr) {
+                  $propsArr = array_map(function ($x) {
+                      return str_replace(
+                          'catalog-article-props-item"',
+                          'catalog-article-props-list__item catalog-article-props-item"',
+                          $x
+                      );
+                  }, $propsArr); ?>
+                  <div class="catalog-article__props-list">
+                    <div class="catalog-article-props-list">
+                      <?php echo implode("\n", $propsArr)?>
+                    </div>
+                  </div>
+              <?php } ?>
+            </div>
           </div>
         </div>
         <?php
@@ -361,21 +363,6 @@ if ($Item) {
       </div>
     </div>
     <script type="application/ld+json"><?php echo json_encode($jsonLd)?></script>
-    <?php
-    $vueData = [
-        'id' => (int)$Item->id,
-        'meta' => '',
-        'price' => (float)$Item->price,
-        'priceold' => (float)($Item->price_old ?: $Item->price),
-        'amount' => (int)$Item->step ?: 1,
-        'min' => (int)$Item->min ?: 1,
-        'step' => (int)$Item->step ?: 1,
-        'selectedImage' => 0,
-    ];
-    ?>
-    <script>
-    raasShopCatalogArticleData = <?php echo json_encode($vueData)?>;
-    </script>
     <?php echo Package::i()->asset(['/js/catalog-article.js']) ?>
 <?php } else { ?>
     <div class="catalog">
