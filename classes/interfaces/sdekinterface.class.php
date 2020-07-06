@@ -418,6 +418,9 @@ class SDEKInterface extends AbstractInterface
         if (!$data['tariffId']) {
             $data['tariffId'] = $this->tariffId;
         }
+        $data['tariffId'] = (int)$data['tariffId'];
+        $data['senderCityId'] = (int)$data['senderCityId'];
+        $data['receiverCityId'] = (int)$data['receiverCityId'];
         $data['version'] = '1.0';
         $data['lang'] = $lang;
         $formData = ['json' => json_encode($data)];
