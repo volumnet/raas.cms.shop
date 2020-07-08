@@ -388,10 +388,21 @@ class SberbankInterface extends EPayInterface
         }
 
         $orderBundle['cartItems'] = [];
+        $sumWithoutDiscount = 0;
+        $discountSum = 0;
+        foreach ($order->items as $i => $item) {
+            $itemSum = (float)($item->realprice * $item->amount);
+            if ($item->realprice < 0) {
+                $discountSum += abs($itemSum);
+            } else {
+                $sumWithoutDiscount += $itemSum;
+            }
+        }
+        $discount = $discountSum / (float)$sumWithoutDiscount;
         foreach ($order->items as $i => $item) {
             if ($item->realprice > 0) {
                 $itemPrice = (float)$item->realprice;
-                $itemPrice = round($itemPrice * 100);
+                $itemPrice = round($itemPrice * (1 - $discount) * 100);
                 $itemData = [
                     'positionId' => ($i + 1),
                     'name' => $item->name,
