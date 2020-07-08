@@ -8,7 +8,7 @@ namespace RAAS\CMS\Shop;
 use SOME\Text;
 
 ?>
-<div data-vue-role="raas-shop-catalog-item" data-inline-template class="catalog-item" data-v-bind_id="<?php echo (int)$item->id?>" data-v-bind_price="<?php echo (float)$item->price?>" data-v-bind_priceold="<?php echo (float)($item->price_old ?: $item->price)?>" data-v-bind_min="<?php echo $item->min || 1?>" data-v-bind_step="<?php echo $item->step || 1?>">
+<div data-vue-role="raas-shop-catalog-item" data-inline-template class="catalog-item" data-v-bind_id="<?php echo (int)$item->id?>" data-v-bind_price="<?php echo (float)$item->price?>" data-v-bind_priceold="<?php echo (float)($item->price_old ?: $item->price)?>" data-v-bind_min="<?php echo $item->min || 1?>" data-v-bind_step="<?php echo $item->step || 1?>" data-v-bind_image="<?php echo htmlspecialchars($item->visImages ? ('/' . $item->visImages[0]->smallURL) : '')?>">
   <div>
     <a href="<?php echo $item->url?>" class="catalog-item__image<?php echo !$item->visImages ? ' catalog-item__image_nophoto' : ''?>">
       <?php if ($item->visImages) { ?>

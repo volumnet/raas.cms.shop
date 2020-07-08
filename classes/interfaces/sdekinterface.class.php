@@ -11,6 +11,11 @@ use RAAS\CMS\Block_PHP;
 use RAAS\CMS\Material;
 use RAAS\CMS\Page;
 
+/**
+ * Класс интерфейса взаимодействия с транспортной компанией СДЭК
+ * @property-write string $authLogin Логин для авторизации
+ * @property-write string $secure Ключ для авторизации
+ */
 class SDEKInterface extends AbstractInterface
 {
     /**
@@ -130,6 +135,18 @@ class SDEKInterface extends AbstractInterface
     public $priceRatio = 1;
 
     /**
+     * Логин для авторизации
+     * @var string
+     */
+    protected $authLogin = '';
+
+    /**
+     * Ключ для авторизации
+     * @var string
+     */
+    protected $secure = '';
+
+    /**
      * Конструктор класса
      * @param Block_PHP|null $block Блок, для которого применяется
      *                               интерфейс
@@ -161,6 +178,17 @@ class SDEKInterface extends AbstractInterface
             $server,
             $files
         );
+    }
+
+
+    public function __set($var, $val)
+    {
+        switch ($var) {
+            case 'authLogin':
+            case 'secure':
+                $this->$var = $val;
+                break;
+        }
     }
 
 
@@ -417,6 +445,12 @@ class SDEKInterface extends AbstractInterface
         }
         if (!$data['tariffId']) {
             $data['tariffId'] = $this->tariffId;
+        }
+        if ($this->authLogin) {
+            $data['authLogin'] = $this->authLogin;
+        }
+        if ($this->secure) {
+            $data['secure'] = $this->secure;
         }
         $data['tariffId'] = (int)$data['tariffId'];
         $data['senderCityId'] = (int)$data['senderCityId'];

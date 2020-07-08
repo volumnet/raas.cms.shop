@@ -8,7 +8,7 @@ use RAAS\Application;
 use RAAS\Command;
 
 /**
- * Команда загрузки прайсов из папки
+ * Команда импорта пунктов выдачи заказа СДЭК
  */
 class SDEKPVZImportCommand extends Command
 {

@@ -43,7 +43,7 @@ if ($Item) {
     <div class="catalog">
       <div class="catalog-article" itemscope itemtype="http://schema.org/Product">
         <meta itemprop="name" content="<?php echo htmlspecialchars($Item->name)?>" />
-        <div data-vue-role="raas-shop-catalog-article" data-inline-template  data-v-bind_id="<?php echo (int)$Item->id?>" data-v-bind_price="<?php echo (float)$Item->price?>" data-v-bind_priceold="<?php echo (float)($Item->price_old ?: $Item->price)?>" data-v-bind_min="<?php echo $Item->min || 1?>" data-v-bind_step="<?php echo $Item->step || 1?>">
+        <div data-vue-role="raas-shop-catalog-article" data-inline-template  data-v-bind_id="<?php echo (int)$Item->id?>" data-v-bind_price="<?php echo (float)$Item->price?>" data-v-bind_priceold="<?php echo (float)($Item->price_old ?: $Item->price)?>" data-v-bind_min="<?php echo $Item->min || 1?>" data-v-bind_step="<?php echo $Item->step || 1?>" data-v-bind_image="<?php echo htmlspecialchars($Item->visImages ? ('/' . $Item->visImages[0]->smallURL) : '')?>">
           <div class="catalog-article__inner">
             <?php if ($Item->visImages) { ?>
                 <div class="catalog-article__images-container">
