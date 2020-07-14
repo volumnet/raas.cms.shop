@@ -26,7 +26,7 @@ export default {
             type: Array,
             default: ['товаров', 'товар', 'товара']
         }
-    }
+    },
     data: function () {
         return {
             dataLoaded: false,
