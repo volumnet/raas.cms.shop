@@ -17,7 +17,7 @@ export default {
             type: String,
             default: 'Избранное',
         },
-    }
+    },
     mixins: [CartMain],
 };
 </script>
