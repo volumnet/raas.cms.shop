@@ -27,7 +27,11 @@ export default {
             default: function () {
                 return ['товаров', 'товар', 'товара'];
             },
-        }
+        },
+        remoteCartId: {
+            type: String,
+            default: 'cart'
+        },
     },
     data: function () {
         return {

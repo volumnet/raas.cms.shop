@@ -17,6 +17,10 @@ export default {
             type: String,
             default: 'Избранное',
         },
+        remoteCartId: {
+            type: String,
+            default: 'favorites'
+        },
     },
     mixins: [CartMain],
 };

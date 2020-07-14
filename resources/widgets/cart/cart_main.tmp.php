@@ -8,5 +8,5 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<div data-vue-role="cart-main" data-v-bind_title="'<?php echo CART?>'"></div>
+<div data-vue-role="cart-main" data-v-bind_title="'<?php echo CART?>'" data-v-bind_remote-cart-id="'cart'"></div>
 <!--/noindex-->
