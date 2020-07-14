@@ -24,7 +24,9 @@ export default {
         },
         numerals: {
             type: Array,
-            default: ['товаров', 'товар', 'товара']
+            default: function () {
+                return ['товаров', 'товар', 'товара'];
+            },
         }
     },
     data: function () {
