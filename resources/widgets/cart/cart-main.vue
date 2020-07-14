@@ -1,20 +1,3 @@
-<template>
-  <a href="/cart/" class="cart-main" rel="nofollow" :class="{ 'cart-main_active': dataLoaded }">
-    <span class="cart-main__amount" v-if="amount > 0">
-      {{ amount }}
-    </span>
-    <span class="cart-main__text">
-      <span class="cart-main__title">{{title}}</span>
-      <span class="cart-main__sum-outer">
-        <span class="cart-main__sum">
-          {{ formatPrice(sum) }}
-        </span>
-        <span class="cart-main__sum-currency">₽</span>
-      </span>
-    </span>
-  </a>
-</template>
-
 <script>
 export default {
     props: {
@@ -33,6 +16,7 @@ export default {
             default: 'cart'
         },
     },
+    template: '#cart-main-template',
     data: function () {
         return {
             dataLoaded: false,
