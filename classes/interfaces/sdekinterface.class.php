@@ -440,6 +440,9 @@ class SDEKInterface extends AbstractInterface
             }
             $data['goods'] = $cartGoodsCalculationCallback();
         }
+        if (!$data['dateExecute']) {
+            $data['dateExecute'] = date('Y-m-d');
+        }
         if (!$data['senderCityId']) {
             $data['senderCityId'] = $this->senderCityId;
         }
@@ -458,7 +461,7 @@ class SDEKInterface extends AbstractInterface
         $data['version'] = '1.0';
         $data['lang'] = $lang;
         $formData = ['json' => json_encode($data)];
-        $result = $this->methodJSON($url, $formData, 'http://api.cdek.ru');
+        $result = $this->methodJSON($url, $formData, 'https://api.cdek.ru');
         $result['result']['price'] = ceil($result['result']['price'] * $this->priceRatio);
         $result['result']['priceByCurrency'] = ceil($result['result']['priceByCurrency'] * $this->priceRatio);
         return $result;
