@@ -30,7 +30,7 @@ if ($_GET['AJAX']) {
     echo json_encode($cartData);
     exit;
 } else { ?>
-    <script type="text/html" data-v-pre id="raas-shop-favorites-item-template">
+    <script type="text/html" v-pre id="favorites-item-template">
       <div class="favorites-list__item">
         <div class="favorites-item">
           <div class="favorites-item__image">
@@ -52,7 +52,7 @@ if ($_GET['AJAX']) {
         </div>
       </div>
     </script>
-    <script type="text/html" data-v-pre id="raas-shop-favorites-list-template">
+    <script type="text/html" v-pre id="favorites-list-template">
       <div class="favorites-list">
         <div class="favorites-list__header">
           <div class="favorites-list__item favorites-list__item_header">
@@ -71,7 +71,7 @@ if ($_GET['AJAX']) {
           </div>
         </div>
         <div class="favorites-list__list">
-          <raas-shop-favorites-item v-for="item in items" :item="item" v-on:delete="$emit('delete', item)"></raas-shop-favorites-item>
+          <favorites-item v-for="item in items" :item="item" v-on:delete="$emit('delete', item)"></favorites-item>
         </div>
         <div class="favorites-list__actions">
           <a class="favorites-list__clear" v-on:click="$emit('clear')">
@@ -81,26 +81,20 @@ if ($_GET['AJAX']) {
       </div>
     </script>
 
-    <div class="favorites" data-vue-role="raas-shop-favorites" data-inline-template>
-      <div class="favorites__list" data-v-if="items.length">
-        <raas-shop-favorites-list data-v-bind_items="items" data-v-bind_cart="cart" data-v-on_clear="requestClear()" data-v-on_delete="requestItemDelete($event)"></raas-shop-favorites-list>
+    <favorites class="favorites" inline-template :cart="favorites">
+      <div>
+        <div class="favorites__list" v-if="items.length">
+          <favorites-list :items="items" :cart="cart" @clear="requestClear()" @delete="requestItemDelete($event)"></favorites-list>
+        </div>
+        <div class="favorites__empty" v-if="!items.length">
+          <?php echo htmlspecialchars(YOUR_FAVORITES_IS_EMPTY)?>
+        </div>
       </div>
-      <div class="favorites__empty" data-v-if="!items.length">
-        <?php echo htmlspecialchars(YOUR_FAVORITES_IS_EMPTY)?>
-      </div>
-    </div>
+    </favorites>
     <script>
-    jQuery(document).ready(function($) {
-        raasShopFavoritesData = {
-            items: <?php echo json_encode($cartData['items'])?>,
-            cart: $.RAAS.Shop.ajax<?php echo $Cart->cartType->no_amount ? 'Favorites' : 'Cart'?>,
-        };
-    });
+    window.raasShopFavoritesData = {
+        items: <?php echo json_encode($cartData['items'])?>,
+    };
     </script>
-    <?php echo Package::i()->asset([
-        '/js/raas-shop-cart-item-mixin.vue.js',
-        '/js/raas-shop-cart-list-mixin.vue.js',
-        '/js/raas-shop-cart-mixin.vue.js',
-        '/js/favorites.js'
-    ]); ?>
+    <?php Package::i()->requestJS('/js/favorites.js')?>
 <?php }

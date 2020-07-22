@@ -103,18 +103,18 @@ if ($pageMime == 'application/json') {
 }
 
 ?>
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-property-value-template">
+<script type="text/html" data-v-pre id="catalog-filter-property-value-template">
   <label class="catalog-filter-property-value" v-bind:class="{ 'catalog-filter-property-value_disabled': !value.enabled }">
     <input v-bind:type="((property.datatype == 'checkbox') && !property.multiple) ? 'radio' : 'checkbox'" class="catalog-filter-property-value__input" v-bind:name="property.urn + ((property.datatype == 'checkbox' && !property.multiple) ? '' : '[]')" v-bind:disabled="!value.enabled || false" v-bind:value="value.value" v-bind:checked="value.checked" v-on:click="$emit('change', $event);">
     {{ value.doRich }}
   </label>
 </script>
 
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-range-slider-template">
+<script type="text/html" data-v-pre id="catalog-filter-range-slider-template">
   <div class="catalog-filter-range-slider" v-bind:data-from="valuefrom" v-bind:data-to="valueto"></div>
 </script>
 
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-range-template">
+<script type="text/html" data-v-pre id="catalog-filter-range-template">
   <div class="catalog-filter-range">
     <div class="catalog-filter-range__controls">
       <div class="catalog-filter-range__control-label">от</div>
@@ -127,20 +127,20 @@ if ($pageMime == 'application/json') {
       </div>
     </div>
     <div class="catalog-filter-range__slider">
-      <raas-shop-catalog-filter-range-slider v-bind:min="min" v-bind:max="max" v-bind:step="step" v-bind:valuefrom="valuefrom" v-bind:valueto="valueto" v-on:change="changeBySlider($event)"></raas-shop-catalog-filter-range-slider>
+      <catalog-filter-range-slider v-bind:min="min" v-bind:max="max" v-bind:step="step" v-bind:valuefrom="valuefrom" v-bind:valueto="valueto" v-on:change="changeBySlider($event)"></catalog-filter-range-slider>
     </div>
   </div>
 </script>
 
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-property-list-template">
+<script type="text/html" data-v-pre id="catalog-filter-property-list-template">
   <div class="catalog-filter-property-values-list">
     <div class="catalog-filter-property-values-list__item" v-for="value of values">
-      <raas-shop-catalog-filter-property-value v-bind:property="property" v-bind:value="value" v-on:change="$emit('change', $event);"></raas-shop-catalog-filter-property-value>
+      <catalog-filter-property-value v-bind:property="property" v-bind:value="value" v-on:change="$emit('change', $event);"></catalog-filter-property-value>
     </div>
   </div>
 </script>
 
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-property-selector-template">
+<script type="text/html" data-v-pre id="catalog-filter-property-selector-template">
   <select class="catalog-filter-property-selector" v-bind:name="property.urn" v-on:change="$emit('change', $event);">
     <option value="" v-bind:selected="!data[property.urn]">не важно</option>
     <option v-for="value of values" v-if="value.enabled" v-bind:value="value.value" v-bind:selected="value.checked">
@@ -149,23 +149,23 @@ if ($pageMime == 'application/json') {
   </select>
 </script>
 
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-property-template">
+<script type="text/html" data-v-pre id="catalog-filter-property-template">
   <div class="catalog-filter-property" v-bind:class="{ 'catalog-filter-property_active': active }">
     <div class="catalog-filter-property__title" v-on:click="toggle()">
       {{ property.name }}
       <span class="catalog-filter-property__toggle"></span>
     </div>
     <div class="catalog-filter-property__inner" data-raas-role="catalog-filter-property__inner">
-      <raas-shop-catalog-filter-range v-if="(property.datatype == 'number') || ([].indexOf(property.urn) != -1)" v-bind:property="property" v-bind:filter="filter" v-bind:data="data" v-on:change="$emit('change', $event);"></raas-shop-catalog-filter-range>
+      <catalog-filter-range v-if="(property.datatype == 'number') || ([].indexOf(property.urn) != -1)" v-bind:property="property" v-bind:filter="filter" v-bind:data="data" v-on:change="$emit('change', $event);"></catalog-filter-range>
       <div class="catalog-filter-property__list" v-else-if="multiple">
-        <raas-shop-catalog-filter-property-list v-bind:property="property" v-bind:values="realValues" v-on:change="$emit('change', $event)"></raas-shop-catalog-filter-property-list>
+        <catalog-filter-property-list v-bind:property="property" v-bind:values="realValues" v-on:change="$emit('change', $event)"></catalog-filter-property-list>
       </div>
-      <raas-shop-catalog-filter-property-selector v-else v-bind:property="property" v-bind:data="data" v-bind:values="realValues" v-on:change="$emit('change', $event)">
+      <catalog-filter-property-selector v-else v-bind:property="property" v-bind:data="data" v-bind:values="realValues" v-on:change="$emit('change', $event)"></catalog-filter-property-selector>
     </div>
   </div>
 </script>
 
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-properties-list-template">
+<script type="text/html" data-v-pre id="catalog-filter-properties-list-template">
   <div class="catalog-filter-properties-list">
     <div class="catalog-filter-properties-list__item">
       <div class="catalog-filter-property catalog-filter-property_fixed">
@@ -178,12 +178,12 @@ if ($pageMime == 'application/json') {
       </div>
     </div>
     <div class="catalog-filter-properties-list__item" v-for="(property, propId) in properties">
-      <raas-shop-catalog-filter-property v-bind:property="property" v-bind:data="data" v-bind:filter="filter" v-bind:multiple="multiple" v-on:change="$emit('change', $event);"></raas-shop-catalog-filter-property>
+      <catalog-filter-property v-bind:property="property" v-bind:data="data" v-bind:filter="filter" v-bind:multiple="multiple" v-on:change="$emit('change', $event);"></catalog-filter-property>
     </div>
   </div>
 </script>
 
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-preview-marker">
+<script type="text/html" data-v-pre id="catalog-filter-preview-marker-template">
   <div class="catalog-filter-preview-marker" v-bind:class="{ 'catalog-filter-preview-marker_floating': float, 'catalog-filter-preview-marker_static': !float, 'catalog-filter-preview-marker_active': active }">
     <span class="catalog-filter-preview-marker__results">
       Найдено
@@ -200,14 +200,14 @@ if ($pageMime == 'application/json') {
   </div>
 </script>
 
-<script type="text/html" data-v-pre id="raas-shop-catalog-filter-template">
+<script type="text/html" data-v-pre id="catalog-filter-template">
   <form action="" method="get" class="catalog-filter__inner">
     <input type="hidden" name="sort" v-bind:value="data.sort || ''">
     <input type="hidden" name="order" v-bind:value="data.order || ''">
     <div class="catalog-filter__list">
-      <raas-shop-catalog-filter-properties-list v-bind:data="data" v-bind:filter="filter" v-bind:properties="properties" v-bind:multiple="multiple" v-on:change="change($event)"></raas-shop-catalog-filter-properties-list>
+      <catalog-filter-properties-list v-bind:data="data" v-bind:filter="filter" v-bind:properties="properties" v-bind:multiple="multiple" v-on:change="change($event)"></catalog-filter-properties-list>
     </div>
-    <raas-shop-catalog-filter-preview-marker v-bind:counter="counter" v-bind:active="previewTimeoutId" v-bind:lastactiveelement="lastActiveElement" v-bind:float="floatingMarker" v-on:submit="submit()"></raas-shop-catalog-filter-preview-marker>
+    <catalog-filter-preview-marker v-bind:counter="counter" v-bind:active="previewTimeoutId" v-bind:lastactiveelement="lastActiveElement" v-bind:float="floatingMarker" v-on:submit="submit()"></catalog-filter-preview-marker>
     <div class="catalog-filter__controls">
       <button type="submit" class="btn btn-primary" v-on:click="submit($event);">
         <?php echo DO_SEARCH?>
@@ -238,18 +238,7 @@ var raasShopCatalogFilterData = <?php echo json_encode($vueData)?>;
         <a class="catalog-filter__close-link"></a>
       </div>
     </div>
-    <div class="catalog-filter__inner" data-role="raas-shop-catalog-filter" data-vue-role="raas-shop-catalog-filter"></div>
+    <div class="catalog-filter__inner" data-role="catalog-filter" data-vue-role="catalog-filter"></div>
   </div>
 </div>
-<?php echo Package::asset([
-    '/js/raas-shop-catalog-filter-property-value-mixin.vue.js',
-    '/js/raas-shop-catalog-filter-range-slider-mixin.vue.js',
-    '/js/raas-shop-catalog-filter-range-mixin.vue.js',
-    '/js/raas-shop-catalog-filter-property-list-mixin.vue.js',
-    '/js/raas-shop-catalog-filter-property-selector-mixin.vue.js',
-    '/js/raas-shop-catalog-filter-property-mixin.vue.js',
-    '/js/raas-shop-catalog-filter-properties-list-mixin.vue.js',
-    '/js/raas-shop-catalog-filter-preview-marker-mixin.vue.js',
-    '/js/raas-shop-catalog-filter-mixin.vue.js',
-    '/js/catalog-filter.js',
-]); ?>
+<?php Package::i()->requestJS(['/js/catalog-filter.js']); ?>

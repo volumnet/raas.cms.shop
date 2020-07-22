@@ -38,4 +38,5 @@ $set = Material::getSQLSet($sqlQuery);
         <a href="#" class="spec__arrow spec__arrow_next" data-role="slider-next"></a>
       </div>
     </div>
+    <?php Package::i()->requestJS(['/js/catalog.js'])?>
 <?php } ?>

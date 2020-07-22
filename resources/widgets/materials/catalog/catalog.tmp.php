@@ -8,6 +8,7 @@
  */
 namespace RAAS\CMS;
 
+use SOME\HTTP;
 use SOME\Text;
 use RAAS\Attachment;
 
@@ -43,7 +44,7 @@ if ($Item) {
     <div class="catalog">
       <div class="catalog-article" itemscope itemtype="http://schema.org/Product">
         <meta itemprop="name" content="<?php echo htmlspecialchars($Item->name)?>" />
-        <div data-vue-role="raas-shop-catalog-article" data-inline-template  data-v-bind_id="<?php echo (int)$Item->id?>" data-v-bind_price="<?php echo (float)$Item->price?>" data-v-bind_priceold="<?php echo (float)($Item->price_old ?: $Item->price)?>" data-v-bind_min="<?php echo $Item->min || 1?>" data-v-bind_step="<?php echo $Item->step || 1?>" data-v-bind_image="<?php echo htmlspecialchars($Item->visImages ? ('/' . $Item->visImages[0]->smallURL) : '')?>">
+        <div data-vue-role="catalog-article" data-inline-template  data-v-bind_id="<?php echo (int)$Item->id?>" data-v-bind_price="<?php echo (float)$Item->price?>" data-v-bind_priceold="<?php echo (float)($Item->price_old ?: $Item->price)?>" data-v-bind_min="<?php echo $Item->min || 1?>" data-v-bind_step="<?php echo $Item->step || 1?>" data-v-bind_image="'<?php echo htmlspecialchars($Item->visImages ? ('/' . $Item->visImages[0]->smallURL) : '')?>'" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
           <div class="catalog-article__inner">
             <?php if ($Item->visImages) { ?>
                 <div class="catalog-article__images-container">
@@ -127,8 +128,8 @@ if ($Item) {
               <!--/noindex-->
               <!--noindex-->
               <div class="catalog-article__share">
-                <script src="//yastatic.net/share/share.js"></script>
-                <?php echo SHARE?>: <div class="yashare-auto-init" style="display: inline-block; vertical-align: middle" data-yashareL10n="ru" data-yashareQuickServices="vkontakte,facebook,twitter,odnoklassniki,moimir" data-yashareTheme="counter"></div>
+                <?php echo SHARE?>:
+                <div class="ya-share2" style="display: inline-block; vertical-align: middle" data-services="vkontakte,facebook,twitter,gplus,whatsapp"></div>
               </div>
               <!--/noindex-->
               <?php
@@ -363,52 +364,73 @@ if ($Item) {
       </div>
     </div>
     <script type="application/ld+json"><?php echo json_encode($jsonLd)?></script>
-    <?php echo Package::i()->asset(['/js/catalog-article.js']) ?>
+    <?php Package::i()->requestJS([
+        '//yastatic.net/es5-shims/0.0.2/es5-shims.min.js',
+        '//yastatic.net/share2/share.js',
+    ]) ?>
 <?php } else { ?>
     <div class="catalog">
-      <div class="catalog__inner">
-        <?php
-        if ($Set || $subcats) {
-            if ($subcats) {
-                ?>
-                <div class="catalog__categories-list">
-                  <div class="catalog-categories-list">
-                    <?php foreach ($subcats as $row) { ?>
-                        <div class="catalog-categories-list__item">
-                          <?php Snippet::importByURN('catalog_category')->process(['page' => $row])?>
-                        </div>
-                    <?php } ?>
-                  </div>
-                </div>
-                <?php
-            }
-            if ($Set) {
-                ?>
-                <div class="catalog__sort">
-                  <?php Snippet::importByURN('catalog_sort')->process([
-                      'sort' => $sort,
-                      'order' => $order,
-                      'Block' => $Block,
-                  ])?>
-                </div>
-                <div class="catalog__list">
-                  <div class="catalog-list">
-                    <?php foreach ($Set as $row) { ?>
-                        <div class="catalog-list__item">
-                          <?php Snippet::importByURN('catalog_item')->process(['item' => $row])?>
-                        </div>
-                    <?php } ?>
-                  </div>
-                </div>
+      <div data-vue-role="catalog-loader" data-inline-template data-v-bind_page="<?php echo (int)$Pages->page?>" data-v-bind_pages="<?php echo (int)$Pages->pages?>" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
+        <div>
+          <div class="catalog__inner">
+            <?php
+            if ($Set || $subcats) {
+                if ($subcats) {
+                    ?>
+                    <div class="catalog__categories-list">
+                      <div class="catalog-categories-list">
+                        <?php foreach ($subcats as $row) { ?>
+                            <div class="catalog-categories-list__item">
+                              <?php Snippet::importByURN('catalog_category')->process(['page' => $row])?>
+                            </div>
+                        <?php } ?>
+                      </div>
+                    </div>
+                    <?php
+                }
+                if ($Set) {
+                    ?>
+                    <div class="catalog__sort" data-role="catalog-sort">
+                      <?php Snippet::importByURN('catalog_sort')->process([
+                          'sort' => $sort,
+                          'order' => $order,
+                          'Block' => $Block,
+                      ])?>
+                    </div>
+                    <div class="catalog__list">
+                      <div class="catalog-list" data-role="catalog-list">
+                        <?php foreach ($Set as $row) { ?>
+                            <div class="catalog-list__item" data-role="catalog-list-item">
+                              <?php Snippet::importByURN('catalog_item')->process(['item' => $row])?>
+                            </div>
+                        <?php } ?>
+                      </div>
+                    </div>
+                <?php } ?>
+            <?php } else { ?>
+                <p><?php echo NO_RESULTS_FOUND?></p>
             <?php } ?>
-        <?php } else { ?>
-            <p><?php echo NO_RESULTS_FOUND?></p>
-        <?php } ?>
-      </div>
-      <?php if ($Set) { ?>
-          <div class="catalog__pagination" data-pages="<?php echo $Pages->pages?>">
-            <?php Snippet::importByURN('pagination')->process(['pages' => $Pages]); ?>
           </div>
-      <?php } ?>
+          <?php if ($Set) {
+              $nextPage = min($Pages->pages, $Pages->page + 1);
+              if ($nextPage == 1) {
+                  $nextPage = '';
+              }
+              ?>
+              <div class="catalog__ajax-loader" data-v-if="busy"></div>
+              <div class="catalog__controls">
+                <div class="catalog__pagination" data-role="catalog-pagination">
+                  <?php Snippet::importByURN('pagination')->process(['pages' => $Pages]); ?>
+                </div>
+                <div class="catalog__more" data-role="catalog-more" data-v-if="currentPage < pagesTotal">
+                  <a href="<?php echo HTTP::queryString('page=' . $nextPage)?>" class="btn btn-primary">
+                    <?php echo SHOW_MORE_CATALOG?>
+                  </a>
+                </div>
+              </div>
+          <?php } ?>
+        </div>
+      </div>
     </div>
 <?php } ?>
+<?php Package::i()->requestJS(['/js/catalog.js'])?>

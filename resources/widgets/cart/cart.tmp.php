@@ -46,8 +46,8 @@ if ($_GET['AJAX']) {
         <?php echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id)?>
       </div>
     </div>
-<?php } elseif ($Cart->items) { ?>
-    <script type="text/html" data-v-pre id="raas-shop-cart-item-template">
+<?php } else { ?>
+    <script type="text/html" v-pre id="cart-item-template">
       <div class="cart-list__item">
         <div class="cart-item">
           <div class="cart-item__image">
@@ -77,7 +77,7 @@ if ($_GET['AJAX']) {
         </div>
       </div>
     </script>
-    <script type="text/html" data-v-pre id="raas-shop-cart-list-template">
+    <script type="text/html" v-pre id="cart-list-template">
       <div class="cart-list">
         <div class="cart-list__header">
           <div class="cart-list__item cart-list__item_header">
@@ -102,7 +102,7 @@ if ($_GET['AJAX']) {
           </div>
         </div>
         <div class="cart-list__list">
-          <raas-shop-cart-item v-for="item in items" :item="item" v-on:change="itemUpdate(item)" v-on:delete="$emit('delete', item)"></raas-shop-cart-item>
+          <cart-item v-for="item in items" :item="item" v-on:change="itemUpdate(item)" v-on:delete="$emit('delete', item)"></cart-item>
         </div>
         <div class="cart-list__summary">
           <div class="cart-list__item cart-list__item_summary">
@@ -124,11 +124,20 @@ if ($_GET['AJAX']) {
         </div>
       </div>
     </script>
-    <div class="cart" data-vue-role="raas-shop-cart" data-inline-template>
+    <cart class="cart" inline-template :cart="cart">
       <div>
-        <form action="#feedback" method="post" enctype="multipart/form-data" data-v-if="items.length">
+        <?php if ($localError) { ?>
+            <div class="alert alert-danger">
+              <ul>
+                <?php foreach ((array)$localError as $key => $val) { ?>
+                    <li><?php echo htmlspecialchars($val)?></li>
+                <?php } ?>
+              </ul>
+            </div>
+        <?php } ?>
+        <form action="#feedback" method="post" enctype="multipart/form-data" v-if="items.length">
           <div class="cart__list">
-            <raas-shop-cart-list data-v-bind_items="items" data-v-bind_cart="cart" data-v-on_delete="requestItemDelete($event)" data-v-on_clear="requestClear()"></raas-shop-cart-list>
+            <cart-list :items="items" :cart="cart" @delete="requestItemDelete($event)" @clear="requestClear()"></cart-list>
           </div>
           <?php if ($Form->id) {
               foreach ($Form->fields as $fieldURN => $field) {
@@ -230,39 +239,15 @@ if ($_GET['AJAX']) {
               </div>
           <?php } ?>
         </form>
-        <div class="cart__empty" data-v-if="!items.length">
+        <div class="cart__empty" v-if="!items.length">
           <?php echo htmlspecialchars(YOUR_CART_IS_EMPTY)?>
         </div>
       </div>
-    </div>
+    </cart>
     <script>
-    jQuery(document).ready(function($) {
-        raasShopCartData = {
-            items: <?php echo json_encode($cartData['items'])?>,
-            cart: $.RAAS.Shop.ajax<?php echo $Cart->cartType->no_amount ? 'Favorites' : 'Cart'?>,
-        };
-    });
+    window.raasShopCartData = {
+        items: <?php echo json_encode($cartData['items'])?>,
+    };
     </script>
-    <?php echo Package::i()->asset([
-        '/js/raas-shop-cart-item-mixin.vue.js',
-        '/js/raas-shop-cart-list-mixin.vue.js',
-        '/js/raas-shop-cart-mixin.vue.js',
-        '/js/cart.js'
-    ]); ?>
-<?php } elseif ($localError) { ?>
-    <div class="cart">
-      <div class="alert alert-danger">
-        <ul>
-          <?php foreach ((array)$localError as $key => $val) { ?>
-              <li><?php echo htmlspecialchars($val)?></li>
-          <?php } ?>
-        </ul>
-      </div>
-    </div>
-<?php } else { ?>
-    <div class="cart">
-      <div class="cart__empty">
-        <?php echo htmlspecialchars(YOUR_CART_IS_EMPTY)?>
-      </div>
-    </div>
+    <?php Package::i()->requestJS('/js/cart.js')?>
 <?php } ?>
