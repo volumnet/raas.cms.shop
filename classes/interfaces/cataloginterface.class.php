@@ -4,7 +4,8 @@
  */
 namespace RAAS\CMS\Shop;
 
-use Mustache_Engine;
+use Twig_Environment;
+use Twig_Loader_String;
 use RAAS\Attachment;
 use RAAS\CMS\Block;
 use RAAS\CMS\Block_Form;
@@ -127,7 +128,7 @@ class CatalogInterface extends MaterialInterface
         }
         if (isset($blockParams['metaTemplates'])) {
             $metaTemplates = $metaData = [];
-            $mustache = new Mustache_Engine();
+            $twig = new Twig_Environment(new Twig_Loader_String());
             foreach (['name', 'meta_title', 'meta_keywords', 'meta_description', 'h1'] as $key) {
                 if (!$item->$key) {
                     if (!$metaData) {
@@ -136,7 +137,7 @@ class CatalogInterface extends MaterialInterface
                     if (!isset($metaTemplates[$key])) {
                         $metaTemplates[$key] = $this->getMetaTemplate($page, $key . '_' . $blockParams['metaTemplates']);
                     }
-                    $page->$key = $mustache->render($metaTemplates[$key], $metaData);
+                    $page->$key = $twig->render($metaTemplates[$key], $metaData);
                 }
             }
         }
@@ -442,7 +443,10 @@ class CatalogInterface extends MaterialInterface
                 if ($commentsListBlock->Interface->id) {
                     $commentsListData = $commentsListBlock->Interface->process($commentsListParams);
                 }
-                $commentsListData = array_merge($commentsListData, $commentsListParams);
+                $commentsListData = array_merge(
+                    (array)$commentsListData,
+                    (array)$commentsListParams
+                );
                 $commentsListData['Set'] = array_values(
                     array_filter(
                         (array)$commentsListData['Set'],

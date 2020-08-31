@@ -98,7 +98,7 @@ $result['properties'] = $properties;
 if ($pageMime == 'application/json') {
     echo json_encode($result);
     exit;
-} elseif ($catalog->visChildren) {
+} elseif (!$catalog->catalogFilter->getIds()) {
     return;
 }
 
