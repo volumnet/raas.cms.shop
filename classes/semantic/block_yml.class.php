@@ -350,7 +350,7 @@ return false;'
         'picture' => [
             'type' => 'image',
             'multiple' => true,
-            'callback' => 'if ($x instanceof \\RAAS\\Attachment) ?
+            'callback' => 'if ($x instanceof \\RAAS\\Attachment) {
     return "http" . ($_SERVER["HTTPS"] == "on" ? "s" : "") . "://" .
            $_SERVER["HTTP_HOST"] . "/" . $x->fileURL;
 } else {
