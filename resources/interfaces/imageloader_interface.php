@@ -7,7 +7,7 @@ use \RAAS\CMS\Sub_Main as Package_Sub_Main;
 use \RAAS\Application;
 use \RAAS\Attachment;
 
-ini_set('max_execution_time', 300);
+ini_set('max_execution_time', 3600);
 $st = microtime(true);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Загрузка картинок
