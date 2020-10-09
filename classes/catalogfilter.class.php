@@ -340,6 +340,7 @@ class CatalogFilter
     public function getRichValues(array $propsMapping = [], array $properties = [])
     {
         $result = [];
+        $materialPropsIds = $materialsToRetrieve = [];
         foreach ($propsMapping as $propId => $propValues) {
             $prop = $properties[$propId];
             if ($prop->id) {
@@ -348,6 +349,30 @@ class CatalogFilter
                 ) {
                     foreach ($propValues as $propValue => $propGoodsIds) {
                         $result[$propId][$propValue] = $prop->doRich($propValue);
+                    }
+                } elseif ($prop->datatype == 'material') {
+                    $materialPropsIds[] = $propId;
+                    foreach ($propValues as $propValue => $propGoodsIds) {
+                        $result[$propId][$propValue] = $propValue;
+                        $materialsToRetrieve[] = (int)$propValue;
+                    }
+                }
+            }
+        }
+        // Обновим материалы по именам
+        if ($materialsToRetrieve) {
+            $sqlQuery = "SELECT id, name
+                           FROM " . Material::_tablename()
+                      . " WHERE id IN (" . implode(", ", $materialsToRetrieve) . ")";
+            $sqlResult = Material::_SQL()->get($sqlQuery);
+            $materialsNames = [];
+            foreach ($sqlResult as $sqlRow) {
+                $materialsNames[trim($sqlRow['id'])] = $sqlRow['name'];
+            }
+            foreach ($materialPropsIds as $propId) {
+                foreach ((array)$result[$propId] as $propValue) {
+                    if (isset($materialsNames[$propValue])) {
+                        $result[$propId][trim($propValue)] = $materialsNames[$propValue];
                     }
                 }
             }
