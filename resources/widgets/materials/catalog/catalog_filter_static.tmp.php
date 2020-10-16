@@ -33,13 +33,23 @@ $hiddenProps = Snippet::importByURN('hidden_props')->process();
 $hiddenProps = array_diff($hiddenProps, ['price']);
 $availableProperties = $catalog->catalogFilter->availableProperties;
 
+if ($filterProps = (array)$catalogInterface->getMetaTemplate($catalog, 'filter_props')) {
+    $availableProperties = array_intersect_key(
+        $availableProperties,
+        array_flip($filterProps)
+    );
+    uksort($availableProperties, function ($a, $b) use ($filterProps) {
+        return array_search($a, $filterProps) - array_search($b, $filterProps);
+    });
+}
+
 $availableProperties = array_filter(
     $availableProperties,
     function ($propId) use ($catalog, $hiddenProps) {
         $prop = $catalog->catalogFilter->properties[$propId];
         $propURN = $prop->urn;
         return !in_array($propURN, $hiddenProps) &&
-               !in_array($prop->datatype, ['image', 'file', 'material']);
+               !in_array($prop->datatype, ['image', 'file']);
     },
     ARRAY_FILTER_USE_KEY
 );
@@ -70,29 +80,27 @@ foreach ($availableProperties as $propId => $availableProperty) {
             if (((trim($valueData['value']) !== '') && (trim($valueData['doRich']) !== '')) ||
                 ($prop->datatype == 'number')
             ) {
-                if (($pageMime == 'application/json') || // Чтобы не перегружать код всеми значениями
-                    ($valueData['checked']) ||
-                    ($prop->datatype == 'number')
-                ) {
-                    // 2020-05-11, AVS: добавлено условие ($prop->datatype == 'number'),
-                    // чтобы цена подгружалась сразу - иначе (т.к. слайдеры не меняются)
-                    // слайдер цены (и прочих числовых полей) не работает
-                    $result['properties'][trim($propId)]['values'][trim($value)] = $valueData;
-                }
+                // 2020-05-11, AVS: добавлено условие ($prop->datatype == 'number'),
+                // чтобы цена подгружалась сразу - иначе (т.к. слайдеры не меняются)
+                // слайдер цены (и прочих числовых полей) не работает
+                $result['properties'][trim($propId)]['values'][trim($value)] = $valueData;
             }
         }
     }
 }
 $properties = $result['properties'];
-uasort($properties, function ($a, $b) {
-    if (($a['urn'] == 'price') && ($b['urn'] != 'price')) {
-        return -1;
-    }
-    if (($a['urn'] != 'price') && ($b['urn'] == 'price')) {
-        return 1;
-    }
-    return $a['priority'] - $b['priority'];
-});
+
+if (!$filterProps) {
+    uasort($properties, function ($a, $b) {
+        if (($a['urn'] == 'price') && ($b['urn'] != 'price')) {
+            return -1;
+        }
+        if (($a['urn'] != 'price') && ($b['urn'] == 'price')) {
+            return 1;
+        }
+        return $a['priority'] - $b['priority'];
+    });
+}
 $result['properties'] = $properties;
 
 if ($pageMime == 'application/json') {

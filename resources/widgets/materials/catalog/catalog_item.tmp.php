@@ -9,7 +9,7 @@ use SOME\Text;
 use RAAS\CMS\Package;
 
 ?>
-<div data-vue-role="catalog-item" data-inline-template data-v-bind_id="<?php echo (int)$item->id?>" data-v-bind_name="'<?php echo htmlspecialchars($item->name)?>'" data-v-bind_price="<?php echo (float)$item->price?>" data-v-bind_priceold="<?php echo (float)($item->price_old ?: $item->price)?>" data-v-bind_min="<?php echo (int)$item->min || 1?>" data-v-bind_step="<?php echo (int)$item->step || 1?>" data-v-bind_image="'<?php echo htmlspecialchars($item->visImages ? ('/' . $item->visImages[0]->smallURL) : '')?>'" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
+<div data-vue-role="catalog-item" data-inline-template data-v-bind_id="<?php echo (int)$item->id?>" data-v-bind_name="'<?php echo addslashes(htmlspecialchars($item->name))?>'" data-v-bind_price="<?php echo (float)$item->price?>" data-v-bind_priceold="<?php echo (float)($item->price_old ?: $item->price)?>" data-v-bind_min="<?php echo (int)$item->min || 1?>" data-v-bind_step="<?php echo (int)$item->step || 1?>" data-v-bind_image="'<?php echo htmlspecialchars($item->visImages ? ('/' . $item->visImages[0]->smallURL) : '')?>'" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
   <div class="catalog-item">
     <a href="<?php echo $item->url?>" class="catalog-item__image<?php echo !$item->visImages ? ' catalog-item__image_nophoto' : ''?>">
       <?php if ($item->visImages) { ?>

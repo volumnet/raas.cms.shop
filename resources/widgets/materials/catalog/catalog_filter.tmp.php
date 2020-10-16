@@ -33,13 +33,23 @@ $hiddenProps = Snippet::importByURN('hidden_props')->process();
 $hiddenProps = array_diff($hiddenProps, ['price']);
 $availableProperties = $catalog->catalogFilter->availableProperties;
 
+if ($filterProps = (array)$catalogInterface->getMetaTemplate($catalog, 'filter_props')) {
+    $availableProperties = array_intersect_key(
+        $availableProperties,
+        array_flip($filterProps)
+    );
+    uksort($availableProperties, function ($a, $b) use ($filterProps) {
+        return array_search($a, $filterProps) - array_search($b, $filterProps);
+    });
+}
+
 $availableProperties = array_filter(
     $availableProperties,
     function ($propId) use ($catalog, $hiddenProps) {
         $prop = $catalog->catalogFilter->properties[$propId];
         $propURN = $prop->urn;
         return !in_array($propURN, $hiddenProps) &&
-               !in_array($prop->datatype, ['image', 'file', 'material']);
+               !in_array($prop->datatype, ['image', 'file']);
     },
     ARRAY_FILTER_USE_KEY
 );
@@ -84,15 +94,18 @@ foreach ($availableProperties as $propId => $availableProperty) {
     }
 }
 $properties = array_values($result['properties']); // Для сохранения сортировки JavaScript
-usort($properties, function ($a, $b) {
-    if (($a['urn'] == 'price') && ($b['urn'] != 'price')) {
-        return -1;
-    }
-    if (($a['urn'] != 'price') && ($b['urn'] == 'price')) {
-        return 1;
-    }
-    return $a['priority'] - $b['priority'];
-});
+
+if (!$filterProps) {
+    usort($properties, function ($a, $b) {
+        if (($a['urn'] == 'price') && ($b['urn'] != 'price')) {
+            return -1;
+        }
+        if (($a['urn'] != 'price') && ($b['urn'] == 'price')) {
+            return 1;
+        }
+        return $a['priority'] - $b['priority'];
+    });
+}
 $result['properties'] = $properties;
 
 if ($pageMime == 'application/json') {

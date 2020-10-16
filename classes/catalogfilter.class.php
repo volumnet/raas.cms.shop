@@ -992,7 +992,7 @@ class CatalogFilter
             $crossFilterGoodsIds = $crossFilterMapping[$propId] ?: $crossFilterMapping[''];
             $filterPropValuesFlipped = [];
             if (isset($filter[$propId]) && !isset($numericFieldsIds[$propId])) {
-                $filterPropValuesFlipped = array_flip((array)$filter[$propId]);
+                $filterPropValuesFlipped = array_flip(array_map('trim', (array)$filter[$propId]));
             }
             foreach ($propValues as $propValue => $goodsIds) {
                 $valueData = [

@@ -478,7 +478,8 @@ class CatalogInterface extends MaterialInterface
             'id' => $item->id,
             'name' => $item->name,
             'urn' => $item->urn,
-            'url' => $item->url
+            'url' => $item->url,
+            'h1' => $item->getH1(),
         ];
         foreach ($item->fields as $fieldURN => $field) {
             $val = $field->doRich();
