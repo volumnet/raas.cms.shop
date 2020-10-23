@@ -54,24 +54,22 @@ if ($Item) {
             <?php if ($Item->visImages) { ?>
                 <div class="catalog-article__images-container">
                   <!--noindex-->
-                  <?php if (count($Item->visImages) > 1) { ?>
-                      <div class="catalog-article__images-list">
-                        <div class="catalog-article-images-list">
-                          <a href="#" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev" data-role="slider-prev"></a>
-                          <div class="catalog-article-images-list__inner" data-role="slider" data-slider-carousel="jcarousel" data-slider-vertical="true" data-slider-wrap="circular" data-slider-duration="500">
-                            <div class="catalog-article-images-list__list">
-                              <?php for ($i = 0; $i < count($Item->visImages); $i++) { $row = $Item->visImages[$i]; ?>
-                                  <div class="catalog-article-images-list__item" data-v-on_click="selectedImage = <?php echo (int)$i?>">
-                                    <img src="/<?php echo htmlspecialchars($row->smallURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></div>
-                              <?php } ?>
-                            </div>
-                          </div>
-                          <a href="#" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next" data-role="slider-next"></a>
+                  <div class="catalog-article__images-list<?php echo (count($Item->visImages) == 1) ? ' catalog-article__images-list_alone' : ''?>">
+                    <div class="catalog-article-images-list">
+                      <a href="#" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev" data-role="slider-prev"></a>
+                      <div class="catalog-article-images-list__inner" data-role="slider" data-slider-carousel="jcarousel" data-slider-vertical="true" data-slider-wrap="circular" data-slider-duration="500">
+                        <div class="catalog-article-images-list__list">
+                          <?php for ($i = 0; $i < count($Item->visImages); $i++) { $row = $Item->visImages[$i]; ?>
+                              <a class="catalog-article-images-list__item" href="/<?php echo $Item->visImages[$i]->fileURL?>" data-v-on_click="clickThumbnail(<?php echo (int)$i?>, $event)" data-lightbox-gallery="tn">
+                                <img src="/<?php echo htmlspecialchars($row->smallURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></a>
+                          <?php } ?>
                         </div>
                       </div>
-                  <?php } ?>
+                      <a href="#" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next" data-role="slider-next"></a>
+                    </div>
+                  </div>
                   <!--/noindex-->
-                  <div class="catalog-article__image">
+                  <div class="catalog-article__image<?php echo (count($Item->visImages) == 1) ? ' catalog-article__image_alone' : ''?>">
                     <?php for ($i = 0; $i < count($Item->visImages); $i++) {
                         $jsonLd['image'][] = '/' . $Item->visImages[$i]->fileURL; ?>
                         <a itemprop="image" href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((selectedImage == <?php echo $i?>) ? 'block' : 'none')}" data-lightbox-gallery="g">
@@ -134,7 +132,7 @@ if ($Item) {
               <!--noindex-->
               <div class="catalog-article__share">
                 <?php echo SHARE?>:
-                <div class="ya-share2" style="display: inline-block; vertical-align: middle" data-services="vkontakte,facebook,twitter,gplus,whatsapp"></div>
+                <div class="ya-share2" style="display: inline-block; vertical-align: middle" data-services="vkontakte,facebook,twitter,whatsapp"></div>
               </div>
               <!--/noindex-->
               <?php
