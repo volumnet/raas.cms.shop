@@ -168,7 +168,7 @@ if ($_GET['AJAX']) {
                       <?php echo ASTERISK_MARKED_FIELDS_ARE_REQUIRED?>
                     </p>
                     <?php if ($Form->signature) { ?>
-                        <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
+                        <input type="hidden" name="form_signature" value="<?php echo htmlspecialchars($Form->getSignature($Block))?>" />
                     <?php }
                     if ($Form->antispam == 'hidden' && $Form->antispam_field_name) { ?>
                         <textarea autocomplete="off" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" style="position: absolute; left: -9999px"><?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?></textarea>
@@ -196,7 +196,7 @@ if ($_GET['AJAX']) {
                             </div>
                         <?php } else { ?>
                             <div class="form-group">
-                              <label<?php echo !$field->multiple ? ' for="' . htmlspecialchars($fieldURN . $field->id . '_' . $Block->id) . '"' : ''?> class="control-label col-sm-3 col-md-2">
+                              <label<?php echo !$field->multiple ? ' for="' . htmlspecialchars($field->getHTMLId($Block)) . '"' : ''?> class="control-label col-sm-3 col-md-2">
                                 <?php echo htmlspecialchars($field->name . ($field->required ? '*' : ''))?>
                               </label>
                               <div class="col-sm-9 col-md-4">

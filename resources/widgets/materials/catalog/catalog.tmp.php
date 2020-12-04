@@ -49,7 +49,7 @@ if ($Item) {
               <?php echo htmlspecialchars($Item->name)?>
             </h1>
         <?php */ ?>
-        <div data-vue-role="catalog-article" data-inline-template data-v-bind_id="<?php echo (int)$Item->id?>" data-v-bind_name="'<?php echo htmlspecialchars($Item->name)?>'" data-v-bind_price="<?php echo (float)$Item->price?>" data-v-bind_priceold="<?php echo (float)($Item->price_old ?: $Item->price)?>" data-v-bind_min="<?php echo $Item->min || 1?>" data-v-bind_step="<?php echo $Item->step || 1?>" data-v-bind_image="'<?php echo htmlspecialchars($Item->visImages ? ('/' . $Item->visImages[0]->smallURL) : '')?>'" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
+        <div data-vue-role="catalog-article" data-vue-inline-template data-v-bind_id="<?php echo (int)$Item->id?>" data-v-bind_name="'<?php echo htmlspecialchars($Item->name)?>'" data-v-bind_price="<?php echo (float)$Item->price?>" data-v-bind_priceold="<?php echo (float)($Item->price_old ?: $Item->price)?>" data-v-bind_min="<?php echo $Item->min || 1?>" data-v-bind_step="<?php echo $Item->step || 1?>" data-v-bind_image="'<?php echo htmlspecialchars($Item->visImages ? ('/' . $Item->visImages[0]->smallURL) : '')?>'" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
           <div class="catalog-article__inner">
             <?php if ($Item->visImages) { ?>
                 <div class="catalog-article__images-container">
@@ -373,7 +373,7 @@ if ($Item) {
     ]) ?>
 <?php } else { ?>
     <div class="catalog">
-      <div data-vue-role="catalog-loader" data-inline-template data-v-bind_page="<?php echo (int)$Pages->page?>" data-v-bind_pages="<?php echo (int)$Pages->pages?>" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
+      <div data-vue-role="catalog-loader" data-vue-inline-template data-v-bind_page="<?php echo (int)$Pages->page?>" data-v-bind_pages="<?php echo (int)$Pages->pages?>" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
         <div>
           <div class="catalog__inner">
             <?php

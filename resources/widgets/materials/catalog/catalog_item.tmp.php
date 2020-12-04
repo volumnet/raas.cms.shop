@@ -9,7 +9,7 @@ use SOME\Text;
 use RAAS\CMS\Package;
 
 ?>
-<div data-vue-role="catalog-item" data-inline-template data-v-bind_id="<?php echo (int)$item->id?>" data-v-bind_name="'<?php echo addslashes(htmlspecialchars($item->name))?>'" data-v-bind_price="<?php echo (float)$item->price?>" data-v-bind_priceold="<?php echo (float)($item->price_old ?: $item->price)?>" data-v-bind_min="<?php echo (int)$item->min || 1?>" data-v-bind_step="<?php echo (int)$item->step || 1?>" data-v-bind_image="'<?php echo htmlspecialchars($item->visImages ? ('/' . $item->visImages[0]->smallURL) : '')?>'" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
+<div data-vue-role="catalog-item" data-vue-inline-template data-v-bind_id="<?php echo (int)$item->id?>" data-v-bind_name="'<?php echo addslashes(htmlspecialchars($item->name))?>'" data-v-bind_price="<?php echo (float)$item->price?>" data-v-bind_priceold="<?php echo (float)($item->price_old ?: $item->price)?>" data-v-bind_min="<?php echo (int)$item->min || 1?>" data-v-bind_step="<?php echo (int)$item->step || 1?>" data-v-bind_image="'<?php echo htmlspecialchars($item->visImages ? ('/' . $item->visImages[0]->smallURL) : '')?>'" data-v-bind_cart="cart" data-v-bind_favorites="favorites">
   <div class="catalog-item">
     <a href="<?php echo $item->url?>" class="catalog-item__image<?php echo !$item->visImages ? ' catalog-item__image_nophoto' : ''?>">
       <?php if ($item->visImages) { ?>
@@ -42,7 +42,7 @@ use RAAS\CMS\Package;
         <?php if ($item->available) { ?>
             <div class="catalog-item__amount-block">
               <a class="catalog-item__decrement" data-v-on_click="amount -= step; checkAmount();">–</a>
-              <input type="number" class="catalog-item__amount" autocomplete="off" name="amount" min="<?php echo (int)$item->min ?: 1?>" step="<?php echo (int)$item->step ?: 1?>" value="<?php echo (int)$item->min ?: 1?>" data-v-model="amount" data-v-on_change="checkAmount()" />
+              <input type="number" class="form-control catalog-item__amount" autocomplete="off" name="amount" min="<?php echo (int)$item->min ?: 1?>" step="<?php echo (int)$item->step ?: 1?>" value="<?php echo (int)$item->min ?: 1?>" data-v-model="amount" data-v-on_change="checkAmount()" />
               <a class="catalog-item__increment" data-v-on_click="amount = parseInt(amount) + parseInt(step); checkAmount();">+</a>
             </div>
             <button type="button" data-v-on_click="addToCart()" class="catalog-item__add-to-cart" title="<?php echo TO_CART?>"></button>
@@ -54,4 +54,6 @@ use RAAS\CMS\Package;
     </div>
   </div>
 </div>
-<?php Package::i()->requestJS('/js/catalog-item.js')?>
+<?php
+Package::i()->requestCSS('/css/catalog-item.css');
+Package::i()->requestJS('/js/catalog-item.js');

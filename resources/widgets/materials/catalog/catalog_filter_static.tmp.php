@@ -77,7 +77,14 @@ foreach ($availableProperties as $propId => $availableProperty) {
         ];
         foreach ($availableProperty as $value => $valueData) {
             unset($valueData['prop']);
-            if (((trim($valueData['value']) !== '') && (trim($valueData['doRich']) !== '')) ||
+            if ((
+                (trim($valueData['value']) !== '') &&
+                (trim($valueData['doRich']) !== '') &&
+                (
+                    ($prop->datatype != 'material') ||
+                    (trim($valueData['value']) !== '0') // Чтобы не отображались нули в материальных полях
+                )
+            ) ||
                 ($prop->datatype == 'number')
             ) {
                 // 2020-05-11, AVS: добавлено условие ($prop->datatype == 'number'),
@@ -157,7 +164,7 @@ $getCatalogFilterRange = function (Material_Field $property) use (&$getCatalogFi
         </div>
       </div>
       <div class="catalog-filter-range__slider">
-        <div data-vue-role="catalog-filter-range-slider" data-inline-template data-v-bind_min="min" data-v-bind_max="max" data-v-bind_step="step" data-v-bind_valuefrom="valuefrom" data-v-bind_valueto="valueto" data-v-on_change="changeBySlider($event)">
+        <div data-vue-role="catalog-filter-range-slider" data-vue-inline-template data-v-bind_min="min" data-v-bind_max="max" data-v-bind_step="step" data-v-bind_valuefrom="valuefrom" data-v-bind_valueto="valueto" data-v-on_change="changeBySlider($event)">
           <?php $getCatalogFilterRangeSlider()?>
         </div>
       </div>
@@ -213,7 +220,7 @@ $getCatalogFilterPropertyValuesList = function (
       <?php foreach ($values as $key => $value) {
           if (trim($value['doRich']) && trim($value['value'])) { ?>
               <div class="catalog-filter-property-values-list__item">
-                <div data-vue-role="catalog-filter-property-value" data-inline-template data-v-bind_property="property" data-v-bind_value="values['<?php echo htmlspecialchars($key)?>']" data-v-on_change="$emit('change', $event);">
+                <div data-vue-role="catalog-filter-property-value" data-vue-inline-template data-v-bind_property="property" data-v-bind_value="values['<?php echo htmlspecialchars($key)?>']" data-v-on_change="$emit('change', $event);">
                   <?php $getCatalogFilterPropertyValue($value)?>
                 </div>
               </div>
@@ -278,17 +285,17 @@ $getCatalogFilterProperty = function (
       </div>
       <div class="catalog-filter-property__inner" data-raas-role="catalog-filter-property__inner">
         <?php if (($property->datatype == 'number') || in_array($property->urn, [])) { ?>
-            <div data-vue-role="catalog-filter-range" data-inline-template data-v-bind_property="property" data-v-bind_filter="filter" data-v-bind_data="data" data-v-on_change="$emit('change', $event);">
+            <div data-vue-role="catalog-filter-range" data-vue-inline-template data-v-bind_property="property" data-v-bind_filter="filter" data-v-bind_data="data" data-v-on_change="$emit('change', $event);">
               <?php $getCatalogFilterRange($property)?>
             </div>
         <?php } elseif ($multiple = true) { // Выбор множественного значения ?>
             <div class="catalog-filter-property__list">
-              <div data-vue-role="catalog-filter-property-list" data-inline-template data-v-bind_property="property" data-v-bind_values="property.values" data-v-on_change="$emit('change', $event)">
+              <div data-vue-role="catalog-filter-property-list" data-vue-inline-template data-v-bind_property="property" data-v-bind_values="property.values" data-v-on_change="$emit('change', $event)">
                 <?php $getCatalogFilterPropertyValuesList($property, $values)?>
               </div>
             </div>
         <?php } else { ?>
-            <div data-vue-role="catalog-filter-property-selector" data-inline-template data-v-bind_property="property" data-v-bind_data="data" data-v-bind_values="property.values" data-v-on_change="$emit('change', $event)">
+            <div data-vue-role="catalog-filter-property-selector" data-vue-inline-template data-v-bind_property="property" data-v-bind_data="data" data-v-bind_values="property.values" data-v-on_change="$emit('change', $event)">
               <?php $getCatalogFilterPropertySelector($property, $values)?>
             </div>
         <?php } ?>
@@ -331,7 +338,7 @@ $getCatalogFilterPropertiesList = function (array $properties) use (
           $property = $catalog->catalogFilter->properties[$propId];
           ?>
           <div class="catalog-filter-properties-list__item">
-            <div data-vue-role="catalog-filter-property" data-inline-template data-v-bind_property="properties['<?php echo htmlspecialchars($propId)?>']" data-v-bind_data="data" data-v-bind_filter="filter" data-v-bind_multiple="multiple" data-v-on_change="$emit('change', $event);">
+            <div data-vue-role="catalog-filter-property" data-vue-inline-template data-v-bind_property="properties['<?php echo htmlspecialchars($propId)?>']" data-v-bind_data="data" data-v-bind_filter="filter" data-v-bind_multiple="multiple" data-v-on_change="$emit('change', $event);">
               <?php $getCatalogFilterProperty($property, $values)?>
             </div>
           </div>
@@ -376,18 +383,18 @@ $getCatalogFilter = function (array $properties) use (
       <input type="hidden" name="sort" data-v-bind_value="data.sort || ''">
       <input type="hidden" name="order" data-v-bind_value="data.order || ''">
       <div class="catalog-filter__list">
-        <div data-vue-role="catalog-filter-properties-list" data-inline-template data-v-bind_data="data" data-v-bind_filter="filter" data-v-bind_properties="properties" data-v-bind_multiple="multiple" data-v-on_change="change($event)">
+        <div data-vue-role="catalog-filter-properties-list" data-vue-inline-template data-v-bind_data="data" data-v-bind_filter="filter" data-v-bind_properties="properties" data-v-bind_multiple="multiple" data-v-on_change="change($event)">
           <?php $getCatalogFilterPropertiesList($properties)?>
         </div>
       </div>
-      <div data-vue-role="catalog-filter-preview-marker" data-inline-template data-v-bind_counter="counter" data-v-bind_active="previewTimeoutId" data-v-bind_lastactiveelement="lastActiveElement" data-v-bind_float="floatingMarker" data-v-on_submit="submit()">
+      <div data-vue-role="catalog-filter-preview-marker" data-vue-inline-template data-v-bind_counter="counter" data-v-bind_active="previewTimeoutId" data-v-bind_lastactiveelement="lastActiveElement" data-v-bind_float="floatingMarker" data-v-on_submit="submit()">
         <?php $getCatalogFilterPreviewMarker()?>
       </div>
       <div class="catalog-filter__controls">
         <button type="submit" class="btn btn-primary" data-v-on_click="submit($event);">
           <?php echo DO_SEARCH?>
         </button>
-        <a href="<?php echo htmlspecialchars($Page->url)?>" class="btn btn-default">
+        <a href="<?php echo htmlspecialchars($Page->url)?>" class="btn btn-secondary">
           <?php echo RESET?>
         </a>
       </div>
@@ -413,7 +420,7 @@ var raasShopCatalogFilterData = <?php echo json_encode($vueData)?>;
         <a class="catalog-filter__close-link"></a>
       </div>
     </div>
-    <div class="catalog-filter__inner" data-role="catalog-filter" data-vue-role="catalog-filter" data-inline-template>
+    <div class="catalog-filter__inner" data-role="catalog-filter" data-vue-role="catalog-filter" data-vue-inline-template>
       <?php $getCatalogFilter($availableProperties)?>
     </div>
   </div>

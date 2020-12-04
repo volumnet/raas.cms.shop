@@ -1048,6 +1048,81 @@ class CatalogFilter
 
 
     /**
+     * Множественная сортировка списка товаров
+     * @param array $sort <pre>array<
+     *     string ID# поля для сортировки (предваряемое знаком ! для обратной сортировки) |
+     *     [
+     *         string ID# поля для сортировки,
+     *         callback(string $a, string $b): int Функция для сортировки значений
+     *     ]
+     * ></pre> Список сортировки
+     * @param array $goodsIds <pre>array<
+     *     string[] ID# товара => int ID# товара
+     * ></pre> Исходный список товаров, null если все
+     * @return array <pre>array<
+     *     string[] ID# товара => int ID# товара
+     * ></pre>
+     */
+    public function multisort(array $sort = [], array $goodsIds = [])
+    {
+        for ($i = count($sort) - 1; $i >= 0; $i--) {
+            $currentSort = $sort[$i];
+            if (is_array($currentSort)) {
+                $sortProp = $currentSort[0];
+                $order = $currentSort[1];
+            } else {
+                $currentSort = trim($currentSort);
+                if ($currentSort[0] == '!') {
+                    $sortProp = mb_substr($currentSort, 1);
+                    $order = -1;
+                } else {
+                    $sortProp = $currentSort;
+                    $order = 1;
+                }
+            }
+            $referencedPropMapping = (array)$this->propsMapping[$sortProp];
+            $referencedPropMapping = array_map(
+                function ($x) use ($goodsIds) {
+                    $y = array_intersect_key($goodsIds, $x);
+                    return $y;
+                },
+                $referencedPropMapping
+            );
+            // Найдем недостающие товары
+            // (у которых в свойстве вообще ничего не записано)
+            // и добавим их с индексом ""
+            $refGoodsIds = array_reduce(
+                $referencedPropMapping,
+                function ($carry, $item) {
+                    return ($carry + $item);
+                },
+                []
+            );
+            $restGoodsIds = array_diff_key($goodsIds, $refGoodsIds);
+            $referencedPropMapping[''] = (array)$referencedPropMapping[''] + $restGoodsIds;
+            if ($order == -1) {
+                krsort($referencedPropMapping, SORT_NATURAL);
+                // $referencedPropMapping = array_reverse($referencedPropMapping, true);
+            } elseif (is_callable($order)) {
+                uksort($referencedPropMapping, $order);
+            } else {
+                ksort($referencedPropMapping, SORT_NATURAL);
+            }
+            $goodsIds = array_reduce(
+                $referencedPropMapping,
+                function ($carry, $item) {
+                    return ($carry + $item);
+                },
+                []
+            );
+        }
+
+        return $goodsIds;
+    }
+
+
+
+    /**
      * Получает ID# товаров с учетом (или без учета) сортировки
      * @param string $sort URN поля для сортировки, либо пустая строка
      *                     для сортировки только по порядку отображения

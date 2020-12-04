@@ -21,7 +21,7 @@ $set = Material::getSQLSet($sqlQuery);
 ?>
 <?php if ($set) { ?>
     <div class="spec">
-      <div class="spec__title">
+      <div class="spec__title h2">
         <?php echo htmlspecialchars($Block->name)?>
       </div>
       <div class="spec__inner">
@@ -38,5 +38,7 @@ $set = Material::getSQLSet($sqlQuery);
         <a href="#" class="spec__arrow spec__arrow_next" data-role="slider-next"></a>
       </div>
     </div>
-    <?php Package::i()->requestJS(['/js/catalog.js'])?>
-<?php } ?>
+    <?php
+    Package::i()->requestCSS(['/css/spec.css']);
+    Package::i()->requestJS(['/js/spec.js']);
+} ?>

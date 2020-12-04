@@ -77,7 +77,14 @@ foreach ($availableProperties as $propId => $availableProperty) {
         ];
         foreach ($availableProperty as $value => $valueData) {
             unset($valueData['prop']);
-            if (((trim($valueData['value']) !== '') && (trim($valueData['doRich']) !== '')) ||
+            if ((
+                (trim($valueData['value']) !== '') &&
+                (trim($valueData['doRich']) !== '') &&
+                (
+                    ($prop->datatype != 'material') ||
+                    (trim($valueData['value']) !== '0') // Чтобы не отображались нули в материальных полях
+                )
+            ) ||
                 ($prop->datatype == 'number')
             ) {
                 if (($pageMime == 'application/json') || // Чтобы не перегружать код всеми значениями
@@ -225,7 +232,7 @@ if ($pageMime == 'application/json') {
       <button type="submit" class="btn btn-primary" v-on:click="submit($event);">
         <?php echo DO_SEARCH?>
       </button>
-      <a href="<?php echo htmlspecialchars($Page->url)?>" class="btn btn-default">
+      <a href="<?php echo htmlspecialchars($Page->url)?>" class="btn btn-secondary">
         <?php echo RESET?>
       </a>
     </div>

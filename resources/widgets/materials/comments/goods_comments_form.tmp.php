@@ -33,7 +33,7 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
         <div data-role="feedback-form" <?php echo $success[(int)$Block->id] ? 'style="display: none"' : ''?>>
           <input type="hidden" name="material" value="<?php echo (int)$Page->Material->id?>" />
           <?php if ($Form->signature) { ?>
-                <input type="hidden" name="form_signature" value="<?php echo md5('form' . (int)$Form->id . (int)$Block->id)?>" />
+                <input type="hidden" name="form_signature" value="<?php echo htmlspecialchars($Form->getSignature($Block))?>" />
           <?php } ?>
           <?php if ($Form->antispam == 'hidden' && $Form->antispam_field_name) { ?>
                 <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" value="<?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?>" style="position: absolute; left: -9999px" />
@@ -56,7 +56,7 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
               </div>
           <?php } ?>
           <div class="form-group">
-            <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-default" type="submit"><?php echo SEND?></button></div>
+            <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-secondary" type="submit"><?php echo SEND?></button></div>
           </div>
         </div>
       </form>

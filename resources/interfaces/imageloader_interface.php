@@ -84,6 +84,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
                     break;
             }
+            usort($proceedFiles, function ($a, $b) {
+                return strnatcasecmp($a['name'], $b['name']);
+            });
             return $proceedFiles;
         };
 
