@@ -134,12 +134,10 @@ $getField = function($row) {
               <?php echo STATUS?>:
             </label>
             <div class="col-sm-9 col-md-4">
-              <?php if ($order->status->id) { ?>
-                  <div class="cart-form__self-status">
-                    <?php echo htmlspecialchars($order->status->name)?>
-                  </div>
-              <?php }
-              if ($order->paid) { ?>
+              <div class="cart-form__self-status">
+                <?php echo htmlspecialchars($order->status->name ?: ORDER_STATUS_NEW)?>
+              </div>
+              <?php if ($order->paid) { ?>
                   <div class="cart-form__payment-status cart-form__payment-status_paid">
                     <?php echo PAYMENT_PAID?>
                   </div>
@@ -151,15 +149,17 @@ $getField = function($row) {
             </div>
           </div>
       <?php } ?>
-      <?php foreach ($order->fields as $fieldURN => $field) { ?>
-          <div class="form-group">
-            <label class="control-label col-sm-3 col-md-2">
-              <?php echo htmlspecialchars($field->name)?>:
-            </label>
-            <div class="col-sm-9 col-md-4">
-              <?php echo $getField($field)?>
-            </div>
-          </div>
+      <?php foreach ($order->fields as $fieldURN => $field) {
+          if (!in_array($fieldURN, []) && ($value = $getField($field))) { ?>
+              <div class="form-group">
+                <label class="control-label col-sm-4 col-md-3">
+                  <?php echo htmlspecialchars($field->name)?>:
+                </label>
+                <div class="col-sm-8 col-md-4">
+                  <?php echo $value?>
+                </div>
+              </div>
+          <?php } ?>
       <?php } ?>
     </div>
   </div>

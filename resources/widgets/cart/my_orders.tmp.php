@@ -59,35 +59,44 @@ use RAAS\CMS\Snippet;
                     <a href="?id=<?php echo (int)$order->id?>" class="my-orders-item__date">
                       <?php echo date(DATEFORMAT, strtotime($order->post_date))?>
                     </a>
-                    <a href="?id=<?php echo (int)$order->id?>" class="my-orders-item__title">
-                      <?php
-                      $temp = [];
-                      foreach ($order->items as $item) {
-                          $arr = $item->name;
-                          $itemPriceText = Text::formatPrice($item->realprice);
-                          if ($item->amount > 1) {
-                              $arr .= ' – ' . (int)$item->amount . ' x '
-                                   .  $itemPriceText .  ' ₽ = '
-                                   .  Text::formatPrice($item->amount * $item->realprice)
-                                   .  ' ₽';
-                          } else {
-                              $arr .= ' = ' . $itemPriceText . ' ₽';
-                          }
-                          $temp[] = $arr;
-                      }
-                      echo implode('<br />', $temp);
-                      ?>
-                    </a>
+                    <div class="my-orders-item__title">
+                      <div class="my-orders-item__title-inner">
+                        <?php
+                        $temp = [];
+                        foreach ($order->items as $item) {
+                            $arr = $item->name;
+                            $itemPriceText = Text::formatPrice($item->realprice);
+                            if ($item->amount > 1) {
+                                $arr .= ' – ' . (int)$item->amount . ' x '
+                                     .  $itemPriceText .  ' ₽ = '
+                                     .  Text::formatPrice($item->amount * $item->realprice)
+                                     .  ' ₽';
+                            } else {
+                                $arr .= ' = ' . $itemPriceText . ' ₽';
+                            }
+                            $temp[] = $arr;
+                        }
+                        $text = implode("\n", $temp);
+                        $text = Text::cuttext($text, 64, '...');
+                        echo nl2br(htmlspecialchars($text));
+                        ?>
+                      </div>
+                      <div class="my-orders-item__more">
+                        <a href="?id=<?php echo (int)$order->id?>">
+                          <?php echo SHOW_MORE?>
+                        </a>
+                      </div>
+                    </div>
                     <a href="?id=<?php echo (int)$order->id?>" class="my-orders-item__status">
                       <?php if ($order->status->id) { ?>
                           <div class="my-orders-item__self-status">
                             <?php echo htmlspecialchars($order->status->name)?>
                           </div>
-                      <?php } else { /* ?>
+                      <?php } else {  ?>
                           <div class="my-orders-item__self-status">
                             <?php echo ORDER_STATUS_NEW?>
                           </div>
-                      <?php */ }
+                      <?php  }
                       if ($order->paid) { ?>
                           <div class="my-orders-item__payment-status my-orders-item__payment-status_paid">
                             <?php echo PAYMENT_PAID?>

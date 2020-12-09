@@ -302,9 +302,7 @@ return $y;'
             'step' => 0.01
         ],
         'manufacturer_warranty' => [
-            'callback' => 'if ((int)$x > 0) {
-    return "P" . (int)$x;
-} elseif (!in_array(
+            'callback' => 'if (!in_array(
     trim(mb_strtolower($x)),
     ["0", "no", "none", "false", "нет"]
 )) {
