@@ -333,6 +333,9 @@ class YMLInterface extends AbstractInterface
                 $json = (array)json_decode($block->config[$key], true);
                 $content = $this->getDeliveryOptions($json);
                 $key = str_replace('_', '-', $key);
+                if (!$content) {
+                    return '';
+                }
             } else {
                 $content = htmlspecialchars(trim($block->config[$key]));
             }
