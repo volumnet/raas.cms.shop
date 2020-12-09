@@ -34,6 +34,13 @@ class Updater extends \RAAS\Updater
         ) < 0) {
             $this->update20200702();
         }
+
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.2.66'
+        ) < 0) {
+            $this->update20201209();
+        }
     }
 
 
@@ -232,6 +239,25 @@ class Updater extends \RAAS\Updater
             $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_priceloaders
                            ADD update_materials TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Allow to update materials' AFTER create_materials,
                            ADD media_action TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Media fields action'";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     * Добавляет варианты доставки и самовывоза в корневой блок Яндекс-Маркета
+     */
+    public function update20201209()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_blocks_yml", $this->tables) &&
+            !in_array(
+                'delivery_options',
+                $this->columns(SOME::_dbprefix() . "cms_shop_blocks_yml")
+            )
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_blocks_yml
+                           ADD delivery_options TEXT NULL DEFAULT NULL COMMENT 'Delivery options',
+                           ADD pickup_options TEXT NULL DEFAULT NULL COMMENT 'Pickup options'";
             $this->SQL->query($sqlQuery);
         }
     }

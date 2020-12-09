@@ -154,7 +154,9 @@ class YMLInterface extends AbstractInterface
               . $this->getShopCurrenciesBlock($block)
               . $this->getShopCategoriesBlock($block)
               . $this->getShopLocalDeliveryCostBlock($block)
-              . $this->getShopCustomFieldBlock('cpa', $block);
+              . $this->getShopCustomFieldBlock('cpa', $block)
+              . $this->getShopCustomFieldBlock('delivery_options', $block)
+              . $this->getShopCustomFieldBlock('pickup_options', $block);
         return $text;
     }
 
@@ -327,9 +329,14 @@ class YMLInterface extends AbstractInterface
     {
         $text = '';
         if (isset($block->config[$key])) {
-            $text .= '<' . $key . '>'
-                  .     htmlspecialchars(trim($block->config[$key]))
-                  .  '</' . $key . '>';
+            if (in_array($key, ['delivery_options', 'pickup_options'])) {
+                $json = (array)json_decode($block->config[$key], true);
+                $content = $this->getDeliveryOptions($json);
+                $key = str_replace('_', '-', $key);
+            } else {
+                $content = htmlspecialchars(trim($block->config[$key]));
+            }
+            $text .= '<' . $key . '>' . $content . '</' . $key . '>';
         }
         return $text;
     }
@@ -729,16 +736,50 @@ class YMLInterface extends AbstractInterface
             $v = preg_replace('/(\\r|\\n)+/umi', ' ', $v);
             $v = \SOME\Text::cuttext($v, 512, '...');
         }
-        $v = trim($v);
-        if ($v === '') {
-            return '';
+        if (in_array($key, ['delivery_options', 'pickup_options'])) {
+            $content = $this->getDeliveryOptions($v);
+            if (!$content || $asAttr) {
+                return '';
+            }
+            $key = str_replace('_', '-', $key);
+        } else {
+            $v = trim($v);
+            if ($v === '') {
+                return '';
+            }
+            $content = htmlspecialchars($v);
         }
         if ($asAttr) {
-            $text = ' ' . $key . '="' . htmlspecialchars($v) . '"';
+            $text = ' ' . $key . '="' . $content . '"';
         } else {
-            $text = '<' . $key . '>' . htmlspecialchars($v) . '</' . $key . '>';
+            $text = '<' . $key . '>' . $content . '</' . $key . '>';
         }
         return $text;
+    }
+
+
+    /**
+     * Получает блок опций (доставки или самовывоза)
+     * @param array $options <pre>array<[
+     *     'cost' => int Стоимость,
+     *     'days' => string Дней,
+     *     'order_before' => string Заказать до
+     * ]></pre> опции
+     * @return string
+     */
+    public function getDeliveryOptions(array $options)
+    {
+        $result = '';
+        foreach ($options as $option) {
+            $result .= '<option cost="' . (int)$option['cost'] . '" days="'
+                . htmlspecialchars(trim($option['days']) ?: 0) . '"';
+            if ($orderBefore = trim($option['order_before'])) {
+                $result .= ' order-before="'
+                    . htmlspecialchars($orderBefore) . '"';
+            }
+            $result .= ' />';
+        }
+        return $result;
     }
 
 
@@ -851,17 +892,17 @@ class YMLInterface extends AbstractInterface
      * Получает значение поля по его URN в системе Яндекс.Маркета
      * @param Material $Item Материал для обработки
      * @param string $key URN поля в системе Яндекс.Маркета
-     * @param [
-     *            'field' => Material_Field Привязанное поле типа материала,
-     *            'field_id' => string URN системного поля (используется, когда
-     *                                 не задано поле типа материала),
-     *            'value' => string Значение по умолчанию,
-     *            'callback' => string Текст обработчика поля с текущими
-     *                                 переменными,
-     *                                 также $x - результирующее значение поля,
-     *                                 $Field - то же что $settings['field']
-     *        ] $settings Настройки поля
-     * @return string;
+     * @param array <pre>[
+     *     'field' => Material_Field Привязанное поле типа материала,
+     *     'field_id' => string URN системного поля (используется, когда
+     *                          не задано поле типа материала),
+     *     'value' => string Значение по умолчанию,
+     *     'callback' => string Текст обработчика поля с текущими
+     *                          переменными,
+     *                          также $x - результирующее значение поля,
+     *                          $Field - то же что $settings['field'],
+     * ]</pre> $settings Настройки поля
+     * @return string|mixed
      */
     public function getValue(Material $item, $key, array $settings = [])
     {
@@ -872,9 +913,11 @@ class YMLInterface extends AbstractInterface
             $Field = $settings['field'];
             $x = eval($f);
         }
-        $x = preg_replace('/\\t+/umi', ' ', $x);
-        $x = preg_replace('/ +/umi', ' ', $x);
-        $x = trim($x);
+        if ($f && is_string($x)) {
+            $x = preg_replace('/\\t+/umi', ' ', $x);
+            $x = preg_replace('/ +/umi', ' ', $x);
+            $x = trim($x);
+        }
         return $x;
     }
 

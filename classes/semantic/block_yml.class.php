@@ -37,28 +37,20 @@ class Block_YML extends Block
             'bid',
             'cbid',
             'url',
-            /*'buyurl', */
             'price',
             'oldprice',
-            /*'wprice', */
             'currencyId',
-            /*'xCategory',*/
             'categoryId',
-            /*'market_category',*/
             'picture',
             'store',
             'pickup',
+            'pickup_options',
             'delivery',
-            /*'deliveryIncluded', */
-            'local_delivery_cost',
-            /*'orderingTime'*/
+            'delivery_options',
         ],
         [
-            /*'aliases',
-            'additional', */
             'description',
             'sales_notes',
-            /*'promo', */
             'manufacturer_warranty',
             'seller_warranty',
             'country_of_origin',
@@ -67,13 +59,11 @@ class Block_YML extends Block
             'age',
             'barcode',
             'cpa',
-            /*'fee', */
             'rec',
             'expiry',
             'weight',
             'dimensions',
             'param',
-            /*'related_offer'*/
         ],
     ];
 
@@ -94,7 +84,6 @@ class Block_YML extends Block
             'vendor',
             'vendorCode',
             'model'
-            /*, 'provider', 'tarifplan'*/
         ],
         'book' => [
             'author',
@@ -149,9 +138,6 @@ class Block_YML extends Block
             'meal',
             'included',
             'transport'
-            /*, 'price_min',
-            'price_max',
-            'options'*/
         ],
         'event-ticket' => [
             'name',
@@ -173,9 +159,6 @@ class Block_YML extends Block
      * ></pre>
      */
     public static $ymlFields = [
-        'additional' => [
-            'multiple' => true,
-        ],
         'adult' => [
             'type' => 'checkbox',
             'callback' => 'return (int)$x ? "true" : "false";'
@@ -191,7 +174,6 @@ foreach ($ages as $age) {
 }
 return 18;',
         ],
-        'aliases' => [],
         'artist' => [],
         'author' => [],
         'available' => [
@@ -207,9 +189,6 @@ return 18;',
             'min' => 0
         ],
         'binding' => [],
-        'buyurl' => [
-            'type' => 'url'
-        ],
         'cbid' => [
             'type' => 'number',
             'min' => 0
@@ -241,9 +220,15 @@ return 18;',
             'type' => 'checkbox',
             'callback' => 'return (int)$x ? "true" : "false";'
         ],
-        'deliveryIncluded' => [
-            'type' => 'checkbox',
-            'callback' => 'return (int)$x ? "true" : "false";'
+        'delivery_options' => [
+            'type' => 'hidden',
+            'callback' => 'return [/*
+    [
+        "cost" => 300,
+        "days" => 4,
+        "order_before" => 18,
+    ]
+*/];'
         ],
         'description' => [
             'default' => 'description'
@@ -263,16 +248,7 @@ return $y;'
         'expiry' => [
             'callback' => 'return "P" . (int)$x . "Y";'
         ],
-        'fee' => [
-            'type' => 'number',
-            'step' => 0.01,
-            'min' => 0
-        ],
         'format' => [],
-        // 'group_id' => [
-        //      'type' => 'number',
-        //      'min' => 0
-        //  ],
         'hall' => [
             'required' => true
         ],
@@ -296,23 +272,14 @@ return $y;'
         ],
         'ISBN' => [],
         'language' => [],
-        'local_delivery_cost' => [
-            'type' => 'number',
-            'min' => 0,
-            'step' => 0.01
-        ],
         'manufacturer_warranty' => [
-            'callback' => 'if (!in_array(
+            'callback' => 'if (trim($x) && !in_array(
     trim(mb_strtolower($x)),
     ["0", "no", "none", "false", "нет"]
 )) {
-    return true;
+    return "true";
 }
-return false;'
-        ],
-        'market_category' => [
-            'type' => 'number',
-            'min' => 0
+return "false";'
         ],
         'meal' => [],
         'media' => [],
@@ -325,10 +292,6 @@ return false;'
             'type' => 'number',
             'min' => 0,
             'step' => 0.01
-        ],
-        'options' => [],
-        'orderingTime' => [
-            'type' => 'datetime-local',
         ],
         'originalName' => [],
         'page_extent' => [
@@ -344,6 +307,16 @@ return false;'
         'pickup' => [
             'type' => 'checkbox',
             'callback' => 'return (int)$x ? "true" : "false";'
+        ],
+        'pickup_options' => [
+            'type' => 'hidden',
+            'callback' => 'return [/*
+    [
+        "cost" => 300,
+        "days" => 4,
+        "order_before" => 18,
+    ]
+*/];'
         ],
         'picture' => [
             'type' => 'image',
@@ -364,18 +337,6 @@ return false;'
             'step' => 0.01,
             'required' => true,
         ],
-        'price_max' => [
-            'type' => 'number',
-            'min' => 0,
-            'step' => 0.01,
-        ],
-        'price_min' => [
-            'type' => 'number',
-            'min' => 0,
-            'step' => 0.01,
-        ],
-        'promo' => [],
-        'provider' => [],
         'publisher' => [],
         'rec' => [
             'type' => 'material',
@@ -385,24 +346,20 @@ return false;'
         ],
         'recording_length' => [],
         'region' => [],
-        'related_offer' => [
-            'type' => 'material',
-            'callback' => 'return $x->id;',
-            'multiple' => true,
-        ],
         'room' => [],
         'sales_notes' => [],
-        'seller_warranty' => [
-            'callback' => 'if ((int)$x > 0) {
-    return "P" . (int)$x;
-} elseif (!in_array(
-    trim(mb_strtolower($x)),
-    ["0", "no", "none", "false", "нет"]
-)) {
-    return true;
-}
-return false;'
-        ],
+// @deprecated
+//         'seller_warranty' => [
+//             'callback' => 'if ((int)$x > 0) {
+//     return "P" . (int)$x;
+// } elseif (!in_array(
+//     trim(mb_strtolower($x)),
+//     ["0", "no", "none", "false", "нет"]
+// )) {
+//     return true;
+// }
+// return false;'
+//         ],
         'series' => [],
         'starring' => [],
         'storage' => [],
@@ -413,7 +370,6 @@ return false;'
         'table_of_contents' => [
             'type' => 'textarea'
         ],
-        'tarifplan' => [],
         'title' => [
             'required' => true,
             'default' => 'name'
@@ -434,15 +390,6 @@ return false;'
             'step' => 0.001
         ],
         'worldRegion' => [],
-        'wprice' => [
-            'type' => 'number',
-            'min' => 0,
-            'step' => 0.01
-        ],
-        'xCategory' => [
-            'type' => 'number',
-            'min' => 0
-        ],
         'year' => [
             'type' => 'number',
             'min' => 1970
@@ -619,7 +566,8 @@ return false;'
             'email' => (string)$this->email,
             'cpa' => (int)(bool)$this->cpa,
             'default_currency' => (string)$this->default_currency,
-            'local_delivery_cost' => (int)$this->local_delivery_cost,
+            'delivery_options' => trim($this->delivery_options),
+            'pickup_options' => trim($this->pickup_options),
         ];
     }
 

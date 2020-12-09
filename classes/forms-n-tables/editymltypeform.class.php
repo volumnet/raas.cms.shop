@@ -305,7 +305,7 @@ class EditYMLTypeForm extends RAASForm
         }
 
         foreach ($temp as $key => $types) {
-            $fieldSet = $this->getYMLFieldFieldSet($key, $MType, $Block);
+            $fieldSet = $this->getYMLFieldFieldSet($key, $MType, $Block, $types);
             if ($fieldSet) {
                 $defaultParams['children']['common']->children['fields']->children[$key] = $fieldSet;
             }
@@ -321,12 +321,14 @@ class EditYMLTypeForm extends RAASForm
      * @param string $ymlURN URN поля в системе Яндекс.Маркет
      * @param Material_Type $mType Тип материалов для связки
      * @param Block_YML $block Текущий блок
+     * @param string[] $types Типы выгрузки, для которых подходит поле
      * @return FieldSet|null null, если не найдено поле
      */
     public function getYMLFieldFieldSet(
         $ymlURN,
         Material_Type $mType,
-        Block_YML $block
+        Block_YML $block,
+        array $types = []
     ) {
         if (!isset(Block_YML::$ymlFields[$ymlURN])) {
             return null;
