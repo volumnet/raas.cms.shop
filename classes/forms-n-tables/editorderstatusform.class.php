@@ -80,25 +80,38 @@ class EditOrderStatusForm extends RAASForm
             'name' => 'legend',
             'export' => 'is_null',
             'import' => function (RAASField $field) {
-                $sqlQuery = "SELECT tCT.id AS cart_type_id, tFF.id, tFF.urn, tFF.name
-                               FROM " . Cart_Type::_tablename() . " AS tCT
-                               JOIN " . Form::_tablename() . " AS tF ON tF.id = tCT.form_id
-                               JOIN " . Form_Field::_tablename() . " AS tFF ON tFF.pid = tF.id AND tFF.classname = ?
-                              WHERE NOT tCT.no_amount
-                                AND tFF.datatype NOT IN ('material', 'file', 'image')
-                                AND NOT tFF.multiple";
-                $sqlResult = Cart_Type::_SQL()->get([$sqlQuery, [Form::class]]);
-                $result = [];
-                foreach ($sqlResult as $sqlRow) {
-                    $result[trim($sqlRow['cart_type_id'])][$sqlRow['urn']] = $sqlRow['name'];
-                }
-                $result = array_values($result);
-                $result = array_reduce(array_slice($result, 1), 'array_intersect_key', $result[0]);
-                $result = array_merge(['id' => ViewSub_Dev::i()->_('ORDER_ID')], $result);
-                return $result;
+                return $this->getLegendVars();
             },
+            'default' => $this->getLegendVars(),
             'template' => 'status_notification_field.inc.php',
         ]);
         return $field;
+    }
+
+
+    /**
+     * Получает список переменных для легенды уведомления
+     * @return array <pre>array<
+     *     string[] URN поля => string Наименование поля
+     * ]></pre>
+     */
+    public function getLegendVars()
+    {
+        $sqlQuery = "SELECT tCT.id AS cart_type_id, tFF.id, tFF.urn, tFF.name
+                       FROM " . Cart_Type::_tablename() . " AS tCT
+                       JOIN " . Form::_tablename() . " AS tF ON tF.id = tCT.form_id
+                       JOIN " . Form_Field::_tablename() . " AS tFF ON tFF.pid = tF.id AND tFF.classname = ?
+                      WHERE NOT tCT.no_amount
+                        AND tFF.datatype NOT IN ('material', 'file', 'image')
+                        AND NOT tFF.multiple";
+        $sqlResult = Cart_Type::_SQL()->get([$sqlQuery, [Form::class]]);
+        $result = [];
+        foreach ($sqlResult as $sqlRow) {
+            $result[trim($sqlRow['cart_type_id'])][$sqlRow['urn']] = $sqlRow['name'];
+        }
+        $result = array_values($result);
+        $result = array_reduce(array_slice($result, 1), 'array_intersect_key', $result[0]);
+        $result = array_merge(['id' => ViewSub_Dev::i()->_('ORDER_ID')], $result);
+        return $result;
     }
 }

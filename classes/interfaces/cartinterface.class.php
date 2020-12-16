@@ -23,6 +23,16 @@ use RAAS\CMS\User;
 class CartInterface extends FormInterface
 {
     /**
+     * Функция расчета дополнительных пунктов для корзины
+     * @var callable <pre>function (
+     *      Cart $cart Корзина,
+     *      array $post POST-данные,
+     *      User $user Пользователь
+     * ): array<CartItem></pre>
+     */
+    public $additionalsCallback = null;
+
+    /**
      * Конструктор класса
      * @param Block_Cart|null $block Блок, для которого применяется
      *                               интерфейс
@@ -106,6 +116,8 @@ class CartInterface extends FormInterface
                     $this->success($this->block, $this->get)
                 );
                 break;
+            case 'refresh':
+                break;
             default:
                 $form = $cartType->Form;
                 if (isset($this->post['amount'])) {
@@ -163,9 +175,11 @@ class CartInterface extends FormInterface
                         $result['localError'] = $localError;
                     } else {
                         $result['DATA'] = [];
-                        foreach ($form->fields as $key => $row) {
+                        foreach ($form->fields as $fieldURN => $row) {
                             if ($row->defval) {
-                                $result['DATA'][$key] = $row->defval;
+                                $result['DATA'][$fieldURN] = $row->defval;
+                            } elseif ($userVal = $user->{$fieldURN}) {
+                                $result['DATA'][$fieldURN] = $userVal;
                             }
                         }
                         $result['localError'] = [];
@@ -192,6 +206,13 @@ class CartInterface extends FormInterface
         $result['Cart'] = $cart;
         $result['Cart_Type'] = $cartType;
         $result['convertMeta'] = [$this, 'convertMeta'];
+        if ($additionalsCallback = $this->additionalsCallback) {
+            $result['additional'] = $additionalsCallback(
+                $cart,
+                $this->post,
+                $user
+            );
+        }
         if ($this->block->EPay_Interface->id) {
             $epayResult = $this->block->EPay_Interface->process(array_merge(
                 [
@@ -315,6 +336,7 @@ class CartInterface extends FormInterface
     public function processOrderItems(Order $order, Cart $cart)
     {
         $orderItems = [];
+        $user = Controller_Frontend::i()->user;
         foreach ($cart->items as $cartItem) {
             if ($cartItem->amount) {
                 $material = new Material($cartItem->id);
@@ -324,7 +346,19 @@ class CartInterface extends FormInterface
                     'name' => $cartItem->name,
                     'meta' => $this->convertMeta($cartItem->meta),
                     'realprice' => (float)$price,
-                    'amount' => (int)$cartItem->amount
+                    'amount' => (int)$cartItem->amount,
+                ];
+            }
+        }
+        if ($additionalsCallback = $this->additionalsCallback) {
+            $additional = $additionalsCallback($cart, $this->post, $user);
+            foreach ((array)$additional as $cartItem) {
+                $orderItems[] = [
+                    'material_id' => $cartItem->id,
+                    'name' => $cartItem->name,
+                    'meta' => $this->convertMeta($cartItem->meta),
+                    'realprice' => (float)$cartItem->realprice,
+                    'amount' => (int)$cartItem->amount,
                 ];
             }
         }
