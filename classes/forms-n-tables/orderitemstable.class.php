@@ -24,14 +24,18 @@ class OrderItemsTable extends \RAAS\Table
         $columns = array();
         $columns['name'] = array(
             'caption' => $this->view->_('NAME'),
-            'callback' => function($row) use ($view) { 
-                return '<a href="' . PackageSubMain::i()->url . '&action=edit_material&id=' . (int)$row->id . '&pid=' . (int)$row->material_type->affectedPages[0]->id . '">' . 
-                          htmlspecialchars($row->name) . 
-                       '</a>';
+            'callback' => function($row) use ($view) {
+                if ($row->id) {
+                    return '<a href="' . PackageSubMain::i()->url . '&action=edit_material&id=' . (int)$row->id . '&pid=' . (int)$row->material_type->affectedPages[0]->id . '">' .
+                              htmlspecialchars($row->name) .
+                           '</a>';
+                } else {
+                    return htmlspecialchars($row->name);
+                }
             }
         );
         $columns['meta'] = array(
-            'caption' => $this->view->_('ADDITIONAL_INFO'), 
+            'caption' => $this->view->_('ADDITIONAL_INFO'),
             'callback' => function($row) use ($view) { return htmlspecialchars($row->meta); }
         );
         $columns['price'] = array(

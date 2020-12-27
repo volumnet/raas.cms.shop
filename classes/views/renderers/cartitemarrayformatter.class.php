@@ -43,6 +43,7 @@ class CartItemArrayFormatter
         }
         $result = array_merge($itemData, [
             'id' => $this->item->id,
+            'name' => $this->item->name,
             'meta' => $this->item->meta,
             'metaJSON' => $this->item->metaJSON,
             'amount' => $this->item->amount,

@@ -13,6 +13,7 @@ use RAAS\View_Web as RAASViewWeb;
 use RAAS\CMS\AbstractInterface;
 use RAAS\CMS\FormInterface;
 use RAAS\CMS\Material;
+use RAAS\CMS\MaterialTypesRecursiveCache;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 use RAAS\CMS\User;
@@ -24,11 +25,14 @@ class CartInterface extends FormInterface
 {
     /**
      * Функция расчета дополнительных пунктов для корзины
-     * @var callable <pre>function (
-     *      Cart $cart Корзина,
-     *      array $post POST-данные,
-     *      User $user Пользователь
-     * ): array<CartItem></pre>
+     * @var callable|null <pre>function (
+     *     Cart $cart Корзина,
+     *     array $post POST-данные,
+     *     User $user Пользователь
+     * ): [
+     *     'items' => array<CartItem>,
+     *     string[] => mixed Дополнительные данные
+     * ]</pre>
      */
     public $additionalsCallback = null;
 
@@ -189,7 +193,10 @@ class CartInterface extends FormInterface
                 break;
         }
         if ((isset($this->get['back']) && $this->get['back']) ||
-            in_array($action, ['set', 'add', 'reduce', 'delete', 'clear'])
+            (
+                in_array($action, ['set', 'add', 'reduce', 'delete', 'clear']) &&
+                !$this->get['AJAX'] // 2020-12-25, AVS: добавлено, чтобы не редиректило в AJAX'е
+            )
         ) {
             if ($this->get['back']) {
                 $url = 'history:back';
@@ -206,12 +213,9 @@ class CartInterface extends FormInterface
         $result['Cart'] = $cart;
         $result['Cart_Type'] = $cartType;
         $result['convertMeta'] = [$this, 'convertMeta'];
-        if ($additionalsCallback = $this->additionalsCallback) {
-            $result['additional'] = $additionalsCallback(
-                $cart,
-                $this->post,
-                $user
-            );
+        $result['interface'] = $this;
+        if ($additional = $this->getAdditionals($cart, $this->post, $user)) {
+            $result['additional'] = $additional;
         }
         if ($this->block->EPay_Interface->id) {
             $epayResult = $this->block->EPay_Interface->process(array_merge(
@@ -228,6 +232,29 @@ class CartInterface extends FormInterface
             $result = array_merge($result, $epayResult);
         }
         return $result;
+    }
+
+
+    /**
+     * Функция расчета дополнительных пунктов для корзины
+     * @param Cart $cart Корзина
+     * @param array $post POST-данные
+     * @param User $user Пользователь
+     * @return array <pre>[
+     *     'items' => array<CartItem>,
+     *     string[] => mixed Дополнительные данные
+     * ]</pre>
+     */
+    public function getAdditionals(
+        Cart $cart,
+        array $post = [],
+        User $user = null
+    ) {
+        if ($additionalsCallback = $this->additionalsCallback) {
+            $result = $additionalsCallback($cart, $this->post, $user);
+            return $result;
+        }
+        return [];
     }
 
 
@@ -300,7 +327,12 @@ class CartInterface extends FormInterface
             $objects[] = $material;
         }
 
-        $this->processOrderItems($order, $cart);
+        $additional = $this->getAdditionals($cart, $post, $user);
+        $additionalItems = [];
+        if ($additional['items']) {
+            $additionalItems = (array)$additional['items'];
+        }
+        $this->processOrderItems($order, $cart, $additionalItems);
 
         foreach ($objects as $object) {
             $this->processObject($object, $form, $post, $server, $files);
@@ -332,8 +364,10 @@ class CartInterface extends FormInterface
      * Добавляет товары в заказ из корзины
      * @param Order $order Заказ
      * @param Cart $cart Корзина
+     * @param CartItem[] $additionalItems Дополнительные элементы для добавления
+     *     в корзину
      */
-    public function processOrderItems(Order $order, Cart $cart)
+    public function processOrderItems(Order $order, Cart $cart, array $additionalItems = [])
     {
         $orderItems = [];
         $user = Controller_Frontend::i()->user;
@@ -350,9 +384,8 @@ class CartInterface extends FormInterface
                 ];
             }
         }
-        if ($additionalsCallback = $this->additionalsCallback) {
-            $additional = $additionalsCallback($cart, $this->post, $user);
-            foreach ((array)$additional as $cartItem) {
+        if ($additionalItems) {
+            foreach ((array)$additionalItems as $cartItem) {
                 $orderItems[] = [
                     'material_id' => $cartItem->id,
                     'name' => $cartItem->name,
