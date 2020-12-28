@@ -200,12 +200,12 @@ class Cart
             foreach ($sqlResult as $row) {
                 $materialId = (int)$row['material_id'];
                 $meta = $row['meta'];
-                $items2[(int)$materialId][$meta] = (int)$row['amount'];
+                $items2[trim($materialId)][trim($meta)] = (int)$row['amount'];
             }
             $items = $items2;
             foreach ($items1 as $materialId => $metaItems) {
                 foreach ($metaItems as $meta => $amount) {
-                    $items[(int)$materialId][$meta] = $amount;
+                    $items[trim($materialId)][trim($meta)] = $amount;
                 }
             }
             $this->items = $items;
@@ -215,6 +215,25 @@ class Cart
         } else {
             $this->items = $items1;
         }
+        $this->purge();
+    }
+
+
+    /**
+     * Чистит корзину от нулевых товаров
+     */
+    public function purge()
+    {
+        $cookieItems = (array)$this->items;
+        $result = [];
+        foreach ((array)$cookieItems as $materialId => $metaItems) {
+            foreach ((array)$metaItems as $meta => $amount) {
+                if ($amount > 0) {
+                    $result[trim($materialId)][trim($meta)] = $amount;
+                }
+            }
+        }
+        $this->items = (array)$result;
     }
 
 
@@ -224,7 +243,8 @@ class Cart
     protected function save()
     {
         $var = 'cart_' . (int)$this->cartType->id;
-        $_COOKIE[$var] = json_encode($this->items);
+        $this->purge();
+        $_COOKIE[$var] = json_encode((object)$this->items);
         setcookie(
             $var,
             $_COOKIE[$var],
