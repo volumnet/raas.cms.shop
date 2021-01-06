@@ -305,10 +305,9 @@ class Cart
                         $cartMaterialType->priceURN = $field->urn;
                     }
                     if ($cartMaterialType->price_callback) {
-                        $cartMaterialType->priceCallback = create_function(
-                            '$x',
-                            $cartMaterialType->price_callback
-                        );
+                        $cartMaterialType->priceCallback = function ($x) use ($cartMaterialType) {
+                            return eval($cartMaterialType->price_callback);
+                        };
                     }
                     return $cartMaterialType;
                 }

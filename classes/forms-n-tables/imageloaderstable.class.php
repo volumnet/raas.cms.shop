@@ -47,8 +47,8 @@ class ImageLoadersTable extends \RAAS\Table
                     }
                 ],
                 ' ' => [
-                    'callback' => function ($row, $i) use ($view, $contextMenuName, $IN) {
-                        return rowContextMenu($view->getImageLoaderContextMenu($row, $i, count($IN['Set'])));
+                    'callback' => function ($row, $i) use ($view, $contextMenuName, $params) {
+                        return rowContextMenu($view->getImageLoaderContextMenu($row, $i, count((array)$params['Set'])));
                     }
                 ]
             ],

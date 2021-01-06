@@ -29,7 +29,7 @@ class ViewOrderForm extends ViewFeedbackForm
     }
 
 
-    protected function getParams()
+    protected function getParams(array $params = [])
     {
         $arr = parent::getParams();
         $arr['action'] = '#history';

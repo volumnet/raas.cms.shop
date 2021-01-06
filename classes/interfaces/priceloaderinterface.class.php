@@ -687,7 +687,9 @@ class PriceloaderInterface extends AbstractInterface
      */
     public function parseCategoryRow(PriceLoader $loader, array $row)
     {
-        list($step, $name) = each(array_filter($row, 'trim'));
+        $filteredCells = array_filter($row, 'trim');
+        $step = array_shift(array_keys($filteredCells));
+        $name = $filteredCells[$step];
         if ($loader->catalog_offset) {
             $step = 0;
             if (preg_match('/^\\s+/i', $name, $regs)) {

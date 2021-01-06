@@ -53,9 +53,9 @@ class PriceLoadersTable extends \RAAS\Table
                     ) use (
                         $view,
                         $contextMenuName,
-                        $IN
+                        $params
                     ) {
-                        return rowContextMenu($view->getPriceLoaderContextMenu($row, $i, count($IN['Set'])));
+                        return rowContextMenu($view->getPriceLoaderContextMenu($row, $i, count((array)$params['Set'])));
                     }
                 ]
             ],

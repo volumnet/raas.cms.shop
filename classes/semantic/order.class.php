@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use Mustache_Engine;
+use SOME\SOME;
 use RAAS\Application;
 use RAAS\User as RAASUser;
 use RAAS\CMS\Feedback;
@@ -127,7 +128,7 @@ class Order extends Feedback
     }
 
 
-    public static function delete(self $Item)
+    public static function delete(SOME $Item)
     {
         $sqlQuery = "DELETE FROM " . static::_dbprefix() . "cms_shop_orders_goods
                       WHERE order_id = " . (int)$Item->id;

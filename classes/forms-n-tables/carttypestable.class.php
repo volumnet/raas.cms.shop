@@ -53,9 +53,9 @@ class CartTypesTable extends \RAAS\Table
                     ) use (
                         $view,
                         $contextMenuName,
-                        $IN
+                        $params
                     ) {
-                        return rowContextMenu($view->getCartTypeContextMenu($row, $i, count($IN['Set'])));
+                        return rowContextMenu($view->getCartTypeContextMenu($row, $i, count((array)$params['Set'])));
                     }
                 ]
 
