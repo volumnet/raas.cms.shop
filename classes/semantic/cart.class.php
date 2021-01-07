@@ -244,13 +244,7 @@ class Cart
     {
         $var = 'cart_' . (int)$this->cartType->id;
         $this->purge();
-        $_COOKIE[$var] = json_encode((object)$this->items);
-        setcookie(
-            $var,
-            $_COOKIE[$var],
-            time() + Application::i()->registryGet('cookieLifetime') * 86400,
-            '/'
-        );
+        Application::i()->setcookie($var, (object)$this->items);
         if ($this->_user && (int)$this->_user->id) {
             $sqlArr = [];
             foreach ($this->items as $itemId => $metas) {

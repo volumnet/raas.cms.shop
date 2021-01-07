@@ -136,7 +136,7 @@ if ($Item) {
               </div>
               <!--/noindex-->
               <?php
-              $propsArr = '';
+              $propsArr = [];
               foreach ($Item->fields as $fieldURN => $field) {
                   if (!in_array($field->urn, $hiddenProps) &&
                       !in_array($field->datatype, [
