@@ -9,9 +9,9 @@ use RAAS\Field as RAASField;
 
 /**
  * Отображает поле
- * @param Field $field Поле для отображения
+ * @param RAASField $field Поле для отображения
  */
-$_RAASForm_Control = function (Field $field) use ($VIEW) {
+$_RAASForm_Control = function (RAASField $field) use ($VIEW) {
     $DATA = $field->Form->DATA;
     ?>
     <table class="table table-striped table-condensed" data-role="raas-repo-block">

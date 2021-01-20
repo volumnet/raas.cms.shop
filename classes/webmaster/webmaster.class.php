@@ -55,6 +55,10 @@ class Webmaster extends CMSWebmaster
                 'name' => 'CART_STANDARD_INTERFACE',
                 'filename' => 'cart_interface',
             ],
+            '__raas_shop_compare_interface' => [
+                'name' => 'COMPARE_STANDARD_INTERFACE',
+                'filename' => 'compare_interface',
+            ],
             '__raas_shop_order_notify' => [
                 'name' => 'ORDER_STANDARD_NOTIFICATION',
                 'filename' => 'form_notification',

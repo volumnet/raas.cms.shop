@@ -166,7 +166,7 @@ class CartInterface extends FormInterface
                                 $this->files
                             ));
                             if ($this->post['epay'] != 1) {
-                                $cart->clear();
+                                // $cart->clear();
                                 $result['success'][(int)$this->block->id] = true;
                             }
                             new Redirector(

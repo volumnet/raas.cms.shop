@@ -12,6 +12,7 @@ use PHPExcel_Reader_IReader;
 use PHPExcel_Reader_IWriter;
 use PHPExcel_Worksheet;
 use RAAS\Exception;
+use RAAS\CMS\Page;
 
 /**
  * Класс конвертера Excel для загрузчика прайсов

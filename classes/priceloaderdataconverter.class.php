@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\Exception;
+use RAAS\CMS\Page;
 
 /**
  * Класс конвертера данных для загрузчика прайсов
