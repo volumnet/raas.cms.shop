@@ -9,6 +9,7 @@ use RAAS\Controller_Frontend as RAASControllerFrontend;
 use RAAS\Redirector;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
+use RAAS\CMS\Material_Type;
 use RAAS\CMS\MaterialTypeRecursiveCache;
 
 /**
@@ -133,16 +134,21 @@ class CompareInterface extends CartInterface
             }
             $groups[trim($group['id'])]['itemsIds'][] = $cartItem->id;
         }
+        $mTypesIds = $cart->cartType->material_types_ids;
+        $mTypesIds = MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($mTypesIds);
 
         if ($set) {
-            $sqlQuery = "SELECT tD.pid, tD.fid, tD.value
+            $sqlQuery = "SELECT tD.pid, tD.fid, tD.fii, tD.value
                            FROM cms_data AS tD
                            JOIN " . Material_Field::_tablename() . " AS tF ON tF.id = tD.fid
-                          WHERE NOT tF.multiple
-                            AND tD.pid IN (" . implode(", ", array_keys($set)) . ")";
-            $sqlResult = Material::_SQL()->get($sqlQuery);
+                          WHERE tF.datatype NOT IN ('file', 'image', 'htmlarea')
+                            AND tF.classname = ?
+                            AND tF.pid IN (" . implode(", ", $mTypesIds) . ")
+                            AND tD.pid IN (" . implode(", ", array_keys($set)) . ")
+                       ORDER BY tF.priority, tD.fii";
+            $sqlResult = Material::_SQL()->get([$sqlQuery, Material_Type::class]);
             foreach ($sqlResult as $sqlRow) {
-                $rawData[trim($sqlRow['pid'])][trim($sqlRow['fid'])] = $sqlRow['value'];
+                $rawData[trim($sqlRow['pid'])][trim($sqlRow['fid'])][trim($sqlRow['fii'])] = $sqlRow['value'];
                 $affectedFieldsIds[trim($sqlRow['fid'])] = (int)$sqlRow['fid'];
             }
         }
@@ -150,7 +156,8 @@ class CompareInterface extends CartInterface
         if ($affectedFieldsIds) {
             $sqlQuery = "SELECT *
                            FROM " . Material_Field::_tablename() . "
-                          WHERE id IN (" . implode(", ", $affectedFieldsIds) . ")";
+                          WHERE id IN (" . implode(", ", $affectedFieldsIds) . ")
+                       ORDER BY priority";
             $sqlResult = Material_Field::getSQLSet($sqlQuery);
             foreach ($sqlResult as $field) {
                 $fields[trim($field->id)] = $field;

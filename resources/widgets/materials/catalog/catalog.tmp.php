@@ -350,7 +350,7 @@ if ($Item) {
             <ul class="nav nav-tabs catalog-article__tabs-nav-list catalog-article-tabs-nav-list" role="tablist">
               <?php $i = 0; foreach ($tabs as $key => $row) { ?>
                   <li class="catalog-article-tabs-nav-list__item <?php echo !$i ? ' active' : ''?>">
-                    <a class="catalog-article-tabs-nav-item" href="#<?php echo $key?>" aria-controls="<?php echo $key?>" role="tab" data-toggle="tab">
+                    <a class="catalog-article-tabs-nav-item" href="#<?php echo $key?>" aria-controls="<?php echo $key?>" role="tab" data-bs-toggle="tab">
                       <?php echo htmlspecialchars($row['name'])?>
                     </a>
                   </li>

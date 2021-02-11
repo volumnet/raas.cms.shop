@@ -124,9 +124,9 @@ class CatalogInterface extends MaterialInterface
         parent::setPageMetatags($page, $item);
         $blockParams = [];
         if ($block) {
-            parse_str(trim($block->params), $blockParams);
+            $blockParams = $block->additionalParams;
         }
-        if (isset($blockParams['metaTemplates'])) {
+        if ($blockParams['metaTemplates']) {
             $metaTemplates = $metaData = [];
             $twig = new Twig_Environment(new Twig_Loader_String());
             foreach (['name', 'meta_title', 'meta_keywords', 'meta_description', 'h1'] as $key) {
@@ -144,9 +144,47 @@ class CatalogInterface extends MaterialInterface
     }
 
 
+    /**
+     * Устанавливает наследуемые шаблоны метатегов для листинга
+     * @param Page|null $page Страница, для которой применяется интерфейс
+     * @param Block_Material $block Блок, для которого применяется интерфейс
+     */
+    public function setListMetatags(Page $page, Block_Material $block = null)
+    {
+        $blockParams = [];
+        if ($block) {
+            $blockParams = $block->additionalParams;
+        }
+        if ($blockParams['listMetaTemplates']) {
+            $metaData = $this->getPageMetadata($page);
+            $metaTemplates = [];
+            $twig = new Twig_Environment(new Twig_Loader_String());
+            foreach ([
+                'name',
+                'meta_title',
+                'meta_keywords',
+                'meta_description',
+                'h1',
+                'breadcrumbs_name',
+                'menu_name'
+            ] as $key) {
+                if (!isset($metaTemplates[$key])) {
+                    $metaTemplates[$key] = $this->getMetaTemplate($page, $key . '_' . $blockParams['listMetaTemplates']);
+                }
+            }
+            foreach ($metaTemplates as $key => $val) {
+                if (!$page->$key && $val) {
+                    $page->$key = $twig->render($metaTemplates[$key], $metaData);
+                }
+            }
+        }
+    }
+
+
     public function processList(Block_Material $block, Page $page, array $get = [])
     {
         $result = parent::processList($block, $page, $get);
+        $this->setListMetatags($page, $block);
         $doSearch = $this->isSearch($block, $page->catalogFilter, $get);
         $subcats = [];
         if ($page->visChildren && !$doSearch && $page->pid) {
@@ -451,7 +489,7 @@ class CatalogInterface extends MaterialInterface
                     array_filter(
                         (array)$commentsListData['Set'],
                         function ($x) use ($item) {
-                            return $x->material->id == $item->id;
+                            return $this->commentsFilterFunction($x, $item);
                         }
                     )
                 );
@@ -464,6 +502,18 @@ class CatalogInterface extends MaterialInterface
             }
         }
         return $result;
+    }
+
+
+    /**
+     * Функция фильтрации комментариев по товару
+     * @param Material $comment Комментарий
+     * @param Material $item Товар, по которому фильтруем
+     * @return bool
+     */
+    public function commentsFilterFunction(Material $comment, Material $item)
+    {
+        return $comment->material->id == $item->id;
     }
 
 
@@ -482,6 +532,48 @@ class CatalogInterface extends MaterialInterface
             'h1' => $item->getH1(),
         ];
         foreach ($item->fields as $fieldURN => $field) {
+            $val = $field->doRich();
+            if ($val instanceof Material) {
+                $val = $val->name;
+            } elseif ($val instanceof Attachment) {
+                $val = '';
+            }
+            $metaData[$fieldURN] = (string)$val;
+        }
+        return $metaData;
+    }
+
+
+    /**
+     * Получает данные по странице для подстановки в шаблоны мета-тегов
+     * @param Page $page Страница для получения данных
+     * @return array<string[] => string>
+     */
+    public function getPageMetadata(Page $page)
+    {
+        $metaData = [
+            'id' => $page->id,
+            'name' => $page->name,
+            'urn' => $page->urn,
+            'url' => $page->url,
+            'h1' => $page->h1,
+            'menu_name' => $page->menu_name,
+            'breadcrumbs_name' => $page->breadcrumbs_name,
+        ];
+        if ($page->catalogFilter) {
+            $metaData['counter'] = $page->catalogFilter->count(true);
+            $metaData['selfCounter'] = $page->catalogFilter->count(false);
+            $priceField = $page->catalogFilter->propertiesByURNs['price'];
+            if ($priceField->id) {
+                $priceValues = array_keys($page->catalogFilter->availableProperties[$priceField->id]);
+                $priceValues = array_filter($priceValues);
+                if ($priceValues) {
+                    $metaData['price_from'] = min($priceValues);
+                    $metaData['price_to'] = max($priceValues);
+                }
+            }
+        }
+        foreach ($page->fields as $fieldURN => $field) {
             $val = $field->doRich();
             if ($val instanceof Material) {
                 $val = $val->name;
