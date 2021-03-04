@@ -533,7 +533,7 @@ class UpdatePropsCacheCommand extends Command
         Material::_SQL()->add(
             $table,
             $sqlArr,
-            ['cache_shop_props' => (object)"VALUES(cache_shop_props)"],
+            ['cache_shop_props' => (object)"VALUES(cache_shop_props)"]
         );
 
 
