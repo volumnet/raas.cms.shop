@@ -110,7 +110,9 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   cat_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Root category ID#',
   create_pages TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Allow to create pages',
   create_materials TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Allow to create materials',
+  update_materials TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Allow to update materials',
   catalog_offset INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Catalog offset',
+  media_action TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Media fields action',
 
   PRIMARY KEY (id),
   KEY (mtype),
@@ -180,6 +182,8 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   cpa TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'YM purchase',
   default_currency VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Default currency',
   local_delivery_cost DECIMAL(8,2) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Local delivery cost',
+  delivery_options TEXT NULL DEFAULT NULL COMMENT 'Delivery options',
+  pickup_options TEXT NULL DEFAULT NULL COMMENT 'Pickup options',
 
   PRIMARY KEY (id)
 ) COMMENT='Yandex Market blocks';

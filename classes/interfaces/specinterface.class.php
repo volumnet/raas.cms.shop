@@ -12,51 +12,18 @@ use RAAS\CMS\Page;
 /**
  * Интерфейс спецпредложений
  */
-class SpecInterface extends MaterialInterface
+class SpecInterface extends CatalogInterface
 {
-    public $type = '';
-
-    public function process()
-    {
-        $get = $this->getAllParams($this->block, $this->get);
-        parse_str(trim($this->block->params), $params);
-        $this->type = $params['type'];
-        $result = $this->processList($this->block, $this->page, $get);
-        return $result;
-    }
-
-
-    public function getMaterialsSQL(
-        Block_Material $block,
-        Page $page,
-        array &$sqlFrom,
-        array &$sqlWhere,
-        array &$sqlWhereBind
-    ) {
-        $sqlWhere[] = " tM.vis";
-        $sqlWhere[] = " (NOT tM.show_from OR tM.show_from <= NOW())";
-        $sqlWhere[] = " (NOT tM.show_to OR tM.show_to >= NOW())";
-        $sqlMaterialTypeSelfAndChildrenIds = implode(
-            ", ",
-            array_fill(0, count($block->Material_Type->selfAndChildrenIds), "?")
-        );
-        $sqlWhere[] = " tM.pid IN (" . $sqlMaterialTypeSelfAndChildrenIds . ") ";
-        $sqlWhereBind = array_merge(
-            $sqlWhereBind,
-            $block->Material_Type->selfAndChildrenIds
-        );
-    }
-
-
     public function getOrderSQL(
         Block_Material $block,
         array $get,
         array &$sqlFrom,
         array &$sqlFromBind,
         &$sqlSort,
-        &$sqlOrder
+        &$sqlOrder,
+        CatalogFilter $catalogFilter = null
     ) {
-        if ($this->type == 'popular') {
+        if ($block->additionalParams['type'] == 'popular') {
             $sqlSort = "(SELECT COUNT(*) FROM cms_shop_orders_goods WHERE material_id = tM.id)";
             $sqlOrder = "DESC";
         } else {
@@ -66,7 +33,8 @@ class SpecInterface extends MaterialInterface
                 $sqlFrom,
                 $sqlFromBind,
                 $sqlSort,
-                $sqlOrder
+                $sqlOrder,
+                $catalogFilter
             );
         }
     }
@@ -87,16 +55,31 @@ class SpecInterface extends MaterialInterface
         $sqlQuery .=  " FROM " . Material::_tablename() . " AS tM "
                   .  implode(" ", $sqlFrom)
                   .  ($sqlWhere ? " WHERE " . implode(" AND ", $sqlWhere) : "")
-                  .  " GROUP BY tM.id ";
-        if ($sqlSort == "RAND()") {
-            $sqlQuery .= " ORDER BY RAND()";
-        } else {
-            $sqlQuery .= " ORDER BY ";
-            if ($sqlSort) {
-                $sqlQuery .= $sqlSort . ($sqlOrder ? " " . $sqlOrder : "") . ", ";
-            }
-            $sqlQuery .= "NOT tM.priority, tM.priority ASC";
+                  .  " GROUP BY tM.id
+                       ORDER BY ";
+        if ($sqlSort) {
+            $sqlQuery .= $sqlSort . ($sqlOrder ? " " . $sqlOrder : "") . ", ";
         }
+        $sqlQuery .= "NOT tM.priority, tM.priority ASC";
         return $sqlQuery;
+    }
+
+
+    public function setCatalogFilter(Block_Material $block, Page $page, array $get = [])
+    {
+        if (!$page->originalFilter) {
+            $withChildrenGoods = true;
+            $classname = static::FILTER_CLASS;
+            $catalogFilter = $classname::loadOrBuild(
+                $block->Material_Type,
+                $withChildrenGoods,
+                []
+            );
+            $page->originalFilter = $catalogFilter;
+        }
+        $get = $this->getAllParams($block, $get);
+        $page->catalogFilter = clone $page->originalFilter;
+        $filterParams = $this->getFilterParams($block, $page->catalogFilter, $get);
+        $page->catalogFilter->apply($page, $filterParams);
     }
 }

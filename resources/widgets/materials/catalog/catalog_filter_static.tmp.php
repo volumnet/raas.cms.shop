@@ -117,60 +117,6 @@ if ($pageMime == 'application/json') {
     return;
 }
 
-/**
- * Получает значение свойства фильтра
- * @param array $value <pre>[
- *     'value' => mixed значение,
- *     'doRich' => mixed Отформатированное значение
- *     'prop' => Material_Field свойство, к которому относится значение
- *     'checked' => bool Установлено ли значение
- *     'enabled' => bool Активно ли значение
- * ]</pre> Значение свойства
- */
-$getCatalogFilterPropertyValue = function (array $value) {
-    $property = $value['prop'];
-    ?>
-    <label class="catalog-filter-property-value" data-v-bind_class="{ 'catalog-filter-property-value_disabled': (value && !value.enabled) }">
-      <input type="<?php echo (($property->datatype == 'checkbox') && !$property->multiple) ? 'radio' : 'checkbox'?>" class="catalog-filter-property-value__input" name="<?php echo htmlspecialchars($property->urn) . (($property->datatype == 'checkbox' && !$property->multiple) ? '' : '[]')?>" value="<?php echo htmlspecialchars($value['value'])?>"<?php echo $value['checked'] ? ' checked="checked"' : ''?> data-v-bind_disabled="(value && !value.enabled) || false" data-v-on_click="$emit('change', $event);">
-      <a href="#">
-        <?php echo htmlspecialchars($value['doRich'])?>
-      </a>
-    </label>
-<?php };
-
-
-/**
- * Получает слайдер диапазона фильтра
- */
-$getCatalogFilterRangeSlider = function () { ?>
-    <div class="catalog-filter-range-slider" data-v-bind_data-from="valuefrom" data-v-bind_data-to="valueto"></div>
-<?php };
-
-
-/**
- * Получает диапазон фильтра
- * @param Material_Field $property Свойство фильтрации
- */
-$getCatalogFilterRange = function (Material_Field $property) use (&$getCatalogFilterRangeSlider) { ?>
-    <div class="catalog-filter-range">
-      <div class="catalog-filter-range__controls">
-        <div class="catalog-filter-range__control-label">от</div>
-        <div class="catalog-filter-range__control">
-          <input type="number" class="form-control" name="<?php echo htmlspecialchars($property->urn . '_from')?>" data-v-bind_min="min" data-v-bind_max="max" data-v-bind_step="step" data-v-bind_placeholder="min" data-v-model="valuefrom" data-v-on_change="changeByInput($event)" />
-        </div>
-        <div class="catalog-filter-range__control-label">до</div>
-        <div class="catalog-filter-range__control">
-          <input type="number" class="form-control" name="<?php echo htmlspecialchars($property->urn . '_to')?>" data-v-bind_min="min" data-v-bind_max="max" data-v-bind_step="step" data-v-bind_placeholder="max" data-v-model="valueto" data-v-on_change="changeByInput($event)" />
-        </div>
-      </div>
-      <div class="catalog-filter-range__slider">
-        <div data-vue-role="catalog-filter-range-slider" data-vue-inline-template data-v-bind_min="min" data-v-bind_max="max" data-v-bind_step="step" data-v-bind_valuefrom="valuefrom" data-v-bind_valueto="valueto" data-v-on_change="changeBySlider($event)">
-          <?php $getCatalogFilterRangeSlider()?>
-        </div>
-      </div>
-    </div>
-<?php };
-
 
 /**
  * Получает список значений свойства фильтра
@@ -186,7 +132,7 @@ $getCatalogFilterRange = function (Material_Field $property) use (&$getCatalogFi
 $getCatalogFilterPropertyValuesList = function (
     Material_Field $property,
     array $values
-) use (&$getCatalogFilterPropertyValue) {
+) {
     if (($property->datatype == 'checkbox') && !$property->multiple) {
         $values = ['' => [
             'enabled' => true,
@@ -221,7 +167,12 @@ $getCatalogFilterPropertyValuesList = function (
           if (trim($value['doRich']) && trim($value['value'])) { ?>
               <div class="catalog-filter-property-values-list__item">
                 <div data-vue-role="catalog-filter-property-value" data-vue-inline-template data-v-bind_property="property" data-v-bind_value="values['<?php echo htmlspecialchars($key)?>']" data-v-on_change="$emit('change', $event);">
-                  <?php $getCatalogFilterPropertyValue($value)?>
+                  <label class="catalog-filter-property-value" data-v-bind_class="{ 'catalog-filter-property-value_disabled': (value && !value.enabled) }">
+                    <input type="<?php echo (($property->datatype == 'checkbox') && !$property->multiple) ? 'radio' : 'checkbox'?>" class="catalog-filter-property-value__input" name="<?php echo htmlspecialchars($property->urn) . (($property->datatype == 'checkbox' && !$property->multiple) ? '' : '[]')?>" value="<?php echo htmlspecialchars($value['value'])?>"<?php echo $value['checked'] ? ' checked="checked"' : ''?> data-v-bind_disabled="(value && !value.enabled) || false" data-v-on_click="$emit('change', $event);">
+                    <a href="#">
+                      <?php echo htmlspecialchars($value['doRich'])?>
+                    </a>
+                  </label>
                 </div>
               </div>
           <?php }
@@ -273,7 +224,6 @@ $getCatalogFilterProperty = function (
     Material_Field $property,
     array $values
 ) use (
-    &$getCatalogFilterRange,
     &$getCatalogFilterPropertyValuesList,
     &$getCatalogFilterPropertySelector
 ) {
@@ -286,7 +236,23 @@ $getCatalogFilterProperty = function (
       <div class="catalog-filter-property__inner" data-raas-role="catalog-filter-property__inner">
         <?php if (($property->datatype == 'number') || in_array($property->urn, [])) { ?>
             <div data-vue-role="catalog-filter-range" data-vue-inline-template data-v-bind_property="property" data-v-bind_filter="filter" data-v-bind_data="data" data-v-on_change="$emit('change', $event);">
-              <?php $getCatalogFilterRange($property)?>
+              <div class="catalog-filter-range">
+                <div class="catalog-filter-range__controls">
+                  <div class="catalog-filter-range__control-label">от</div>
+                  <div class="catalog-filter-range__control">
+                    <input type="number" class="form-control" name="<?php echo htmlspecialchars($property->urn . '_from')?>" data-v-bind_min="min" data-v-bind_max="max" data-v-bind_step="step" data-v-bind_placeholder="min" data-v-model="valuefrom" data-v-on_change="changeByInput($event)" />
+                  </div>
+                  <div class="catalog-filter-range__control-label">до</div>
+                  <div class="catalog-filter-range__control">
+                    <input type="number" class="form-control" name="<?php echo htmlspecialchars($property->urn . '_to')?>" data-v-bind_min="min" data-v-bind_max="max" data-v-bind_step="step" data-v-bind_placeholder="max" data-v-model="valueto" data-v-on_change="changeByInput($event)" />
+                  </div>
+                </div>
+                <div class="catalog-filter-range__slider">
+                  <div data-vue-role="catalog-filter-range-slider" data-vue-inline-template data-v-bind_min="min" data-v-bind_max="max" data-v-bind_step="step" data-v-bind_valuefrom="valuefrom" data-v-bind_valueto="valueto" data-v-on_change="changeBySlider($event)">
+                    <div class="catalog-filter-range-slider" data-v-bind_data-from="valuefrom" data-v-bind_data-to="valueto"></div>
+                  </div>
+                </div>
+              </div>
             </div>
         <?php } elseif ($multiple = true) { // Выбор множественного значения ?>
             <div class="catalog-filter-property__list">

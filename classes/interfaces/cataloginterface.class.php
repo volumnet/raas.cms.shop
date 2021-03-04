@@ -376,17 +376,21 @@ class CatalogInterface extends MaterialInterface
                            ? (string)$sortItem['relation']
                            : '';
             if ($sortItem) {
-                if (is_numeric($sortItem['field'])) {
-                    if ($catalogFilter &&
-                        isset($catalogFilter->properties[$sortItem['field']])
-                    ) {
-                        $order = $this->getOrder($orderVar, $orderRelation, $get);
-                        $order = ($order == 'desc' ? -1 : 1);
-                        $urn = $catalogFilter->properties[$sortItem['field']]->urn;
-                        $ids = $catalogFilter->getIds($urn, $order);
-                        $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
-                        $sqlOrder = "";
-                    }
+                if (($sortItem['field'] == 'random') && $catalogFilter) {
+                    $ids = $catalogFilter->getIds();
+                    shuffle($ids);
+                    $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
+                    $sqlOrder = "";
+                } elseif (is_numeric($sortItem['field']) &&
+                    $catalogFilter &&
+                    isset($catalogFilter->properties[$sortItem['field']])
+                ) {
+                    $order = $this->getOrder($orderVar, $orderRelation, $get);
+                    $order = ($order == 'desc' ? -1 : 1);
+                    $urn = $catalogFilter->properties[$sortItem['field']]->urn;
+                    $ids = $catalogFilter->getIds($urn, $order);
+                    $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
+                    $sqlOrder = "";
                 } else {
                     $sqlSort = $this->getField(
                         $sortItem['field'],
@@ -403,17 +407,21 @@ class CatalogInterface extends MaterialInterface
         }
         // Ни с чем не совпадает, но есть сортировка по умолчанию
         if ($sortDefField) {
-            if (is_numeric($sortDefField)) {
-                if ($catalogFilter &&
-                    isset($catalogFilter->properties[$sortDefField])
-                ) {
-                    $order = $this->getOrder($orderVar, $orderRelDefault, $get);
-                    $order = ($order == 'desc' ? -1 : 1);
-                    $urn = $catalogFilter->properties[$sortDefField]->urn;
-                    $ids = $catalogFilter->getIds($urn, $order);
-                    $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
-                    $sqlOrder = "";
-                }
+            if (($sortDefField == 'random') && $catalogFilter) {
+                $ids = $catalogFilter->getIds();
+                shuffle($ids);
+                $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
+                $sqlOrder = "";
+            } elseif (is_numeric($sortDefField) &&
+                $catalogFilter &&
+                isset($catalogFilter->properties[$sortDefField])
+            ) {
+                $order = $this->getOrder($orderVar, $orderRelDefault, $get);
+                $order = ($order == 'desc' ? -1 : 1);
+                $urn = $catalogFilter->properties[$sortDefField]->urn;
+                $ids = $catalogFilter->getIds($urn, $order);
+                $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
+                $sqlOrder = "";
             } else {
                 $sqlSort = $this->getField(
                     $sortDefField,
@@ -561,8 +569,8 @@ class CatalogInterface extends MaterialInterface
             'breadcrumbs_name' => $page->breadcrumbs_name,
         ];
         if ($page->catalogFilter) {
-            $metaData['counter'] = $page->catalogFilter->count(true);
-            $metaData['selfCounter'] = $page->catalogFilter->count(false);
+            $metaData['counter'] = $page->catalogFilter->count($page, true);
+            $metaData['selfCounter'] = $page->catalogFilter->count($page, false);
             $priceField = $page->catalogFilter->propertiesByURNs['price'];
             if ($priceField->id) {
                 $priceValues = array_keys($page->catalogFilter->availableProperties[$priceField->id]);

@@ -41,6 +41,12 @@ class Updater extends \RAAS\Updater
         ) < 0) {
             $this->update20201209();
         }
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.2.75'
+        ) < 0) {
+            $this->update20210224();
+        }
     }
 
 
@@ -258,6 +264,24 @@ class Updater extends \RAAS\Updater
             $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_blocks_yml
                            ADD delivery_options TEXT NULL DEFAULT NULL COMMENT 'Delivery options',
                            ADD pickup_options TEXT NULL DEFAULT NULL COMMENT 'Pickup options'";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     * Добавляет кэш характеристик к материалам
+     */
+    public function update20210224()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_materials", $this->tables) &&
+            !in_array(
+                'cache_shop_props',
+                $this->columns(SOME::_dbprefix() . "cms_materials")
+            )
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_materials
+                           ADD cache_shop_props TEXT NULL DEFAULT NULL COMMENT 'Items props cache'";
             $this->SQL->query($sqlQuery);
         }
     }
