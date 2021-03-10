@@ -28,9 +28,6 @@ class Webmaster extends CMSWebmaster
     public function __get($var)
     {
         switch ($var) {
-            case 'nextImage':
-            case 'nextText':
-            case 'nextUser':
             case 'Site':
             case 'interfacesFolder':
             case 'widgetsFolder':
@@ -103,15 +100,6 @@ class Webmaster extends CMSWebmaster
                 )
             );
         }
-        $interfaces['hidden_props'] = $this->checkSnippet(
-            $this->interfacesFolder,
-            'hidden_props',
-            'HIDDEN_PROPERTIES',
-            file_get_contents(
-                Module::i()->resourcesDir . '/interfaces/hidden_props.php'
-            ),
-            false
-        );
 
         return $interfaces;
     }
@@ -130,13 +118,6 @@ class Webmaster extends CMSWebmaster
             'cart/compare' => View_Web::i()->_('COMPARISON'),
             'cart/order' => View_Web::i()->_('VIEW_ORDER'),
             'epay/robokassa' => View_Web::i()->_('ROBOKASSA'),
-            'materials/catalog/catalog_item' => View_Web::i()->_('CATALOG_ITEM'),
-            'materials/catalog/catalog_category' => View_Web::i()->_('CATEGORY_INC'),
-            'materials/catalog/catalog' => View_Web::i()->_('CATALOG'),
-            'materials/catalog/catalog_filter' => View_Web::i()->_('CATALOG_FILTER'),
-            'materials/catalog/catalog_controls' => View_Web::i()->_('CATALOG_CONTROLS'),
-            'materials/brands/brands' => View_Web::i()->_('BRANDS'),
-            'materials/brands/brands_main' => View_Web::i()->_('BRANDS_MAIN'),
             'materials/comments/goods_comments' => View_Web::i()->_('GOODS_COMMENTS'),
             'materials/comments/goods_comments_form' => View_Web::i()->_('GOODS_COMMENTS_FORM'),
             'materials/comments/rating' => View_Web::i()->_('RATING'),
@@ -165,349 +146,7 @@ class Webmaster extends CMSWebmaster
             }
             $widgets[$urn] = $widget;
         }
-
         return $widgets;
-    }
-
-
-    /**
-     * Создаем бренды
-     * @return Material_Type Созданный или существующий тип материала
-     */
-    public function createBrands()
-    {
-        $MT = Material_Type::importByURN('brands');
-        if (!$MT->id) {
-            $MT = new Material_Type([
-                'name' => View_Web::i()->_('BRANDS'),
-                'urn' => 'brands',
-                'global_type' => 1,
-            ]);
-            $MT->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('IMAGE'),
-                'multiple' => 0,
-                'urn' => 'image',
-                'datatype' => 'image',
-                'show_in_table' => 1,
-            ]);
-            $F->commit();
-        }
-        $temp = Page::getSet([
-            'where' => ["pid = " . (int)$this->Site->id, "urn = 'brands'"]
-        ]);
-        if ($temp) {
-            $brandsPage = $temp[0];
-            $brandsPage->trust();
-        } else {
-            $brandsPage = $this->createPage(
-                ['name' => View_Web::i()->_('BRANDS'), 'urn' => 'brands'],
-                $this->Site
-            );
-
-            for ($i = 0; $i < 3; $i++) {
-                $temp = $this->nextText;
-                $Item = new Material([
-                    'pid' => (int)$MT->id,
-                    'vis' => 1,
-                    'name' => View_Web::i()->_('BRAND') . ' ' . ($i + 1),
-                    'description' => $temp['text'],
-                    'sitemaps_priority' => 0.5
-                ]);
-                $Item->commit();
-                $att = Attachment::createFromFile(
-                    $this->nextImage,
-                    $Item->fields['image']
-                );
-                $Item->fields['image']->addValue(json_encode([
-                    'vis' => 1,
-                    'name' => '',
-                    'description' => '',
-                    'attachment' => (int)$att->id
-                ]));
-            }
-
-            $brandsBlock = new Block_Material([
-                'material_type' => (int)$MT->id,
-                'nat' => 1,
-                'pages_var_name' => 'page',
-                'rows_per_page' => 20,
-                'sort_field_default' => 'name',
-                'sort_order_default' => 'asc',
-                'sort_var_name' => 'sort',
-                'order_var_name' => 'order',
-                'params' => ''
-            ]);
-            $brandsBlock = $this->createBlock(
-                $brandsBlock,
-                'content',
-                'material_interface',
-                'brands',
-                $brandsPage,
-                true
-            );
-            $brandsBlock->commit();
-
-            $brandsMainBlock = new Block_Material([
-                'material_type' => (int)$MT->id,
-                'nat' => 0,
-                'pages_var_name' => '',
-                'rows_per_page' => 20,
-                'sort_field_default' => 'name',
-                'sort_order_default' => 'asc!',
-                'sort_var_name' => '',
-                'order_var_name' => '',
-                'params' => ''
-            ]);
-            $brandsMainBlock = $this->createBlock(
-                $brandsMainBlock,
-                'content',
-                'material_interface',
-                'brands_main',
-                $this->Site,
-                true
-            );
-            $brandsMainBlock->commit();
-        }
-        return $MT;
-    }
-
-
-    /**
-     * Создаем тип материалов
-     * @return Material_Type Созданный или существующий тип материала
-     */
-    public function createMaterialType()
-    {
-        $MT = Material_Type::importByURN('catalog');
-        if (!$MT->id) {
-            $MT = new Material_Type([
-                'name' => View_Web::i()->_('CATALOG'),
-                'urn' => 'catalog',
-                'global_type' => 0,
-            ]);
-            $MT->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('ARTICLE'),
-                'urn' => 'article',
-                'datatype' => 'text',
-                'show_in_table' => 1,
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('PRICE'),
-                'urn' => 'price',
-                'datatype' => 'number',
-                'show_in_table' => 1,
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('IMAGE'),
-                'multiple' => 1,
-                'urn' => 'images',
-                'datatype' => 'image',
-                'show_in_table' => 1,
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('VIDEOS'),
-                'multiple' => 1,
-                'urn' => 'videos',
-                'datatype' => 'text',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('FILES'),
-                'multiple' => 1,
-                'urn' => 'files',
-                'datatype' => 'file',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('SPECIAL_OFFER'),
-                'urn' => 'spec',
-                'datatype' => 'checkbox',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('AVAILABLE'),
-                'urn' => 'available',
-                'defval' => 1,
-                'datatype' => 'checkbox',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('MINIMAL_AMOUNT'),
-                'urn' => 'min',
-                'defval' => 1,
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('CART_STEP'),
-                'urn' => 'step',
-                'defval' => 1,
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('OLD_PRICE'),
-                'urn' => 'price_old',
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('DISCOUNT'),
-                'urn' => 'discount',
-                'datatype' => 'text',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('RELATED_GOODS'),
-                'multiple' => 1,
-                'urn' => 'related',
-                'datatype' => 'material',
-                'source' => $MT->id,
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('UNIT'),
-                'multiple' => 0,
-                'urn' => 'unit',
-                'datatype' => 'text',
-                'placeholder' => View_Web::i()->_('PCS'),
-            ]);
-            $F->commit();
-
-            $brandsMT = Material_Type::importByURN('brands');
-            if ($brandsMT->id) {
-                $F = new Material_Field([
-                    'pid' => $MT->id,
-                    'vis' => 0,
-                    'name' => View_Web::i()->_('BRAND'),
-                    'multiple' => 0,
-                    'urn' => 'brand',
-                    'datatype' => 'material',
-                    'source' => $brandsMT->id,
-                ]);
-                $F->commit();
-            }
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('RATING'),
-                'multiple' => 0,
-                'urn' => 'rating',
-                'datatype' => 'number',
-                'min_val' => 0,
-                'max_val' => 5,
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('REVIEWS_COUNTER'),
-                'multiple' => 0,
-                'urn' => 'reviews_counter',
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 1,
-                'name' => View_Web::i()->_('LENGTH_CM'),
-                'multiple' => 0,
-                'urn' => 'length',
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('WIDTH_CM'),
-                'multiple' => 0,
-                'urn' => 'width',
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('HEIGHT_CM'),
-                'multiple' => 0,
-                'urn' => 'height',
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 1,
-                'name' => View_Web::i()->_('WEIGHT_G'),
-                'multiple' => 0,
-                'urn' => 'weight',
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 1,
-                'name' => View_Web::i()->_('COUNTRY'),
-                'multiple' => 0,
-                'urn' => 'country',
-                'datatype' => 'text',
-            ]);
-            $F->commit();
-        }
-        return $MT;
     }
 
 
@@ -560,7 +199,7 @@ class Webmaster extends CMSWebmaster
         if (!$CT->id) {
             $CT = new Cart_Type([
                 'id' => 3,
-                'name' => View_Web::i()->_('COMPARE'),
+                'name' => View_Web::i()->_('COMPARISON'),
                 'urn' => 'compare',
                 'form_id' => 0,
                 'no_amount' => 1,
@@ -726,53 +365,11 @@ class Webmaster extends CMSWebmaster
     }
 
 
-    /**
-     * Создадим каталог
-     * @param Material_Type $catalogType Тип материала каталога
-     * @return Page Созданная или существующая страница
-     */
-    public function createCatalog(Material_Type $catalogType)
+    public function createPageFields()
     {
-        $temp = Page::getSet([
-            'where' => ["pid = " . (int)$this->Site->id, "urn = 'catalog'"]
-        ]);
-        if ($temp) {
-            $catalog = $temp[0];
-            $catalog->trust();
-        } else {
-            foreach (['title', 'description', 'keywords'] as $key) {
-                $urn = 'meta_' . $key . '_template';
-                $field = new Page_Field([
-                    'classname' => Material_Type::class,
-                    'pid' => 0,
-                    'datatype' => 'text',
-                    'urn' => $urn,
-                    'name' => View_Web::i()->_(mb_strtoupper($urn)),
-                ]);
-                $field->commit();
-            }
-            foreach (['title', 'description', 'keywords'] as $key) {
-                $urn = 'meta_' . $key . '_list_template';
-                $field = new Page_Field([
-                    'classname' => Material_Type::class,
-                    'pid' => 0,
-                    'datatype' => 'text',
-                    'urn' => $urn,
-                    'name' => View_Web::i()->_(mb_strtoupper($urn)),
-                ]);
-                $field->commit();
-            }
-            $field = new Page_Field([
-                'classname' => Material_Type::class,
-                'pid' => 0,
-                'datatype' => 'text',
-                'urn' => $urn,
-                'name' => View_Web::i()->_('DISCOUNT'),
-            ]);
-            $field->commit();
+        $result = [];
 
-
-            $fieldsSource = <<<'RAAS_CMS_SHOP_FIELDS_SOURCE_TMP'
+        $fieldsSource = <<<'RAAS_CMS_SHOP_FIELDS_SOURCE_TMP'
 namespace RAAS\CMS;
 
 $pageId = (int)$_GET['id'];
@@ -817,283 +414,55 @@ return $result;
 
 RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
 
-            $field = new Page_Field([
-                'classname' => Material_Type::class,
-                'pid' => 0,
-                'datatype' => 'select',
-                'urn' => 'filter_props',
-                'multiple' => 1,
-                'name' => View_Web::i()->_('FILTER_PROPS'),
-                'source' => $fieldsSource,
-            ]);
-            $field->commit();
-            $field = new Page_Field([
-                'classname' => Material_Type::class,
-                'pid' => 0,
-                'datatype' => 'select',
-                'urn' => 'main_props',
-                'multiple' => 1,
-                'name' => View_Web::i()->_('MAIN_PROPS'),
-                'source' => $fieldsSource,
-            ]);
-            $field->commit();
-            $field = new Page_Field([
-                'classname' => Material_Type::class,
-                'pid' => 0,
-                'datatype' => 'select',
-                'urn' => 'article_props',
-                'multiple' => 1,
-                'name' => View_Web::i()->_('ARTICLE_PROPS'),
-                'source' => $fieldsSource,
-            ]);
-            $field->commit();
-
-
-            $categories = [];
-            $catalog = $this->createPage(
-                ['name' => View_Web::i()->_('CATALOG'), 'urn' => 'catalog'],
-                $this->Site
-            );
-            for ($i = 1; $i <= 3; $i++) {
-                $categories[$i] = $this->createPage(
-                    [
-                        'name' => View_Web::i()->_('CATEGORY') . ' ' . $i,
-                        'urn' => 'category' . $i
-                    ],
-                    $catalog
-                );
-                if ($i == 1) {
-                    for ($j = 1; $j <= 3; $j++) {
-                        $categories[$i . $j] = $this->createPage(
-                            [
-                                'name' => View_Web::i()->_('CATEGORY')
-                                       .  ' ' . $i . $j,
-                                'urn' => 'category' . $i . $j
-                            ],
-                            $categories[$i]
-                        );
-                        if ($j == 1) {
-                            for ($k = 1; $k <= 3; $k++) {
-                                $categories[$i . $j . $k] = $this->createPage(
-                                    [
-                                        'name' => View_Web::i()->_('CATEGORY')
-                                               .  ' ' . $i . $j . $k,
-                                        'urn' => 'category' . $i . $j . $k
-                                    ],
-                                    $categories[$i . $j]
-                                );
-                            }
-                        }
-                    }
-                }
-            }
-            foreach ($categories as $category) {
-                $att = Attachment::createFromFile(
-                    $this->nextImage,
-                    $category->fields['image']
-                );
-                $category->fields['image']->addValue(json_encode([
-                    'vis' => 1,
-                    'name' => '',
-                    'description' => '',
-                    'attachment' => (int)$att->id
-                ]));
-            }
-            $goods = [];
-            $brandsMaterialType = Material_Type::importByURN('brands');
-            $brands = Material::getSet([
-                'where' => "pid = " . (int)$brandsMaterialType->id,
-                'orderBy' => "id",
-            ]);
-            $units = ['', 'гр', 'комплект', 'м'];
-            for ($i = 0; $i < 10; $i++) {
-                $temp = $this->nextText;
-                $Item = new Material([
-                    'pid' => (int)$catalogType->id,
-                    'vis' => 1,
-                    'name' => View_Web::i()->_('GOODS_ITEM') . ' ' . ($i + 1),
-                    'description' => $temp['text'],
-                    'sitemaps_priority' => 0.5
-                ]);
-                $cats = [];
-                $Item->cats = [
-                    $this->Site->id,
-                    $categories[111]->id, $categories[112]->id, $categories[113]->id,
-                    $categories[12]->id, $categories[13]->id,
-                    $categories[2]->id, $categories[3]->id,
+        $fieldsData = [];
+        foreach (['', '_list'] as $suffix) {
+            foreach (['title', 'description', 'keywords'] as $key) {
+                $urn = 'meta_' . $key . $suffix . '_template';
+                $fieldsData[] = [
+                    'name' => View_Web::i()->_(mb_strtoupper($urn)),
+                    'urn' => $urn,
+                    'datatype' => 'text',
                 ];
-                $Item->commit();
-                $Item->fields['article']->addValue(dechex(crc32($i)));
-                $Item->fields['price']->addValue($price = rand(100, 100000));
-                $Item->fields['price_old']->addValue(
-                    ($price % 2) ? (int)($price * (100 + rand(5, 25)) / 100) : 0
-                );
-                $Item->fields['videos']->addValue(
-                    'https://www.youtube.com/watch?v=YVgc2PQd_bo'
-                );
-                $Item->fields['videos']->addValue(
-                    'https://www.youtube.com/watch?v=YVgc2PQd_bo'
-                );
-                $Item->fields['spec']->addValue(1);
-                $Item->fields['available']->addValue((int)(bool)($i % 4));
-                $Item->fields['min']->addValue($i % 4 ? 1 : 2);
-                $Item->fields['step']->addValue($i % 4 ? 1 : 2);
-                foreach (['test.doc', 'test.pdf'] as $val) {
-                    $att = Attachment::createFromFile(
-                        Module::i()->resourcesDir . '/' . $val,
-                        $Item->fields['files']
-                    );
-
-                    $Item->fields['files']->addValue(json_encode([
-                        'vis' => 1,
-                        'name' => '',
-                        'description' => '',
-                        'attachment' => (int)$att->id
-                    ]));
-                }
-
-                for ($j = 0; $j < (!$i ? 4 : 1); $j++) {
-                    $att = Attachment::createFromFile(
-                        $this->nextImage,
-                        $Item->fields['images']
-                    );
-                    $Item->fields['images']->addValue(json_encode([
-                        'vis' => 1,
-                        'name' => '',
-                        'description' => '',
-                        'attachment' => (int)$att->id
-                    ]));
-                }
-                $Item->fields['brand']->addValue($brands[rand(0, count($brands) - 1)]->id);
-                $Item->fields['unit']->addValue($units[rand(0, count($units) - 1)]);
-                $Item->fields['rating']->addValue(rand(1, 5));
-                $Item->fields['reviews_counter']->addValue(rand(0, 100));
-                $Item->fields['length']->addValue(rand(0, 1000));
-                $Item->fields['width']->addValue(rand(0, 1000));
-                $Item->fields['height']->addValue(rand(0, 1000));
-                $Item->fields['weight']->addValue(rand(0, 1000));
-                $Item->fields['country']->addValue(View_Web::i()->_('COUNTRY') . ' ' . ($i + 1));
-                $goods[] = $Item;
             }
-            for ($i = 0; $i < 10; $i++) {
-                $Item->fields['related']->addValue($goods[rand(0, 9)]->id);
-                $Item->fields['related']->addValue($goods[rand(0, 9)]->id);
-                $Item->fields['related']->addValue($goods[rand(0, 9)]->id);
-            }
-
-            $B = new Block_Material([
-                'material_type' => (int)$catalogType->id,
-                'nat' => 1,
-                'pages_var_name' => 'page',
-                'rows_per_page' => 20,
-                'sort_field_default' => (int)$catalogType->fields['price']->id,
-                'sort_order_default' => 'asc',
-                'sort_var_name' => 'sort',
-                'order_var_name' => 'order',
-                'params' => 'metaTemplates=template&listMetaTemplates=list_template&withChildrenGoods=1&commentFormBlock=&commentsListBlock='
-            ]);
-            $catalogBlock = $this->createBlock(
-                $B,
-                'content',
-                'catalog_interface',
-                'catalog',
-                $catalog,
-                true
-            );
-            $B->filter = [
-                [
-                    'id' => (int)$B->id,
-                    'var' => 'search_string',
-                    'relation' => 'FULLTEXT',
-                    'field' => (int)$catalogType->fields['article']->id,
-                ]
-            ];
-            $B->sort = [
-                [
-                    'id' => (int)$B->id,
-                    'var' => 'price',
-                    'field' => (int)$catalogType->fields['price']->id,
-                    'relation' => 'asc',
-                ],
-                [
-                    'id' => (int)$B->id,
-                    'var' => 'name',
-                    'field' => 'name',
-                    'relation' => 'asc',
-                ],
-            ];
-            $B->commit();
-
-            $specBlock = new Block_Material([
-                'material_type' => (int)$catalogType->id,
-                'nat' => 0,
-                'params' => 'spec=1',
-                'pages_var_name' => '',
-                'rows_per_page' => 20,
-                'sort_field_default' => 'random',
-                'sort_order_default' => 'asc!',
-                'sort_var_name' => '',
-                'order_var_name' => '',
-            ]);
-            $specBlock->filter = [
-                [
-                    'id' => (int)$specBlock->id,
-                    'var' => 'spec',
-                    'relation' => '=',
-                    'field' => (int)$catalogType->fields['spec']->id,
-                ]
-            ];
-            $specBlock = $this->createBlock(
-                $specBlock,
-                'content',
-                'spec_interface',
-                'spec',
-                $this->Site,
-                false
-            );
-
-            $newBlock = new Block_Material([
-                'material_type' => (int)$catalogType->id,
-                'nat' => 0,
-                'pages_var_name' => '',
-                'rows_per_page' => 20,
-                'sort_field_default' => 'post_date',
-                'sort_order_default' => 'desc!',
-                'sort_var_name' => '',
-                'order_var_name' => '',
-            ]);
-            $newBlock = $this->createBlock(
-                $newBlock,
-                'content',
-                'spec_interface',
-                'spec',
-                $this->Site,
-                false
-            );
-
-            $popularBlock = new Block_Material([
-                'material_type' => (int)$catalogType->id,
-                'nat' => 0,
-                'params' => 'type=popular',
-                'pages_var_name' => '',
-                'rows_per_page' => 20,
-                'sort_field_default' => 'post_date',
-                'sort_order_default' => 'desc!',
-                'sort_var_name' => '',
-                'order_var_name' => '',
-            ]);
-            $popularBlock = $this->createBlock(
-                $popularBlock,
-                'content',
-                'spec_interface',
-                'spec',
-                $this->Site,
-                false
-            );
-
-            $this->createCron();
         }
-        return $catalog;
+        $fieldsData = array_merge($fieldsData, [
+            [
+                'name' => View_Web::i()->_('DISCOUNT'),
+                'urn' => 'discount',
+                'datatype' => 'text',
+            ],
+            [
+                'name' => View_Web::i()->_('FILTER_PROPS'),
+                'urn' => 'filter_props',
+                'datatype' => 'select',
+                'multiple' => 1,
+                'source' => $fieldsSource,
+            ],
+            [
+                'name' => View_Web::i()->_('MAIN_PROPS'),
+                'urn' => 'main_props',
+                'datatype' => 'select',
+                'multiple' => 1,
+                'source' => $fieldsSource,
+            ],
+            [
+                'name' => View_Web::i()->_('ARTICLE_PROPS'),
+                'urn' => 'article_props',
+                'datatype' => 'select',
+                'multiple' => 1,
+                'source' => $fieldsSource,
+            ],
+        ]);
+        foreach ($fieldsData as $row) {
+            $field = Page_Field::importByURN($row['urn']);
+            if (!$field->id) {
+                $field = new Page_Field($row);
+                $field->commit();
+            }
+            $result[$row['urn']] = $field;
+        }
+
+        return $result;
     }
 
 
@@ -1472,7 +841,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 ],
                 $this->Site
             );
-            $B = new Block_Cart(['cart_type' => (int)$cartType->id]);
+            $B = new Block_Cart([
+                'name' => View_Web::i()->_('FAVORITES'),
+                'cart_type' => (int)$cartType->id
+            ]);
             $this->createBlock(
                 $B,
                 'content',
@@ -1539,14 +911,17 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         } else {
             $compare = $this->createPage(
                 [
-                    'name' => View_Web::i()->_('COMPARE'),
+                    'name' => View_Web::i()->_('COMPARISON'),
                     'urn' => 'compare',
                     'cache' => 0,
                     'response_code' => 200
                 ],
                 $this->Site
             );
-            $B = new Block_Cart(['cart_type' => (int)$cartType->id]);
+            $B = new Block_Cart([
+                'name' => View_Web::i()->_('COMPARISON'),
+                'cart_type' => (int)$cartType->id,
+            ]);
             $this->createBlock(
                 $B,
                 'content',
@@ -1575,7 +950,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         } else {
             $ajaxCompare = $this->createPage(
                 [
-                    'name' => View_Web::i()->_('COMPARE'),
+                    'name' => View_Web::i()->_('COMPARISON'),
                     'urn' => 'compare',
                     'template' => 0,
                     'cache' => 0,
@@ -1602,7 +977,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
     public function createFilter()
     {
         $ajax = array_shift(Page::getSet([
-            'where' => "urn = 'ajax' AND pid = " . (int)$this->Site->id
+            'where' => ["pid = " . (int)$this->Site->id, "urn = 'ajax'"]
         ]));
         $catalogFilterPages = Page::getSet([
             'where' => ["pid = " . (int)$ajax->id, "urn = 'catalog_filter'"]
@@ -1752,6 +1127,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
      */
     public function createIShop()
     {
+        $this->createPageFields();
         $interfaces = $this->checkStdInterfaces();
         $widgets = $this->createWidgets();
         $forms = $this->createForms(
@@ -1797,24 +1173,46 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 ]
             ]
         );
-        $this->createBrands();
-        $catalogType = $this->createMaterialType();
+        BrandsTemplate::spawn(View_Web::i()->_('BRANDS'), 'brands', $this)
+            ->create();
+        $materialTemplate = CatalogTemplate::spawn(
+            View_Web::i()->_('CATALOG'),
+            'catalog',
+            $this
+        );
+        $catalogType = $materialTemplate->materialType;
+        $catalog = $materialTemplate->create();
+
         $ajax = array_shift(Page::getSet([
             'where' => "urn = 'ajax' AND pid = " . (int)$this->Site->id
         ]));
-        $catalog = $this->createCatalog($catalogType);
-        $menus = $this->createMenus([[
-            'pageId' => (int)$catalog->id,
-            'urn' => 'left',
-            'inherit' => 10,
-            'name' => View_Web::i()->_('LEFT_MENU'),
-            'realize' => false,
-            'addMainPageLink' => false,
-            'blockLocation' => 'left',
-            'fullMenu' => true,
-            'blockPage' => $catalog,
-            'inheritBlock' => true,
-        ]]);
+        $menus = $this->createMenus([
+            [
+                'pageId' => (int)$catalog->id,
+                'urn' => 'left',
+                'inherit' => 10,
+                'name' => View_Web::i()->_('LEFT_MENU'),
+                'realize' => false,
+                'addMainPageLink' => false,
+                'blockLocation' => 'left',
+                'fullMenu' => true,
+                'blockPage' => $catalog,
+                'inheritBlock' => true,
+            ],
+            [
+                'pageId' => (int)$catalog->id,
+                'urn' => 'catalog',
+                'inherit' => 10,
+                'name' => View_Web::i()->_('CATALOG_MAIN_MENU'),
+                'realize' => false,
+                'addMainPageLink' => false,
+                'blockLocation' => 'menu_main',
+                'fullMenu' => true,
+                'blockPage' => $this->Site,
+                'inheritBlock' => true,
+            ],
+        ]);
+        $this->createAJAXMenus($ajax);
         $sqlQuery = "SELECT tB.id
                        FROM " . Block::_tablename() . " AS tB
                        JOIN cms_blocks_menu AS tBM
@@ -1844,6 +1242,79 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $this->createFilter();
         $this->adjustBlocks();
         $yml = $this->createYandexMarket($catalogType, $catalog);
+        $this->createCron();
+    }
+
+
+    /**
+     * Создает AJAX-меню
+     */
+    public function createAJAXMenus(Page $ajax)
+    {
+        $cacheInterfaceId = Snippet::importByURN('__raas_cache_interface')->id;
+        $menuInterface =  Snippet::importByURN('__raas_menu_interface');
+        $temp = Page::getSet([
+            'where' => ["pid = " . (int)$ajax->id, "urn = 'menu_left'"]
+        ]);
+        if ($temp) {
+            $leftMenuPage = $temp[0];
+        } else {
+            $leftMenuPageData = [
+                'name' => View_Web::i()->_('LEFT_MENU'),
+                'urn' => 'menu_left',
+                'template' => 0,
+                'cache' => 0,
+                'response_code' => 200
+            ];
+            $leftMenu = Menu::importByURN('left');
+            $leftMenuPage = $this->createPage($leftMenuPageData, $ajax);
+            $leftMenuWidget = Snippet::importByURN('menu_left');
+            $leftMenuBlock = new Block_Menu([
+                'menu' => (int)$leftMenu->id,
+                'full_menu' => 1,
+                'cache_type' => Block::CACHE_DATA,
+                'cache_interface_id' => (int)$cacheInterfaceId,
+            ]);
+            $this->createBlock(
+                $leftMenuBlock,
+                '',
+                $menuInterface,
+                $leftMenuWidget,
+                $leftMenuPage,
+                false
+            );
+        }
+        $temp = Page::getSet([
+            'where' => ["pid = " . (int)$ajax->id, "urn = 'menu_mobile'"]
+        ]);
+        if ($temp) {
+            $mobileMenuPage = $temp[0];
+        } else {
+            $mobileMenuPageData = [
+                'name' => View_Web::i()->_('MOBILE_MENU'),
+                'urn' => 'menu_mobile',
+                'template' => 0,
+                'cache' => 0,
+                'response_code' => 200
+            ];
+            $mobileMenu = Menu::importByURN('mobile');
+            $mobileMenuPage = $this->createPage($mobileMenuPageData, $ajax);
+            $mobileMenuWidget = Snippet::importByURN('menu_mobile');
+            $mobileMenuBlock = new Block_Menu([
+                'menu' => (int)$mobileMenu->id,
+                'full_menu' => 1,
+                'cache_type' => Block::CACHE_DATA,
+                'cache_interface_id' => (int)$cacheInterfaceId,
+            ]);
+            $this->createBlock(
+                $mobileMenuBlock,
+                '',
+                $menuInterface,
+                $mobileMenuWidget,
+                $mobileMenuPage,
+                false
+            );
+        }
     }
 
 
