@@ -28,6 +28,12 @@ class CatalogTemplate extends MaterialTypeTemplate
 
     public static $global = false;
 
+    /**
+     * Блок каталога
+     * @var Block_Material
+     */
+    public $catalogBlock;
+
     public function createFields()
     {
         $articleField = new Material_Field([
@@ -40,6 +46,15 @@ class CatalogTemplate extends MaterialTypeTemplate
         ]);
         $articleField->commit();
 
+        $priceOldField = new Material_Field([
+            'pid' => $this->materialType->id,
+            'vis' => 0,
+            'name' => View_Web::i()->_('BASE_PRICE'),
+            'urn' => 'price_old',
+            'datatype' => 'number',
+        ]);
+        $priceOldField->commit();
+
         $priceField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 0,
@@ -49,6 +64,15 @@ class CatalogTemplate extends MaterialTypeTemplate
             'show_in_table' => 1,
         ]);
         $priceField->commit();
+
+        $fixPriceField = new Material_Field([
+            'pid' => $this->materialType->id,
+            'vis' => 0,
+            'name' => View_Web::i()->_('FIX_PRICE'),
+            'urn' => 'fix_price',
+            'datatype' => 'checkbox',
+        ]);
+        $fixPriceField->commit();
 
         $imagesField = new Material_Field([
             'pid' => $this->materialType->id,
@@ -119,15 +143,6 @@ class CatalogTemplate extends MaterialTypeTemplate
             'datatype' => 'number',
         ]);
         $stepField->commit();
-
-        $priceOldField = new Material_Field([
-            'pid' => $this->materialType->id,
-            'vis' => 0,
-            'name' => View_Web::i()->_('OLD_PRICE'),
-            'urn' => 'price_old',
-            'datatype' => 'number',
-        ]);
-        $priceOldField->commit();
 
         $relatedField = new Material_Field([
             'pid' => $this->materialType->id,
@@ -237,7 +252,9 @@ class CatalogTemplate extends MaterialTypeTemplate
 
         return [
             $articleField->urn => $articleField,
+            $priceOldField->urn => $priceOldField,
             $priceField->urn => $priceField,
+            $fixPriceField->urn => $fixPriceField,
             $imagesField->urn => $imagesField,
             $videosField->urn => $videosField,
             $filesField->urn => $filesField,
@@ -245,7 +262,6 @@ class CatalogTemplate extends MaterialTypeTemplate
             $availableField->urn => $availableField,
             $minField->urn => $minField,
             $stepField->urn => $stepField,
-            $priceOldField->urn => $priceOldField,
             $relatedField->urn => $relatedField,
             $unitField->urn => $unitField,
             $brandField->urn => $brandField,
@@ -373,7 +389,8 @@ class CatalogTemplate extends MaterialTypeTemplate
             Module::i()->resourcesDir . '/fish/categories/*.png'
         );
         shuffle($categoriesImages);
-        foreach ($result as $i => $category) {
+        $i = 0;
+        foreach ($result as $category) {
             $att = Attachment::createFromFile(
                 $categoriesImages[$i % count($categoriesImages)],
                 $category->fields['image']
@@ -384,6 +401,7 @@ class CatalogTemplate extends MaterialTypeTemplate
                 'description' => '',
                 'attachment' => (int)$att->id
             ]));
+            $i++;
         }
         return $result;
     }
@@ -404,7 +422,7 @@ class CatalogTemplate extends MaterialTypeTemplate
                 'sort_order_default' => 'asc',
                 'sort_var_name' => 'sort',
                 'order_var_name' => 'order',
-                'params' => 'metaTemplates=template&listMetaTemplates=list_template&withChildrenGoods=1&commentFormBlock=&commentsListBlock='
+                'params' => 'metaTemplates=template&listMetaTemplates=list_template&withChildrenGoods=1'
             ]);
             $block = $this->webmaster->createBlock(
                 $block,
@@ -437,6 +455,7 @@ class CatalogTemplate extends MaterialTypeTemplate
                 ],
             ];
             $block->commit();
+            $this->catalogBlock = $block;
             return $block;
         }
     }
@@ -566,7 +585,7 @@ class CatalogTemplate extends MaterialTypeTemplate
             $item->fields['step']->addValue($i % 4 ? 1 : 2);
             foreach (['test.doc', 'test.pdf'] as $val) {
                 $att = Attachment::createFromFile(
-                    Module::i()->resourcesDir . '/' . $val,
+                    Module::i()->resourcesDir . '/fish/' . $val,
                     $item->fields['files']
                 );
 

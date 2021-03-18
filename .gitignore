@@ -3,3 +3,5 @@ vendor
 components
 composer.lock
 config.php
+/nbproject/private/
+/nbproject

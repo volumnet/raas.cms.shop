@@ -10,9 +10,12 @@ use RAAS\Attachment;
 use RAAS\CMS\Block;
 use RAAS\CMS\Block_Form;
 use RAAS\CMS\Block_Material;
+use RAAS\CMS\DiagTimer;
 use RAAS\CMS\Material;
 use RAAS\CMS\MaterialInterface;
+use RAAS\CMS\MaterialTypeRecursiveCache;
 use RAAS\CMS\Page;
+use RAAS\CMS\SearchInterface;
 
 /**
  * Класс стандартного интерфейса каталога
@@ -23,6 +26,11 @@ class CatalogInterface extends MaterialInterface
      * Класс фильтра каталога
      */
     const FILTER_CLASS = CatalogFilter::class;
+
+    /**
+     * ID# товаров, полученные из полнотекстового поиска
+     */
+    protected $fullTextIds = [];
 
     public function process()
     {
@@ -62,6 +70,7 @@ class CatalogInterface extends MaterialInterface
         if ($legacy) {
             return;
         }
+        $t = new DiagTimer();
         $this->setPageMetatags($page, $item, $block);
         $item->proceed = true;
         $result = ['Item' => $item];
@@ -109,6 +118,7 @@ class CatalogInterface extends MaterialInterface
             }
         }
         $this->processVisited($item, $this->session);
+        $t->stop();
         return $result;
     }
 
@@ -183,6 +193,7 @@ class CatalogInterface extends MaterialInterface
 
     public function processList(Block_Material $block, Page $page, array $get = [])
     {
+        $t = new DiagTimer();
         $result = parent::processList($block, $page, $get);
         $this->setListMetatags($page, $block);
         $doSearch = $this->isSearch($block, $page->catalogFilter, $get);
@@ -195,6 +206,7 @@ class CatalogInterface extends MaterialInterface
         }
         $result['subcats'] = $subcats;
         $result['doSearch'] = $doSearch;
+        $t->stop();
         return $result;
     }
 
@@ -322,22 +334,51 @@ class CatalogInterface extends MaterialInterface
                 $filterItem['field'],
                 $get[$filterItem['var']]
             ) && $filterItem['relation'] == 'FULLTEXT') {
-                $var = $filterItem['var'];
-                $val = $get[$var];
-                $field = $filterItem['field'];
-                $sqlField = $this->getField($field, 't' . $field, $sqlFrom, $sqlFromBind);
-                $sqlNameField = $this->getField('name', '', $sqlFrom, $sqlFromBind);
+                $searchString = $get[$filterItem['var']];
+                $mTypesIds = MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($this->block->material_type);
+                $searchInterface = new SearchInterface();
+                $searchArray = $searchInterface->getSearchArray($searchString);
 
-                $filteringItemSQL = $this->getFilteringItemSQL($sqlField, 'LIKE', $val);
-                $filteringNameSQL = $this->getFilteringItemSQL($sqlNameField, 'LIKE', $val);
-                $sqlArray[$var][] = "(" . implode(" OR ", [$filteringNameSQL[0], $filteringItemSQL[0]]) . ")";
-                $sqlWhereBind[] = $filteringNameSQL[1];
-                $sqlWhereBind[] = $filteringItemSQL[1];
+                // 3. Ищем все материалы по имени и описанию
+                $materialsNameDescriptionResult = $searchInterface->searchMaterialsByNameAndDescription(
+                    $searchString,
+                    $searchArray,
+                    $mTypesIds,
+                );
+
+                // 4. Ищем все материалы по данным
+                $materialsDataResult = $searchInterface->searchMaterialsByData(
+                    $searchString,
+                    $searchArray,
+                    $mTypesIds,
+                );
+                $searchResult = $materialsNameDescriptionResult
+                    + $materialsDataResult;
+                arsort($searchResult);
+                $this->fullTextIds = array_map('intval', array_keys($searchResult));
+
+                $sqlWhere[] = "tM.id IN (" . implode(", ", array_fill(0, count($this->fullTextIds), "?")) . ")";
+                $sqlWhereBind = array_merge($sqlWhereBind, $this->fullTextIds);
+                return;
+
+                // var_dump($searchResult); exit;
+
+                // $var = $filterItem['var'];
+                // $val = $get[$var];
+                // $field = $filterItem['field'];
+                // $sqlField = $this->getField($field, 't' . $field, $sqlFrom, $sqlFromBind);
+                // $sqlNameField = $this->getField('name', '', $sqlFrom, $sqlFromBind);
+
+                // $filteringItemSQL = $this->getFilteringItemSQL($sqlField, 'LIKE', $val);
+                // $filteringNameSQL = $this->getFilteringItemSQL($sqlNameField, 'LIKE', $val);
+                // $sqlArray[$var][] = "(" . implode(" OR ", [$filteringNameSQL[0], $filteringItemSQL[0]]) . ")";
+                // $sqlWhereBind[] = $filteringNameSQL[1];
+                // $sqlWhereBind[] = $filteringItemSQL[1];
             }
         }
-        foreach ($sqlArray as $key => $arr) {
-            $sqlWhere[$key] = $arr ? "(" . implode(" AND ", $arr) . ")" : "";
-        }
+        // foreach ($sqlArray as $key => $arr) {
+        //     $sqlWhere[$key] = $arr ? "(" . implode(" AND ", $arr) . ")" : "";
+        // }
     }
 
 
@@ -362,6 +403,13 @@ class CatalogInterface extends MaterialInterface
         &$sqlOrder,
         CatalogFilter $catalogFilter = null
     ) {
+        // Есть полнотекстовый поиск, сортируем по нему
+        if ($this->fullTextIds) {
+            $sqlSort = "FIELD(tM.id, " . implode(", ", array_map('intval', $this->fullTextIds)) . ")";
+            $sqlOrder = "";
+            return;
+        }
+
         $sortVar = (string)$block->sort_var_name;
         $sortVal = isset($get[$sortVar]) ? $get[$sortVar] : '';
         $orderVar = (string)$block->order_var_name;
@@ -708,6 +756,7 @@ class CatalogInterface extends MaterialInterface
     public function setCatalogFilter(Block_Material $block, Page $page, array $get = [])
     {
         if (!$page->catalogFilter) {
+            $t = new DiagTimer();
             parse_str(trim($block->params), $blockParams);
             $withChildrenGoods = isset($blockParams['withChildrenGoods'])
                                ? (bool)$blockParams['withChildrenGoods']
@@ -721,6 +770,7 @@ class CatalogInterface extends MaterialInterface
             $filterParams = $this->getFilterParams($block, $catalogFilter, $get);
             $catalogFilter->apply($page, $filterParams);
             $page->catalogFilter = $catalogFilter;
+            $t->stop();
         }
     }
 }

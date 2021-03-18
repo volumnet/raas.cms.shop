@@ -6,13 +6,18 @@ namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
 use RAAS\Attachment;
+use RAAS\CMS\Block_Form;
 use RAAS\CMS\Block_Material;
+use RAAS\CMS\FishRandomUserRetriever;
 use RAAS\CMS\FishYandexReferatsRetriever;
+use RAAS\CMS\Form;
 use RAAS\CMS\Material;
 use RAAS\CMS\MaterialTypeTemplate;
 use RAAS\CMS\Material_Field;
+use RAAS\CMS\Material_Type;
 use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
+use RAAS\CMS\Webmaster as CMSWebmaster;
 
 /**
  * Класс шаблона типа материалов "Отзывы к товарам"
@@ -46,12 +51,12 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
     /**
      * Конструктор класса
      * @param Material_Type $materialType Тип материалов
-     * @param Webmaster $webmaster Вебмастер
+     * @param CMSWebmaster $webmaster Вебмастер
      * @param Block_Material $catalogBlock Блок каталога
      */
     public function __construct(
         Material_Type $materialType,
-        Webmaster $webmaster,
+        CMSWebmaster $webmaster,
         Block_Material $catalogBlock
     ) {
         $this->materialType = $materialType;
@@ -70,7 +75,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
             'datatype' => 'material',
             'source' => (int)$this->catalogBlock->material_type,
         ]);
-        $dateField->commit();
+        $materialField->commit();
 
         $dateField = new Material_Field([
             'pid' => $this->materialType->id,
@@ -134,7 +139,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
         $proVotesField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 0,
-            'name' => View_Web::i()->_('PRO_VOTES'),
+            'name' => View_Web::i()->_('PROS'),
             'urn' => 'pros',
             'datatype' => 'number',
         ]);
@@ -143,7 +148,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
         $conVotesField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 0,
-            'name' => View_Web::i()->_('CON_VOTES'),
+            'name' => View_Web::i()->_('CONS'),
             'urn' => 'cons',
             'datatype' => 'number',
         ]);
@@ -183,11 +188,11 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
                     'datatype' => 'material',
                     'source' => (int)$this->catalogBlock->material_type,
                     'show_in_table' => 1,
-                ]
+                ],
                 [
                     'vis' => 1,
                     'name' => View_Web::i()->_('YOUR_NAME'),
-                    'urn' => 'name',
+                    'urn' => '_name_',
                     'required' => 1,
                     'datatype' => 'text',
                     'show_in_table' => 1,
@@ -252,7 +257,22 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
 
     public function createBlockSnippet($nat = false)
     {
-        $filename = Package::i()->resourcesDir
+        $widget = Snippet::importByURN('rating');
+        if (!$widget->id) {
+            $widget = $this->webmaster->createSnippet(
+                'rating',
+                View_Web::i()->_('RATING'),
+                (int)$this->widgetsFolder->id,
+                Module::i()->resourcesDir . '/widgets/materials/comments/rating.tmp.php',
+                [
+                    'WIDGET_NAME' => View_Web::i()->_('RATING'),
+                    'WIDGET_URN' => 'rating',
+                    'WIDGET_CSS_CLASSNAME' => 'rating',
+                ]
+            );
+        }
+
+        $filename = Module::i()->resourcesDir
                   . '/widgets/materials/comments/goods_comments.tmp.php';
         $snippet = $this->webmaster->createSnippet(
             $this->materialType->urn,
@@ -273,7 +293,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
      */
     public function createFormSnippet()
     {
-        $filename = Package::i()->resourcesDir
+        $filename = Module::i()->resourcesDir
                   . '/widgets/materials/comments/goods_comments_form.tmp.php';
         $snippet = $this->webmaster->createSnippet(
             $this->materialType->urn . '_form',
@@ -296,6 +316,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
     ) {
         $additionalData = array_merge(
             [
+                'name' => View_Web::i()->_('REVIEWS'),
                 'vis' => 0,
                 'sort_field_default' => $this->materialType->fields['date']->id,
                 'sort_order_default' => 'desc!',
@@ -319,15 +340,15 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
         Form $form,
         Snippet $widget = null,
         array $additionalData = []
-    )
-    {
+    ) {
         if ($widget->id && $page->id) {
             $blockData = array_merge([
                 'vis' => 0,
                 'form' => (int)$form->id,
-                'interface_id' => (int)Snippet::importByURN('__raas_material_interface')->id,
+                'interface_id' => (int)Snippet::importByURN('__raas_form_interface')->id,
                 'widget_id' => (int)$widget->id,
                 'location' => 'content',
+                'inherit' => 1,
                 'cats' => (array)$this->catalogBlock->pages_ids,
             ], $additionalData);
             $block = new Block_Form($blockData);
@@ -344,11 +365,11 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
         $usersRetriever = new FishRandomUserRetriever();
         $goods = Material::getSet([
             'where' => "pid = " . (int)$this->catalogBlock->material_type,
+            'orderBy' => "id ASC",
         ]);
         foreach ($goods as $product) {
             for ($i = 0; $i < 3; $i++) {
                 $user = $usersRetriever->retrieve();
-                $answer = $usersRetriever->retrieve();
                 $text = $textRetriever->retrieve();
                 $text2 = $textRetriever->retrieve();
                 $text3 = $textRetriever->retrieve();
@@ -364,7 +385,6 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
                 ]);
                 $item->commit();
                 $t = time() - 86400 * rand(1, 7);
-                $t1 = $t + rand(0, 86400);
                 $item->fields['material']->addValue((int)$product->id);
                 $item->fields['date']->addValue(date('Y-m-d', $t));
                 $item->fields['phone']->addValue($user['phone']);
@@ -384,16 +404,17 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
     /**
      * Создает или находит тип материалов, соответствующий URN, и создает к нему
      * шаблон
-     * @param Webmaster $webmaster Объект вебмастера
      * @param string $name Наименование
      * @param string $urn URN
+     * @param CMSWebmaster $webmaster Объект вебмастера
+     * @param Block_Material $catalogBlock Блок каталога
      * @return self
      */
     public static function spawn(
         $name,
         $urn,
-        Webmaster $webmaster,
-        Block_Material $catalogBlock
+        CMSWebmaster $webmaster,
+        Block_Material $catalogBlock = null
     ) {
         $newMaterialType = false;
         $materialType = Material_Type::importByURN($urn);
@@ -431,11 +452,9 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
             $formWidget = $this->createFormSnippet();
         }
 
-        $mainWidget = Snippet::importByURN($urn . '_main');
-        if (!$mainWidget->id) {
-            $mainWidget = $this->createMainPageSnippet();
-        }
-
+        $pagesIds = (array)$this->catalogBlock->pages_ids;
+        $pageId = min($pagesIds);
+        $page = new Page($pageId);
 
         $block = $this->createBlock($page, $widget);
         $formBlock = $this->createFormBlock($page, $form, $formWidget);

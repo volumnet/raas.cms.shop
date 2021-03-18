@@ -7,6 +7,7 @@ namespace RAAS\CMS\Shop;
 use RAAS\Application;
 use RAAS\Attachment;
 use RAAS\CMS\Block_Material;
+use RAAS\CMS\FishRandomUserRetriever;
 use RAAS\CMS\FishYandexReferatsRetriever;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
@@ -32,7 +33,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
             'datatype' => 'material',
             'source' => (int)$this->catalogBlock->material_type,
         ]);
-        $dateField->commit();
+        $materialField->commit();
 
         $dateField = new Material_Field([
             'pid' => $this->materialType->id,
@@ -42,6 +43,15 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
             'datatype' => 'date',
         ]);
         $dateField->commit();
+
+        $nameField = new Material_Field([
+            'pid' => $this->materialType->id,
+            'vis' => 1,
+            'name' => View_Web::i()->_('FULL_NAME'),
+            'urn' => 'full_name',
+            'datatype' => 'text',
+        ]);
+        $nameField->commit();
 
         $phoneField = new Material_Field([
             'pid' => $this->materialType->id,
@@ -121,6 +131,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
         return [
             $materialField->urn => $materialField,
             $dateField->urn => $dateField,
+            $nameField->urn => $nameField,
             $phoneField->urn => $phoneField,
             $emailField->urn => $emailField,
             $imageField->urn => $imageField,
@@ -153,11 +164,11 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
                     'datatype' => 'material',
                     'source' => (int)$this->catalogBlock->material_type,
                     'show_in_table' => 1,
-                ]
+                ],
                 [
                     'vis' => 1,
                     'name' => View_Web::i()->_('YOUR_NAME'),
-                    'urn' => 'name',
+                    'urn' => 'full_name',
                     'required' => 1,
                     'datatype' => 'text',
                     'show_in_table' => 1,
@@ -177,7 +188,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
                     'show_in_table' => 0,
                 ],
                 [
-                    'vis' => 1,
+                    'vis' => 0,
                     'name' => View_Web::i()->_('YOUR_PHOTO'),
                     'urn' => 'image',
                     'datatype' => 'image',
@@ -186,7 +197,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
                 [
                     'vis' => 1,
                     'name' => View_Web::i()->_('QUESTION_TEXT'),
-                    'urn' => '_description_',
+                    'urn' => '_name_',
                     'required' => 1,
                     'datatype' => 'textarea',
                     'show_in_table' => 0,
@@ -206,7 +217,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
 
     public function createBlockSnippet($nat = false)
     {
-        $filename = Package::i()->resourcesDir
+        $filename = Module::i()->resourcesDir
                   . '/widgets/materials/faq/goods_faq.tmp.php';
         $snippet = $this->webmaster->createSnippet(
             $this->materialType->urn,
@@ -227,7 +238,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
      */
     public function createFormSnippet()
     {
-        $filename = Package::i()->resourcesDir
+        $filename = Module::i()->resourcesDir
                   . '/widgets/materials/faq/goods_faq_form.tmp.php';
         $snippet = $this->webmaster->createSnippet(
             $this->materialType->urn . '_form',
@@ -243,6 +254,24 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
     }
 
 
+    public function createBlock(
+        Page $page,
+        Snippet $widget = null,
+        array $additionalData = []
+    ) {
+        $additionalData = array_merge(
+            [
+                'name' => View_Web::i()->_('FAQ'),
+                'vis' => 0,
+                'sort_field_default' => $this->materialType->fields['date']->id,
+                'sort_order_default' => 'desc!',
+            ],
+            $additionalData
+        );
+        return parent::createBlock($page, $widget, $additionalData, true);
+    }
+
+
     public function createMaterials(array $pagesIds = [])
     {
         $result = [];
@@ -250,6 +279,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
         $usersRetriever = new FishRandomUserRetriever();
         $goods = Material::getSet([
             'where' => "pid = " . (int)$this->catalogBlock->material_type,
+            'orderBy' => "id ASC",
         ]);
         foreach ($goods as $product) {
             for ($i = 0; $i < 3; $i++) {

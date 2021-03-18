@@ -151,7 +151,7 @@ class UpdatePropsCacheCommand extends Command
     public function getFieldsetMapping(Page_Field $fieldset)
     {
         $props = [];
-        // 1. Найдем точки задания верхних/нижних характеристик
+        // 1. Найдем точки задания характеристик
         $sqlQuery = "SELECT *
                        FROM cms_data
                       WHERE fid = ?
@@ -164,7 +164,7 @@ class UpdatePropsCacheCommand extends Command
             }
         }
 
-        // 2. Найдем маппинг к точкам задания верхних/нижних характеристик
+        // 2. Найдем маппинг к точкам задания характеристик
         $ch = PageRecursiveCache::i()->getChildrenIds(0);
         do {
             foreach ($ch as $childId) {

@@ -84,6 +84,11 @@ class Webmaster extends CMSWebmaster
                 'name' => 'ROBOKASSA_INTERFACE',
                 'filename' => 'robokassa_interface',
             ],
+            'sberbank_interface' => [
+                'name' => 'SBERBANK_INTERFACE',
+                'filename' => 'sberbank_interface',
+                'locked' => false,
+            ],
             '__raas_my_orders_interface' => [
                 'name' => 'MY_ORDERS_STANDARD_INTERFACE',
                 'filename' => 'my_orders_interface',
@@ -97,7 +102,8 @@ class Webmaster extends CMSWebmaster
                 file_get_contents(
                     Module::i()->resourcesDir .
                     '/interfaces/' . $interfaceData['filename'] . '.php'
-                )
+                ),
+                isset($interfaceData['locked']) ? (bool)$interfaceData['locked'] : true
             );
         }
 
@@ -118,13 +124,13 @@ class Webmaster extends CMSWebmaster
             'cart/compare' => View_Web::i()->_('COMPARISON'),
             'cart/order' => View_Web::i()->_('VIEW_ORDER'),
             'epay/robokassa' => View_Web::i()->_('ROBOKASSA'),
-            'materials/comments/goods_comments' => View_Web::i()->_('GOODS_COMMENTS'),
-            'materials/comments/goods_comments_form' => View_Web::i()->_('GOODS_COMMENTS_FORM'),
+            'epay/sberbank' => View_Web::i()->_('SBERBANK'),
             'materials/comments/rating' => View_Web::i()->_('RATING'),
             'cart/cart_main' => View_Web::i()->_('CART_MAIN'),
             'cart/favorites_main' => View_Web::i()->_('FAVORITES_MAIN'),
             'cart/compare_main' => View_Web::i()->_('COMPARISON_MAIN'),
             'materials/catalog/spec' => View_Web::i()->_('SPECIAL_OFFER'),
+            'materials/catalog/popular_cats' => View_Web::i()->_('POPULAR_CATEGORIES'),
             'cart/my_orders' => View_Web::i()->_('MY_ORDERS'),
         ];
         foreach ($widgetsData as $url => $name) {
@@ -427,9 +433,9 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         }
         $fieldsData = array_merge($fieldsData, [
             [
-                'name' => View_Web::i()->_('DISCOUNT'),
+                'name' => View_Web::i()->_('DISCOUNT_PERCENT'),
                 'urn' => 'discount',
-                'datatype' => 'text',
+                'datatype' => 'number',
             ],
             [
                 'name' => View_Web::i()->_('FILTER_PROPS'),
@@ -463,283 +469,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         }
 
         return $result;
-    }
-
-
-    /**
-     * Создает отзывы к товарам
-     */
-    public function createComments(
-        Material_Type $catalogMType,
-        Page $catalog,
-        Block_Material $catalogBlock
-    ) {
-        if (!$mainName) {
-            $mainName = $name;
-        }
-        $MT = Material_Type::importByURN('goods_comments');
-        if (!$MT->id) {
-            $MT = new Material_Type([
-                'name' => View_Web::i()->_('GOODS_COMMENTS'),
-                'urn' => $urn,
-                'global_type' => 0,
-            ]);
-            $MT->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('GOODS_ITEM'),
-                'urn' => 'material',
-                'datatype' => 'material',
-                'source' => (int)$catalogMType->id,
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 1,
-                'name' => View_Web::i()->_('DATE'),
-                'urn' => 'date',
-                'datatype' => 'date',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('PHONE'),
-                'urn' => 'phone',
-                'datatype' => 'tel',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('EMAIL'),
-                'urn' => 'email',
-                'datatype' => 'email',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 1,
-                'name' => View_Web::i()->_('RATING'),
-                'multiple' => 0,
-                'urn' => 'rating',
-                'datatype' => 'number',
-                'min_val' => 0,
-                'max_val' => 5,
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 1,
-                'name' => View_Web::i()->_('ADVANTAGES'),
-                'multiple' => 0,
-                'urn' => 'advantages',
-                'datatype' => 'textarea',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 1,
-                'name' => View_Web::i()->_('DISADVANTAGES'),
-                'multiple' => 0,
-                'urn' => 'disadvantages',
-                'datatype' => 'textarea',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('PRO_VOTES'),
-                'urn' => 'pros',
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-            $F = new Material_Field([
-                'pid' => $MT->id,
-                'vis' => 0,
-                'name' => View_Web::i()->_('CON_VOTES'),
-                'urn' => 'cons',
-                'datatype' => 'number',
-            ]);
-            $F->commit();
-
-        }
-
-        $S = Snippet::importByURN('__raas_form_notify');
-        $FRM = Form::importByURN('goods_comments');
-        if (!$FRM->id) {
-            $FRM = $this->createForm([
-                'name' => View_Web::i()->_('GOODS_COMMENTS'),
-                'urn' => 'goods_comments',
-                'material_type' => (int)$MT->id,
-                'interface_id' => (int)$S->id,
-                'fields' => [
-                    [
-                        'vis' => 0,
-                        'name' => View_Web::i()->_('GOODS_ITEM'),
-                        'urn' => 'material',
-                        'required' => 1,
-                        'datatype' => 'material',
-                        'show_in_table' => 1,
-                    ],
-                    [
-                        'vis' => 1,
-                        'name' => View_Web::i()->_('YOUR_NAME'),
-                        'urn' => 'name',
-                        'required' => 1,
-                        'datatype' => 'text',
-                        'show_in_table' => 1,
-                    ],
-                    [
-                        'vis' => 1,
-                        'name' => View_Web::i()->_('PHONE'),
-                        'urn' => 'phone',
-                        'datatype' => 'text',
-                        'show_in_table' => 1,
-                    ],
-                    [
-                        'vis' => 1,
-                        'name' => View_Web::i()->_('EMAIL'),
-                        'urn' => 'email',
-                        'datatype' => 'email',
-                        'show_in_table' => 0,
-                    ],
-                    [
-                        'vis' => 1,
-                        'name' => View_Web::i()->_('RATING'),
-                        'urn' => 'rating',
-                        'datatype' => 'number',
-                        'min_val' => 1,
-                        'max_val' => 5,
-                        'show_in_table' => 0,
-                    ],
-                    [
-                        'vis' => 1,
-                        'name' => View_Web::i()->_('ADVANTAGES'),
-                        'multiple' => 0,
-                        'urn' => 'advantages',
-                        'datatype' => 'textarea',
-                    ],
-                    [
-                        'vis' => 1,
-                        'name' => View_Web::i()->_('DISADVANTAGES'),
-                        'multiple' => 0,
-                        'urn' => 'disadvantages',
-                        'datatype' => 'textarea',
-                    ],
-                    [
-                        'vis' => 1,
-                        'name' => View_Web::i()->_('COMMENT'),
-                        'urn' => '_description_',
-                        'required' => 1,
-                        'datatype' => 'textarea',
-                        'show_in_table' => 0,
-                    ],
-                    [
-                        'vis' => 1,
-                        'name' => View_Web::i()->_('AGREE_PRIVACY_POLICY'),
-                        'urn' => 'agree',
-                        'required' => 1,
-                        'datatype' => 'checkbox',
-                    ],
-                ]
-            ]);
-        }
-
-        $formBlock = $this->createBlock(
-            new Block_Form([
-                'vis' => 0,
-                'form' => $FRM->id,
-            ]),
-            'content',
-            '__raas_form_interface',
-            'feedback',
-            $catalog,
-            true
-        );
-
-        ;
-        $listBlock = $this->createBlock(
-            new Block_Material([
-                'material_type' => (int)$MT->id,
-                'vis' => 0,
-                'nat' => 0,
-                'pages_var_name' => '',
-                'rows_per_page' => 0,
-                'sort_field_default' => 'post_date',
-                'sort_order_default' => 'desc!',
-            ]),
-            'content',
-            '__raas_material_interface',
-            'goods_comments',
-            $catalog
-        );
-
-        $params = $catalogBlock->params;
-        $params = str_replace('commentFormBlock=', 'commentFormBlock=' . (int)$formBlock->id, $params);
-        $params = str_replace('commentsListBlock=', 'commentsListBlock=' . (int)$listBlock->id, $params);
-        $catalogBlock->params = $params;
-        $catalogBlock->commit();
-
-        // Создадим материалы
-        for ($i = 0; $i < 3; $i++) {
-            $user = $this->nextUser;
-            $answer = $this->nextUser;
-            $temp = $this->nextText;
-            $item = new Material([
-                'pid' => (int)$MT->id,
-                'vis' => 1,
-                'name' => $user['name']['first'] . ' '
-                       .  $user['name']['last'],
-                'description' => $temp['name'],
-                'priority' => ($i + 1) * 10,
-                'sitemaps_priority' => 0.5
-            ]);
-            $item->commit();
-            $t = time() - 86400 * rand(1, 7);
-            $t1 = $t + rand(0, 86400);
-            $item->fields['date']->addValue(date('Y-m-d', $t));
-            $item->fields['phone']->addValue($user['phone']);
-            $item->fields['email']->addValue($user['email']);
-            $item->fields['answer_date']->addValue(date('Y-m-d', $t1));
-            $item->fields['answer_name']->addValue(
-                $answer['name']['first'] . ' ' . $answer['name']['last']
-            );
-            $item->fields['answer_gender']->addValue(
-                (int)($answer['gender'] == 'male')
-            );
-            $item->fields['answer']->addValue($temp['text']);
-            $att = Attachment::createFromFile(
-                $user['pic']['filepath'],
-                $MT->fields['image']
-            );
-            $item->fields['image']->addValue(json_encode([
-                'vis' => 1,
-                'name' => '',
-                'description' => '',
-                'attachment' => (int)$att->id
-            ]));
-            $att = Attachment::createFromFile(
-                $answer['pic']['filepath'],
-                $MT->fields['answer_image']
-            );
-            $item->fields['answer_image']->addValue(json_encode([
-                'vis' => 1,
-                'name' => '',
-                'description' => '',
-                'attachment' => (int)$att->id
-            ]));
-        }
     }
 
 
@@ -891,6 +620,32 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             );
         }
         return $favorites;
+    }
+
+
+    /**
+     * Создаем страницу доставки/оплаты
+     * @return Page Созданная или существующая страница
+     */
+    public function createDelivery()
+    {
+        $temp = Page::getSet([
+            'where' => ["pid = " . (int)$this->Site->id, "urn = 'delivery'"]
+        ]);
+        if ($temp) {
+            $delivery = $temp[0];
+            $delivery->trust();
+        } else {
+            $delivery = $this->createPage(
+                [
+                    'name' => View_Web::i()->_('DELIVERY_AND_PAYMENT'),
+                    'urn' => 'delivery',
+                ],
+                $this->Site,
+                true
+            );
+        }
+        return $delivery;
     }
 
 
@@ -1183,6 +938,20 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $catalogType = $materialTemplate->materialType;
         $catalog = $materialTemplate->create();
 
+        GoodsCommentsTemplate::spawn(
+            View_Web::i()->_('GOODS_REVIEWS'),
+            'goods_comments',
+            $this,
+            $materialTemplate->catalogBlock
+        )->create();
+
+        GoodsFAQTemplate::spawn(
+            View_Web::i()->_('GOODS_FAQ'),
+            'goods_faq',
+            $this,
+            $materialTemplate->catalogBlock
+        )->create();
+
         $ajax = array_shift(Page::getSet([
             'where' => "urn = 'ajax' AND pid = " . (int)$this->Site->id
         ]));
@@ -1210,6 +979,19 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'fullMenu' => true,
                 'blockPage' => $this->Site,
                 'inheritBlock' => true,
+            ],
+            [
+                'pageId' => (int)$catalog->id,
+                'urn' => 'popular_cats',
+                'inherit' => 1,
+                'name' => View_Web::i()->_('POPULAR_CATEGORIES'),
+                'realize' => false,
+                'addMainPageLink' => false,
+                'blockLocation' => 'content4',
+                'fullMenu' => true,
+                'blockPage' => $this->Site,
+                'inheritBlock' => true,
+                'widget_urn' => 'popular_cats',
             ],
         ]);
         $this->createAJAXMenus($ajax);
@@ -1239,6 +1021,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $cart = $this->createCart($cartTypes['cart'], $ajax);
         $favorites = $this->createFavorites($cartTypes['favorites'], $ajax);
         $compare = $this->createCompare($cartTypes['compare'], $ajax);
+        $delivery = $this->createDelivery();
         $this->createFilter();
         $this->adjustBlocks();
         $yml = $this->createYandexMarket($catalogType, $catalog);
@@ -1323,6 +1106,18 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
      */
     public function createCron()
     {
+        $recalculatePriceTask = new Crontab([
+            'name' => View_Web::i()->_('RECALCULATING_PRICES'),
+            'vis' => 1,
+            'once' => 0,
+            'minutes' => '*',
+            'hours' => '*',
+            'days' => '*',
+            'weekdays' => '*',
+            'command_classname' => RecalculatePriceCommand::class,
+            'args' => '[]'
+        ]);
+        $recalculatePriceTask->commit();
         $updateCatalogFilterTask = new Crontab([
             'name' => View_Web::i()->_('UPDATING_CATALOG_FILTER_CACHE'),
             'vis' => 1,
@@ -1337,7 +1132,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $updateCatalogFilterTask->commit();
         $updatePropsCache = new Crontab([
             'name' => View_Web::i()->_('UPDATING_PROPS_CACHE'),
-            'vis' => 1,
+            'vis' => 0,
             'once' => 0,
             'minutes' => '*',
             'hours' => '*',
@@ -1359,5 +1154,17 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             'args' => '[]'
         ]);
         $updateYMLTask->commit();
+        $updateRatingTask = new Crontab([
+            'name' => View_Web::i()->_('UPDATING_CATALOG_RATING'),
+            'vis' => 1,
+            'once' => 0,
+            'minutes' => '*',
+            'hours' => '*',
+            'days' => '*',
+            'weekdays' => '*',
+            'command_classname' => UpdateRatingCommand::class,
+            'args' => '[]'
+        ]);
+        $updateRatingTask->commit();
     }
 }

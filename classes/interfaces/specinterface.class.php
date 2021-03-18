@@ -7,6 +7,7 @@ namespace RAAS\CMS\Shop;
 use RAAS\CMS\Material;
 use RAAS\CMS\MaterialInterface;
 use RAAS\CMS\Block_Material;
+use RAAS\CMS\DiagTimer;
 use RAAS\CMS\Page;
 
 /**
@@ -68,6 +69,9 @@ class SpecInterface extends CatalogInterface
     public function setCatalogFilter(Block_Material $block, Page $page, array $get = [])
     {
         if (!$page->originalFilter) {
+            $t1 = new DiagTimer(
+                __CLASS__ . '::' . __FUNCTION__ . '::getOriginalFilter'
+            );
             $withChildrenGoods = true;
             $classname = static::FILTER_CLASS;
             $catalogFilter = $classname::loadOrBuild(
@@ -76,10 +80,15 @@ class SpecInterface extends CatalogInterface
                 []
             );
             $page->originalFilter = $catalogFilter;
+            $t1->stop();
         }
+        $t2 = new DiagTimer(
+            __CLASS__ . '::' . __FUNCTION__ . '::applyFilter'
+        );
         $get = $this->getAllParams($block, $get);
         $page->catalogFilter = clone $page->originalFilter;
         $filterParams = $this->getFilterParams($block, $page->catalogFilter, $get);
         $page->catalogFilter->apply($page, $filterParams);
+        $t2->stop();
     }
 }
