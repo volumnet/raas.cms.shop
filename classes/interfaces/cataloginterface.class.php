@@ -343,22 +343,22 @@ class CatalogInterface extends MaterialInterface
                 $materialsNameDescriptionResult = $searchInterface->searchMaterialsByNameAndDescription(
                     $searchString,
                     $searchArray,
-                    $mTypesIds,
+                    $mTypesIds
                 );
 
                 // 4. Ищем все материалы по данным
                 $materialsDataResult = $searchInterface->searchMaterialsByData(
                     $searchString,
                     $searchArray,
-                    $mTypesIds,
+                    $mTypesIds
                 );
                 $searchResult = $materialsNameDescriptionResult
                     + $materialsDataResult;
                 arsort($searchResult);
-                $this->fullTextIds = array_map('intval', array_keys($searchResult));
+                $this->fullTextIds = $searchResult;
 
                 $sqlWhere[] = "tM.id IN (" . implode(", ", array_fill(0, count($this->fullTextIds), "?")) . ")";
-                $sqlWhereBind = array_merge($sqlWhereBind, $this->fullTextIds);
+                $sqlWhereBind = array_merge($sqlWhereBind, array_keys($this->fullTextIds));
                 return;
 
                 // var_dump($searchResult); exit;
@@ -403,13 +403,6 @@ class CatalogInterface extends MaterialInterface
         &$sqlOrder,
         CatalogFilter $catalogFilter = null
     ) {
-        // Есть полнотекстовый поиск, сортируем по нему
-        if ($this->fullTextIds) {
-            $sqlSort = "FIELD(tM.id, " . implode(", ", array_map('intval', $this->fullTextIds)) . ")";
-            $sqlOrder = "";
-            return;
-        }
-
         $sortVar = (string)$block->sort_var_name;
         $sortVal = isset($get[$sortVar]) ? $get[$sortVar] : '';
         $orderVar = (string)$block->order_var_name;
@@ -468,6 +461,24 @@ class CatalogInterface extends MaterialInterface
                 $order = ($order == 'desc' ? -1 : 1);
                 $urn = $catalogFilter->properties[$sortDefField]->urn;
                 $ids = $catalogFilter->getIds($urn, $order);
+                if ($this->fullTextIds) {
+                    $st = microtime(1);
+                    $idsFlipped = array_flip($ids);
+                    $idsFlipped = array_intersect_key($idsFlipped, $this->fullTextIds);
+                    $ids = array_keys($idsFlipped);
+                    usort($ids, function ($a, $b) use ($idsFlipped) {
+                        if ($this->fullTextIds[$a] != $this->fullTextIds[$b]) {
+                            return $this->fullTextIds[$b] - $this->fullTextIds[$a];
+                        }
+                        if ($idsFlipped[$a] != $idsFlipped[$b]) {
+                            return $idsFlipped[$a] - $idsFlipped[$b];
+                        }
+                        return 0;
+                    });
+                    $sqlSort = "FIELD(tM.id, " . implode(", ", array_map('intval', $this->fullTextIds)) . ")";
+                    $sqlOrder = "";
+                    return;
+                }
                 $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
                 $sqlOrder = "";
             } else {

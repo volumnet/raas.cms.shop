@@ -38,7 +38,9 @@ class Module extends RAASModule
         EventProcessor::on(
             Package::class . ':clearCache:clearCache',
             Package::class,
-            [CatalogFilter::class, 'clearCaches']
+            function () {
+                CatalogFilter::clearCaches();
+            }
         );
         parent::init();
     }
