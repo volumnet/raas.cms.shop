@@ -267,9 +267,17 @@ class SDEKInterface extends AbstractInterface
             if ($result[$regionCode]) {
                 continue;
             }
-            $countryCode = trim($pvz['countryCodeIso']);
-            if ($get['countryCode'] && ($get['countryCode'] != $countryCode)) {
-                continue;
+            foreach ([
+                'regionCode' => 'regionCode',
+                'regionName' => 'regionName',
+                'region' => 'regionName',
+                'countryCode' => 'countryCodeIso',
+                'countryName' => 'countryName',
+                'country' => 'countryName',
+            ] as $getParam => $pvzParam) {
+                if (isset($get[$getParam]) && ($pvz[$pvzParam] != $get[$getParam])) {
+                    continue 2;
+                }
             }
             $resultArr = [
                 'country' => trim($pvz['countryName']),
@@ -333,13 +341,20 @@ class SDEKInterface extends AbstractInterface
             if ($result[$cityCode]) {
                 continue;
             }
-            $regionCode = trim($pvz['regionCode']);
-            if ($get['regionCode'] && ($get['regionCode'] != $regionCode)) {
-                continue;
-            }
-            $countryCode = trim($pvz['countryCodeIso']);
-            if ($get['countryCode'] && ($get['countryCode'] != $countryCode)) {
-                continue;
+            foreach ([
+                'cityCode' => 'cityCode',
+                'cityName' => 'city',
+                'city' => 'city',
+                'regionCode' => 'regionCode',
+                'regionName' => 'regionName',
+                'region' => 'regionName',
+                'countryCode' => 'countryCodeIso',
+                'countryName' => 'countryName',
+                'country' => 'countryName',
+            ] as $getParam => $pvzParam) {
+                if (isset($get[$getParam]) && ($pvz[$pvzParam] != $get[$getParam])) {
+                    continue 2;
+                }
             }
             $resultArr = [
                 'cityName' => trim($pvz['city']),
@@ -396,9 +411,17 @@ class SDEKInterface extends AbstractInterface
         foreach ($this->pvzJSON as $pvz) {
             foreach ([
                 'cityid' => 'cityCode',
+                'cityCode' => 'cityCode',
+                'city' => 'city',
+                'cityName' => 'city',
                 'regionid' => 'regionCode',
+                'regionCode' => 'regionCode',
+                'region' => 'regionName',
+                'regionName' => 'regionName',
                 'countryid' => 'countryCode',
+                'countryid' => 'countryName',
                 'countryiso' => 'countryCodeIso',
+                'countryCode' => 'countryCodeIso',
                 'type' => 'type',
                 'havecashless' => 'haveCashless',
                 'havecash' => 'haveCash',
@@ -521,8 +544,8 @@ class SDEKInterface extends AbstractInterface
                 $text = file_get_contents($filepath);
                 $json = json_decode($text, true);
                 $this->pvzJSON = $json['pvz'];
-                return true;
             }
+            return true;
         } catch (\Exception $e) {
             return false;
         }

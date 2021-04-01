@@ -6,6 +6,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\CMS\Block_PHP;
+use RAAS\CMS\Page;
+
 $interface = new MyOrdersInterface(
     $Block,
     $Page,

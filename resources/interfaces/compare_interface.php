@@ -6,6 +6,8 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\CMS\Page;
+
 $interface = new CompareInterface(
     $Block,
     $Page,
@@ -16,5 +18,4 @@ $interface = new CompareInterface(
     $_SERVER,
     $_FILES
 );
-
 return $interface->process();

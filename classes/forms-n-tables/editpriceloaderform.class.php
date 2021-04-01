@@ -203,11 +203,33 @@ class EditPriceLoaderForm extends RAASForm
                     'caption' => $this->view->_('ALLOW_TO_UPDATE_MATERIALS'),
                     'default' => 1
                 ],
+                'cats_usage' => [
+                    'type' => 'select',
+                    'name' => 'cats_usage',
+                    'caption' => $this->view->_('CATEGORIES_USAGE'),
+                    'default' => 0,
+                    'class' => 'input-xxlarge',
+                    'children' => [
+                        [
+                            'value' => PriceLoader::CATS_USAGE_NORMAL,
+                            'caption' => $this->view->_('USE_CATS_REPEAT'),
+                        ],
+                        [
+                            'value' => PriceLoader::CATS_USAGE_DONT_REPEAT,
+                            'caption' => $this->view->_('USE_CATS_DONT_REPEAT'),
+                        ],
+                        [
+                            'value' => PriceLoader::CATS_USAGE_DONT_USE,
+                            'caption' => $this->view->_('DONT_USE_CATS'),
+                        ],
+                    ],
+                ],
                 'media_action' => [
                     'type' => 'select',
                     'name' => 'media_action',
                     'caption' => $this->view->_('WHAT_TO_DO_WITH_MEDIA_FIELDS'),
                     'default' => PriceLoader::MEDIA_FIELDS_APPEND_IF_EMPTY,
+                    'class' => 'input-xxlarge',
                     'children' => [
                         [
                             'value' => PriceLoader::MEDIA_FIELDS_APPEND_IF_EMPTY,

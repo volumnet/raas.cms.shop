@@ -6,6 +6,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\CMS\Block_Material;
+use RAAS\CMS\Page;
+
 $interface = new SpecInterface(
     $Block,
     $Page,

@@ -24,7 +24,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
-use \RAAS\CMS\Page;
+use RAAS\CMS\Page;
 
 $interface = new PriceloaderInterface($Loader);
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

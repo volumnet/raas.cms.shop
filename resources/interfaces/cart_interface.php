@@ -7,6 +7,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Material;
+use RAAS\CMS\Page;
 use RAAS\CMS\User;
 
 $interface = new CartInterface(

@@ -48,17 +48,19 @@ class Webmaster extends CMSWebmaster
     {
         $interfaces = [];
         $interfacesData = [
-            '__raas_shop_cart_interface' => [
-                'name' => 'CART_STANDARD_INTERFACE',
+            'cart_interface' => [
+                'name' => 'CART_INTERFACE',
                 'filename' => 'cart_interface',
+                'locked' => false,
             ],
             '__raas_shop_compare_interface' => [
                 'name' => 'COMPARE_STANDARD_INTERFACE',
                 'filename' => 'compare_interface',
             ],
-            '__raas_shop_catalog_interface' => [
-                'name' => 'CATALOG_STANDARD_INTERFACE',
+            'catalog_interface' => [
+                'name' => 'CATALOG_INTERFACE',
                 'filename' => 'catalog_interface',
+                'locked' => false,
             ],
             '__raas_shop_spec_interface' => [
                 'name' => 'SPEC_STANDARD_INTERFACE',

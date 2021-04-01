@@ -3,209 +3,139 @@
  * Стандартное уведомление о заказе
  * @param bool $SMS Уведомление отправляется по SMS
  * @param Order $Item Уведомление формы обратной связи
- * @param bool $forUser Отправка для пользователя
+ * @param bool $forUser Отправка сообщения для пользователя
+ *     (если false то для администратора)
  */
 namespace RAAS\CMS\Shop;
 
+use SOME\Text;
+use RAAS\Controller_Frontend as ControllerFrontend;
 use RAAS\CMS\Form_Field;
+use RAAS\CMS\NotificationFieldRenderer;
 
-/**
- * Получает представление поля для отправки по SMS
- * @param Form_Field $field Поле для получения представления
- * @return string
- */
-$smsField = function (Form_Field $field) use ($forUser) {
-    $values = $field->getValues(true);
-    if (!array_filter($values, function ($x) {
-        if (is_scalar($x)) {
-            return trim($x);
-        } elseif ($x instanceof SOME) {
-            return (bool)$x->id;
-        } else {
-            return (bool)$x;
-        }
-    })) {
-        return '';
-    }
-    $arr = [];
-    foreach ($values as $key => $val) {
-        $val = $field->doRich($val);
-        switch ($field->datatype) {
-            case 'date':
-                $arr[$key] = date(DATEFORMAT, strtotime($val));
-                break;
-            case 'datetime-local':
-                $arr[$key] = date(DATETIMEFORMAT, strtotime($val));
-                break;
-            case 'file':
-            case 'image':
-                $arr[$key] .= $val->filename;
-                break;
-            case 'htmlarea':
-                $arr[$key] = strip_tags($val);
-                break;
-            case 'material':
-                $arr[$key] = $val->name;
-                break;
-            default:
-                if (!$field->multiple && ($field->datatype == 'checkbox')) {
-                    $arr[$key] = $val ? _YES : _NO;
-                } else {
-                    $arr[$key] = $val;
-                }
-                break;
-        }
-    }
-    return $field->name . ': ' . implode(', ', $arr) . "\n";
-};
+$cf = ControllerFrontend::i();
+$adminUrl = $cf->schemeHost . '/admin/?p=cms';
 
-/**
- * Получает представление поля для отправки по электронной почте
- * @param Form_Field $field Поле для получения представления
- * @return string
- */
-$emailField = function (Form_Field $field) use ($forUser) {
-    $values = $field->getValues(true);
-    if (!array_filter($values, function ($x) {
-        if (is_scalar($x)) {
-            return trim($x);
-        } elseif ($x instanceof SOME) {
-            return (bool)$x->id;
-        } else {
-            return (bool)$x;
-        }
-    })) {
-        return '';
-    }
-    $arr = [];
-    foreach ($values as $key => $val) {
-        $val = $field->doRich($val);
-        switch ($field->datatype) {
-            case 'date':
-                $arr[$key] = date(DATEFORMAT, strtotime($val));
-                break;
-            case 'datetime-local':
-                $arr[$key] = date(DATETIMEFORMAT, strtotime($val));
-                break;
-            case 'color':
-                $arr[$key] = '<span style="display: inline-block; height: 16px; width: 16px; background-color: ' . htmlspecialchars($val) . '"></span>';
-                break;
-            case 'email':
-                $arr[$key] .= '<a href="mailto:' . htmlspecialchars($val) . '">' . htmlspecialchars($val) . '</a>';
-                break;
-            case 'url':
-                $arr[$key] .= '<a href="' . (!preg_match('/^http(s)?:\\/\\//umi', trim($val)) ? 'http://' : '') . htmlspecialchars($val) . '">' . htmlspecialchars($val) . '</a>';
-                break;
-            case 'file':
-                $arr[$key] .= '<a href="http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/' . $val->fileURL . '">' . htmlspecialchars($val->filename) . '</a>';
-                break;
-            case 'image':
-                $arr[$key] .= '<a href="http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/' . $val->fileURL . '">
-                                 <img src="http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . '/' . $val->tnURL. '" alt="' . htmlspecialchars($val->filename) . '" title="' . htmlspecialchars($val->filename) . '" />
-                               </a>';
-                break;
-            case 'htmlarea':
-                $arr[$key] = '<div>' . $val . '</div>';
-                break;
-            case 'material':
-                if (!$forUser) {
-                    $arr[$key] = '<a href="http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&m=shop&sub=orders&action=view&id=' . $Item->id) . '">
-                                    ' . htmlspecialchars($val->name) . '
-                                  </a>';
-                } elseif ($val->url) {
-                    $arr[$key] = '<a href="http' . ($_SERVER['HTTPS'] == 'on' ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . htmlspecialchars($val->url) . '">
-                                    ' . htmlspecialchars($val->name) . '
-                                  </a>';
-                } else {
-                    $arr[$key] = htmlspecialchars($val->name);
-                }
-                break;
-            default:
-                if (!$field->multiple && ($field->datatype == 'checkbox')) {
-                    $arr[$key] = $val ? _YES : _NO;
-                } else {
-                    $arr[$key] = nl2br(htmlspecialchars($val));
-                }
-                break;
-        }
-    }
-    return '<div>' . htmlspecialchars($field->name) . ': ' . implode(', ', $arr) . '</div>';
-};
-?>
-<?php if ($SMS) {
+$page = $Item->page;
+$cartType = $Item->parent;
+
+if ($SMS) {
     if ($forUser) {
         echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id);
     } else {
-        echo date(DATETIMEFORMAT) . ' ' . sprintf(ORDER_STANDARD_HEADER_USER, $Item->id, $_SERVER['HTTP_HOST']) . "\n";
+        echo date(DATETIMEFORMAT) . ' ' .
+            sprintf(ORDER_STANDARD_HEADER_USER, $Item->id, $cf->idnHost) . "\n";
         foreach ($Item->fields as $field) {
-            echo $smsField($field);
+            $renderer = NotificationFieldRenderer::spawn($field);
+            echo $renderer->render(['admin' => !$forUser, 'sms' => true]);
         }
     }
 } else { ?>
     <div>
-      <?php
-      foreach ($Item->fields as $field) {
-          echo $emailField($field);
-      }
-      ?>
+      <?php echo ORDER_ID . ': ' . (int)$Item->id?>
+    </div>
+    <div>
+      <?php foreach ($Item->fields as $field) {
+          $renderer = NotificationFieldRenderer::spawn($field);
+          echo $renderer->render(['admin' => !$forUser, 'sms' => false]);
+      } ?>
     </div>
     <?php if ($Item->items) { ?>
-      <br />
-      <table style="width: 100%" border="1">
-        <thead>
-          <tr>
-            <th><?php echo NAME?></th>
-            <th><?php echo ADDITIONAL_INFO?></th>
-            <th><?php echo PRICE?></th>
-            <th><?php echo AMOUNT?></th>
-            <th><?php echo SUM?></th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php
-          $sum = 0;
-          foreach ($Item->items as $row) {
-              $url = ($forUser ? $row->url : '/admin/?p=cms&sub=main&action=edit_material&id=' . $row->id . '&pid=' . ($row->material_type->affectedPages[0]->id)); ?>
-              <tr>
-                <td>
-                  <?php if ($url) { ?>
-                      <a href="http<?php echo ($_SERVER['HTTPS'] == 'on' ? 's' : '')?>://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . $url)?>">
-                        <?php echo htmlspecialchars($row->name)?>
-                      </a>
-                  <?php } else { ?>
-                      <?php echo htmlspecialchars($row->name)?>
-                  <?php } ?>
-                </td>
-                <td><?php echo htmlspecialchars($row->__get('meta'))?>&nbsp;</td>
-                <td style="text-align: right; white-space: nowrap;"><?php echo number_format($row->realprice, 2, '.', ' ')?></td>
-                <td><?php echo (int)$row->amount?></td>
-                <td style="text-align: right; white-space: nowrap;"><?php echo number_format($row->amount * $row->realprice, 2, '.', ' ')?></td>
-              </tr>
-          <?php $sum += $row->amount * $row->realprice; } ?>
-          <tr>
-            <th colspan="4" style="text-align: right"><?php echo TOTAL_SUM?>:</th>
-            <th style="text-align: right; white-space: nowrap;"><?php echo number_format($sum, 2, '.', ' ')?></th>
-          </tr>
-        </tbody>
-      </table>
-    <?php } ?>
-    <?php if (!$forUser) { ?>
-        <p><a href="http<?php echo ($_SERVER['HTTPS'] == 'on' ? 's' : '')?>://<?php echo htmlspecialchars($_SERVER['HTTP_HOST'] . '/admin/?p=cms&m=shop&sub=orders&action=view&id=' . $Item->id)?>"><?php echo VIEW?></a></p>
+        <br />
+        <table style="width: 100%" border="1">
+          <thead>
+            <tr>
+              <th><?php echo NAME?></th>
+              <th><?php echo ADDITIONAL_INFO?></th>
+              <th><?php echo PRICE?></th>
+              <th><?php echo AMOUNT?></th>
+              <th><?php echo SUM?></th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php
+            $sum = 0;
+            foreach ($Item->items as $item) {
+                $url = '';
+                if (!$forUser || $item->url) {
+                    if ($forUser) {
+                        $url = $cf->schemeHost . $item->url;
+                    } else {
+                        $url = $cf->schemeHost
+                            . '/admin/?p=cms&sub=main&action=edit_material&id='
+                            . $item->id
+                            . '&pid='
+                            . ($item->material_type->affectedPages[0]->id);
+                    }
+                }
+                $itemSum = $item->amount * $item->realprice;
+                $sum += $itemSum;
+                ?>
+                <tr>
+                  <td>
+                    <?php if ($url) { ?>
+                        <a href="<?php echo htmlspecialchars($url)?>">
+                          <?php echo htmlspecialchars($item->name)?>
+                        </a>
+                    <?php } else {
+                        echo htmlspecialchars($item->name);
+                    } ?>
+                  </td>
+                  <td>
+                    <?php echo htmlspecialchars($item->__get('meta'))?>&nbsp;
+                  </td>
+                  <td style="text-align: right; white-space: nowrap;">
+                    <?php echo Text::formatPrice($item->realprice)?>
+                  </td>
+                  <td>
+                    <?php echo (int)$item->amount?>
+                  </td>
+                  <td style="text-align: right; white-space: nowrap;">
+                    <?php echo Text::formatPrice($itemSum)?>
+                  </td>
+                </tr>
+            <?php } ?>
+            <tr>
+              <th colspan="4" style="text-align: right">
+                <?php echo TOTAL_SUM?>:
+              </th>
+              <th style="text-align: right; white-space: nowrap;">
+                <?php echo Text::formatPrice($sum)?>
+              </th>
+            </tr>
+          </tbody>
+        </table>
+    <?php }
+    if (!$forUser) { ?>
+        <p>
+          <a href="<?php echo htmlspecialchars($adminUrl . '&m=shop&sub=orders&action=view&id=' . (int)$Item->id)?>">
+            <?php echo VIEW?>
+          </a>
+        </p>
         <p>
           <small>
-            <?php echo IP_ADDRESS?>: <?php echo htmlspecialchars($Item->ip)?><br />
-            <?php echo USER_AGENT?>: <?php echo htmlspecialchars($Item->user_agent)?><br />
-            <?php echo PAGE?>:
-            <?php if ($Item->page->parents) { ?>
-                <?php foreach ($Item->page->parents as $row) { ?>
-                    <a href="<?php echo htmlspecialchars($Item->domain . $row->url)?>"><?php echo htmlspecialchars($row->name)?></a> /
-                <?php } ?>
-            <?php } ?>
-            <a href="<?php echo htmlspecialchars($Item->domain . $Item->page->url)?>"><?php echo htmlspecialchars($Item->page->name)?></a>
+            <?php
+            echo IP_ADDRESS . ': ' .
+                htmlspecialchars($Item->ip) . '<br />' .
+                USER_AGENT . ': ' .
+                htmlspecialchars($Item->user_agent) . '<br />' .
+                PAGE . ': ';
+            if ($page->parents) {
+                foreach ($page->parents as $row) { ?>
+                    <a href="<?php echo htmlspecialchars($adminUrl . '&id=' . (int)$row->id)?>">
+                      <?php echo htmlspecialchars($row->name)?>
+                    </a> /
+                <?php }
+            } ?>
+            <a href="<?php echo htmlspecialchars($adminUrl . '&id=' . (int)$page->id)?>">
+              <?php echo htmlspecialchars($page->name)?>
+            </a>
             <br />
             <?php echo CART_TYPE?>:
-            <a href="<?php echo htmlspecialchars($Item->domain . '/admin/?p=cms&m=shop&sub=orders&id=' . $Item->parent->id)?>"><?php echo htmlspecialchars($Item->parent->name)?></a>
+            <a href="<?php echo htmlspecialchars($adminUrl . '&m=shop&sub=orders&id=' . (int)$cartType->id)?>">
+              <?php echo htmlspecialchars($cartType->name)?>
+            </a>
           </small>
         </p>
-    <?php } ?>
-<?php } ?>
+    <?php }
+}

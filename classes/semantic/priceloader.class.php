@@ -56,6 +56,21 @@ class PriceLoader extends SOME
      */
     const MEDIA_FIELDS_REPLACE = 3;
 
+    /**
+     * Использовать категории
+     */
+    const CATS_USAGE_NORMAL = 0;
+
+    /**
+     * Использовать категории, но не дублировать товары при выгрузке
+     */
+    const CATS_USAGE_DONT_REPEAT = 1;
+
+    /**
+     * Не использовать категории
+     */
+    const CATS_USAGE_DONT_USE = 2;
+
     protected static $tablename = 'cms_shop_priceloaders';
 
     protected static $defaultOrderBy = "name";

@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\CSV;
+use RAAS\CMS\Page;
 
 /**
  * Класс конвертера CSV для загрузчика прайсов

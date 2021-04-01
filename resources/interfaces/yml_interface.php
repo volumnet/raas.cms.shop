@@ -6,6 +6,8 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\CMS\Page;
+
 $interface = new YMLInterface(
     $Block,
     $Page,

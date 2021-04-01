@@ -21,6 +21,7 @@ use RAAS\CMS\Material_Field;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\MaterialTypeRecursiveCache;
 use RAAS\CMS\Package;
+use RAAS\CMS\PageRecursiveCache;
 use RAAS\CMS\Page_Field;
 use RAAS\CMS\Field;
 
@@ -1188,7 +1189,9 @@ class PriceloaderInterface extends AbstractInterface
                     $st,
                     $i
                 );
-            } elseif ($this->isPageDataRow($dataRow)) {
+            } elseif ($this->isPageDataRow($dataRow) &&
+                ($loader->cats_usage != PriceLoader::CATS_USAGE_DONT_USE)
+            ) {
                 // Категория
                 $this->processPageRow(
                     $loader,
@@ -1508,12 +1511,25 @@ class PriceloaderInterface extends AbstractInterface
         }
 
         $sqlQuery = "SELECT tM.* FROM " . Material::_tablename() . " AS tM ";
-        if (!$loader->Material_Type->global_type) {
+        if (!$loader->Material_Type->global_type &&
+            ($loader->cats_usage != PriceLoader::CATS_USAGE_DONT_REPEAT)
+        ) {
             $sqlQuery .= " JOIN " . Material::_dbprefix() . "cms_materials_pages_assoc AS tMPA ON tMPA.id = tM.id";
         }
         $sqlQuery .= " WHERE tM.pid IN (" . implode(", ", $materialTypes ?: [0]) . ") ";
         if (!$loader->Material_Type->global_type) {
-            $sqlQuery .= " AND tMPA.pid = " . (int)$page->id;
+            switch ($loader->cats_usage) {
+                case PriceLoader::CATS_USAGE_DONT_REPEAT:
+                    $sqlQuery .= " AND tM.cache_url_parent_id = " . (int)$page->id;
+                    break;
+                case PriceLoader::CATS_USAGE_DONT_USE:
+                    $pagesIds = PageRecursiveCache::i()->getSelfAndChildrenIds($page->id);
+                    $sqlQuery .= " AND tMPA.pid IN (" . implode(", ", $pagesIds) . ")";
+                    break;
+                default:
+                    $sqlQuery .= " AND tMPA.pid = " . (int)$page->id;
+                    break;
+            }
         }
         $sqlQuery .= " GROUP BY tM.id";
         $sqlResult = Material::_SQL()->get($sqlQuery);
@@ -1524,9 +1540,11 @@ class PriceloaderInterface extends AbstractInterface
             $material = new Material($materialData);
             $data[] = $this->exportMaterialRow($loader, $material);
         }
-        foreach ($page->children as $child) {
-            $childrenData = $this->exportData($loader, $child, 0, $level + 1, $materialTypes);
-            $data = array_merge($data, $childrenData);
+        if ($loader->cats_usage != PriceLoader::CATS_USAGE_DONT_USE) {
+            foreach ($page->children as $child) {
+                $childrenData = $this->exportData($loader, $child, 0, $level + 1, $materialTypes);
+                $data = array_merge($data, $childrenData);
+            }
         }
         return $data;
     }

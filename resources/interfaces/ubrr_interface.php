@@ -20,4 +20,7 @@ $interface = new UBRRInterface(
     $_FILES
 );
 $ubrrOut = $interface->process($Item);
-$OUT = array_merge($OUT, $ubrrOut);
+if (isset($OUT)) {
+    $OUT = array_merge((array)$OUT, $ubrrOut);
+}
+return $ubrrOut;

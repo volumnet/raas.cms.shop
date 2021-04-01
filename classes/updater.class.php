@@ -47,6 +47,12 @@ class Updater extends \RAAS\Updater
         ) < 0) {
             $this->update20210224();
         }
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.2.80'
+        ) < 0) {
+            $this->update20210401();
+        }
     }
 
 
@@ -282,6 +288,24 @@ class Updater extends \RAAS\Updater
         ) {
             $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_materials
                            ADD cache_shop_props TEXT NULL DEFAULT NULL COMMENT 'Items props cache'";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+    /**
+     * Добавляет пункт о недублировании товаров по категориям
+     * в загрузчик прайсов
+     */
+    public function update20210401()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_priceloaders", $this->tables) &&
+            !in_array(
+                'cats_usage',
+                $this->columns(SOME::_dbprefix() . "cms_shop_priceloaders")
+            )
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_priceloaders
+                           ADD cats_usage TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Categories usage'";
             $this->SQL->query($sqlQuery);
         }
     }

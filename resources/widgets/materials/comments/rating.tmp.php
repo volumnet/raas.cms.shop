@@ -11,10 +11,10 @@ namespace RAAS\CMS;
     <div class="rating-list">
       <?php for ($i = 1; $i <= 5; $i++) {
           $halfStar = min(2, max(0, (int)(($rating - $i + 1) * 2)));
-          $starClass = ['star-o', 'star-half-o', 'star'];
+          $starClass = ['empty', 'half', 'full'];
           ?>
           <span class="rating-list__item">
-            <span class="rating-list-item fa fa-<?php echo $starClass[$halfStar]?>"></span>
+            <span class="rating-list-item rating-list-item_<?php echo $starClass[$halfStar]?>"></span>
           </span>
       <?php } ?>
     </div>

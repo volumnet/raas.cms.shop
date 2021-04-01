@@ -335,6 +335,9 @@ class CatalogInterface extends MaterialInterface
                 $get[$filterItem['var']]
             ) && $filterItem['relation'] == 'FULLTEXT') {
                 $searchString = $get[$filterItem['var']];
+                if (!$searchString) {
+                    continue;
+                }
                 $mTypesIds = MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($this->block->material_type);
                 $searchInterface = new SearchInterface();
                 $searchArray = $searchInterface->getSearchArray($searchString);
