@@ -138,14 +138,18 @@ $getRussianPostDeliveryPrice = function ($sumForDelivery) {
 /**
  * Функция расчета доставки СДЭК
  * @param float $sumForDelivery Сумма для расчета доставки
- * @param int $tariffId ID# тарифа
  * @return array <pre>[
  *     'delivery' => Material Материал доставки,
  *     'price' => float Стоимость доставки,
  *     string[] => mixed Дополнительные данные
  * ]</pre>
  */
-$getSDEKDeliveryPrice = function ($sumForDelivery, $tariffId) {
+$getSDEKDeliveryPrice = function ($sumForDelivery) {
+    if ($_POST['delivery'] == 'sdek') {
+        $tariffId = 0;
+    } elseif ($_POST['delivery'] == 'sdekcourier') {
+        $tariffId = 0;
+    }
     $result = [];
     $delivery = new Material((int)$_POST['delivery']);
 
@@ -272,12 +276,7 @@ $getDeliveryData = function (
             break;
         case 'sdek':
         case 'sdekcourier':
-            if ($_POST['delivery'] == 'sdek') {
-                $tariffId = 0;
-            } elseif ($_POST['delivery'] == 'sdekcourier') {
-                $tariffId = 0;
-            }
-            $deliveryData = $getSDEKDeliveryPrice($sumForDelivery, $tariffId);
+            $deliveryData = $getSDEKDeliveryPrice($sumForDelivery);
             break;
         case 'boxberry':
             $weight = 1;

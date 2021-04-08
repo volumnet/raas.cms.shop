@@ -134,8 +134,10 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
         if (!$Item->id) {
             new Redirector(\SOME\HTTP::queryString('id=&action='));
         }
-        $Item->vis = (int)$this->application->user->id;
-        $Item->commit();
+        if (!$Item->vis) {
+            $Item->vis = (int)$this->application->user->id;
+            $Item->commit();
+        }
         $OUT['Item'] = $Item;
         $OUT['items'] = $Item->items;
         $OUT['Cart_Types'] = $Cart_Types;

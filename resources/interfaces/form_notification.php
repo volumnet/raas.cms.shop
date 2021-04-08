@@ -35,7 +35,13 @@ if ($SMS) {
       <?php echo ORDER_ID . ': ' . (int)$Item->id?>
     </div>
     <div>
-      <?php foreach ($Item->fields as $field) {
+      <?php
+      if ($forUser) {
+          $fields = $Item->visFields;
+      } else {
+          $fields = $Item->fields;
+      }
+      foreach ($fields as $field) {
           $renderer = NotificationFieldRenderer::spawn($field);
           echo $renderer->render(['admin' => !$forUser, 'sms' => false]);
       } ?>

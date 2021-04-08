@@ -3,9 +3,6 @@
  */
 export default {
     data: function () {
-        const CART_TYPE_ID = 1;
-        const FAVORITES_TYPE_ID = 2;
-        const COMPARE_TYPE_ID = 3;
         let translations = {
             CART_DELETE_CONFIRM: 'Вы действительно хотите удалить этот товар?',
         };
@@ -13,9 +10,6 @@ export default {
             Object.assign(translations, window.translations);
         }
         return {
-            CART_TYPE_ID, // ID# типа корзины "Корзина"
-            FAVORITES_TYPE_ID, // ID# типа корзины "Избранное"
-            COMPARE_TYPE_ID, // ID# типа корзины "Сравнение"
             cart: null, // Объект корзины
             favorites: null, // Объект избранного
             compare: null, // Объект сравнения

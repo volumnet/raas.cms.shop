@@ -54,7 +54,7 @@ class Order extends Feedback
         ],
     ];
 
-    protected static $cognizableVars = ['fields', 'items'];
+    protected static $cognizableVars = ['fields', 'visFields', 'items'];
 
     protected static $children = [
         'history' => [

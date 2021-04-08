@@ -1431,19 +1431,23 @@ class PriceloaderInterface extends AbstractInterface
     public function exportMaterialColumn(PriceLoader_Column $column, Material $material)
     {
         $x = null;
-        if ($column->Field->id) {
-            if ($column->Field->multiple) {
-                $x = $material->fields[$column->Field->urn]->getValues(true);
+        $field = $column->Field->deepClone();
+        $materialType = $this->loader->Material_Type;
+        if ($field->id) {
+            $fieldURN = $field->urn;
+            $field->Owner = $material;
+            if ($field->multiple) {
+                $x = $field->getValues(true);
                 $x = array_map(function ($y) use ($column) {
-                    $z = $column->Field->doRich($y);
-                    if (in_array($column->Field->datatype, ['number', 'range'])) {
+                    $z = $field->doRich($y);
+                    if (in_array($field->datatype, ['number', 'range'])) {
                         $z = (float)$z;
                     }
                     return $z;
                 }, $x);
             } else {
-                $x = $material->fields[$column->Field->urn]->doRich();
-                if (in_array($column->Field->datatype, ['number', 'range'])) {
+                $x = $field->doRich();
+                if (in_array($field->datatype, ['number', 'range'])) {
                     $x = (float)$x;
                 }
             }

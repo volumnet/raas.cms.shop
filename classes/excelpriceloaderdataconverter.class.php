@@ -140,8 +140,13 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
     {
         $sheet->setTitle(mb_substr($page->name, 0, 30));
         $maxcol = 0;
+        $pageRows = [];
         for ($i = 0; $i < count($data); $i++) {
             $maxcol = max($maxcol, count($data[$i]) - 1);
+            $isPage = (count(array_filter($data[$i], 'trim')) == 1);
+            if ($isPage) {
+                $pageRows[] = $i;
+            }
             for ($j = 0; $j < count($data[$i]); $j++) {
                 $val = $data[$i][$j];
                 if (is_float($val) || is_int($val)) {
@@ -157,6 +162,13 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
             $range = PHPExcel_Cell::stringFromColumnIndex((int)$cols) . (int)$rows . ':'
                    . PHPExcel_Cell::stringFromColumnIndex($maxcol) . (int)$rows;
             $sheet->getStyle($range)->getFont()->setBold(true);
+        }
+        if ($pageRows) {
+            foreach ($pageRows as $i) {
+                $range = PHPExcel_Cell::stringFromColumnIndex(0) . ($i + 1) . ':'
+                       . PHPExcel_Cell::stringFromColumnIndex($maxcol) . ($i + 1);
+                $sheet->getStyle($range)->getFont()->setItalic(true);
+            }
         }
     }
 }
