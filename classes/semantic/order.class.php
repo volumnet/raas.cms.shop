@@ -8,6 +8,7 @@ use Mustache_Engine;
 use SOME\SOME;
 use RAAS\Application;
 use RAAS\User as RAASUser;
+use RAAS\CMS\Controller_Frontend;
 use RAAS\CMS\Feedback;
 use RAAS\CMS\Material;
 use RAAS\CMS\Page;
@@ -223,7 +224,7 @@ class Order extends Feedback
                 $emails,
                 $subject,
                 $message,
-                ViewSub_Orders::i()->_('ADMINISTRATION_OF_SITE') . ' ' . $_SERVER['HTTP_HOST'],
+                ViewSub_Orders::i()->_('ADMINISTRATION_OF_SITE') . ' ' . Controller_Frontend::i()->idnHost,
                 'info@' . $_SERVER['HTTP_HOST']
             );
         }

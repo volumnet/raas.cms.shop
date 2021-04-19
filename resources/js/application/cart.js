@@ -8,12 +8,54 @@ export default class {
      * @param {String|null} updateUrl URL для обновления
      */
     constructor(id, updateUrl = null) {
+        /**
+         * Идентификатор (URN) корзины
+         * @type {String}
+         */
         this.id = id;
         if (updateUrl) {
             this.updateUrl = updateUrl;
         } else {
             this.updateUrl = '/ajax/' + this.id + '/?AJAX=1';
         }
+        /**
+         * Получены данные
+         * @type {Boolean}
+         */
+        this.dataLoaded = false;
+
+        /**
+         * Товары в корзине
+         * @type {Array|null}
+         */
+        this.items = [];
+
+        /**
+         * Сумма товаров без учета дополнительных данных 
+         * (доставка, скидки и т.д.)
+         * @type {Number}
+         */
+        this.sum = 0;
+
+        /**
+         * Количество товаров без учета дополнительных данных 
+         * (доставка, скидки и т.д.)
+         * @type {Number}
+         */
+        this.count = 0;
+
+        /**
+         * Количество товаров с учетом дополнительных данных 
+         * (доставка, скидки и т.д.)
+         * @type {Number}
+         */
+        this.rollup = 0;
+
+        /**
+         * Дополнительные данные * (доставка, скидки и т.д.)
+         * @type {mixed|null}
+         */
+        this.additional = null;
     }
 
 
@@ -58,13 +100,20 @@ export default class {
                 ajaxSettings.data = postData;
             }
             return $.ajax(ajaxSettings).then((remoteData) => {
-                for (let key in ['items', 'sum', 'count', 'additional']) {
-                    if (remoteData[key]) {
+                for (let key of [
+                    'items', 
+                    'sum', 
+                    'count', 
+                    'rollup', 
+                    'additional'
+                ]) {
+                    if (remoteData[key] !== undefined) {
                         this[key] = remoteData[key];
                     } else {
                         this[key] = null;
                     }
                 }
+                this.dataLoaded = true;
                 $(document).trigger(
                     'raas.shop.cart-updated', 
                     [{id: this.id, remote: true, data: remoteData}]
@@ -79,7 +128,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     set(item, postData) {
-        this.update('action=set' + getItemQuery(item, item.amount), postData);
+        return this.update('action=set' + getItemQuery(item, item.amount), postData);
     }
 
 
@@ -89,7 +138,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     add(item, postData) {
-        this.update(
+        return this.update(
             'action=add' + getItemQuery(item, parseInt(item.min) || 1), 
             postData
         );
@@ -102,7 +151,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     delete(item, postData) {
-        this.update('action=delete' + getItemQuery(item), postData);
+        return this.update('action=delete' + getItemQuery(item), postData);
     }
 
 
@@ -111,6 +160,6 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     clear(postData) {
-        this.update('action=clear', postData);
+        return this.update('action=clear', postData);
     }
 }

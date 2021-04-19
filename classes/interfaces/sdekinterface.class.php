@@ -571,6 +571,10 @@ class SDEKInterface extends AbstractInterface
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         // curl_setopt($ch, CURLOPT_VERBOSE, 1);
         $result = curl_exec($ch);
+
+        $logFilename = Application::i()->baseDir . '/logs/' . date('Y-m-d-H-i-s') . ' sdek.txt';
+        $logData = ['url' => $url, 'request' => $data, 'response' => $result];
+        // file_put_contents($logFilename, var_export($logData, true));
         return $result;
     }
 

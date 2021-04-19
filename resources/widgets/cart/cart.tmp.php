@@ -12,27 +12,51 @@ namespace RAAS\CMS\Shop;
 use SOME\Text;
 use RAAS\CMS\Form;
 use RAAS\CMS\Material;
+use RAAS\CMS\Material_Type;
+use RAAS\CMS\MaterialTypeRecursiveCache;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
+use RAAS\CMS\JSONFormatter;
 
 $cartData = [];
 $cartData['count'] = (int)$Cart->count;
-$cartData['sum'] = (float)$Cart->sum;
+$cartData['additional'] = (array)$additional ?: null;
+if ($cartData['additional']['items']) {
+    foreach ((array)$cartData['additional']['items'] as $i => $cartItem) {
+        $cartItemFormatter = new CartItemArrayFormatter($cartItem);
+        $cartData['additional']['items'][$i] = $cartItemFormatter->format([
+            'type' => trim($cartItem->additional['type'])
+        ]);
+    }
+}
+$cartData['sum'] = $cartData['rollup'] = (float)$Cart->sum;
+if ($additional['discount']['price']) {
+    $cartData['rollup'] += (float)$additional['discount']['price'];
+}
+if ($additional['delivery']['price']) {
+    $cartData['rollup'] += (float)$additional['delivery']['price'];
+}
+$cartData['formData'] = (object)$_POST;
+if (!$cartData['formData']->delivery) {
+    $cartData['formData']->delivery = '0';
+}
+foreach (['region', 'city', 'pickup_point'] as $key) {
+    if (!$cartData['formData']->$key) {
+        $cartData['formData']->$key = '';
+    }
+}
 $cartData['items'] = [];
-foreach ($Cart->items as $cartItem) {
-    $item = new Material($cartItem->id);
-    $cartData['items'][] = [
-        'id' => $cartItem->id,
-        'meta' => $cartItem->meta,
-        'amount' => $cartItem->amount,
-        'price' => $cartItem->realprice,
-        'name' => $cartItem->name,
-        'url' => $item->url,
-        'image' => $item->visImages ? '/' . $item->visImages[0]->smallURL : null,
-        'min' => $item->min ?: 1,
-        'step' => $item->step ?: 1,
-    ];
+$cartData['localError'] = (array)$localError;
+$cartData['proceed'] = ($_SERVER['REQUEST_METHOD'] == 'POST');
+foreach ($Cart->items as $i => $cartItem) {
+    $cartItemFormatter = new CartItemArrayFormatter($cartItem);
+    $cartItemData = $cartItemFormatter->format([
+        'article',
+        'url',
+        'eCommerce' => ECommerce::getProduct($item, $i),
+    ]);
+    $cartData['items'][] = $cartItemData;
 }
 
 if ($_GET['AJAX']) {
@@ -40,12 +64,32 @@ if ($_GET['AJAX']) {
     exit;
 } elseif ($epayWidget && ($epayWidget instanceof Snippet)) {
     eval('?' . '>' . $epayWidget->description);
-} elseif ($success[(int)$Block->id]) { ?>
+} elseif ($success[(int)$Block->id]) {
+    $eCommerceProducts = [];
+    $catalogMaterialType = Material_Type::importByURN('catalog');
+    foreach ((array)$Item->items as $item) {
+        if (in_array(
+            $item->pid,
+            MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id)
+        )) {
+            $eCommerceProducts[] = ECommerce::getProduct($item);
+        }
+    }
+    ?>
     <div class="notifications">
       <div class="alert alert-success">
         <?php echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id)?>
       </div>
     </div>
+    <script>
+    jQuery(document).ready(function($) {
+        window.eCommerce.pushToDataLayer(
+            'purchase',
+            <?php echo json_encode($eCommerceProducts)?>,
+            <?php echo (int)$Item->id?>
+        );
+    });
+    </script>
 <?php } else { ?>
     <script type="text/html" v-pre id="cart-item-template">
       <div class="cart-list__item">

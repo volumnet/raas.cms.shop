@@ -134,6 +134,7 @@ class Webmaster extends CMSWebmaster
             'materials/catalog/spec' => View_Web::i()->_('SPECIAL_OFFER'),
             'materials/catalog/popular_cats' => View_Web::i()->_('POPULAR_CATEGORIES'),
             'cart/my_orders' => View_Web::i()->_('MY_ORDERS'),
+            'menu/menu_catalog' => View_Web::i()->_('MENU_CATALOG'),
         ];
         foreach ($widgetsData as $url => $name) {
             $urn = explode('/', $url);
@@ -974,10 +975,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'pageId' => (int)$catalog->id,
                 'urn' => 'catalog',
                 'inherit' => 10,
-                'name' => View_Web::i()->_('CATALOG_MAIN_MENU'),
+                'name' => View_Web::i()->_('CATALOG'),
                 'realize' => false,
                 'addMainPageLink' => false,
-                'blockLocation' => 'menu_main',
+                'blockLocation' => 'menu_catalog',
                 'fullMenu' => true,
                 'blockPage' => $this->Site,
                 'inheritBlock' => true,
@@ -996,6 +997,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'widget_urn' => 'popular_cats',
             ],
         ]);
+
         $this->createAJAXMenus($ajax);
         $sqlQuery = "SELECT tB.id
                        FROM " . Block::_tablename() . " AS tB

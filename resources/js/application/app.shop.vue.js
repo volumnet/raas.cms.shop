@@ -22,6 +22,10 @@ export default {
             this.favorites && this.favorites.update();
             this.compare && this.compare.update();
         }, 0);
+
+        $(document).on('raas.shop.cart-updated', (e, data) => {
+            this.$forceUpdate();
+        });
     },
     methods: {
         /**
