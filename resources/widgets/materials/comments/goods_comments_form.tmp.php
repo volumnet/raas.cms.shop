@@ -50,7 +50,7 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
               <div class="form-group">
                 <label for="<?php echo htmlspecialchars($Form->antispam_field_name)?>" class="control-label col-sm-3 col-md-2"><?php echo CAPTCHA?></label>
                 <div class="col-sm-9 col-md-4">
-                  <img src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
+                  <img loading="lazy" src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
                   <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
                 </div>
               </div>

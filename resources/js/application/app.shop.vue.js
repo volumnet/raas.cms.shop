@@ -30,14 +30,13 @@ export default {
     methods: {
         /**
          * Запрос на удаление
-         * @param  {[type]} item [description]
-         * @param  {[type]} cart [description]
-         * @return {[type]}      [description]
+         * @param  {Object} item Товар для удаления
+         * @param  {Cart} cart Корзина
          */
-        requestItemDelete: function (item, cart) {
-            this.confirm(this.translations.CART_DELETE_CONFIRM).then(() => {
-                cart.set(item.id, 0, item.meta, item.price);
-            });
+        requestItemDelete: async function (item, cart) {
+            if (await this.confirm(this.translations.CART_DELETE_CONFIRM)) {
+                cart.delete(item);
+            }
         },
     },
     computed: {

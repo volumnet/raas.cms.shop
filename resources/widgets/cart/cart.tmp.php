@@ -54,7 +54,7 @@ foreach ($Cart->items as $i => $cartItem) {
     $cartItemData = $cartItemFormatter->format([
         'article',
         'url',
-        'eCommerce' => ECommerce::getProduct($item, $i),
+        'eCommerce' => ECommerce::getProduct($cartItem->material, $i),
     ]);
     $cartData['items'][] = $cartItemData;
 }
@@ -96,7 +96,7 @@ if ($_GET['AJAX']) {
         <div class="cart-item">
           <div class="cart-item__image">
             <a :href="item.url" v-if="item.image">
-              <img :src="item.image" alt="">
+              <img loading="lazy" :src="item.image" alt="">
             </a>
           </div>
           <div class="cart-item__title">
@@ -253,7 +253,7 @@ if ($_GET['AJAX']) {
                         <div class="form-group">
                           <label for="<?php echo htmlspecialchars($Form->antispam_field_name)?>" class="control-label col-sm-3 col-md-2"><?php echo CAPTCHA?></label>
                           <div class="col-sm-9 col-md-4">
-                            <img src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
+                            <img loading="lazy" src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
                             <input type="text" autocomplete="off" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
                           </div>
                         </div>

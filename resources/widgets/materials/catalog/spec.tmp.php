@@ -30,5 +30,4 @@ if ($Set) { ?>
     </div>
     <?php
     Package::i()->requestCSS('/css/spec.css');
-    Package::i()->requestJS('/js/spec.js');
 }

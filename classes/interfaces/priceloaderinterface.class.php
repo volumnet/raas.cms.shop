@@ -1438,7 +1438,7 @@ class PriceloaderInterface extends AbstractInterface
             $field->Owner = $material;
             if ($field->multiple) {
                 $x = $field->getValues(true);
-                $x = array_map(function ($y) use ($column) {
+                $x = array_map(function ($y) use ($field) {
                     $z = $field->doRich($y);
                     if (in_array($field->datatype, ['number', 'range'])) {
                         $z = (float)$z;

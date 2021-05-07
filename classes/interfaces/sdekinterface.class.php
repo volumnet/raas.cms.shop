@@ -574,7 +574,7 @@ class SDEKInterface extends AbstractInterface
 
         $logFilename = Application::i()->baseDir . '/logs/' . date('Y-m-d-H-i-s') . ' sdek.txt';
         $logData = ['url' => $url, 'request' => $data, 'response' => $result];
-        // file_put_contents($logFilename, var_export($logData, true));
+        file_put_contents($logFilename, var_export($logData, true));
         return $result;
     }
 

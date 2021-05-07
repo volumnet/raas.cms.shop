@@ -61,7 +61,7 @@ if ($Item) {
                         <div class="catalog-article-images-list__list">
                           <?php for ($i = 0; $i < count($Item->visImages); $i++) { $row = $Item->visImages[$i]; ?>
                               <a class="catalog-article-images-list__item" href="/<?php echo $Item->visImages[$i]->fileURL?>" data-v-on_click="clickThumbnail(<?php echo (int)$i?>, $event)" data-lightbox-gallery="tn">
-                                <img src="/<?php echo htmlspecialchars($row->smallURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></a>
+                                <img loading="lazy" src="/<?php echo htmlspecialchars($row->smallURL)?>" alt="<?php echo htmlspecialchars($row->name)?>" /></a>
                           <?php } ?>
                         </div>
                       </div>
@@ -73,7 +73,7 @@ if ($Item) {
                     <?php for ($i = 0; $i < count($Item->visImages); $i++) {
                         $jsonLd['image'][] = '/' . $Item->visImages[$i]->fileURL; ?>
                         <a itemprop="image" href="/<?php echo $Item->visImages[$i]->fileURL?>" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((selectedImage == <?php echo $i?>) ? 'block' : 'none')}" data-lightbox-gallery="g">
-                          <img src="/<?php echo Package::i()->tn($Item->visImages[$i]->fileURL, 600, 600, 'frame')?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
+                          <img loading="lazy" src="/<?php echo Package::i()->tn($Item->visImages[$i]->fileURL, 600, 600, 'frame')?>" alt="<?php echo htmlspecialchars($Item->visImages[$i]->name ?: $row->name)?>" /></a>
                     <?php } ?>
                   </div>
                 </div>
@@ -287,7 +287,7 @@ if ($Item) {
                                           <meta itemprop="uploadDate" content="' . date('Y-m-d', strtotime($Item->modify_date)) . '" />
                                           <meta itemprop="thumbnailUrl" content="https://i.ytimg.com/vi/' . htmlspecialchars(addslashes($ytid)) . '/hqdefault.jpg" />
                                           <a itemprop="url" class="catalog-article-videos-item__image" href="https://youtube.com/embed/' . $ytid . '" data-lightbox-gallery="v" title="' . htmlspecialchars($ytname) . '">
-                                            <img itemprop="thumbnail" src="https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
+                                            <img loading="lazy" itemprop="thumbnail" src="https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg" alt="' . htmlspecialchars($ytname) . '">
                                           </a>
                                         </div>
                                       </div>';

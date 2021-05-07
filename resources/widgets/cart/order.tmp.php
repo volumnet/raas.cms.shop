@@ -33,7 +33,7 @@ $getField = function($row) {
             $arr[$key] .= '<a href="/' . $val->fileURL . '">' . htmlspecialchars($val->name) . '</a>';
             break;
         case 'image':
-            $arr[$key] .= '<a href="/' . $val->fileURL . '"><img src="/' . $val->tnURL. '" alt="' . htmlspecialchars($val->name) . '" title="' . htmlspecialchars($val->name) . '" /></a>';
+            $arr[$key] .= '<a href="/' . $val->fileURL . '"><img loading="lazy" src="/' . $val->tnURL. '" alt="' . htmlspecialchars($val->name) . '" title="' . htmlspecialchars($val->name) . '" /></a>';
             break;
         case 'htmlarea':
             $arr[$key] = '<div>' . $val . '</div>';
@@ -84,7 +84,7 @@ $getField = function($row) {
                     <div class="cart-item__image">
                       <?php if ($item->visImages) { ?>
                           <a <?php echo $item->url ? 'href="' . htmlspecialchars($item->url) . '" target="_blank"' : ''?>>
-                            <img src="/<?php echo htmlspecialchars(addslashes($item->visImages[0]->tnURL))?>" alt="<?php echo htmlspecialchars($item->visImages[0]->name ?: $item->name)?>" target="_blank" /></a>
+                            <img loading="lazy" src="/<?php echo htmlspecialchars(addslashes($item->visImages[0]->tnURL))?>" alt="<?php echo htmlspecialchars($item->visImages[0]->name ?: $item->name)?>" target="_blank" /></a>
                       <?php } ?>
                     </div>
                     <div class="cart-item__title">

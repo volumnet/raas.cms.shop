@@ -20,25 +20,6 @@ export default {
             type: Object,
             required: true
         },
-        /**
-         * Корзина
-         */
-        cart: {
-            type: Object,
-        },
-        /**
-         * Избранное
-         */
-        favorites: {
-            type: Object,
-        },
-        /**
-         * Сравнение
-         * @type {Object}
-         */
-        compare: {
-            type: Object,
-        },
     },
     data: function () {
         let translations = {
@@ -65,13 +46,8 @@ export default {
         };
     },
     mounted: function () {
-        this.inCart = !!this.checkInCart(this.cart);
-        this.inFavorites = !!this.checkInCart(this.favorites);
-        this.inCompare = !!this.checkInCart(this.compare);
         $(document).on('raas.shop.cart-updated', () => {
-            this.inCart = !!this.checkInCart(this.cart);
-            this.inFavorites = !!this.checkInCart(this.favorites);
-            this.inCompare = !!this.checkInCart(this.compare);
+            this.checkCarts();
         });
     },
     methods: {
@@ -86,17 +62,12 @@ export default {
 
 
         /**
-         * Проверка, присутствует ли товар в корзине
-         * @param {AjaxCart} cart Корзина для проверки
-         * @return {Number} Количество товара в корзине
+         * Проверяет наличие в корзинах
          */
-        checkInCart: function (cart) {
-            try {
-                let result = parseInt(cart.cookieCart.rawItems()[this.item.id][this.item.meta || '']);
-                return result;
-            } catch (e) {
-                return 0;
-            }
+        checkCarts: function () {
+            this.inCart = !!window.app.cart.checkAmount(this.item);
+            this.inFavorites = !!window.app.favorites.checkAmount(this.item);
+            this.inCompare = !!window.app.compare.checkAmount(this.item);
         },
 
 
@@ -110,51 +81,25 @@ export default {
 
 
         /**
-         * Получает данные для модального окна корзины
-         * @param  {Number} amount 1 - товар добавлен, -1 - товар удален
+         * Получает данные для модального окна корзин
+         * @param {Cart} cart Корзина
+         * @param {Number} amount 1 - товар добавлен, -1 - товар удален
          * @return {Object}
          */
-        getCartModalData: function (amount = 1) {
-            return {
-                items: [Object.assign({}, this.item, { amount: this.amount })],
-                cart: this.cart,
-                title: this.translations[(amount > 0) ? 'ADDED_TO_CART' : 'DELETED_FROM_CART'],
+        getCartModalData: function (cart, amount = 1) {
+            let suffix = '_' + cart.id.toUpperCase();
+            let titleURN = ((amount > 0) ? 'ADDED_TO' : 'DELETED_FROM');
+            let result = {
+                items: [Object.assign({}, this.item, { amount })],
+                title: this.translations[titleURN + suffix],
                 href: '/cart/', 
-                submitTitle: this.translations.GO_TO_CART, 
+                submitTitle: this.translations['GO_TO' + suffix], 
                 dismissTitle: this.translations.CONTINUE_SHOPPING,
             };
-        },
-
-
-        /**
-         * Получает данные для модального окна избранного
-         * @param  {Number} amount amount 1 - товар добавлен, -1 - товар удален
-         * @return {Object}
-         */
-        getFavoritesModalData: function (amount = 1) {
-            return {
-                items: [Object.assign({}, this.item, { amount: this.amount })],
-                title: this.translations[(amount > 0) ? 'ADDED_TO_FAVORITES' : 'DELETED_FROM_FAVORITES'],
-                href: '/favorites/', 
-                submitTitle: this.translations.GO_TO_FAVORITES, 
-                dismissTitle: this.translations.CONTINUE_SHOPPING,
-            };
-        },
-
-
-        /**
-         * Получает данные для модального окна сравнения
-         * @param  {Number} amount amount 1 - товар добавлен, -1 - товар удален
-         * @return {Object}
-         */
-        getCompareModalData: function (amount = 1) {
-            return {
-                items: [Object.assign({}, this.item, { amount: this.amount })],
-                title: this.translations[(amount > 0) ? 'ADDED_TO_COMPARE' : 'DELETED_FROM_COMPARE'],
-                href: '/compare/', 
-                submitTitle: this.translations.GO_TO_COMPARE, 
-                dismissTitle: this.translations.CONTINUE_SHOPPING,
-            };
+            if (cart.id == 'cart') {
+                result.cart = cart;
+            }
+            return result;
         },
 
 
@@ -163,11 +108,11 @@ export default {
          */
         addToCart: function () {
             this.inCart = true;
-            this.cart.add(this.item.id, this.amount, this.item.meta, this.item.price);
+            window.app.cart.add(this.item, this.amount);
             $(document).one('raas.shop.cart-updated', () => {
-                let modalData = this.getCartModalData();
+                let modalData = this.getCartModalData(window.app.cart, this.amount);
                 window.app.addedModal.show(modalData);
-            })
+            });
         },
 
 
@@ -175,11 +120,15 @@ export default {
          * Добавляет/убирает товара в корзине
          */
         toggleCart: function () {
-            let added = (this.inCart ? -1 : 1);
-            this.cart.set(this.item.id, this.inCart ? 0 : 1, '');
+            window.app.cart.set(this.item, this.inCart ? 0 : this.amount);
             this.inCart = !this.inCart;
-            let modalData = this.getCartModalData(added);
-            window.app.addedModal.show(modalData);
+            $(document).one('raas.shop.cart-updated', () => {
+                let modalData = this.getCartModalData(
+                    window.app.cart, 
+                    this.inCart ? 1 : -1
+                );
+                window.app.addedModal.show(modalData);
+            });
         },
 
 
@@ -187,11 +136,15 @@ export default {
          * Добавляет/убирает товар в избранном
          */
         toggleFavorites: function () {
-            let added = (this.inFavorites ? -1 : 1);
-            this.favorites.set(this.item.id, this.inFavorites ? 0 : 1, '');
+            window.app.favorites.set(this.item, this.inFavorites ? 0 : 1);
             this.inFavorites = !this.inFavorites;
-            let modalData = this.getFavoritesModalData(added);
-            window.app.addedModal.show(modalData);
+            $(document).one('raas.shop.cart-updated', () => {
+                let modalData = this.getCartModalData(
+                    window.app.favorites, 
+                    this.inFavorites ? 1 : -1
+                );
+                window.app.addedModal.show(modalData);
+            });
         },
 
 
@@ -199,11 +152,15 @@ export default {
          * Добавляет/убирает товар в избранном
          */
         toggleCompare: function () {
-            let added = (this.inCompare ? -1 : 1);
-            this.compare.set(this.item.id, this.inFavorites ? 0 : 1, '');
+            window.app.compare.set(this.item, this.inCompare ? 0 : 1);
             this.inCompare = !this.inCompare;
-            let modalData = this.getFavoritesModalData(added);
-            window.app.addedModal.show(modalData);
+            $(document).one('raas.shop.cart-updated', () => {
+                let modalData = this.getCartModalData(
+                    window.app.compare, 
+                    this.inCompare ? 1 : -1
+                );
+                window.app.addedModal.show(modalData);
+            });
         },
     },
     computed: {

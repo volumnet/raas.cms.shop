@@ -503,7 +503,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 'content',
-                '__raas_shop_cart_interface',
+                'cart_interface',
                 'cart',
                 $cart
             );
@@ -532,7 +532,8 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                     'urn' => 'cart',
                     'template' => 0,
                     'cache' => 0,
-                    'response_code' => 200
+                    'response_code' => 200,
+                    'mime' => 'application/json',
                 ],
                 $ajax
             );
@@ -540,7 +541,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 '',
-                '__raas_shop_cart_interface',
+                'cart_interface',
                 'cart',
                 $ajaxCart
             );
@@ -580,7 +581,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 'content',
-                '__raas_shop_cart_interface',
+                '__raas_shop_compare_interface',
                 'favorites',
                 $favorites
             );
@@ -609,7 +610,8 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                     'urn' => 'favorites',
                     'template' => 0,
                     'cache' => 0,
-                    'response_code' => 200
+                    'response_code' => 200,
+                    'mime' => 'application/json',
                 ],
                 $ajax
             );
@@ -617,38 +619,12 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 '',
-                '__raas_shop_cart_interface',
-                'cart',
+                '__raas_shop_compare_interface',
+                'favorites',
                 $ajaxFavorites
             );
         }
         return $favorites;
-    }
-
-
-    /**
-     * Создаем страницу доставки/оплаты
-     * @return Page Созданная или существующая страница
-     */
-    public function createDelivery()
-    {
-        $temp = Page::getSet([
-            'where' => ["pid = " . (int)$this->Site->id, "urn = 'delivery'"]
-        ]);
-        if ($temp) {
-            $delivery = $temp[0];
-            $delivery->trust();
-        } else {
-            $delivery = $this->createPage(
-                [
-                    'name' => View_Web::i()->_('DELIVERY_AND_PAYMENT'),
-                    'urn' => 'delivery',
-                ],
-                $this->Site,
-                true
-            );
-        }
-        return $delivery;
     }
 
 
@@ -683,7 +659,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 'content',
-                '__raas_shop_cart_interface',
+                '__raas_shop_compare_interface',
                 'compare',
                 $compare
             );
@@ -712,7 +688,8 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                     'urn' => 'compare',
                     'template' => 0,
                     'cache' => 0,
-                    'response_code' => 200
+                    'response_code' => 200,
+                    'mime' => 'application/json',
                 ],
                 $ajax
             );
@@ -720,12 +697,38 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 '',
-                '__raas_shop_cart_interface',
-                'cart',
+                '__raas_shop_compare_interface',
+                'compare',
                 $ajaxCompare
             );
         }
         return $compare;
+    }
+
+
+    /**
+     * Создаем страницу доставки/оплаты
+     * @return Page Созданная или существующая страница
+     */
+    public function createDelivery()
+    {
+        $temp = Page::getSet([
+            'where' => ["pid = " . (int)$this->Site->id, "urn = 'delivery'"]
+        ]);
+        if ($temp) {
+            $delivery = $temp[0];
+            $delivery->trust();
+        } else {
+            $delivery = $this->createPage(
+                [
+                    'name' => View_Web::i()->_('DELIVERY_AND_PAYMENT'),
+                    'urn' => 'delivery',
+                ],
+                $this->Site,
+                true
+            );
+        }
+        return $delivery;
     }
 
 

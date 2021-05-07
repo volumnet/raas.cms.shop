@@ -9,7 +9,6 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Pages;
-use SOME\Text;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\PageRecursiveCache;
 use RAAS\CMS\Snippet;
@@ -51,10 +50,9 @@ if ($Item) {
         <div class="brands-article">
           <?php if ($Item->image->id) { ?>
               <div class="brands-article__image">
-                <img src="/<?php echo htmlspecialchars($Item->image->fileURL)?>" alt="<?php echo htmlspecialchars($Item->image->name ?: $row->name)?>" />
+                <img loading="lazy" src="/<?php echo htmlspecialchars($Item->image->fileURL)?>" alt="<?php echo htmlspecialchars($Item->image->name ?: $row->name)?>" />
               </div>
           <?php } ?>
-          <div class="brands-article__text">
             <div class="brands-article__description">
               <?php echo $Item->description; ?>
             </div>
@@ -90,7 +88,7 @@ if ($Item) {
                 <div class="brands-item">
                   <a class="brands-item__image" href="<?php echo htmlspecialchars($item->url)?>">
                     <?php if ($item->image->id) { ?>
-                        <img src="/<?php echo htmlspecialchars($item->image->fileURL)?>" alt="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" title="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" />
+                        <img loading="lazy" src="/<?php echo htmlspecialchars($item->image->fileURL)?>" alt="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" title="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" />
                     <?php } else {
                         echo htmlspecialchars($item->name);
                     } ?>
@@ -106,4 +104,6 @@ if ($Item) {
           </div>
       <?php } ?>
     </div>
-<?php } ?>
+    <?php
+    Package::i()->requestCSS('/css/brands.css');
+}

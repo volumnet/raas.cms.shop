@@ -14,16 +14,13 @@ use RAAS\CMS\Package;
 $cartData = [];
 $cartData['count'] = (int)$Cart->count;
 $cartData['items'] = [];
-foreach ($Cart->items as $cartItem) {
-    $item = new Material($cartItem->id);
-    $cartData['items'][] = [
-        'id' => $cartItem->id,
-        'meta' => $cartItem->meta,
-        'price' => $cartItem->realprice,
-        'name' => $cartItem->name,
-        'url' => $item->url,
-        'image' => $item->visImages ? '/' . $item->visImages[0]->smallURL : null,
-    ];
+foreach ($Cart->items as $i => $cartItem) {
+    $cartItemFormatter = new CartItemArrayFormatter($cartItem);
+    $cartItemData = $cartItemFormatter->format([
+        'article',
+        'url',
+    ]);
+    $cartData['items'][] = $cartItemData;
 }
 
 if ($_GET['AJAX']) {
@@ -35,7 +32,7 @@ if ($_GET['AJAX']) {
         <div class="favorites-item">
           <div class="favorites-item__image">
             <a :href="item.url" v-if="item.image">
-              <img :src="item.image" alt="">
+              <img loading="lazy" :src="item.image" alt="">
             </a>
           </div>
           <div class="favorites-item__title">

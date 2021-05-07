@@ -8,8 +8,8 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<div class="cart-main__outer">
-  <a href="/cart/" class="cart-main" rel="nofollow" data-v-bind_class="{ 'cart-main_active': cart.dataLoaded }" title="<?php echo CART?>">
+<div class="cart-main__outer" data-vue-role="cart-main" data-v-bind_cart="cart" data-v-slot="vm">
+  <a href="/cart/" class="cart-main" rel="nofollow" data-v-bind_class="{ 'cart-main_active': cart.dataLoaded }" title="<?php echo CART?>" data-v-on_click="vm.clickInformer($event)">
     <span class="cart-main__amount" data-v-if="cart.count > 0" data-v-html="cart.count"></span>
     <span class="cart-main__text">
       <span class="cart-main__sum-outer">
@@ -18,6 +18,5 @@ namespace RAAS\CMS\Shop;
       </span>
     </span>
   </a>
-  <?php /*<div data-vue-role="cart-main-list" data-v-if="vm.listActive" data-v-bind_items="vm.items" data-v-bind_amount="vm.amount" data-v-bind_sum="vm.sum" data-v-on_close="vm.closeList()" data-v-on_delete="vm.emit('delete', $event)"></div>*/?>
 </div>
 <!--/noindex-->

@@ -4,7 +4,8 @@
  */
 namespace RAAS\CMS\Shop;
 
-use Mustache_Engine;
+use Twig_Environment;
+use Twig_Loader_String;
 use SOME\SOME;
 use RAAS\Application;
 use RAAS\User as RAASUser;
@@ -203,23 +204,29 @@ class Order extends Feedback
             if (!in_array($field->datatype, ['material', 'file', 'image']) &&
                 !$field->multiple
             ) {
-                $val = $field->doRich();
+                $origVal = $field->getValue();
+                if ($field->source) {
+                    $val = $field->doRich($origVal);
+                    $dataArr[$field->urn] = $origVal;
+                } else {
+                    $val = $origVal;
+                }
                 $dataArr[mb_strtoupper($field->urn)] = $val;
                 if (($field->datatype == 'email') || ($field->urn == 'email')) {
                     $emails[] = $val;
                 }
             }
         }
-        $mustache = new Mustache_Engine();
+        $twig = new Twig_Environment(new Twig_Loader_String());
         if ($emails) {
-            $subject = $mustache->render(
-                $this->status->notification_title,
-                $dataArr
-            );
-            $message = $mustache->render(
-                $this->status->notification,
-                $dataArr
-            );
+            $subjectTemplate = $this->status->notification_title;
+            $subjectTemplate = strtr($subjectTemplate, ['&#39;' => "'"]);
+            $subject = $twig->render($subjectTemplate, $dataArr);
+
+            $messageTemplate = $this->status->notification;
+            $messageTemplate = strtr($messageTemplate, ['&#39;' => "'"]);
+            $message = $twig->render($messageTemplate, $dataArr);
+
             Application::i()->sendmail(
                 $emails,
                 $subject,

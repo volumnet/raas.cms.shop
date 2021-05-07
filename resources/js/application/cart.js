@@ -125,21 +125,26 @@ export default class {
     /**
      * Устанавливает количество товара
      * @param {Object} item Товар
+     * @param {Number} amount Количество единиц товара
      * @param {Object} postData Дополнительные POST-данные
      */
-    set(item, postData) {
-        return this.update('action=set' + getItemQuery(item, item.amount), postData);
+    set(item, amount = null, postData = null) {
+        return this.update(
+            'action=set' + this.getItemQuery(item, parseInt(amount)), 
+            postData
+        );
     }
 
 
     /**
      * Добавляет товар
      * @param {Object} item Товар
+     * @param {Number} amount Количество единиц товара
      * @param {Object} postData Дополнительные POST-данные
      */
-    add(item, postData) {
+    add(item, amount = null, postData = null) {
         return this.update(
-            'action=add' + getItemQuery(item, parseInt(item.min) || 1), 
+            'action=add' + this.getItemQuery(item, parseInt(amount) || 1), 
             postData
         );
     }
@@ -151,7 +156,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     delete(item, postData) {
-        return this.update('action=delete' + getItemQuery(item), postData);
+        return this.update('action=delete' + this.getItemQuery(item), postData);
     }
 
 
@@ -161,5 +166,25 @@ export default class {
      */
     clear(postData) {
         return this.update('action=clear', postData);
+    }
+
+
+    /**
+     * Проверяет количество товара в корзине
+     * @param {Object} item Товар
+     * @return {Number} Количество товара в корзине
+     */
+    checkAmount(item) {
+        try {
+            let filteredItems = this.items.filter((x) => {
+                let result = (x.id == item.id) && 
+                    ((x.meta || '') == (item.meta || ''));
+                return result;
+            });
+            // console.log(this.item.id, this.item.meta, this.id, filteredItems[0]);
+            return filteredItems[0].amount;
+        } catch (e) {
+            return 0;
+        }
     }
 }

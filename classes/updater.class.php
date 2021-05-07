@@ -59,7 +59,7 @@ class Updater extends \RAAS\Updater
     public function postInstall()
     {
         $w = new Webmaster();
-        $s = Snippet::importByURN('__raas_shop_cart_interface');
+        $s = Snippet::importByURN('__raas_shop_yml_interface');
         $w->checkStdInterfaces();
         if (!$s || !$s->id) {
             $w->createIShop();

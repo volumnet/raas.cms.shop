@@ -34,7 +34,7 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
     if ($node instanceof Menu) {
         $children = $node->visSubMenu;
     } else {
-        $children = (isset($node['children']) && is_array($node['children'])) ? $node['children'] : array();
+        $children = (isset($node['children']) && is_array($node['children'])) ? $node['children'] : [];
     }
     for ($i = 0; $i < count($children); $i++) {
         $row = $children[$i];
