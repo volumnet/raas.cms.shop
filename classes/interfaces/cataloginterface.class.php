@@ -6,6 +6,8 @@ namespace RAAS\CMS\Shop;
 
 use Twig_Environment;
 use Twig_Loader_String;
+use SOME\Pages;
+use SOME\SOME;
 use RAAS\Attachment;
 use RAAS\CMS\Block;
 use RAAS\CMS\Block_Form;
@@ -28,9 +30,19 @@ class CatalogInterface extends MaterialInterface
     const FILTER_CLASS = CatalogFilter::class;
 
     /**
-     * ID# товаров, полученные из полнотекстового поиска
+     * Использовать (если нет дополнительной фильтрации) быстрый поиск
+     * по ID# товаров, взятых из фильтра
+     * @var bool
      */
-    protected $fullTextIds = [];
+    public $useFilterIds = true;
+
+    /**
+     * ID# товаров, полученных из фильтра (с учетом сортировки)
+     * @var int[]
+     */
+    protected $filterIds = [];
+
+
 
     public function process()
     {
@@ -211,34 +223,155 @@ class CatalogInterface extends MaterialInterface
     }
 
 
-    public function getSQLParts(Block_Material $block, Page $page, array $get = [])
-    {
-        $sqlFrom = $sqlFromBind = $sqlWhere = $sqlWhereBind = $result = [];
+    public function getList(
+        Block_Material $block,
+        Page $page,
+        array $get = [],
+        Pages $pages = null
+    ) {
+        $st = microtime(1);
+        $this->filterIds = $this->getFilterIds($block, $get, $page->catalogFilter);
+        $sqlParts = $this->getSQLParts($block, $page, $get, $pages);
+        $sqlQuery = $this->getSQLQuery(
+            $sqlParts['from'],
+            $sqlParts['where'],
+            $sqlParts['sort'],
+            $sqlParts['order']
+        );
+
+        // var_dump(microtime(1) - $st, $sqlQuery, $sqlParts['bind']); exit;
+        $st = microtime(1);
+        if ($this->useFilterIds) {
+            $set = Material::getSQLSet([$sqlQuery, $sqlParts['bind']]);
+            // var_dump('aaa', microtime(1) - $st);
+        } else {
+            $set = Material::getSQLSet([$sqlQuery, $sqlParts['bind']], $pages);
+            // var_dump('bbb', microtime(1) - $st);
+        }
+        // print_r($sqlQuery);
+        // var_dump($sqlParts);
+        // exit;
+        $set = array_filter($set, function ($x) {
+            return $x->currentUserHasAccess();
+        });
+        return $set;
+    }
+
+
+    /**
+     * Получает части SQL-выражения
+     * @param Block_Material|null $block Блок, для которого применяется
+     *                                   интерфейс
+     * @param Page|null $page Страница, для которой применяется интерфейс
+     * @param array $get Поля $_GET параметров
+     * @param Pages|null $pages Постраничная разбивка
+     * @return [
+     *             'from' => array<
+     *                 string[] псевдоним поля => string SQL-инструкция
+     *                                                   по выборке таблицы
+     *             > Список подключаемых таблиц,
+     *             'where' => array<string SQL-инструкция> Ограничения
+     *                                                     для SQL WHERE,
+     *             'sort' => string Сортировка для SQL ORDER BY
+     *             'order' => ""|"ASC"|"DESC" Порядок сортировки
+     *                                        для SQL ORDER BY,
+     *             'bind' => array<mixed Значение связки> Связки
+     *                                                    для SQL-выражения
+     *         ]
+     */
+    public function getSQLParts(
+        Block_Material $block,
+        Page $page,
+        array $get = [],
+        Pages $pages = null
+    ) {
+        $st = microtime(1);
+
+        $sqlFromAccess = $sqlFromBindAccess = $sqlWhereAccess = [];
+        $sqlFromMaterials =  $sqlWhereMaterials = $sqlWhereBindMaterials = [];
+        $sqlFromFilter = $sqlFromBindFilter = $sqlWhereFilter = $sqlWhereBindFilter = [];
+        $sqlFromOrder = $sqlFromBindOrder = [];
+
+        // $sqlFrom = $sqlFromBind = $sqlWhere = $sqlWhereBind = [];
+
         $sqlSort = $sqlOrder = "";
-        $this->getListAccessSQL($sqlFrom, $sqlFromBind, $sqlWhere);
+        $this->getListAccessSQL($sqlFromAccess, $sqlFromBindAccess, $sqlWhereAccess);
         $this->getMaterialsSQL(
             $block,
             $page,
-            $sqlFrom,
-            $sqlWhere,
-            $sqlWhereBind
+            $sqlFromMaterials,
+            $sqlWhereMaterials,
+            $sqlWhereBindMaterials,
+            $this->filterIds // Добавился параметр относительно MaterialInterface::getMaterialsSQL
         );
-        $this->getFilteringSQL(
-            $sqlFrom,
-            $sqlFromBind,
-            $sqlWhere,
-            $sqlWhereBind,
+        $nativeFilter = array_values(array_filter(
             (array)$block->filter,
-            $get
-        );
+            function ($x) {
+                return !is_numeric($x['field']);
+            }
+        ));
+        if ($nativeFilter) {
+            $this->useFilterIds = false;
+            $this->getFilteringSQL(
+                $sqlFromFilter,
+                $sqlFromBindFilter,
+                $sqlWhereFilter,
+                $sqlWhereBindFilter,
+                (array)$nativeFilter,
+                $get
+            );
+        }
         $this->getOrderSQL(
             $block,
             $get,
-            $sqlFrom,
-            $sqlFromBind,
+            $sqlFromOrder,
+            $sqlFromBindOrder,
             $sqlSort,
             $sqlOrder,
-            $page->catalogFilter // Добавился параметр относительно MaterialInterface::getSQLParts
+            $this->filterIds // Добавился параметр относительно MaterialInterface::getOrderSQL
+        );
+        if ($this->useFilterIds && $pages) {
+            $sqlFromMaterials =  $sqlWhereMaterials = $sqlWhereBindMaterials = [];
+            $pagedFilterIds = SOME::getArraySet($this->filterIds, $pages);
+            $this->getMaterialsSQL(
+                $block,
+                $page,
+                $sqlFromMaterials,
+                $sqlWhereMaterials,
+                $sqlWhereBindMaterials,
+                $pagedFilterIds // Добавился параметр относительно MaterialInterface::getMaterialsSQL
+            );
+            $sqlFromOrder = $sqlFromBindOrder = [];
+            $sqlSort = $sqlOrder = "";
+            $this->getOrderSQL(
+                $block,
+                $get,
+                $sqlFromOrder,
+                $sqlFromBindOrder,
+                $sqlSort,
+                $sqlOrder,
+                $pagedFilterIds // Добавился параметр относительно MaterialInterface::getOrderSQL
+            );
+        }
+        $sqlFrom = array_merge(
+            $sqlFromAccess,
+            $sqlFromMaterials,
+            $sqlFromFilter,
+            $sqlFromOrder
+        );
+        $sqlFromBind = array_merge(
+            $sqlFromBindAccess,
+            $sqlFromBindFilter,
+            $sqlFromBindOrder
+        );
+        $sqlWhere = array_merge(
+            $sqlWhereAccess,
+            $sqlWhereMaterials,
+            $sqlWhereFilter
+        );
+        $sqlWhereBind = array_merge(
+            $sqlWhereBindMaterials,
+            $sqlWhereBindFilter
         );
         $result = [
             'from' => $sqlFrom,
@@ -251,82 +384,76 @@ class CatalogInterface extends MaterialInterface
     }
 
 
+    /**
+     * Получает SQL-инструкции по материалам
+     * @param Block_Material|null $block Блок, для которого применяется
+     *                                   интерфейс
+     * @param Page|null $page Страница, для которой применяется интерфейс
+     * @param array<
+     *            string[] псевдоним поля => string SQL-инструкция
+     *                                              по выборке таблицы
+     *        > $sqlFrom Список подключаемых таблиц
+     * @param array<string SQL-инструкция> $sqlWhere Ограничения для SQL WHERE
+     * @param array<mixed Значение связки> $sqlWhereBind Связки для SQL WHERE
+     * @param int[] $filterIds ID# товаров по фильтру
+     */
     public function getMaterialsSQL(
         Block_Material $block,
         Page $page,
         array &$sqlFrom,
         array &$sqlWhere,
-        array &$sqlWhereBind
+        array &$sqlWhereBind,
+        array $filterIds = []
     ) {
-        if ($page->catalogFilter) {
-            $ids = $page->catalogFilter->getIds();
-            if ($ids) {
-                $sqlWhere[] = "tM.id IN (" . implode(", ", array_fill(0, count($ids), "?")) . ")";
-                $sqlWhereBind = array_merge($sqlWhereBind, $ids);
-            } else {
-                $sqlWhere[] = "0";
-            }
+        if ($filterIds) {
+            $sqlWhere[] = "tM.id IN (" . implode(", ", array_fill(0, count($filterIds), "?")) . ")";
+            $sqlWhereBind = array_merge($sqlWhereBind, $filterIds);
+        } else {
+            $sqlWhere[] = "0";
         }
     }
 
 
-    public function getFilteringSQL(
-        array &$sqlFrom,
-        array &$sqlFromBind,
-        array &$sqlWhere,
-        array &$sqlWhereBind,
-        array $filter = [],
-        array $get = []
+    /**
+     * Получает список ID# товаров по фильтру и полнотекстовому поиску
+     * с учетом сортировки
+     * @param Block_Material|null $block Блок, для которого применяется интерфейс
+     * @param array $get Поля $_GET параметров
+     * @param CatalogFilter $catalogFilter Фильтр каталога
+     * @return int[]
+     */
+    public function getFilterIds(
+        Block_Material $block,
+        array $get,
+        CatalogFilter $catalogFilter
     ) {
-        $fullTextFilter = array_values(array_filter($filter, function ($x) {
+        $fullTextFilter = array_values(array_filter((array)$block->filter, function ($x) {
             return $x['relation'] == 'FULLTEXT';
         }));
-        $filter = array_values(array_filter($filter, function ($x) {
-            return !is_numeric($x['field']);
-        }));
-        parent::getFilteringSQL(
-            $sqlFrom,
-            $sqlFromBind,
-            $sqlWhere,
-            $sqlWhereBind,
-            $filter,
-            $get
-        );
-        $this->getFullTextFilteringSQL(
-            $sqlFrom,
-            $sqlFromBind,
-            $sqlWhere,
-            $sqlWhereBind,
-            $fullTextFilter,
-            $get
-        );
+        $fullTextIds = $this->getFullTextIds($fullTextFilter, $get);
+        $filterIds = $this->getRawFilterIds($block, $get, $catalogFilter);
+        if ($fullTextIds) {
+            $result = array_values(array_intersect($fullTextIds, $filterIds));
+        } else {
+            $result = $filterIds;
+        }
+        return $result;
     }
 
 
     /**
-     * Получает SQL-инструкции по полнотекстовому поиску
-     * @param array<
-     *            string[] псевдоним поля => string SQL-инструкция по выборке таблицы
-     *        > $sqlFrom Список подключаемых таблиц
-     * @param array<mixed Значение связки> $sqlFromBind Связки для SQL FROM
-     * @param array<string SQL-инструкция> $sqlWhere Ограничения для SQL WHERE
-     * @param array<mixed Значение связки> $sqlWhereBind Связки для SQL WHERE
-     * @param array<[
-     *            'var' => string Переменная для фильтрации
-     *            'relation' => 'FULLTEXT' Отношение для фильтрации
-     *            'field' => int ID# поля артикула
-     *        ]> $filter Данные по фильтрации
+     * Получает список ID#, найденных при полнотекстовом поиске
+     * @param array $filter <pre><code>array<[
+     *     'var' => string Переменная для фильтрации
+     *     'relation' => 'FULLTEXT' Отношение для фильтрации
+     *     'field' => int ID# поля артикула
+     * ]></code></pre> Данные по фильтрации
      * @param array $get Поля $_GET параметров
+     * @return int[]|null Список ID# товаров (с учетом сортировки),
+     *     либо null, если полнотекстовый поиск не использовался
      */
-    public function getFullTextFilteringSQL(
-        array &$sqlFrom,
-        array &$sqlFromBind,
-        array &$sqlWhere,
-        array &$sqlWhereBind,
-        array $filter = [],
-        array $get = []
-    ) {
-        $sqlArray = [];
+    public function getFullTextIds(array $filter = [], array $get = [])
+    {
         foreach ((array)$filter as $filterItem) {
             if (isset(
                 $filterItem['var'],
@@ -358,53 +485,24 @@ class CatalogInterface extends MaterialInterface
                 $searchResult = $materialsNameDescriptionResult
                     + $materialsDataResult;
                 arsort($searchResult);
-                $this->fullTextIds = $searchResult;
-
-                $sqlWhere[] = "tM.id IN (" . implode(", ", array_fill(0, count($this->fullTextIds), "?")) . ")";
-                $sqlWhereBind = array_merge($sqlWhereBind, array_keys($this->fullTextIds));
-                return;
-
-                // var_dump($searchResult); exit;
-
-                // $var = $filterItem['var'];
-                // $val = $get[$var];
-                // $field = $filterItem['field'];
-                // $sqlField = $this->getField($field, 't' . $field, $sqlFrom, $sqlFromBind);
-                // $sqlNameField = $this->getField('name', '', $sqlFrom, $sqlFromBind);
-
-                // $filteringItemSQL = $this->getFilteringItemSQL($sqlField, 'LIKE', $val);
-                // $filteringNameSQL = $this->getFilteringItemSQL($sqlNameField, 'LIKE', $val);
-                // $sqlArray[$var][] = "(" . implode(" OR ", [$filteringNameSQL[0], $filteringItemSQL[0]]) . ")";
-                // $sqlWhereBind[] = $filteringNameSQL[1];
-                // $sqlWhereBind[] = $filteringItemSQL[1];
+                return array_keys($searchResult);
             }
         }
-        // foreach ($sqlArray as $key => $arr) {
-        //     $sqlWhere[$key] = $arr ? "(" . implode(" AND ", $arr) . ")" : "";
-        // }
+        return null;
     }
 
 
     /**
-     * Получает SQL-инструкции по сортировке
+     * Получает список ID# товаров только по фильтру с учетом сортировки
      * @param Block_Material|null $block Блок, для которого применяется интерфейс
      * @param array $get Поля $_GET параметров
-     * @param array<
-     *            string[] псевдоним поля => string SQL-инструкция по выборке таблицы
-     *        > $sqlFrom Список подключаемых таблиц
-     * @param array<mixed Значение связки> $sqlFromBind Связки для SQL FROM
-     * @param string $sqlSort Сортировка для SQL ORDER BY
-     * @param ""|"ASC"|"DESC" $sqlOrder Порядок сортировки для SQL ORDER BY
      * @param CatalogFilter $catalogFilter Фильтр каталога
+     * @return int[]
      */
-    public function getOrderSQL(
+    public function getRawFilterIds(
         Block_Material $block,
         array $get,
-        array &$sqlFrom,
-        array &$sqlFromBind,
-        &$sqlSort,
-        &$sqlOrder,
-        CatalogFilter $catalogFilter = null
+        CatalogFilter $catalogFilter
     ) {
         $sortVar = (string)$block->sort_var_name;
         $sortVal = isset($get[$sortVar]) ? $get[$sortVar] : '';
@@ -420,22 +518,86 @@ class CatalogInterface extends MaterialInterface
                            ? (string)$sortItem['relation']
                            : '';
             if ($sortItem) {
-                if (($sortItem['field'] == 'random') && $catalogFilter) {
+                if ($sortItem['field'] == 'random') {
                     $ids = $catalogFilter->getIds();
                     shuffle($ids);
-                    $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
-                    $sqlOrder = "";
+                    return $ids;
                 } elseif (is_numeric($sortItem['field']) &&
-                    $catalogFilter &&
                     isset($catalogFilter->properties[$sortItem['field']])
                 ) {
                     $order = $this->getOrder($orderVar, $orderRelation, $get);
                     $order = ($order == 'desc' ? -1 : 1);
                     $urn = $catalogFilter->properties[$sortItem['field']]->urn;
                     $ids = $catalogFilter->getIds($urn, $order);
-                    $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
-                    $sqlOrder = "";
-                } else {
+                    return $ids;
+                }
+                $ids = $catalogFilter->getIds();
+                return $ids;
+            }
+        }
+        // Ни с чем не совпадает, но есть сортировка по умолчанию
+        if ($sortDefField) {
+            if ($sortDefField == 'random') {
+                $ids = $catalogFilter->getIds();
+                shuffle($ids);
+                return $ids;
+            } elseif (is_numeric($sortDefField) &&
+                isset($catalogFilter->properties[$sortDefField])
+            ) {
+                $order = $this->getOrder($orderVar, $orderRelation, $get);
+                $order = ($order == 'desc' ? -1 : 1);
+                $urn = $catalogFilter->properties[$sortDefField]->urn;
+                $ids = $catalogFilter->getIds($urn, $order);
+                return $ids;
+            }
+            $ids = $catalogFilter->getIds();
+            return $ids;
+        }
+    }
+
+
+    /**
+     * Получает SQL-инструкции по сортировке
+     * @param Block_Material|null $block Блок, для которого применяется интерфейс
+     * @param array $get Поля $_GET параметров
+     * @param array<
+     *            string[] псевдоним поля => string SQL-инструкция по выборке таблицы
+     *        > $sqlFrom Список подключаемых таблиц
+     * @param array<mixed Значение связки> $sqlFromBind Связки для SQL FROM
+     * @param string $sqlSort Сортировка для SQL ORDER BY
+     * @param ""|"ASC"|"DESC" $sqlOrder Порядок сортировки для SQL ORDER BY
+     * @param int[] $filterIds ID# товаров по фильтру
+     */
+    public function getOrderSQL(
+        Block_Material $block,
+        array $get,
+        array &$sqlFrom,
+        array &$sqlFromBind,
+        &$sqlSort,
+        &$sqlOrder,
+        array $filterIds = []
+    ) {
+        $sortVar = (string)$block->sort_var_name;
+        $sortVal = isset($get[$sortVar]) ? $get[$sortVar] : '';
+        $orderVar = (string)$block->order_var_name;
+        $sortParams = (array)$block->sort;
+        $sortDefField = (string)$block->sort_field_default;
+        $orderRelDefault = (string)$block->sort_order_default;
+        $sqlSort = $sqlOrder = "";
+        if ($filterIds) {
+            $sqlSort = "FIELD(tM.id, " . implode(", ", array_map('intval', $filterIds)) . ")";
+        }
+        if ($sortVar && $sortVal && $sortParams) {
+            // Выберем подходящую запись
+            // (у которой значение var совпадает со значением переменной сортировки $_GET)
+            $sortItem = $this->getMatchingSortParam($sortVal, $sortParams, 'var');
+            $orderRelation = isset($sortItem['relation'])
+                           ? (string)$sortItem['relation']
+                           : '';
+            if ($sortItem) {
+                if (($sortItem['field'] != 'random') &&
+                    !is_numeric($sortItem['field'])
+                ) {
                     $sqlSort = $this->getField(
                         $sortItem['field'],
                         'tOr',
@@ -445,46 +607,14 @@ class CatalogInterface extends MaterialInterface
                     $sqlOrder = mb_strtoupper(
                         $this->getOrder($orderVar, $orderRelation, $get)
                     );
+                    $this->useFilterIds = false;
                 }
                 return;
             }
         }
         // Ни с чем не совпадает, но есть сортировка по умолчанию
         if ($sortDefField) {
-            if (($sortDefField == 'random') && $catalogFilter) {
-                $ids = $catalogFilter->getIds();
-                shuffle($ids);
-                $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
-                $sqlOrder = "";
-            } elseif (is_numeric($sortDefField) &&
-                $catalogFilter &&
-                isset($catalogFilter->properties[$sortDefField])
-            ) {
-                $order = $this->getOrder($orderVar, $orderRelDefault, $get);
-                $order = ($order == 'desc' ? -1 : 1);
-                $urn = $catalogFilter->properties[$sortDefField]->urn;
-                $ids = $catalogFilter->getIds($urn, $order);
-                if ($this->fullTextIds) {
-                    $st = microtime(1);
-                    $idsFlipped = array_flip($ids);
-                    $idsFlipped = array_intersect_key($idsFlipped, $this->fullTextIds);
-                    $ids = array_keys($idsFlipped);
-                    usort($ids, function ($a, $b) use ($idsFlipped) {
-                        if ($this->fullTextIds[$a] != $this->fullTextIds[$b]) {
-                            return $this->fullTextIds[$b] - $this->fullTextIds[$a];
-                        }
-                        if ($idsFlipped[$a] != $idsFlipped[$b]) {
-                            return $idsFlipped[$a] - $idsFlipped[$b];
-                        }
-                        return 0;
-                    });
-                    $sqlSort = "FIELD(tM.id, " . implode(", ", array_map('intval', $this->fullTextIds)) . ")";
-                    $sqlOrder = "";
-                    return;
-                }
-                $sqlSort = $ids ? "FIELD(tM.id, " . implode(", ", array_map('intval', $ids)) . ")" : "";
-                $sqlOrder = "";
-            } else {
+            if (($sortDefField != 'random') && !is_numeric($sortDefField)) {
                 $sqlSort = $this->getField(
                     $sortDefField,
                     'tOr',
@@ -494,6 +624,7 @@ class CatalogInterface extends MaterialInterface
                 $sqlOrder = mb_strtoupper(
                     $this->getOrder($orderVar, $orderRelDefault, $get)
                 );
+                $this->useFilterIds = false;
             }
         }
     }

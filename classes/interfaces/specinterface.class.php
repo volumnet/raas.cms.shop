@@ -22,7 +22,7 @@ class SpecInterface extends CatalogInterface
         array &$sqlFromBind,
         &$sqlSort,
         &$sqlOrder,
-        CatalogFilter $catalogFilter = null
+        array $filterIds = []
     ) {
         if ($block->additionalParams['type'] == 'popular') {
             $sqlSort = "(SELECT COUNT(*) FROM cms_shop_orders_goods WHERE material_id = tM.id)";
@@ -35,7 +35,7 @@ class SpecInterface extends CatalogInterface
                 $sqlFromBind,
                 $sqlSort,
                 $sqlOrder,
-                $catalogFilter
+                $filterIds
             );
         }
     }
