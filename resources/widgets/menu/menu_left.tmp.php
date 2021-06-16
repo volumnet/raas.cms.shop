@@ -1,6 +1,6 @@
 <?php
 /**
- * Основное меню каталога
+ * Левое меню
  * @param Page $Page Текущая страница
  * @param Block_Menu $Block Текущий блок
  * @param array<[
@@ -17,6 +17,8 @@ use RAAS\CMS\Menu;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 
+$useAjax = true;
+
 $ajax = (bool)stristr($Page->url, '/ajax/');
 
 /**
@@ -29,12 +31,12 @@ $ajax = (bool)stristr($Page->url, '/ajax/');
  * @param Page $current Текущая страница
  * @return string
  */
-$showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
+$showMenu = function($node, Page $current) use (&$showMenu, $ajax, $useAjax) {
     static $level = 0;
     if ($node instanceof Menu) {
         $children = $node->visSubMenu;
     } else {
-        $children = (isset($node['children']) && is_array($node['children'])) ? $node['children'] : [];
+        $children = (isset($node['children']) && is_array($node['children'])) ? $node['children'] : array();
     }
     for ($i = 0; $i < count($children); $i++) {
         $row = $children[$i];
@@ -46,8 +48,6 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
             $name = $row['name'];
         }
         $active = $semiactive = false;
-        // 2021-02-23, AVS: заменил HTTP::queryString('', true) на $current->url,
-        // чтобы была возможность использовать через AJAX
         // 2021-06-16, AVS: Заменил ($url == $current->url) на (!$ajax && ($url == $_SERVER['REQUEST_URI'])),
         // чтобы при активном материале ссылка не была активной
         if (!$ajax && ($url == $_SERVER['REQUEST_URI'])) {
@@ -57,8 +57,10 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
         ) {
             $semiactive = true;
         }
+        // 2021-02-23, AVS: заменил HTTP::queryString('', true) на $current->url,
+        // чтобы была возможность использовать через AJAX
         $ch = '';
-        if (1 || $active || $semiactive || $ajax || !stristr($url, '/catalog/')) { // Для подгрузки AJAX'ом
+        if (!$useAjax || $active || $semiactive || $ajax || !stristr($url, '/catalog/')) { // Для подгрузки AJAX'ом
             $level++;
             $ch = $showMenu($row, $current);
             $level--;
@@ -67,49 +69,54 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
             $semiactive = true;
         }
         $liClasses = array(
-            'menu-catalog__item',
-            'menu-catalog__item_' . (!$level ? 'main' : 'inner'),
-            'menu-catalog__item_level_' . $level
+            'menu-left__item',
+            'menu-left__item_' . (!$level ? 'main' : 'inner'),
+            'menu-left__item_level_' . $level
         );
         $aClasses = array(
-            'menu-catalog__link',
-            'menu-catalog__link_' . (!$level ? 'main' : 'inner'),
-            'menu-catalog__link_level_' . $level
+            'menu-left__link',
+            'menu-left__link_' . (!$level ? 'main' : 'inner'),
+            'menu-left__link_level_' . $level
         );
         if ($active) {
-            $liClasses[] = 'menu-catalog__item_active';
-            $liClasses[] = 'menu-catalog__item_focused';
-            $aClasses[] = 'menu-catalog__link_active';
+            $liClasses[] = 'menu-left__item_active';
+            $liClasses[] = 'menu-left__item_focused';
+            $aClasses[] = 'menu-left__link_active';
         } elseif ($semiactive) {
-            $liClasses[] = 'menu-catalog__item_semiactive';
-            $liClasses[] = 'menu-catalog__item_focused';
-            $aClasses[] = 'menu-catalog__link_semiactive';
+            $liClasses[] = 'menu-left__item_semiactive';
+            $liClasses[] = 'menu-left__item_focused';
+            $aClasses[] = 'menu-left__link_semiactive';
         }
         if ($ch) {
-            $liClasses[] = 'menu-catalog__item_has-children';
-            $aClasses[] = 'menu-catalog__link_has-children';
+            $liClasses[] = 'menu-left__item_has-children';
+            $aClasses[] = 'menu-left__link_has-children';
         }
         $text .= '<li class="' . implode(' ', $liClasses) . '">'
               .  '  <a class="' . implode(' ', $aClasses) . '" ' . ($active ? '' : ' href="' . htmlspecialchars($url) . '"') . '>'
               .       htmlspecialchars($name)
-              .       ($ch ? '<span class="menu-catalog__children-trigger"></span>' : '')
+              .       ($ch ? '<span class="menu-left__children-trigger"></span>' : '')
               .  '  </a>'
               .     $ch
               .  '</li>';
     }
     $ulClasses = array(
-        'menu-catalog__list',
-        'menu-catalog__list_' . (!$level ? 'main' : 'inner'),
-        'menu-catalog__list_level_' . $level
+        'menu-left__list',
+        'menu-left__list_' . (!$level ? 'main' : 'inner'),
+        'menu-left__list_level_' . $level
     );
     return $text ? '<ul class="' . implode(' ', $ulClasses) . '">' . $text . '</ul>' : $text;
 };
-?>
 
-<nav class="menu-catalog" data-vue-role="menu-catalog" data-v-slot="vm">
-  <a href="/catalog/" class="menu-catalog__trigger" data-v-on_click.prevent.stop="vm.toggle()">
-    <?php echo htmlspecialchars($Block->name)?>
-  </a>
-  <?php echo $showMenu($menuArr ?: $Item, $Page)?>
+$current = $ajax ? new Page($_GET['id']) : $Page;
+?>
+<nav class="menu-left" data-vue-role="menu-left" data-v-bind_page-id="<?php echo (int)$Page->id?>">
+  <div class="menu-left__title">
+    <a href="/catalog/">
+      <?php echo htmlspecialchars($Block->name)?>
+    </a>
+  </div>
+  <?php echo $showMenu($menuArr ?: $Item, $current)?>
 </nav>
-<?php echo Package::i()->asset('/js/menu-catalog.js')?>
+<?php
+Package::i()->requestCSS('/css/menu-left.css');
+Package::i()->requestJS('/js/menu-left.js');

@@ -46,6 +46,11 @@ export default {
         })
     },
     methods: {
+        /**
+         * Форматирует цену
+         * @param {Number} x Цена для форматирования
+         * @return {String}
+         */
         formatPrice: function (x) {
             return window.formatPrice(x);
         },

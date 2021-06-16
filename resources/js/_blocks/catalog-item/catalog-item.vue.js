@@ -14,6 +14,7 @@ export default {
          *     min: Number Минимальное количество для добавления в корзину
          *     step: Шаг корзины,
          *     image: String Ссылка на изображение,
+         *     available: Boolean Товар в наличии,
          * }</code></pre>
          */
         item: {
@@ -37,8 +38,12 @@ export default {
         if (typeof window.translations == 'object') {
             Object.assign(translations, window.translations);
         }
+        let amount = 1;
+        if (this.item.available && (this.item.min > 1)) {
+            amount = this.item.min;
+        }
         return {
-            amount: this.item.min || 1, // Количество товара для добавления в корзину
+            amount: amount, // Количество товара для добавления в корзину
             inCart: false, // Находится ли товар в корзине
             inFavorites: false, // Находится ли товар в избранном
             inCompare: false, // Находится ли товар в сравнении

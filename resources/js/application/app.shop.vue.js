@@ -40,7 +40,7 @@ export default {
         },
     },
     computed: {
-        // Компонент "Товар добавлен в избранное"
+        // Компонент "Товар добавлен в ..."
         addedModal: function () {
             return this.$refs.addedModal;
         },

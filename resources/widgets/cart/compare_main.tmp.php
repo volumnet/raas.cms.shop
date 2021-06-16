@@ -8,7 +8,5 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<a href="/compare/" class="compare-main" data-v-bind_class="{ 'compare-main_active': compare.dataLoaded }" title="<?php echo COMPARE?>">
-  <span class="compare-main__amount" data-v-if="compare.count > 0" data-v-html="compare.count"></span>
-</a>
+<div class="compare-main" data-vue-role="compare-main" data-v-bind_cart="compare" data-v-bind_title="'<?php echo COMPARE?>'" data-v-bind_href="'/compare/'"></div>
 <!--/noindex-->

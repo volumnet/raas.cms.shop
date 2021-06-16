@@ -8,7 +8,5 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<a href="/favorites/" class="favorites-main" data-v-bind_class="{ 'favorites-main_active': favorites.dataLoaded }" title="<?php echo FAVORITES?>">
-  <span class="favorites-main__amount" data-v-if="favorites.count > 0" data-v-html="favorites.count"></span>
-</a>
+<div class="favorites-main" data-vue-role="favorites-main" data-v-bind_cart="favorites" data-v-bind_title="'<?php echo FAVORITES?>'" data-v-bind_href="'/favorites/'"></div>
 <!--/noindex-->

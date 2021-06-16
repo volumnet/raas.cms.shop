@@ -9,7 +9,7 @@ namespace RAAS\CMS;
 
 if ($Set) { ?>
     <div class="spec">
-      <?php if ($Block->name[0] != '.') { ?>
+      <?php if ($Block->name && $Block->name[0] != '.') { ?>
           <div class="spec__title h2">
             <?php echo htmlspecialchars($Block->name)?>
           </div>

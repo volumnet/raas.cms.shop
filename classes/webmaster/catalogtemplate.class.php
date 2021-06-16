@@ -417,7 +417,7 @@ class CatalogTemplate extends MaterialTypeTemplate
                 'material_type' => (int)$this->materialType->id,
                 'nat' => 1,
                 'pages_var_name' => 'page',
-                'rows_per_page' => 20,
+                'rows_per_page' => 12,
                 'sort_field_default' => (int)$this->materialType->fields['price']->id,
                 'sort_order_default' => 'asc',
                 'sort_var_name' => 'sort',

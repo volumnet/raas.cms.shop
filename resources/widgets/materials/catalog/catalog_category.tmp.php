@@ -18,10 +18,12 @@ $queryString = $queryString ? '?' . $queryString : '';
   </div>
   <div class="catalog-category__text">
     <div class="catalog-category__title">
-      <?php echo htmlspecialchars(
-          $page->name .
-          ((int)$page->counter ? ' (' . (int)$page->counter . ')' : '')
-      ); ?>
+      <?php echo htmlspecialchars($page->name)?>
+      <?php if ($counter = (int)$page->counter) { ?>
+          <span class="catalog-category__counter">
+            <?php echo (int)$counter?>
+          </span>
+      <?php } ?>
     </div>
   </div>
 </a>

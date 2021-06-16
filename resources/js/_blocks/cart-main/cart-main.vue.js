@@ -4,6 +4,21 @@
 export default {
     props: {
         /**
+         * Ссылка на страницу корзины
+         * @type {String}
+         */
+        href: {
+            type: String,
+            default: '/cart/',
+        },
+        /**
+         * Заголовок
+         * @type {String}
+         */
+        title: {
+            type: String,
+        },
+        /**
          * Корзина
          * @type {Object}
          */
@@ -98,7 +113,15 @@ export default {
             } else {
                 await this.cart.set(item, amount);
             }
-        }
+        },
+        /**
+         * Форматирует цену
+         * @param {Number} x Цена для форматирования
+         * @return {String}
+         */
+        formatPrice: function (x) {
+            return window.formatPrice(x);
+        },
     },
     computed: {
         /**

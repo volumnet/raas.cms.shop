@@ -17,11 +17,18 @@ export default {
         })
     },
     methods: {
+        /**
+         * Переключение меню
+         */
         toggle: function () {
             this.active = !this.active;
         }
     },
     computed: {
+        /**
+         * Распаковка текущего экземпляра для слота
+         * @return {Object}
+         */
         self: function () {
             return { ...this };
         },

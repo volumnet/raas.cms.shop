@@ -445,6 +445,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'urn' => 'filter_props',
                 'datatype' => 'select',
                 'multiple' => 1,
+                'source_type' => 'php',
                 'source' => $fieldsSource,
             ],
             [
@@ -452,6 +453,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'urn' => 'main_props',
                 'datatype' => 'select',
                 'multiple' => 1,
+                'source_type' => 'php',
                 'source' => $fieldsSource,
             ],
             [
@@ -459,6 +461,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'urn' => 'article_props',
                 'datatype' => 'select',
                 'multiple' => 1,
+                'source_type' => 'php',
                 'source' => $fieldsSource,
             ],
         ]);
@@ -734,8 +737,9 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
 
     /**
      * Создает фильтр
+     * @param Block_Material $catalogBlock Блок каталога
      */
-    public function createFilter()
+    public function createFilter(Block_Material $catalogBlock)
     {
         $ajax = array_shift(Page::getSet([
             'where' => ["pid = " . (int)$this->Site->id, "urn = 'ajax'"]
@@ -759,7 +763,9 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 $ajax
             );
             $this->createBlock(
-                new Block_PHP(),
+                new Block_PHP([
+                    'params' => 'catalogBlockId=' . (int)$catalogBlock->id,
+                ]),
                 '',
                 null,
                 'catalog_filter',
@@ -944,6 +950,13 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $catalogType = $materialTemplate->materialType;
         $catalog = $materialTemplate->create();
 
+        $Page->fields['main_props']->addValue((int)$catalogType->props['article']->id);
+        $Page->fields['main_props']->addValue((int)$catalogType->props['brand']->id);
+        $Page->fields['main_props']->addValue((int)$catalogType->props['length']->id);
+        $Page->fields['main_props']->addValue((int)$catalogType->props['height']->id);
+        $Page->fields['main_props']->addValue((int)$catalogType->props['width']->id);
+        $Page->fields['main_props']->addValue((int)$catalogType->props['weight']->id);
+
         GoodsCommentsTemplate::spawn(
             View_Web::i()->_('GOODS_REVIEWS'),
             'goods_comments',
@@ -996,7 +1009,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'blockLocation' => 'content4',
                 'fullMenu' => true,
                 'blockPage' => $this->Site,
-                'inheritBlock' => true,
+                'inheritBlock' => false,
                 'widget_urn' => 'popular_cats',
             ],
         ]);
@@ -1016,6 +1029,8 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             [(int)$menus['left']->id, 'menu_left', (int)$catalog->id]
         ]);
         $this->leftMenuBlock = new Block_Menu((int)$lastBlockId);
+        $this->leftMenuBlock->name = View_Web::i()->_('CATALOG'),
+        $this->leftMenuBlock->commit();
 
 
         $cartTypes = $this->createCartTypes(
@@ -1029,7 +1044,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $favorites = $this->createFavorites($cartTypes['favorites'], $ajax);
         $compare = $this->createCompare($cartTypes['compare'], $ajax);
         $delivery = $this->createDelivery();
-        $this->createFilter();
+        $this->createFilter($materialTemplate->catalogBlock);
         $this->adjustBlocks();
         $yml = $this->createYandexMarket($catalogType, $catalog);
         $this->createCron();
@@ -1139,7 +1154,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $updateCatalogFilterTask->commit();
         $updatePropsCache = new Crontab([
             'name' => View_Web::i()->_('UPDATING_PROPS_CACHE'),
-            'vis' => 0,
+            'vis' => 1,
             'once' => 0,
             'minutes' => '*',
             'hours' => '*',
