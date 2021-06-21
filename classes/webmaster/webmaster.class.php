@@ -1029,7 +1029,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             [(int)$menus['left']->id, 'menu_left', (int)$catalog->id]
         ]);
         $this->leftMenuBlock = new Block_Menu((int)$lastBlockId);
-        $this->leftMenuBlock->name = View_Web::i()->_('CATALOG'),
+        $this->leftMenuBlock->name = View_Web::i()->_('CATALOG');
         $this->leftMenuBlock->commit();
 
 
