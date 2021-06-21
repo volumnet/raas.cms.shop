@@ -83,6 +83,12 @@ use RAAS\CMS\Page;
 class CatalogFilter
 {
     /**
+     * Использовать сортировку по наличию
+     * @var string|null URN поля наличия, либо null чтобы не использовать
+     */
+    public $useAvailabilityOrder = null;
+
+    /**
      * Тип материалов
      * @var Material_Type
      */
@@ -1139,9 +1145,19 @@ class CatalogFilter
         if ($sort && isset($this->propertiesByURNs[$sort])) {
             $sortKey = $this->propertiesByURNs[$sort]->id;
         }
-        $ids = $this->sortMapping[$sortKey];
-        if ($sortKey && ($order < 0)) {
-            $ids = array_reverse($ids);
+        if ($this->useAvailabilityOrder) {
+            $availabilityProp = $this->propertiesByURNs[$this->useAvailabilityOrder];
+        }
+        if ($availabilityPropId = (int)$availabilityProp->id) {
+            $ids = $this->multisort([
+                ('!' . $availabilityPropId),
+                ((($order < 0) ? '!' : '') . $sortKey)
+            ], $this->sortMapping[$sortKey]);
+        } else {
+            $ids = $this->sortMapping[$sortKey];
+            if ($sortKey && ($order < 0)) {
+                $ids = array_reverse($ids);
+            }
         }
         return array_values($ids);
     }

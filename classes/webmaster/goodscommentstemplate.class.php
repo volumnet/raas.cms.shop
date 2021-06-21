@@ -91,7 +91,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
             'vis' => 0,
             'name' => View_Web::i()->_('PHONE'),
             'urn' => 'phone',
-            'datatype' => 'text',
+            'datatype' => 'tel',
         ]);
         $phoneField->commit();
 

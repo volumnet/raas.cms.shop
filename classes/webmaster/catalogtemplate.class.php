@@ -422,7 +422,7 @@ class CatalogTemplate extends MaterialTypeTemplate
                 'sort_order_default' => 'asc',
                 'sort_var_name' => 'sort',
                 'order_var_name' => 'order',
-                'params' => 'metaTemplates=template&listMetaTemplates=list_template&withChildrenGoods=1'
+                'params' => 'metaTemplates=template&listMetaTemplates=list_template&withChildrenGoods=1&useAvailabilityOrder=available'
             ]);
             $block = $this->webmaster->createBlock(
                 $block,

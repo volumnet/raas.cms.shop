@@ -902,9 +902,8 @@ class CatalogInterface extends MaterialInterface
     {
         if (!$page->catalogFilter) {
             $t = new DiagTimer();
-            parse_str(trim($block->params), $blockParams);
-            $withChildrenGoods = isset($blockParams['withChildrenGoods'])
-                               ? (bool)$blockParams['withChildrenGoods']
+            $withChildrenGoods = isset($block->additionalParams['withChildrenGoods'])
+                               ? (bool)$block->additionalParams['withChildrenGoods']
                                : false;
             $classname = static::FILTER_CLASS;
             $catalogFilter = $classname::loadOrBuild(
@@ -912,6 +911,9 @@ class CatalogInterface extends MaterialInterface
                 $withChildrenGoods,
                 []
             );
+            if ($useAvailabilityOrder = $block->additionalParams['useAvailabilityOrder']) {
+                $catalogFilter->useAvailabilityOrder = $useAvailabilityOrder;
+            }
             $filterParams = $this->getFilterParams($block, $catalogFilter, $get);
             $catalogFilter->apply($page, $filterParams);
             $page->catalogFilter = $catalogFilter;

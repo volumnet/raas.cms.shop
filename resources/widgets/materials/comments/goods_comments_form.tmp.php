@@ -1,5 +1,18 @@
-<?php namespace RAAS\CMS?>
 <?php
+/**
+ * Форма отзывов к товарам
+ * @param Block_Form $Block Текущий блок
+ * @param Page $Page Текущая страница
+ */
+namespace RAAS\CMS\Shop;
+
+use RAAS\CMS\Block_Form;
+use RAAS\CMS\Feedback;
+use RAAS\CMS\FormRenderer;
+use RAAS\CMS\FormFieldRenderer;
+use RAAS\CMS\Package;
+use RAAS\CMS\Page;
+
 if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
     $result = array();
     if ($success[(int)$Block->id]) {
@@ -8,57 +21,94 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
     if ($localError) {
         $result['localError'] = $localError;
     }
-    while (ob_get_level()) {
-      ob_end_clean();
-    }
+    ob_clean();
     echo json_encode($result);
     exit;
 } else { ?>
-    <div class="feedback" id="feedback">
-      <p>Вы можете оставить отзыв о данном товаре, заполнив форму ниже</p>
-      <p class="feedback__required-fields">Поля, помеченные звездочкой (*), обязательны для заполнения</p>
-      <form class="form-horizontal" data-role="raas-ajaxform" action="/ajax/goods_comments/" method="post" enctype="multipart/form-data">
-        <?php include \RAAS\CMS\Package::i()->resourcesDir . '/form2.inc.php'?>
-        <div data-role="notifications" <?php echo ($success[(int)$Block->id] || $localError) ? '' : 'style="display: none"'?>>
-          <div class="alert alert-success" <?php echo ($success[(int)$Block->id]) ? '' : 'style="display: none"'?>><?php echo FEEDBACK_SUCCESSFULLY_SENT?></div>
-          <div class="alert alert-danger" <?php echo ($localError) ? '' : 'style="display: none"'?>>
-            <ul>
-              <?php foreach ((array)$localError as $key => $val) { ?>
-                  <li><?php echo htmlspecialchars($val)?></li>
-              <?php } ?>
-            </ul>
+    <div class="goods-comments-form feedback feedback_standalone">
+      <div class="goods-comments-form__title">
+        <?php echo YOU_CAN_LEAVE_REVIEW_BY_FILLING_FORM_BELOW?>
+      </div>
+      <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" data-vue-role="ajax-form" data-v-bind_block-id="<?php echo (int)$Block->id?>" data-v-slot="vm">
+        <div class="feedback__notifications" data-v-bind_class="{ 'feedback__notifications_active': true }" data-v-if="vm.success">
+          <div class="alert alert-success">
+            <?php echo REVIEW_SUCCESSFULLY_SENT?>
           </div>
         </div>
 
-        <div data-role="feedback-form" <?php echo $success[(int)$Block->id] ? 'style="display: none"' : ''?>>
-          <input type="hidden" name="material" value="<?php echo (int)$Page->Material->id?>" />
-          <?php if ($Form->signature) { ?>
-                <input type="hidden" name="form_signature" value="<?php echo htmlspecialchars($Form->getSignature($Block))?>" />
-          <?php } ?>
-          <?php if ($Form->antispam == 'hidden' && $Form->antispam_field_name) { ?>
-                <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" value="<?php echo htmlspecialchars($DATA[$Form->antispam_field_name])?>" style="position: absolute; left: -9999px" />
-          <?php } ?>
-          <?php foreach ($Form->fields as $row) { ?>
-              <?php if ($row->urn != 'material') { ?>
-                  <div class="form-group">
-                    <label for="<?php echo htmlspecialchars($row->urn)?>" class="control-label col-sm-3 col-md-2"><?php echo htmlspecialchars($row->name . ($row->required ? '*' : ''))?></label>
-                    <div class="col-sm-9 col-md-4"><?php $getField($row, $DATA)?></div>
-                  </div>
-              <?php } ?>
-          <?php } ?>
-          <?php if ($Form->antispam == 'captcha' && $Form->antispam_field_name) { ?>
-              <div class="form-group">
-                <label for="<?php echo htmlspecialchars($Form->antispam_field_name)?>" class="control-label col-sm-3 col-md-2"><?php echo CAPTCHA?></label>
-                <div class="col-sm-9 col-md-4">
-                  <img loading="lazy" src="/assets/kcaptcha/?<?php echo session_name() . '=' . session_id()?>" /><br />
-                  <input type="text" name="<?php echo htmlspecialchars($Form->antispam_field_name)?>" />
-                </div>
+        <div data-v-if="!vm.success">
+          <div class="feedback__required-fields">
+            <?php echo str_replace(
+                '*',
+                '<span class="feedback__asterisk">*</span>',
+                ASTERISK_MARKED_FIELDS_ARE_REQUIRED
+            )?>
+          </div>
+          <div class="feedback__notifications" data-v-bind_class="{ 'feedback__notifications_active': true }" data-v-if="vm.hasErrors">
+            <div class="alert alert-danger">
+              <ul>
+                <li data-v-for="error in vm.errors" data-v-html="error"></li>
+              </ul>
+            </div>
+          </div>
+          <?php
+          $formRenderer = new FormRenderer(
+              $Form,
+              $Block,
+              $DATA,
+              $localError
+          );
+          echo $formRenderer->renderSignatureField();
+          echo $formRenderer->renderHiddenAntispamField();
+          foreach ($Form->visFields as $fieldURN => $field) {
+              $fieldRenderer = FormFieldRenderer::spawn(
+                  $field,
+                  $Block,
+                  $DATA[$fieldURN],
+                  $localError
+              );
+              $fieldHTML = $fieldRenderer->render([
+                  'data-v-bind_class' => "{ 'is-invalid': !!vm.errors." . $fieldURN . " }",
+                  'data-v-bind_title' => "vm.errors." . $fieldURN . " || ''"
+              ]);
+              $fieldCaption = htmlspecialchars($field->name);
+              if ($fieldURN == 'agree') {
+                  $fieldCaption = '<a href="/privacy/" target="_blank">' .
+                                     $fieldCaption .
+                                  '</a>';
+              }
+              if ($field->required) {
+                  $fieldCaption .= '<span class="feedback__asterisk">*</span>';
+              }
+              ?>
+              <div class="form-group" data-v-bind_class="{ 'text-danger': !!vm.errors.<?php echo htmlspecialchars($fieldURN)?> }">
+                <?php
+                if (($field->datatype == 'checkbox') &&
+                    !$field->multiple
+                ) { ?>
+                    <div class="feedback__control-label"></div>
+                    <label class="feedback__input-container">
+                      <?php echo $fieldHTML . ' ' . $fieldCaption; ?>
+                    </label>
+                <?php } else { ?>
+                    <label class="feedback__control-label" <?php echo !$field->multiple ? ' for="' . htmlspecialchars($field->getHTMLId($Block)) . '"' : ''?>>
+                      <?php echo $fieldCaption; ?>:
+                    </label>
+                    <div class="feedback__input-container">
+                      <?php echo $fieldHTML; ?>
+                    </div>
+                <?php } ?>
               </div>
           <?php } ?>
-          <div class="form-group">
-            <div class="col-sm-9 col-md-4 col-sm-offset-3 col-md-offset-2"><button class="btn btn-secondary" type="submit"><?php echo SEND?></button></div>
+          <div class="feedback__controls">
+            <button class="feedback__submit btn btn-primary" type="submit" data-v-bind_disabled="vm.loading" data-v-bind_class="{ 'feedback__submit_loading': vm.loading }">
+              <?php echo SEND?>
+            </button>
           </div>
         </div>
       </form>
     </div>
-<?php } ?>
+    <?php
+    Package::i()->requestCSS('/css/feedback.css');
+    Package::i()->requestJS('/js/feedback.js');
+}
