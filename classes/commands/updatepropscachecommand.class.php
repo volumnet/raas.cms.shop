@@ -519,22 +519,16 @@ class UpdatePropsCacheCommand extends Command
                 )
             ];
             $sqlArr[] = $sqlRow;
-            // Material::_SQL()->update(
-            //     $table,
-            //     "id = " . (int)$materialId,
-            //     [
-            //         'cache_shop_props' => json_encode(
-            //             $materialCache,
-            //             JSON_UNESCAPED_UNICODE
-            //         )
-            //     ]
-            // );
         }
-        Material::_SQL()->add(
-            $table,
-            $sqlArr,
-            ['cache_shop_props' => (object)"VALUES(cache_shop_props)"]
-        );
+        // 2021-07-07, AVS: разделим по 1000 записей, чтобы база не падала
+        for ($i = 0; $i < ceil(count($sqlArr) / 1000); $i++) {
+            $sqlChunk = array_slice($sqlArr, $i * 1000, 1000);
+            Material::_SQL()->add(
+                $table,
+                $sqlChunk,
+                ['cache_shop_props' => (object)"VALUES(cache_shop_props)"]
+            );
+        }
 
 
         $mTypesIds = MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds((int)$materialType->id);
