@@ -14,7 +14,7 @@ $queryString = $queryString ? '?' . $queryString : '';
 ?>
 <a class="catalog-category" href="<?php echo $page->url . $queryString ?>">
   <div class="catalog-category__image">
-    <img loading="lazy" src="/<?php echo htmlspecialchars($page->image->smallURL ?: '/files/cms/common/image/design/nophoto.jpg')?>" alt="<?php echo htmlspecialchars($page->image->name ?: $page->name)?>" />
+    <img loading="lazy" src="/<?php echo htmlspecialchars($page->image->smallURL ?: 'files/cms/common/image/design/nophoto.jpg')?>" alt="<?php echo htmlspecialchars($page->image->name ?: $page->name)?>" />
   </div>
   <div class="catalog-category__text">
     <div class="catalog-category__title">

@@ -1,17 +1,18 @@
 <?php
 namespace RAAS\CMS\Shop;
 
-use RAAS\Redirector as Redirector;
-use RAAS\Attachment as Attachment;
 use ArrayObject as ArrayObject;
+use SOME\HTTP;
+use RAAS\Attachment as Attachment;
 use RAAS\Field as Field;
-use RAAS\FieldSet as FieldSet;
 use RAAS\FieldContainer as FieldContainer;
+use RAAS\FieldSet as FieldSet;
 use RAAS\FormTab as FormTab;
-use RAAS\CMS\Form as CMSForm;
 use RAAS\OptGroup as OptGroup;
 use RAAS\Option as Option;
+use RAAS\Redirector as Redirector;
 use RAAS\StdSub as StdSub;
+use RAAS\CMS\Form as CMSForm;
 
 class Sub_Orders extends \RAAS\Abstract_Sub_Controller
 {
@@ -59,17 +60,29 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
 
     protected function orders()
     {
+        $cartTypes = Cart_Type::getSet();
         $IN = $this->model->orders();
         $Set = $IN['Set'];
         $Pages = $IN['Pages'];
         $Item = $IN['Parent'];
-        $Cart_Types = Cart_Type::getSet();
+        if (!$Item->id) {
+            $affectedCartTypes = array_values(array_filter(
+                $cartTypes,
+                function ($x) {
+                    return (bool)$x->form_id;
+                }
+            ));
+            if (count($affectedCartTypes) == 1) {
+                new Redirector(HTTP::queryString('id=' . (int)$affectedCartTypes[0]->id));
+                exit;
+            }
+        }
 
         $OUT['Item'] = $Item;
         $OUT['columns'] = $IN['columns'];
         $OUT['Set'] = $Set;
         $OUT['Pages'] = $Pages;
-        $OUT['Cart_Types'] = $Cart_Types;
+        $OUT['Cart_Types'] = $cartTypes;
         $OUT['search_string'] = isset($_GET['search_string']) ? (string)$_GET['search_string'] : '';
         $OUT['statuses'] = Order_Status::getSet();
         $this->view->orders($OUT);
@@ -132,7 +145,7 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
         $Item = new Order($this->id);
         $Cart_Types = Cart_Type::getSet();
         if (!$Item->id) {
-            new Redirector(\SOME\HTTP::queryString('id=&action='));
+            new Redirector(HTTP::queryString('id=&action='));
         }
         if (!$Item->vis) {
             $Item->vis = (int)$this->application->user->id;

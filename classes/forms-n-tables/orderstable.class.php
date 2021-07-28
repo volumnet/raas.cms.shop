@@ -44,25 +44,11 @@ class OrdersTable extends Table
                 }
             ];
         }
-        $columns['name'] = [
-            'caption' => $this->view->_('PAGE'),
-            'callback' => function ($row) use ($view) {
-                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . htmlspecialchars($row->page->name) . '</a>';
-            }
-        ];
-        $columns['ip'] = [
-            'caption' => $this->view->_('IP_ADDRESS'),
-            'callback' => function ($row) use ($view) {
-                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '" title="' . htmlspecialchars($row->description) . '">'
-                     .    htmlspecialchars($row->ip)
-                     . '</a>';
-            }
-        ];
         foreach ($params['columns'] as $key => $col) {
             $columns[$col->urn] = [
                 'caption' => $col->name,
                 'callback' => function ($row) use ($col) {
-                    if (isset($row->fields[$col->urn])) {
+                    if ($row->fields[$col->urn]) {
                         $y = htmlspecialchars($row->fields[$col->urn]->doRich());
                     }
                     return $y ? $y : '';

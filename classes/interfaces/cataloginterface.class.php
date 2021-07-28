@@ -902,9 +902,7 @@ class CatalogInterface extends MaterialInterface
     {
         if (!$page->catalogFilter) {
             $t = new DiagTimer();
-            $withChildrenGoods = isset($block->additionalParams['withChildrenGoods'])
-                               ? (bool)$block->additionalParams['withChildrenGoods']
-                               : false;
+            $withChildrenGoods = (bool)$block->additionalParams['withChildrenGoods'];
             $classname = static::FILTER_CLASS;
             $catalogFilter = $classname::loadOrBuild(
                 $block->Material_Type,
