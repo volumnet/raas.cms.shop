@@ -80,13 +80,13 @@ if ($Item) {
     }
     ?>
     <div class="catalog">
-      <div class="catalog-article" itemscope itemtype="http://schema.org/Product"  data-vue-role="catalog-article" data-v-bind_item="<?php echo htmlspecialchars(json_encode($itemData))?>" data-v-slot="vm" data-id="<?php echo (int)$Item->id?>">
+      <div class="catalog-article" itemscope itemtype="http://schema.org/Product"  data-vue-role="catalog-article" data-v-bind_item="<?php echo htmlspecialchars(json_encode($itemData))?>" data-v-bind_bind-amount-to-cart="true" data-v-slot="vm" data-id="<?php echo (int)$Item->id?>">
         <?php /*
         <meta itemprop="name" content="<?php echo htmlspecialchars($itemData['name'])?>" />
         */ ?>
         <div class="catalog-article__inner">
           <div class="catalog-article__images-container">
-            <div class="catalog-article__image<?php echo (count($photoVideo) <= 1) ? ' catalog-article__image_alone' : ''?>">
+            <div class="catalog-article__image">
               <?php foreach ($photoVideo as $i => $row) {
                   if ($ytid = $row['ytid']) {
                       $videoJsonLd = [
@@ -112,7 +112,7 @@ if ($Item) {
                   <?php } else {
                       $jsonLd['image'][] = '/' . $row['fileURL']; ?>
                       <a itemprop="image" href="/<?php echo $row['fileURL']?>" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((vm.selectedImage == <?php echo $i?>) ? 'block' : 'none')}" data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__image">
-                        <img loading="lazy" src="/<?php echo Package::i()->tn($row['fileURL'], 600, 600, 'frame')?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" /></a>
+                        <img loading="lazy" src="/<?php echo Package::i()->tn($row['fileURL'], 461, null, 'inline')?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" /></a>
                   <?php }
               }
               if (!$photoVideo) { ?>
@@ -120,7 +120,7 @@ if ($Item) {
               <?php } ?>
             </div>
             <!--noindex-->
-            <div class="catalog-article__images-list<?php echo (count($photoVideo) <= 1) ? ' catalog-article__images-list_alone' : ''?>">
+            <div class="catalog-article__images-list">
               <div class="catalog-article-images-list slider slider_horizontal" data-vue-role="raas-slider" data-vue-type="horizontal" data-v-bind_wrap="false" data-v-bind_autoscroll="false" data-v-slot="slider">
                 <a data-v-on_click="slider.prev()" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev slider__arrow slider__arrow_prev" data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.prevAvailable, 'slider__arrow_active': slider.prevAvailable }"></a>
                 <div class="catalog-article-images-list__inner slider__list" data-role="slider-list">
@@ -327,13 +327,13 @@ if ($Item) {
               <div class="catalog-article__price-container" data-price="<?php echo (float)$itemData['price']?>">
                 <?php if ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) { ?>
                     <span class="catalog-article__price catalog-article__price_old" data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)">
-                      <span data-v-html="vm.formatPrice(vm.item.price_old * vm.amount)">
+                      <span data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount))">
                         <?php echo Text::formatPrice((float)$itemData['price_old'])?>
                       </span>
                     </span>
                 <?php } ?>
                 <span class="catalog-article__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) ? ' catalog-article__price_new' : ''?>">
-                  <span data-role="price-container" itemprop="price" content="<?php echo (float)$itemData['price']?>" data-v-html="formatPrice(vm.item.price * vm.amount)">
+                  <span data-role="price-container" itemprop="price" content="<?php echo (float)$itemData['price']?>" data-v-html="vm.formatPrice(vm.item.price * Math.max(vm.item.min || 1, vm.amount))">
                     <?php echo Text::formatPrice((float)$itemData['price'])?>
                   </span>
                   <span itemprop="priceCurrency" content="RUB" class="catalog-article__currency">₽</span>
@@ -352,26 +352,21 @@ if ($Item) {
             <!--noindex-->
             <?php if ($itemData['available']) { ?>
                 <div class="catalog-article__add-to-cart-outer">
-                  <div class="catalog-article__amount-block">
-                    <a class="catalog-article__decrement" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1));">–</a>
-                    <input type="number" class="form-control catalog-article__amount" autocomplete="off" name="amount" min="<?php echo (int)$itemData['min'] ?: 1?>" step="<?php echo (int)$itemData['step'] ?: 1?>" value="<?php echo (int)$itemData['min'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_input="vm.setAmount($event.target.value)" />
-                    <a class="catalog-article__increment" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1))">+</a>
+                  <div class="catalog-article__amount-block" title="<?php echo IN_CART?>" data-v-if="vm.inCart">
+                    <a class="catalog-article__decrement" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();">–</a>
+                    <input type="number" class="form-control catalog-article__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_input="vm.setAmount($event.target.value); vm.setCart();" />
+                    <a class="catalog-article__increment" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();">+</a>
                   </div>
-                  <button type="button" data-v-on_click="vm.addToCart()" class="btn btn-primary catalog-article__add-to-cart" data-v-bind_class="{ 'catalog-article__add-to-cart_active': vm.inCart}">
-                    <?php echo TO_CART?>
+                  <button type="button" data-v-else data-v-on_click="vm.setAmount(Math.max(vm.item.min, 1)); vm.setCart()" class="btn btn-primary catalog-article__add-to-cart">
+                    <?php echo DO_BUY?>
                   </button>
-                  <!--
-                  <button type="button" data-v-on_click="vm.toggleCart()" class="btn btn-primary catalog-article__add-to-cart" data-v-bind_class="{ 'catalog-article__add-to-cart_active': vm.inCart}" data-v-bind_title="vm.inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'" data-v-html="vm.inCart ? '<?php echo DELETE_FROM_CART?>' : '<?php echo TO_CART?>'">
-                    <?php echo TO_CART?>
-                  </button>
-                  -->
                 </div>
             <?php } ?>
             <div class="catalog-article__controls">
-              <button type="button" data-v-on_click="vm.toggleFavorites()" class="catalog-article__add-to-favorites" data-v-bind_class="{ 'catalog-article__add-to-favorites_active': vm.inFavorites}" data-v-bind_title="vm.inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'" data-v-html="vm.inFavorites ? '<?php echo DELETE_FROM_FAVORITES?>' : '<?php echo TO_FAVORITES?>'">
+              <button type="button" data-v-on_click="vm.toggleFavorites()" class="catalog-article__add-to-favorites" data-v-bind_class="{ 'catalog-article__add-to-favorites_active': vm.inFavorites}" data-v-bind_title="vm.inFavorites ? '<?php echo IN_FAVORITES?>' : '<?php echo TO_FAVORITES?>'" data-v-html="vm.inFavorites ? '<?php echo IN_FAVORITES?>' : '<?php echo TO_FAVORITES?>'">
                 <?php echo TO_FAVORITES?>
               </button>
-              <button type="button" data-v-on_click="vm.toggleCompare()" class="catalog-article__add-to-compare" data-v-bind_class="{ 'catalog-article__add-to-compare_active': vm.inCompare}" data-v-bind_title="vm.inCompare ? '<?php echo DELETE_FROM_COMPARISON?>' : '<?php echo TO_COMPARISON?>'" data-v-html="vm.inCompare ? '<?php echo DELETE_FROM_COMPARISON?>' : '<?php echo TO_COMPARISON?>'">
+              <button type="button" data-v-on_click="vm.toggleCompare()" class="catalog-article__add-to-compare" data-v-bind_class="{ 'catalog-article__add-to-compare_active': vm.inCompare}" data-v-bind_title="vm.inCompare ? '<?php echo IN_COMPARISON?>' : '<?php echo TO_COMPARISON?>'" data-v-html="vm.inCompare ? '<?php echo IN_COMPARISON?>' : '<?php echo TO_COMPARISON?>'">
                 <?php echo TO_COMPARISON?>
               </button>
             </div>
@@ -395,7 +390,7 @@ if ($Item) {
         foreach ([
             'description' => DESCRIPTION,
             'files',
-            'reviews' => REVIEWS . ($comments ? ' (' . count($comments) . ')' : ''),
+            'comments' => REVIEWS . ($comments ? ' (' . count($comments) . ')' : ''),
             'faq' => FAQ . ($faq ? ' (' . count($faq) . ')' : ''),
         ] as $key => $name) {
             if (is_numeric($key)) {
@@ -428,13 +423,13 @@ if ($Item) {
                         </div>
                     <?php }
                     break;
-                case 'reviews':
+                case 'comments':
                     if ($comments || $commentFormBlock->id) { ?>
-                        <div class="catalog-article__reviews-list">
+                        <div class="catalog-article__comments-list">
                           <?php echo $commentsListText?>
                         </div>
                         <?php if ($commentFormBlock->id) { ?>
-                            <div class="catalog-article__reviews-form">
+                            <div class="catalog-article__comments-form">
                               <?php $commentFormBlock->process($Page)?>
                             </div>
                         <?php } ?>

@@ -74,6 +74,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
             'urn' => 'material',
             'datatype' => 'material',
             'source' => (int)$this->catalogBlock->material_type,
+            'show_in_table' => 1,
         ]);
         $materialField->commit();
 
@@ -113,6 +114,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
             'datatype' => 'number',
             'min_val' => 0,
             'max_val' => 5,
+            'show_in_table' => 1,
         ]);
         $ratingField->commit();
 
@@ -136,24 +138,6 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
         ]);
         $disadvantagesField->commit();
 
-        $proVotesField = new Material_Field([
-            'pid' => $this->materialType->id,
-            'vis' => 0,
-            'name' => View_Web::i()->_('PROS'),
-            'urn' => 'pros',
-            'datatype' => 'number',
-        ]);
-        $proVotesField->commit();
-
-        $conVotesField = new Material_Field([
-            'pid' => $this->materialType->id,
-            'vis' => 0,
-            'name' => View_Web::i()->_('CONS'),
-            'urn' => 'cons',
-            'datatype' => 'number',
-        ]);
-        $conVotesField->commit();
-
         return [
             $materialField->urn => $materialField,
             $dateField->urn => $dateField,
@@ -162,8 +146,6 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
             $ratingField->urn => $ratingField,
             $advantagesField->urn => $advantagesField,
             $disadvantagesField->urn => $disadvantagesField,
-            $proVotesField->urn => $proVotesField,
-            $conVotesField->urn => $conVotesField,
         ];
     }
 
@@ -316,10 +298,15 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
     ) {
         $additionalData = array_merge(
             [
+                'interface_id' => (int)Snippet::importByURN('__raas_shop_goods_comments_interface')->id,
                 'name' => View_Web::i()->_('REVIEWS'),
+                'nat' => 0,
                 'vis' => 0,
+                'pages_var_name' => '',
+                'rows_per_page' => 0,
                 'sort_field_default' => $this->materialType->fields['date']->id,
                 'sort_order_default' => 'desc!',
+                'params' => 'materialFieldURN=material',
             ],
             $additionalData
         );
@@ -379,7 +366,6 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
                     'name' => $user['name']['first'] . ' '
                            .  $user['name']['last'],
                     'description' => $text['name'],
-                    'priority' => ($i + 1) * 10,
                     'sitemaps_priority' => 0.5,
                     'cats' => (array)$product->pages_ids,
                 ]);
@@ -392,8 +378,6 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
                 $item->fields['rating']->addValue(rand(0, 5));
                 $item->fields['advantages']->addValue($text2['name']);
                 $item->fields['disadvantages']->addValue($text3['name']);
-                $item->fields['pros']->addValue(rand(0, 100));
-                $item->fields['cons']->addValue(rand(0, 100));
                 $result[] = $item;
             }
         }

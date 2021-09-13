@@ -32,6 +32,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
             'urn' => 'material',
             'datatype' => 'material',
             'source' => (int)$this->catalogBlock->material_type,
+            'show_in_table' => 1,
         ]);
         $materialField->commit();
 
@@ -70,15 +71,6 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
             'datatype' => 'email',
         ]);
         $emailField->commit();
-
-        $imageField = new Material_Field([
-            'pid' => $this->materialType->id,
-            'vis' => 1,
-            'name' => View_Web::i()->_('IMAGE'),
-            'urn' => 'image',
-            'datatype' => 'image', 'show_in_table' => 0,
-        ]);
-        $imageField->commit();
 
         $answerDateField = new Material_Field([
             'pid' => $this->materialType->id,
@@ -261,10 +253,15 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
     ) {
         $additionalData = array_merge(
             [
+                'interface_id' => (int)Snippet::importByURN('__raas_shop_goods_comments_interface')->id,
                 'name' => View_Web::i()->_('FAQ'),
+                'nat' => 0,
                 'vis' => 0,
+                'pages_var_name' => '',
+                'rows_per_page' => 0,
                 'sort_field_default' => $this->materialType->fields['date']->id,
                 'sort_order_default' => 'desc!',
+                'params' => 'materialFieldURN=material',
             ],
             $additionalData
         );
@@ -289,10 +286,8 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
                 $item = new Material([
                     'pid' => (int)$this->materialType->id,
                     'vis' => 1,
-                    'name' => $user['name']['first'] . ' '
-                           .  $user['name']['last'],
-                    'description' => $text['name'],
-                    'priority' => ($i + 1) * 10,
+                    'name' => $text['name'],
+                    'description' => '',
                     'sitemaps_priority' => 0.5,
                     'cats' => (array)$product->pages_ids,
                 ]);
@@ -301,6 +296,9 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
                 $t1 = $t + rand(0, 86400);
                 $item->fields['material']->addValue((int)$product->id);
                 $item->fields['date']->addValue(date('Y-m-d', $t));
+                $item->fields['full_name']->addValue(
+                    $user['name']['first'] . ' ' .  $user['name']['last']
+                );
                 $item->fields['phone']->addValue($user['phone']);
                 $item->fields['email']->addValue($user['email']);
                 $item->fields['answer_date']->addValue(date('Y-m-d', $t1));
@@ -311,16 +309,6 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
                     (int)($answer['gender'] == 'male')
                 );
                 $item->fields['answer']->addValue($text['text']);
-                $att = Attachment::createFromFile(
-                    $user['pic']['filepath'],
-                    $this->materialType->fields['image']
-                );
-                $item->fields['image']->addValue(json_encode([
-                    'vis' => 1,
-                    'name' => '',
-                    'description' => '',
-                    'attachment' => (int)$att->id
-                ]));
                 $att = Attachment::createFromFile(
                     $answer['pic']['filepath'],
                     $this->materialType->fields['answer_image']

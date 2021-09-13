@@ -62,6 +62,10 @@ class Webmaster extends CMSWebmaster
                 'filename' => 'catalog_interface',
                 'locked' => false,
             ],
+            '__raas_shop_goods_comments_interface' => [
+                'name' => 'GOODS_COMMENTS_STANDARD_INTERFACE',
+                'filename' => 'goods_comments_interface',
+            ],
             '__raas_shop_spec_interface' => [
                 'name' => 'SPEC_STANDARD_INTERFACE',
                 'filename' => 'spec_interface',
@@ -914,14 +918,14 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                         [
                             'name' => View_Web::i()->_('PHONE'),
                             'urn' => 'phone',
-                            'datatype' => 'text',
+                            'datatype' => 'tel',
                             'required' => true,
                             'show_in_table' => true,
                         ],
                         [
                             'name' => View_Web::i()->_('EMAIL'),
                             'urn' => 'email',
-                            'datatype' => 'text',
+                            'datatype' => 'email',
                             'show_in_table' => true,
                         ],
                         [

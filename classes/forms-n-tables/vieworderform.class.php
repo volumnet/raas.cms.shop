@@ -1,5 +1,6 @@
 <?php
 namespace RAAS\CMS\Shop;
+
 use \RAAS\Form as RAASForm;
 use \RAAS\FormTab;
 use \RAAS\Field as RAASField;
@@ -33,7 +34,7 @@ class ViewOrderForm extends ViewFeedbackForm
     {
         $arr = parent::getParams();
         $arr['action'] = '#history';
-        $arr['commit'] = function(RAASForm $Form) {
+        $arr['commit'] = function (RAASForm $Form) {
             $history = new Order_History();
             $history->uid = Application::i()->user->id;
             $history->order_id = (int)$Form->Item->id;
@@ -91,6 +92,9 @@ class ViewOrderForm extends ViewFeedbackForm
                     'children' => ['Set' => Order_Status::getSet()],
                     'default' => $this->Item->status_id,
                 ],
+                // 2021-01-04, AVS: сделал выпадающее меню вместо галочки, чтобы
+                // не сбрасывался статус оплаты при сохранении, когда фоном
+                // прошел онлайн-платеж
                 'paid' => [
                     'type' => 'select',
                     'name' => 'paid',

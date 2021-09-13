@@ -9,14 +9,24 @@ export default {
         pageId: {
             type: Number,
         },
+        /**
+         * Использовать AJAX-загрузку
+         * @type {Boolean}
+         */
+        useAjax: {
+            type: Boolean,
+            default: false,
+        },
     },
     mounted: function () {
-        $(window).one('load', () => {
-            window.setTimeout(() => {
-                this.getAJAXMenu();
-                this.ajaxLoaded = true;
-            }, 50);
-        });
+        if (this.useAjax) {
+            $(window).one('load', () => {
+                window.setTimeout(() => {
+                    this.getAJAXMenu();
+                    this.ajaxLoaded = true;
+                }, 50);
+            });
+        }
         
         $(this.$el).on('click', '.menu-left__children-trigger', function () {
             $(this)
@@ -47,6 +57,13 @@ export default {
          */
         ajaxURL: function () {
             return '/ajax/menu_left/?id=' + this.pageId;
+        },
+        /**
+         * Аналог this для привязки к слоту
+         * @return {Object}
+         */
+        self: function () {
+            return { ...this };
         },
     }
 

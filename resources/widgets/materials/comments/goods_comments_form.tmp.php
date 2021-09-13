@@ -21,7 +21,9 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
     if ($localError) {
         $result['localError'] = $localError;
     }
-    ob_clean();
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
     echo json_encode($result);
     exit;
 } else { ?>
@@ -30,6 +32,7 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
         <?php echo YOU_CAN_LEAVE_REVIEW_BY_FILLING_FORM_BELOW?>
       </div>
       <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" data-vue-role="ajax-form" data-v-bind_block-id="<?php echo (int)$Block->id?>" data-v-slot="vm">
+        <input type="hidden" name="material" value="<?php echo (int)$Page->Material->id?>" />
         <div class="feedback__notifications" data-v-bind_class="{ 'feedback__notifications_active': true }" data-v-if="vm.success">
           <div class="alert alert-success">
             <?php echo REVIEW_SUCCESSFULLY_SENT?>
@@ -67,10 +70,17 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
                   $DATA[$fieldURN],
                   $localError
               );
-              $fieldHTML = $fieldRenderer->render([
+              $renderData = [
                   'data-v-bind_class' => "{ 'is-invalid': !!vm.errors." . $fieldURN . " }",
                   'data-v-bind_title' => "vm.errors." . $fieldURN . " || ''"
-              ]);
+              ];
+              if ($fieldURN == 'rating') {
+                  $renderData['data-vue-role'] = 'raas-field';
+                  $renderData['type'] = 'rating';
+                  $renderData['class'] = ['form-control' => false];
+                  $renderData['data-raas-field'] = null;
+              }
+              $fieldHTML = $fieldRenderer->render($renderData);
               $fieldCaption = htmlspecialchars($field->name);
               if ($fieldURN == 'agree') {
                   $fieldCaption = '<a href="/privacy/" target="_blank">' .

@@ -686,14 +686,21 @@ class CatalogInterface extends MaterialInterface
                     (array)$commentsListData,
                     (array)$commentsListParams
                 );
-                $commentsListData['Set'] = array_values(
-                    array_filter(
-                        (array)$commentsListData['Set'],
-                        function ($x) use ($item) {
-                            return $this->commentsFilterFunction($x, $item);
-                        }
-                    )
-                );
+                // 2021-08-22, AVS: если указана фильтрация на уровне блока
+                // списка комментариев
+                // (предполагается, что используется интерфейс комментариев),
+                // то там уже есть своя фильтрация, и дополнительно фильтровать
+                // не нужно
+                if (!$commentsListBlock->additionalParams['materialFieldURN']) {
+                    $commentsListData['Set'] = array_values(
+                        array_filter(
+                            (array)$commentsListData['Set'],
+                            function ($x) use ($item) {
+                                return $this->commentsFilterFunction($x, $item);
+                            }
+                        )
+                    );
+                }
                 $result['comments'] = $commentsListData['Set'];
                 if ($commentsListBlock->Widget->id) {
                     ob_start();

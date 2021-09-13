@@ -217,7 +217,7 @@ $static = (bool)(int)$Block->additionalParams['static'];
                                         <div class="catalog-filter-property-values-list__item">
                                           <label class="catalog-filter-property-value<?php echo !$value['enabled'] ? ' catalog-filter-property-value_disabled' : ''?>">
                                             <input type="<?php echo (($property->datatype == 'checkbox') && !$property->multiple) ? 'radio' : 'checkbox'?>" class="catalog-filter-property-value__input" name="<?php echo htmlspecialchars($property->urn) . (($property->datatype == 'checkbox' && !$property->multiple) ? '' : '[]')?>" value="<?php echo htmlspecialchars($value['value'])?>"<?php echo ($value['checked'] ? ' checked="checked"' : '') . (!$value['enabled'] ? ' disabled="disabled"' : '')?>>
-                                            <a href="<?php echo htmlspecialchars($catalog->catalogFilter->getCanonicalURLFromFilter($catalog->catalogFilter->filter, $property->urn, $value['value']))?>">
+                                            <a href="<?php echo htmlspecialchars($catalog->catalogFilter->getCanonicalURLFromFilter($catalog->catalogFilter->filter, $property->urn, $value['value']))?>" rel="nofollow">
                                               <?php echo htmlspecialchars($value['doRich'])?>
                                             </a>
                                           </label>

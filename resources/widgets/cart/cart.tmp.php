@@ -60,6 +60,9 @@ foreach ($Cart->items as $i => $cartItem) {
 }
 
 if ($_GET['AJAX']) {
+    while (ob_get_level()) {
+        ob_end_clean();
+    }
     echo json_encode($cartData);
     exit;
 } elseif ($epayWidget && ($epayWidget instanceof Snippet)) {

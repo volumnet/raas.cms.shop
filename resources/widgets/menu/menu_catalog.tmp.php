@@ -112,4 +112,4 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
   </a>
   <?php echo $showMenu($menuArr ?: $Item, $Page)?>
 </nav>
-<?php echo Package::i()->asset('/js/menu-catalog.js')?>
+<?php Package::i()->requestJS('/js/menu-catalog.js');

@@ -21,19 +21,27 @@ export default {
             type: Object,
             required: true
         },
+        /**
+         * Автоматически изменяять количество по корзине
+         * @type {Object}
+         */
+        bindAmountToCart: {
+            type: Boolean,
+            default: false,
+        },
     },
     data: function () {
         let translations = {
             ADDED_TO_CART: 'Товар добавлен в корзину',
             DELETED_FROM_CART: 'Товар удален из корзины',
-            GO_TO_CART: 'Перейти в корзину',
+            GO_TO_CART: 'В корзину',
             ADDED_TO_FAVORITES: 'Товар добавлен в избранное',
             DELETED_FROM_FAVORITES: 'Товар удален из избранного',
-            GO_TO_FAVORITES: 'Перейти в избранное',
+            GO_TO_FAVORITES: 'В избранное',
             ADDED_TO_COMPARE: 'Товар добавлен в сравнение',
             DELETED_FROM_COMPARE: 'Товар удален из сравнения',
-            GO_TO_COMPARE: 'Перейти в сравнение',
-            CONTINUE_SHOPPING: 'Продолжить покупки',
+            GO_TO_COMPARE: 'В сравнение',
+            CONTINUE_SHOPPING: 'Продолжить',
         };
         if (typeof window.translations == 'object') {
             Object.assign(translations, window.translations);
@@ -44,9 +52,9 @@ export default {
         }
         return {
             amount: amount, // Количество товара для добавления в корзину
-            inCart: false, // Находится ли товар в корзине
-            inFavorites: false, // Находится ли товар в избранном
-            inCompare: false, // Находится ли товар в сравнении
+            inCart: 0, // Находится ли товар в корзине
+            inFavorites: 0, // Находится ли товар в избранном
+            inCompare: 0, // Находится ли товар в сравнении
             translations, // Переводы
         };
     },
@@ -70,9 +78,12 @@ export default {
          * Проверяет наличие в корзинах
          */
         checkCarts: function () {
-            this.inCart = !!window.app.cart.checkAmount(this.item);
-            this.inFavorites = !!window.app.favorites.checkAmount(this.item);
-            this.inCompare = !!window.app.compare.checkAmount(this.item);
+            this.inCart = window.app.cart.checkAmount(this.item);
+            if (this.bindAmountToCart) {
+                this.amount = this.inCart;
+            }
+            this.inFavorites = window.app.favorites.checkAmount(this.item);
+            this.inCompare = window.app.compare.checkAmount(this.item);
         },
 
 
@@ -81,7 +92,10 @@ export default {
          * @param {Number} amount Количество для установки
          */
         setAmount: function (amount) {
-            this.amount = Math.max(this.item.min, amount);
+            this.amount = Math.max(
+                this.bindAmountToCart ? 0 : this.item.min, 
+                amount
+            );
         },
 
 
@@ -112,7 +126,7 @@ export default {
          * Добавляет товар в корзину
          */
         addToCart: function () {
-            this.inCart = true;
+            this.inCart++;
             window.app.cart.add(this.item, this.amount);
             $(document).one('raas.shop.cart-updated', () => {
                 let modalData = this.getCartModalData(window.app.cart, this.amount);
@@ -122,11 +136,20 @@ export default {
 
 
         /**
+         * Устанавливает количество товара в корзине
+         */
+        setCart: function () {
+            this.inCart = this.amount;
+            window.app.cart.set(this.item, this.amount);
+        },
+
+
+        /**
          * Добавляет/убирает товара в корзине
          */
         toggleCart: function () {
             window.app.cart.set(this.item, this.inCart ? 0 : this.amount);
-            this.inCart = !this.inCart;
+            this.inCart = this.inCart ? 0 : this.amount;
             $(document).one('raas.shop.cart-updated', () => {
                 let modalData = this.getCartModalData(
                     window.app.cart, 

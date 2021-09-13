@@ -109,7 +109,7 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax, $useAjax) {
 
 $current = $ajax ? new Page($_GET['id']) : $Page;
 ?>
-<nav class="menu-left" data-vue-role="menu-left" data-v-bind_page-id="<?php echo (int)$Page->id?>">
+<nav class="menu-left" data-vue-role="menu-left" data-v-bind_page-id="<?php echo (int)$Page->id?>" data-v-bind_use-ajax="<?php echo htmlspecialchars(json_encode($useAjax))?>" data-v-slot="vm">
   <div class="menu-left__title">
     <a href="/catalog/">
       <?php echo htmlspecialchars($Block->name)?>
