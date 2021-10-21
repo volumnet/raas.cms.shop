@@ -51,6 +51,8 @@ export default {
     mounted: function () {
         $('.body').on('click', () => { 
             this.listActive = false;
+        }).on('click', '.cart-main-list', (e) => { 
+            e.stopPropagation();
         });
     },
     methods: {
@@ -59,10 +61,11 @@ export default {
          * @param {Event} e Событие
          */
         clickInformer: function (e) {
-            if (this.cart.dataLoaded && 
+            if (!this.isCartPage &&
+                this.cart.dataLoaded && 
                 (this.cart.count > 0) &&
                 (window.app.windowWidth >= window.app.mediaTypes.lg) &&
-                (!this.listActive)
+                !this.listActive
             )  {
                 this.listActive = true;
                 e.stopPropagation();
@@ -131,5 +134,12 @@ export default {
         self: function () { 
             return { ...this };
         },
+        /**
+         * Находимся на странице корзины
+         * @return {Boolean}
+         */
+        isCartPage: function () {
+            return /\/cart\//gi.test(window.location.pathname);
+        }
     },
 };

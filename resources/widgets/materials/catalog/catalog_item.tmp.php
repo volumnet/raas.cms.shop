@@ -77,8 +77,8 @@ if ($propsCache) {
     </a>
     <div class="catalog-item__controls">
       <!--noindex-->
-      <button type="button" data-v-on_click="vm.toggleCompare()" class="catalog-item__add-to-compare" data-v-bind_class="{ 'catalog-item__add-to-compare_active': vm.inCompare}" data-v-bind_title="vm.inCompare ? '<?php echo IN_COMPARISON?>' : '<?php echo TO_COMPARISON?>'"></button>
-      <button type="button" data-v-on_click="vm.toggleFavorites()" class="catalog-item__add-to-favorites" data-v-bind_class="{ 'catalog-item__add-to-favorites_active': vm.inFavorites}" data-v-bind_title="vm.inFavorites ? '<?php echo IN_FAVORITES?>' : '<?php echo TO_FAVORITES?>'"></button>
+      <button type="button" data-v-on_click="vm.toggleCompare()" class="catalog-item__add-to-compare" data-v-bind_class="{ 'catalog-item__add-to-compare_active': vm.inCompare }" data-v-bind_title="vm.inCompare ? '<?php echo IN_COMPARISON?>' : '<?php echo TO_COMPARISON?>'"></button>
+      <button type="button" data-v-on_click="vm.toggleFavorites()" class="catalog-item__add-to-favorites" data-v-bind_class="{ 'catalog-item__add-to-favorites_active': vm.inFavorites }" data-v-bind_title="vm.inFavorites ? '<?php echo IN_FAVORITES?>' : '<?php echo TO_FAVORITES?>'"></button>
       <!--/noindex-->
     </div>
   </div>
@@ -135,9 +135,9 @@ if ($propsCache) {
           <!--noindex-->
           <div class="catalog-item__add-to-cart-outer">
             <div class="catalog-item__amount-block" title="<?php echo IN_CART?>" data-v-if="vm.inCart">
-              <a class="catalog-item__decrement" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();">–</a>
-              <input type="number" class="form-control catalog-item__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_input="vm.setAmount($event.target.value); vm.setCart();" />
-              <a class="catalog-item__increment" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();">+</a>
+              <button type="button" class="catalog-item__decrement" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();">–</button>
+              <input type="number" class="catalog-item__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_input="vm.setAmount($event.target.value); vm.setCart();" />
+              <button type="button" class="catalog-item__increment" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();">+</button>
             </div>
             <button type="button" data-v-else data-v-on_click="vm.setAmount(Math.max(vm.item.min, 1)); vm.setCart()" class="btn btn-primary catalog-item__add-to-cart">
               <?php echo DO_BUY?>

@@ -890,8 +890,18 @@ class PriceloaderInterface extends AbstractInterface
     {
         $itemSet = [];
         if ($uniqueIndex !== null) {
-            if (trim($dataRow[$uniqueIndex])) {
-                $itemSet = $this->getItemsByUniqueField($loader, trim($dataRow[$uniqueIndex]));
+            // 2021-10-08, AVS: добавили возможность нескалярных значений
+            if (!is_scalar($dataRow[$uniqueIndex]) ||
+                trim($dataRow[$uniqueIndex])
+            ) {
+                $itemSet = $this->getItemsByUniqueField(
+                    $loader,
+                    (
+                        is_scalar($dataRow[$uniqueIndex]) ?
+                        trim($dataRow[$uniqueIndex]) :
+                        $dataRow[$uniqueIndex]
+                    )
+                );
             }
         } else {
             $itemSet = $this->getItemsByEntireRow($loader, $dataRow);
@@ -1208,7 +1218,13 @@ class PriceloaderInterface extends AbstractInterface
                     $i
                 );
             }
-            $rawData[] = $dataRow;
+            $rawData[] = array_map(function ($x) {
+                if (is_scalar($x)) {
+                    return $x;
+                } else {
+                    return json_encode($x, JSON_UNESCAPED_UNICODE);
+                }
+            }, $dataRow);
         }
         // 2020-02-10, AVS: для ускорения обновим связанные страницы здесь
         Material_Type::updateAffectedPagesForSelf();

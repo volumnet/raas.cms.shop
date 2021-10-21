@@ -486,9 +486,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
      * Создаем страницу корзины
      * @param Cart_Type $cartType Тип корзины
      * @param Page $ajax Страница AJAX
+     * @param Form $form Форма заказа
      * @return Page Созданная или существующая страница корзины
      */
-    public function createCart(Cart_Type $cartType, Page $ajax)
+    public function createCart(Cart_Type $cartType, Page $ajax, Form $form)
     {
         $temp = Page::getSet([
             'where' => ["pid = " . (int)$this->Site->id, "urn = 'cart'"]
@@ -553,6 +554,24 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 $ajaxCart
             );
         }
+
+        DeliveryTemplate::spawn(
+            View_Web::i()->_('RECEIVING_METHODS'),
+            'delivery',
+            $this
+        )->create();
+        PaymentTypesTemplate::spawn(
+            View_Web::i()->_('PAYMENT_TYPES'),
+            'payment',
+            $this
+        )->create();
+
+        $deliveryMaterialType = Material_Type::importByURN('delivery');
+        $paymentMaterialType = Material_Type::importByURN('payment');
+        $form->fields['delivery']->source = (int)$deliveryMaterialType->id;
+        $form->fields['delivery']->commit();
+        $form->fields['payment']->source = (int)$paymentMaterialType->id;
+        $form->fields['payment']->commit();
         return $cart;
     }
 
@@ -909,11 +928,88 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                     'interface_id' => (int)$interfaces['__raas_shop_order_notify']->id,
                     'fields' => [
                         [
-                            'name' => View_Web::i()->_('YOUR_NAME'),
-                            'urn' => 'full_name',
+                            'name' => View_Web::i()->_('ESTIMATED_WEIGHT'),
+                            'urn' => 'weight',
+                            'required' => true,
+                            'datatype' => 'number',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('RECEIVING_METHOD'),
+                            'urn' => 'delivery',
+                            'required' => true,
+                            'datatype' => 'material',
+                            'show_in_table' => true,
+                        ],
+                        [
+                            'name' => View_Web::i()->_('PAYMENT_METHOD'),
+                            'urn' => 'payment',
+                            'required' => true,
+                            'datatype' => 'material',
+                            'show_in_table' => true,
+                        ],
+                        [
+                            'name' => View_Web::i()->_('POSTAL_CODE'),
+                            'urn' => 'post_code',
+                            'required' => true,
+                            'datatype' => 'text',
+                            'pattern' => '^\d{6}$',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('REGION'),
+                            'urn' => 'region',
+                            'required' => true,
+                            'datatype' => 'text',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('CITY'),
+                            'urn' => 'region',
+                            'required' => true,
+                            'datatype' => 'text',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('STREET'),
+                            'urn' => 'street',
+                            'datatype' => 'text',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('HOUSE'),
+                            'urn' => 'house',
+                            'datatype' => 'text',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('APARTMENT'),
+                            'urn' => 'apartment',
+                            'datatype' => 'text',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('PICKUP_POINT'),
+                            'urn' => 'pickup_point',
+                            'datatype' => 'text',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('PICKUP_POINT_ID'),
+                            'urn' => 'pickup_point_id',
+                            'vis' => 0,
+                            'datatype' => 'text',
+                        ],
+
+                        [
+                            'name' => View_Web::i()->_('LAST_NAME'),
+                            'urn' => 'last_name',
+                            'required' => true,
+                            'datatype' => 'text',
+                        ],
+                        [
+                            'name' => View_Web::i()->_('FIRST_NAME'),
+                            'urn' => 'first_name',
                             'required' => true,
                             'datatype' => 'text',
                             'show_in_table' => true,
+                        ],
+                        [
+                            'name' => View_Web::i()->_('SECOND_NAME'),
+                            'urn' => 'second_name',
+                            'datatype' => 'text',
                         ],
                         [
                             'name' => View_Web::i()->_('PHONE'),
@@ -926,13 +1022,18 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                             'name' => View_Web::i()->_('EMAIL'),
                             'urn' => 'email',
                             'datatype' => 'email',
-                            'show_in_table' => true,
                         ],
                         [
                             'name' => View_Web::i()->_('ORDER_COMMENT'),
                             'urn' => 'description',
                             'datatype' => 'textarea',
                             'show_in_table' => 0,
+                        ],
+                        [
+                            'name' => View_Web::i()->_('TRACK_NUMBER'),
+                            'vis' => 0,
+                            'urn' => 'description',
+                            'datatype' => 'text',
                         ],
                         [
                             'name' => View_Web::i()->_('AGREE_PRIVACY_POLICY'),
@@ -954,12 +1055,12 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $catalogType = $materialTemplate->materialType;
         $catalog = $materialTemplate->create();
 
-        $Page->fields['main_props']->addValue((int)$catalogType->props['article']->id);
-        $Page->fields['main_props']->addValue((int)$catalogType->props['brand']->id);
-        $Page->fields['main_props']->addValue((int)$catalogType->props['length']->id);
-        $Page->fields['main_props']->addValue((int)$catalogType->props['height']->id);
-        $Page->fields['main_props']->addValue((int)$catalogType->props['width']->id);
-        $Page->fields['main_props']->addValue((int)$catalogType->props['weight']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->props['article']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->props['brand']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->props['length']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->props['height']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->props['width']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->props['weight']->id);
 
         GoodsCommentsTemplate::spawn(
             View_Web::i()->_('GOODS_REVIEWS'),
@@ -1045,6 +1146,8 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $orderStatuses = $this->createOrderStatuses();
         $loaders = $this->createLoaders($catalogType, $catalog);
         $cart = $this->createCart($cartTypes['cart'], $ajax);
+
+
         $favorites = $this->createFavorites($cartTypes['favorites'], $ajax);
         $compare = $this->createCompare($cartTypes['compare'], $ajax);
         $delivery = $this->createDelivery();
@@ -1192,5 +1295,17 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             'args' => '[]'
         ]);
         $updateRatingTask->commit();
+        $sdekPVZImportTask = new Crontab([
+            'name' => View_Web::i()->_('UPDATING_CATALOG_RATING'),
+            'vis' => 1,
+            'once' => 0,
+            'minutes' => '0',
+            'hours' => '0',
+            'days' => '*',
+            'weekdays' => '*',
+            'command_classname' => SDEKPVZImportCommand::class,
+            'args' => '[]'
+        ]);
+        $sdekPVZImportTask->commit();
     }
 }

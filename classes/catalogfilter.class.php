@@ -435,7 +435,7 @@ class CatalogFilter
         // применением ВСЕГО фильтра, т.е. фактически отображаемые товары
         $crossFilterMapping = $this->applyCrossFilter(
             $goodsIdsMapping,
-            $this->categoryGoodsIds
+            (array)$this->categoryGoodsIds
         );
 
         // Отсортируем полный маппинг по значениям свойств и отберем только
@@ -1152,7 +1152,7 @@ class CatalogFilter
             $ids = $this->multisort([
                 ('!' . $availabilityPropId),
                 ((($order < 0) ? '!' : '') . $sortKey)
-            ], $this->sortMapping[$sortKey]);
+            ], (array)$this->sortMapping[$sortKey]);
         } else {
             $ids = $this->sortMapping[$sortKey];
             if ($sortKey && ($order < 0)) {

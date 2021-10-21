@@ -139,7 +139,7 @@ $static = (bool)(int)$Block->additionalParams['static'];
     </div>
     <form action="" method="get" class="catalog-filter__inner">
       <div class="catalog-filter__list">
-        <div data-vue-role="catalog-filter-properties-list" data-v-bind_form-data="vm.formData" data-v-bind_filter="vm.filter" data-v-bind_properties="vm.properties" data-v-bind_multiple="vm.multiple" data-v-on_input="vm.change($event)">
+        <div class="catalog-filter-properties-list" data-vue-role="catalog-filter-properties-list" data-v-bind_form-data="vm.formData" data-v-bind_filter="vm.filter" data-v-bind_properties="vm.properties" data-v-bind_multiple="vm.multiple" data-v-on_input="vm.change($event)">
           <?php if ($static) {
               foreach ($availableProperties as $propId => $values) {
                   if (count((array)$values) <= 1) {
@@ -247,7 +247,7 @@ $static = (bool)(int)$Block->additionalParams['static'];
           } ?>
         </div>
       </div>
-      <div data-vue-role="catalog-filter-preview-marker" data-v-bind_counter="vm.counter" data-v-bind_active="!!vm.previewTimeoutId" data-v-bind_last-active-element="vm.lastActiveElement" data-v-bind_float="vm.floatingMarker" data-v-on_submit="vm.submit()">
+      <div class="catalog-filter-preview-marker" data-vue-role="catalog-filter-preview-marker" data-v-bind_counter="vm.counter" data-v-bind_active="!!vm.previewTimeoutId" data-v-bind_last-active-element="vm.lastActiveElement" data-v-bind_float="vm.floatingMarker" data-v-on_submit="vm.submit()">
         <?php if ($static) { ?>
             <span class="catalog-filter-preview-marker__results">
               <?php echo FOUND?>

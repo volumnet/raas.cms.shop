@@ -4,6 +4,7 @@
 export default {
     data: function () {
         let translations = {
+            ARE_YOU_SURE_TO_CLEAR_CART: 'Вы действительно хотите очистить корзину?',
             CART_DELETE_CONFIRM: 'Вы действительно хотите удалить этот товар?',
         };
         if (typeof window.translations == 'object') {
@@ -32,10 +33,27 @@ export default {
          * Запрос на удаление
          * @param  {Object} item Товар для удаления
          * @param  {Cart} cart Корзина
+         * @param  {String} confirmText Текст подтверждения
          */
-        requestItemDelete: async function (item, cart) {
-            if (await this.confirm(this.translations.CART_DELETE_CONFIRM)) {
+        requestItemDelete: async function (item, cart, confirmText) {
+            if (!confirmText) {
+                confirmText = this.translations.CART_DELETE_CONFIRM;
+            }
+            if (await this.confirm(confirmText)) {
                 cart.delete(item);
+            }
+        },
+        /**
+         * Запрос на очистку корзины
+         * @param  {Cart} cart Корзина
+         * @param  {String} confirmText Текст подтверждения
+         */
+        requestCartClear: async function (cart, confirmText) {
+            if (!confirmText) {
+                confirmText = this.translations.ARE_YOU_SURE_TO_CLEAR_CART;
+            }
+            if (await this.confirm(confirmText)) {
+                cart.clear();
             }
         },
     },

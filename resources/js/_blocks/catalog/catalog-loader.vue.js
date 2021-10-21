@@ -16,6 +16,25 @@ export default {
             type: Number,
             required: true,
         },
+        /**
+         * CSS-селектор внутренних ссылок (по отношению к загрузчику) 
+         * для обработки динамического клика (подгрузки через AJAX)
+         * @type {String}
+         */
+        dynamicLinkSelector: {
+            type: String,
+            default: '',
+        },
+        /**
+         * CSS-селектор обновляемых внутренних блоков (по отношению к загрузчику) 
+         * @type {String[]}
+         */
+        updatableBlockSelectors: {
+            type: Array,
+            default: function () {
+                return [];
+            },
+        },
     },
     data: function () {
         return {
@@ -31,14 +50,16 @@ export default {
             self.loadCatalog($(this).attr('href'), false);
             return false;
         });
-        $(this.$el).on(
-            'click', 
-            '[data-role="loader-pagination"] a', 
-            function () {
+        $(this.$el).on('click', '[data-role="loader-pagination"] a', function () {
+            self.loadCatalog($(this).attr('href'), true);
+            return false;
+        });
+        if (this.dynamicLinkSelector) {
+            $(this.$el).on('click', this.dynamicLinkSelector, function () {
                 self.loadCatalog($(this).attr('href'), true);
                 return false;
-            }
-        );
+            });
+        }
         $(document).on('raas.shop.catalogupdaterequest', ($event, url) => {
             self.loadCatalog(url, true);
         });
@@ -74,6 +95,13 @@ export default {
             ].forEach((selector) => {
                 $(selector, document).html($(selector, $remoteLoader).html());
             })
+            if (this.updatableBlockSelectors && 
+                this.updatableBlockSelectors.length
+            ) {
+                this.updatableBlockSelectors.forEach((selector) => {
+                    $(selector, document).html($(selector, $remote).html());
+                })
+            }
             
             if (clear) {
                 $('[data-role="loader-list"]', document).empty();
@@ -108,13 +136,20 @@ export default {
         loadCatalog: function (url, clear) {
             let self = this;
             let $dO = $.Deferred();
+            let title = document.title;
             if (this.busy) {
                 $dO.reject(false);
                 return $dO;
             }
             this.busy = true;
-            $.get(url).then(function (result) {
+            $.get(url).then((result) => {
                 const rxRes = /\<body.*?\>([\s\S]*?)\<\/body\>/m.exec(result);
+                if (clear) {
+                    let rxTitle = /<title>(.*)<\/title>/.exec(result);
+                    if (rxTitle && rxTitle[1]) {
+                        title = rxTitle[1];
+                    }
+                }
                 if (rxRes) {
                     result = $.trim(rxRes[1]);
                 }
@@ -125,7 +160,10 @@ export default {
                     $.scrollTo(self.$el, 500);
                 }
                 $(document).trigger('raas.shop.catalog-ready');
-                window.history.pushState({}, document.title, url);
+                window.history.pushState({}, title, url);
+                if (clear) {
+                    document.title = title;
+                }
                 self.busy = false;
                 return $result;
             });

@@ -53,6 +53,7 @@ export default {
     },
     updated: function () {
         if (this.lastActiveElement && this.float) {
+            // console.log(this.lastActiveElement)
             $(this.$el).css('top', 0);
             var neutralMarkerOffset = $(this.$el).offset().top;
             var markerHeight = $(this.$el).outerHeight();

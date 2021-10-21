@@ -134,8 +134,8 @@ if ($Item) {
                             $href = '/' . $row['fileURL'];
                         }
                         ?>
-                        <div class="catalog-article-images-list__item slider-list__item">
-                          <a class="catalog-article-images-item<?php echo $row['ytid'] ? ' catalog-article-images-item_video' : ''?>" href="<?php echo htmlspecialchars($href)?>" data-role="slider-item" data-v-bind_class="{ 'catalog-article-images-list__item_active': (slider.activeFrame == <?php echo $i?>), 'slider-list__item_active': (slider.activeFrame == <?php echo $i?>) }" data-v-on_click="vm.clickThumbnail(<?php echo (int)$i?>, $event)" data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__images">
+                        <div class="catalog-article-images-list__item slider-list__item" data-role="slider-item" data-v-bind_class="{ 'catalog-article-images-list__item_active': (slider.activeFrame == <?php echo $i?>), 'slider-list__item_active': (slider.activeFrame == <?php echo $i?>) }">
+                          <a class="catalog-article-images-item<?php echo $row['ytid'] ? ' catalog-article-images-item_video' : ''?>" href="<?php echo htmlspecialchars($href)?>" data-v-on_click="vm.clickThumbnail(<?php echo (int)$i?>, $event)" data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__images">
                             <img loading="lazy" src="<?php echo htmlspecialchars($image)?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" />
                           </a>
                         </div>

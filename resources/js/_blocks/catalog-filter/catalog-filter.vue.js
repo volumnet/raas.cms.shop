@@ -107,7 +107,7 @@ export default {
         if (this.source) {
             for (let key of ['counter', 'formData', 'filter', 'properties']) {
                 if (this.source[key]) {
-                    this[key] = this.source[key];
+                    result[key] = this.source[key];
                 }
             }
         }
@@ -147,7 +147,11 @@ export default {
                 });
             }
         }, 0); // Задержка чтобы успел инициализироваться window.app
-        this.refresh();
+        // 2021-10-05, AVS: добавили условие чтобы лишний раз 
+        // не обновлялось при статическом фильтре
+        if (!this.source) {
+            this.refresh(); 
+        }
     },
     methods: {
         /**
@@ -204,26 +208,28 @@ export default {
          * @return {String}
          */
         getFormUrl: function () {
-            let query = window.queryString.parse(
-                document.location.search, 
-                { arrayFormat: 'bracket' }
-            );
-            delete query.page;
+            // 2021-10-05, AVS: убрали всё лишнее, оставили только updateQuery
+            // let query = window.queryString.parse(
+            //     document.location.search, 
+            //     { arrayFormat: 'bracket' }
+            // );
             let updateQuery = window.queryString.parse(
                 $(this.$el).formSerialize(), 
                 { arrayFormat: 'bracket' }
             );
-            for (let key in updateQuery) {
-                if (typeof updateQuery[key] == 'boolean') {
-                    if (updateQuery[key]) {
-                        query[key] = 1; 
-                    } else {
-                        delete query[key];
-                    }
-                } else {
-                    query[key] = updateQuery[key];
-                }
-            }
+            let query = updateQuery;
+            delete query.page;
+            // for (let key in updateQuery) {
+            //     if (typeof updateQuery[key] == 'boolean') {
+            //         if (updateQuery[key]) {
+            //             query[key] = 1; 
+            //         } else {
+            //             delete query[key];
+            //         }
+            //     } else {
+            //         query[key] = updateQuery[key];
+            //     }
+            // }
             let url = window.queryString.stringify(
                 query, 
                 { arrayFormat: 'bracket' }
@@ -288,7 +294,7 @@ export default {
          * @param {Object} result Входящие данные
          */
         update: function (result) {
-            this.data = result.data;
+            this.formData = result.formData;
             this.filter = result.filter;
             this.properties = result.properties;
             this.counter = result.counter;
