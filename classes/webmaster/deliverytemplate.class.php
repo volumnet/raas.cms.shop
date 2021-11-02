@@ -45,7 +45,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
 
         $minSumField = new Material_Field([
             'pid' => $this->materialType->id,
-            'vis' => 0,
+            'vis' => 1,
             'name' => View_Web::i()->_('MINIMAL_FREE_SUM'),
             'urn' => 'min_sum',
             'datatype' => 'number',
@@ -54,19 +54,20 @@ class DeliveryTemplate extends MaterialTypeTemplate
 
         $receivingMethodsField = new Material_Field([
             'pid' => $this->materialType->id,
-            'vis' => 0,
+            'vis' => 1,
             'name' => View_Web::i()->_('RECEIVING_METHOD'),
-            'urn' => 'receiving_method',
+            'urn' => 'delivery',
             'datatype' => 'radio',
+            'required' => true,
             'source_type' => 'ini',
-            'source' => '0 => "' . View_Web::i()->_('PICKUP') . '"' . "\n" .
-                        '1 => "' . View_Web::i()->_('DELIVERY') . '"',
+            'source' => '0 = "' . View_Web::i()->_('PICKUP') . '"' . "\n" .
+                        '1 = "' . View_Web::i()->_('DELIVERY') . '"',
         ]);
         $receivingMethodsField->commit();
 
         $serviceURN = new Material_Field([
             'pid' => $this->materialType->id,
-            'vis' => 0,
+            'vis' => 1,
             'name' => View_Web::i()->_('SERVICE_URN'),
             'urn' => 'service_urn',
             'datatype' => 'text',
@@ -99,7 +100,8 @@ class DeliveryTemplate extends MaterialTypeTemplate
             ],
             $additionalData
         );
-        return parent::createBlock($page, $widget, $additionalData, true);
+        $result = parent::createBlock($page, $widget, $additionalData, true);
+        return $result;
     }
 
 
@@ -116,7 +118,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
         $item->fields['brief']->addValue(View_Web::i()->_('SALES_OFFICE'));
         $item->fields['price']->addValue(0);
         $item->fields['min_sum']->addValue(0);
-        $item->fields['receiving_method']->addValue(0);
+        $item->fields['delivery']->addValue(0);
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -128,7 +130,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
         $item->commit();
         $item->fields['price']->addValue(300);
         $item->fields['min_sum']->addValue(1000);
-        $item->fields['receiving_method']->addValue(1);
+        $item->fields['delivery']->addValue(1);
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -138,10 +140,10 @@ class DeliveryTemplate extends MaterialTypeTemplate
             'description' => '',
             'sitemaps_priority' => 0.5,
         ]);
-        $item->fields['brief']->addValue(View_Web::i()->_('CDEK'));
-        $item->fields['receiving_method']->addValue(0);
-        $item->fields['service_urn']->addValue('cdek');
         $item->commit();
+        $item->fields['brief']->addValue(View_Web::i()->_('CDEK'));
+        $item->fields['delivery']->addValue(0);
+        $item->fields['service_urn']->addValue('cdek');
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -151,10 +153,10 @@ class DeliveryTemplate extends MaterialTypeTemplate
             'description' => '',
             'sitemaps_priority' => 0.5,
         ]);
-        $item->fields['brief']->addValue(View_Web::i()->_('CDEK'));
-        $item->fields['receiving_method']->addValue(1);
-        $item->fields['service_urn']->addValue('cdek');
         $item->commit();
+        $item->fields['brief']->addValue(View_Web::i()->_('CDEK'));
+        $item->fields['delivery']->addValue(1);
+        $item->fields['service_urn']->addValue('cdek');
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -164,10 +166,10 @@ class DeliveryTemplate extends MaterialTypeTemplate
             'description' => '',
             'sitemaps_priority' => 0.5,
         ]);
-        $item->fields['brief']->addValue(View_Web::i()->_('RUSSIAN_POST'));
-        $item->fields['receiving_method']->addValue(1);
-        $item->fields['service_urn']->addValue('russianpost');
         $item->commit();
+        $item->fields['brief']->addValue(View_Web::i()->_('RUSSIAN_POST'));
+        $item->fields['delivery']->addValue(1);
+        $item->fields['service_urn']->addValue('russianpost');
 
         return $result;
     }

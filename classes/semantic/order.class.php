@@ -11,6 +11,7 @@ use RAAS\Application;
 use RAAS\User as RAASUser;
 use RAAS\CMS\Controller_Frontend;
 use RAAS\CMS\Feedback;
+use RAAS\CMS\Form_Field;
 use RAAS\CMS\Material;
 use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
@@ -18,6 +19,24 @@ use RAAS\CMS\User;
 
 /**
  * Класс заказа
+ * @property-read User $user Пользователь, который сделал заказ
+ * @property-read Cart_Type $parent Родительский тип корзины
+ * @property-read Page $page Страница, с которой сделан заказ
+ * @property-read RAASUser $viewer Администратор, который просмотрел заказ
+ * @property-read Order_Status $status Статус заказа
+ * @property-read Snippet $paymentInterface Интерфейс заказа
+ * @property-read Form_Field[] $fields Поля заказа с установленным Owner
+ * @property-read Form_Field[] $visFields Видимые поля заказа с установленным Owner
+ * @property-read Material[] $items Товары заказа с установленным amount и meta
+ * @property-read Order_Status[] $history История заказа
+ * @property-read int $count Количество товаров в заказе
+ * @property-read float $sum Сумма заказа
+ * @property-read float $weight Вес заказа, кг
+ * @property-read array $sizes <pre><code>[
+ *     int Длина, см,
+ *     int Ширина, см,
+ *     int Высота, см
+ * ]</code></pre> Размеры заказа
  */
 class Order extends Feedback
 {
@@ -81,6 +100,14 @@ class Order extends Feedback
                     $sum += $row->amount * $row->realprice;
                 }
                 return $sum;
+                break;
+            case 'weight':
+                $result = $this->parent->getWeight($this->items);
+                return $result;
+                break;
+            case 'sizes':
+                $result = $this->parent->getSizes($this->items);
+                return $result;
                 break;
             default:
                 return parent::__get($var);

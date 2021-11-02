@@ -153,7 +153,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
-            'vis' => 1,
+            'vis' => 0,
             'name' => View_Web::i()->_('WITH_ONLINE_PAYMENT'),
             'description' => '',
             'sitemaps_priority' => 0.5,

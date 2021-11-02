@@ -25,6 +25,12 @@ export default class {
         this.dataLoaded = false;
 
         /**
+         * Идет загрузка
+         * @type {Boolean}
+         */
+        this.loading = false;
+
+        /**
          * Товары в корзине
          * @type {Array|null}
          */
@@ -99,6 +105,7 @@ export default class {
                 ajaxSettings.method = 'POST';
                 ajaxSettings.data = postData;
             }
+            this.loading = true;
             return $.ajax(ajaxSettings).then((remoteData) => {
                 for (let key of [
                     'items', 
@@ -114,6 +121,7 @@ export default class {
                     }
                 }
                 this.dataLoaded = true;
+                this.loading = false;
                 $(document).trigger(
                     'raas.shop.cart-updated', 
                     [{id: this.id, remote: true, data: remoteData}]

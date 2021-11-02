@@ -1,7 +1,11 @@
 <?php
+/**
+ * Таблица заказов
+ */
 namespace RAAS\CMS\Shop;
 
 use RAAS\Table;
+use RAAS\CMS\Material;
 
 class OrdersTable extends Table
 {
@@ -33,14 +37,18 @@ class OrdersTable extends Table
         $columns['post_date'] = [
             'caption' => $this->view->_('POST_DATE'),
             'callback' => function ($row) use ($view) {
-                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . date(DATETIMEFORMAT, strtotime($row->post_date)) . '</a>';
+                return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' .
+                          date(DATETIMEFORMAT, strtotime($row->post_date)) .
+                       '</a>';
             }
         ];
         if (!$params['Item']->id) {
             $columns['pid'] = [
                 'caption' => $this->view->_('CART_TYPE'),
                 'callback' => function ($row) use ($view) {
-                    return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' . htmlspecialchars($row->parent->name) . '</a>';
+                    return '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '">' .
+                              htmlspecialchars($row->parent->name) .
+                           '</a>';
                 }
             ];
         }
@@ -48,10 +56,51 @@ class OrdersTable extends Table
             $columns[$col->urn] = [
                 'caption' => $col->name,
                 'callback' => function ($row) use ($col) {
-                    if ($row->fields[$col->urn]) {
-                        $y = htmlspecialchars($row->fields[$col->urn]->doRich());
+                    $text = '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '" title="' . htmlspecialchars($row->description) . '">';
+                    $f = $row->fields[$col->urn];
+                    switch ($f->datatype) {
+                        case 'color':
+                            $v = $f->getValue();
+                            return '<span style="color: ' . htmlspecialchars($v) . '">' .
+                                      htmlspecialchars($v) .
+                                   '</span>';
+                            break;
+                        case 'htmlarea':
+                            $text .= strip_tags($f->doRich());
+                            break;
+                        case 'file':
+                            $v = $f->getValue();
+                            $text .= $v->name;
+                            break;
+                        case 'image':
+                            $v = $f->getValue();
+                            $text .= '<img src="/' . $v->tnURL . '" style="max-width: 48px;" />';
+                            break;
+                        case 'material':
+                            $v = $f->getValue();
+                            $m = new Material($v);
+                            if ($m->id) {
+                                $text .= htmlspecialchars($m->name);
+                            }
+                            break;
+                        case 'checkbox':
+                            if ($f->multiple) {
+                                $text .= $f->doRich();
+                            } else {
+                                if ((int)$f->getValue()) {
+                                    $text .= '<span class="icon icon-ok"></span>';
+                                }
+                            }
+                            break;
+                        default:
+                            if (isset($f)) {
+                                $y = htmlspecialchars($f->doRich());
+                            }
+                            $text .= $y ? $y : '';
+                            break;
                     }
-                    return $y ? $y : '';
+                    $text .= '</a>';
+                    return $text;
                 }
             ];
         }

@@ -53,6 +53,12 @@ class Updater extends \RAAS\Updater
         ) < 0) {
             $this->update20210401();
         }
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.3.7'
+        ) < 0) {
+            $this->update20211026();
+        }
     }
 
 
@@ -306,6 +312,25 @@ class Updater extends \RAAS\Updater
         ) {
             $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_priceloaders
                            ADD cats_usage TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Categories usage'";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     * Добавляет функции расчета веса и размеров в тип корзины
+     */
+    public function update20211026()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_cart_types", $this->tables) &&
+            !in_array(
+                'weight_callback',
+                $this->columns(SOME::_dbprefix() . "cms_shop_cart_types")
+            )
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_cart_types
+                           ADD weight_callback TEXT NULL DEFAULT NULL COMMENT 'Weight callback',
+                           ADD sizes_callback TEXT NULL DEFAULT NULL COMMENT 'Sizes callback'";
             $this->SQL->query($sqlQuery);
         }
     }

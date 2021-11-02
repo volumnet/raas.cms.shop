@@ -102,6 +102,18 @@ class EditCartTypeForm extends RAASForm
                     'children' => $CONTENT['forms']
                 ],
                 [
+                    'type' => 'textarea',
+                    'name' => 'weight_callback',
+                    'caption' => $view->_('WEIGHT_CALLBACK'),
+                    'data-hint' => $view->_('WEIGHT_CALLBACK_HINT'),
+                ],
+                [
+                    'type' => 'textarea',
+                    'name' => 'sizes_callback',
+                    'caption' => $view->_('SIZES_CALLBACK'),
+                    'data-hint' => $view->_('SIZES_CALLBACK_HINT'),
+                ],
+                [
                     'type' => 'checkbox',
                     'name' => 'no_amount',
                     'caption' => $view->_('FAVORITES_MODE')

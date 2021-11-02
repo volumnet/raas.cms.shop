@@ -10,7 +10,9 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
+use RAAS\Application;
 use RAAS\CMS\FieldArrayFormatter;
+use RAAS\CMS\Block;
 use RAAS\CMS\Form;
 use RAAS\CMS\FormArrayFormatter;
 use RAAS\CMS\FormFieldRenderer;
@@ -23,46 +25,48 @@ use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
 
 $cartData = [];
-$cartData['count'] = (int)$Cart->count;
-$cartData['additional'] = (array)$additional ?: null;
-if ($cartData['additional']['items']) {
-    foreach ((array)$cartData['additional']['items'] as $i => $cartItem) {
-        $cartItemFormatter = new CartItemArrayFormatter($cartItem);
-        $cartData['additional']['items'][$i] = $cartItemFormatter->format([
-            'type' => trim($cartItem->additional['type'])
-        ]);
-    }
-}
-$cartData['sum'] = $cartData['rollup'] = (float)$Cart->sum;
-if ($additional['discount']['price']) {
-    $cartData['rollup'] += (float)$additional['discount']['price'];
-}
-if ($additional['delivery']['price']) {
-    $cartData['rollup'] += (float)$additional['delivery']['price'];
-}
-$cartData['formData'] = (object)$_POST;
+$cartData['formData'] = (object)$DATA;
 if (!$cartData['formData']->delivery) {
     $cartData['formData']->delivery = '0';
 }
-foreach (['region', 'city', 'pickup_point'] as $key) {
-    if (!$cartData['formData']->$key) {
-        $cartData['formData']->$key = '';
+foreach ($Form->fields as $fieldURN => $field) {
+    if (!isset($cartData['formData']->$fieldURN)) {
+        $cartData['formData']->$fieldURN = $field->multiple ? [] : '';
     }
 }
-$cartData['items'] = [];
-$cartData['localError'] = (array)$localError;
-$cartData['proceed'] = ($_SERVER['REQUEST_METHOD'] == 'POST');
-foreach ($Cart->items as $i => $cartItem) {
-    $cartItemFormatter = new CartItemArrayFormatter($cartItem);
-    $cartItemData = $cartItemFormatter->format([
-        'article',
-        'url',
-        'eCommerce' => ECommerce::getProduct($cartItem->material, $i),
-    ]);
-    $cartData['items'][] = $cartItemData;
-}
 
-if ($_GET['AJAX'] || ($_POST['AJAX'] == $Block->id)) {
+if ($Page->mime == 'application/json') {
+    $cartData['count'] = (int)$Cart->count;
+    $cartData['additional'] = (array)$additional ?: null;
+    if ($cartData['additional']['items']) {
+        foreach ((array)$cartData['additional']['items'] as $i => $cartItem) {
+            $cartItemFormatter = new CartItemArrayFormatter($cartItem);
+            $cartData['additional']['items'][$i] = $cartItemFormatter->format([
+                'type' => trim($cartItem->additional['type'])
+            ]);
+        }
+    }
+    if ($minOrderSum) {
+        $cartData['additional']['minOrderSum'] = $minOrderSum;
+    }
+    $cartData['sum'] = $cartData['rollup'] = (float)$Cart->sum;
+    if ($additional['items']) {
+        foreach ((array)$additional['items'] as $additionalItem) {
+            $cartData['rollup'] += (float)$additionalItem->realprice * (int)$additionalItem->amount;
+        }
+    }
+    $cartData['items'] = [];
+    $cartData['localError'] = (array)$localError;
+    $cartData['proceed'] = ($_SERVER['REQUEST_METHOD'] == 'POST');
+    foreach ($Cart->items as $i => $cartItem) {
+        $cartItemFormatter = new CartItemArrayFormatter($cartItem);
+        $cartItemData = $cartItemFormatter->format([
+            'article',
+            'url',
+            'eCommerce' => ECommerce::getProduct($cartItem->material, $i),
+        ]);
+        $cartData['items'][] = $cartItemData;
+    }
     $result = $cartData;
     if ($success[(int)$Block->id]) {
         $result['success'] = 1;
@@ -106,9 +110,10 @@ if ($_GET['AJAX'] || ($_POST['AJAX'] == $Block->id)) {
     </script>
 <?php } else {
     $formArrayFormatter = new FormArrayFormatter($Form);
+    $ajaxBlock = Block::spawn((int)$Block->additionalParams['ajaxBlockId']);
     $formArr = $formArrayFormatter->format(
-        ['signature' => function ($form) use ($Block) {
-            return $form->getSignature($Block);
+        ['signature' => function ($form) use ($ajaxBlock) {
+            return $form->getSignature($ajaxBlock);
         }],
         [
             'htmlId' => function ($field) use ($Block) {
@@ -116,9 +121,22 @@ if ($_GET['AJAX'] || ($_POST['AJAX'] == $Block->id)) {
             },
         ],
     );
-    // var_dump($formArr); exit;
+    $cdekText = file_get_contents(Application::i()->baseDir . '/sdek.pvz.json');
+    $cities = [];
+    foreach ($cdekJSON as $pvz) {
+        $cities[trim($pvz['cityCode'])] = [
+            'value' => trim($pvz['city']),
+            'name' => trim($pvz['city']),
+            'region' => trim($pvz['regionName'])
+        ];
+    }
+    usort($cities, function ($a, $b) {
+        return strnatcasecmp($a['name'], $b['name']);
+    });
+    $formArr['fields']['city']['datatype'] = 'city';
+    $formArr['fields']['city']['stdSource'] = $cities;
     ?>
-    <cart class="cart" :cart="cart" :block-id="<?php echo (int)$Block->id?>" id="cart" :form="<?php echo htmlspecialchars(json_encode($formArr))?>" :initial-form-data="<?php echo htmlspecialchars(json_encode((object)$DATA))?>">
+    <cart class="cart" :cart="cart" :block-id="<?php echo (int)$Block->id?>" id="cart" :form="<?php echo htmlspecialchars(json_encode($formArr))?>" :initial-form-data="<?php echo htmlspecialchars(json_encode((object)$cartData['formData']))?>">
       <div v-if="false" class="cart__loading">
         <?php echo CART_IS_LOADING?>
       </div>

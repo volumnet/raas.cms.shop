@@ -20,6 +20,12 @@ use RAAS\CMS\User;
  * @property-read CartItem[] $items Товары корзины
  * @property-read int $count Количество товаров в корзине
  * @property-read float $sum Сумма корзины
+ * @property-read float $weight Вес заказа, кг
+ * @property-read array $sizes <pre><code>[
+ *     int Длина, см,
+ *     int Ширина, см,
+ *     int Высота, см
+ * ]</code></pre> Размеры заказа
  */
 class Cart
 {
@@ -82,6 +88,24 @@ class Cart
                 $items = $this->__get('items');
                 foreach ($items as $item) {
                     $result += $item->sum;
+                }
+                return $result;
+                break;
+            case 'weight':
+            case 'sizes':
+                $items = [];
+                foreach ($this->items as $itemId => $metas) {
+                    foreach ($metas as $meta => $c) {
+                        $material = new Material((int)$itemId);
+                        $material->meta = $meta;
+                        $material->amount = (int)$c;
+                        $items[] = $material;
+                    }
+                }
+                if ($var == 'weight') {
+                    $result = $this->cartType->getWeight($items);
+                } elseif ($var == 'sizes') {
+                    $result = $this->cartType->getSizes($items);
                 }
                 return $result;
                 break;

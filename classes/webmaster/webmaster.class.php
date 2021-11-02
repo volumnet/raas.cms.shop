@@ -139,6 +139,7 @@ class Webmaster extends CMSWebmaster
             'materials/catalog/popular_cats' => View_Web::i()->_('POPULAR_CATEGORIES'),
             'cart/my_orders' => View_Web::i()->_('MY_ORDERS'),
             'menu/menu_catalog' => View_Web::i()->_('MENU_CATALOG'),
+            'menu/menu_left' => View_Web::i()->_('LEFT_MENU'),
         ];
         foreach ($widgetsData as $url => $name) {
             $urn = explode('/', $url);
@@ -184,6 +185,15 @@ class Webmaster extends CMSWebmaster
                 'urn' => 'cart',
                 'form_id' => (int)$orderForm->id,
                 'no_amount' => 0,
+                'weight_callback' => '$result = 0;' . "\n"
+                    . 'foreach ($items as $item) {' . "\n"
+                    . '    $itemWeight = ((float)$item->weight / 1000) ?: 0;' . "\n"
+                    . '    $itemAmount = (int)$item->amount ?: 1;' . "\n"
+                    . '    $result += $itemWeight * $itemAmount;' . "\n"
+                    . '}' . "\n"
+                    . 'return $result ?: 1;' . "\n",
+                'sizes_callback' => '$result = [20, 20, 20];' . "\n"
+                    . 'return $result;' . "\n",
                 'mtypes' => [
                     ['id' => $catalogType->id, 'price_id' => $priceCol->id]
                 ],
@@ -492,42 +502,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
     public function createCart(Cart_Type $cartType, Page $ajax, Form $form)
     {
         $temp = Page::getSet([
-            'where' => ["pid = " . (int)$this->Site->id, "urn = 'cart'"]
-        ]);
-        if ($temp) {
-            $cart = $temp[0];
-            $cart->trust();
-        } else {
-            $cart = $this->createPage(
-                [
-                    'name' => View_Web::i()->_('CART'),
-                    'urn' => 'cart',
-                    'cache' => 0,
-                    'response_code' => 200
-                ],
-                $this->Site
-            );
-            $B = new Block_Cart(['cart_type' => (int)$cartType->id]);
-            $this->createBlock(
-                $B,
-                'content',
-                'cart_interface',
-                'cart',
-                $cart
-            );
-
-            $B = new Block_PHP();
-            $this->createBlock(
-                $B,
-                'cart',
-                '',
-                'cart_main',
-                $this->Site,
-                true
-            );
-        }
-
-        $temp = Page::getSet([
             'where' => ["pid = " . (int)$ajax->id, "urn = 'cart'"]
         ]);
         if ($temp) {
@@ -545,13 +519,46 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 ],
                 $ajax
             );
-            $B = new Block_Cart(['cart_type' => (int)$cartType->id]);
+            $ajaxBlock = $this->createBlock(new Block_Cart([
+                'cart_type' => (int)$cartType->id,
+                'params' => 'cdek[authLogin]='
+                    . '&cdek[secure]='
+                    . '&cdek[senderCityId]=250'
+                    . '&cdek[pickupTariff]=136'
+                    . '&cdek[deliveryTariff]=137'
+                    . '&russianpost[login]='
+                    . '&russianpost[password]='
+                    . '&russianpost[token]='
+                    . '&minOrderSum=0',
+            ]), '', 'cart_interface', 'cart', $ajaxCart);
+        }
+
+
+        $temp = Page::getSet([
+            'where' => ["pid = " . (int)$this->Site->id, "urn = 'cart'"]
+        ]);
+        if ($temp) {
+            $cart = $temp[0];
+            $cart->trust();
+        } else {
+            $cart = $this->createPage([
+                'name' => View_Web::i()->_('CART'),
+                'urn' => 'cart',
+                'cache' => 0,
+                'response_code' => 200
+            ], $this->Site);
+            $this->createBlock(new Block_Cart([
+                'cart_type' => (int)$cartType->id,
+                'params' => 'ajaxBlockId=' . (int)$ajaxBlock->id,
+            ]), 'content', 'cart_interface', 'cart', $cart);
+
             $this->createBlock(
-                $B,
-                '',
-                'cart_interface',
+                new Block_PHP(),
                 'cart',
-                $ajaxCart
+                '',
+                'cart_main',
+                $this->Site,
+                true
             );
         }
 
@@ -563,6 +570,11 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         PaymentTypesTemplate::spawn(
             View_Web::i()->_('PAYMENT_TYPES'),
             'payment',
+            $this
+        )->create();
+        DiscountTemplate::spawn(
+            View_Web::i()->_('PROMO_CODES'),
+            'discount',
             $this
         )->create();
 
@@ -786,9 +798,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 $ajax
             );
             $this->createBlock(
-                new Block_PHP([
-                    'params' => 'catalogBlockId=' . (int)$catalogBlock->id,
-                ]),
+                new Block_PHP(),
                 '',
                 null,
                 'catalog_filter',
@@ -803,7 +813,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $catalogPage = $catalogPages[0];
             $catalogPage->trust();
             $this->createBlock(
-                new Block_PHP(['vis_material' => Block::BYMATERIAL_WITHOUT]),
+                new Block_PHP([
+                    'vis_material' => Block::BYMATERIAL_WITHOUT,
+                    'params' => 'catalogBlockId=' . (int)$catalogBlock->id,
+                ]),
                 'left',
                 null,
                 'catalog_filter',
@@ -917,6 +930,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
      */
     public function createIShop()
     {
+        ini_set('max_execution_time', 3600);
         $this->createPageFields();
         $interfaces = $this->checkStdInterfaces();
         $widgets = $this->createWidgets();
@@ -930,6 +944,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                         [
                             'name' => View_Web::i()->_('ESTIMATED_WEIGHT'),
                             'urn' => 'weight',
+                            'vis' => false,
                             'required' => true,
                             'datatype' => 'number',
                         ],
@@ -948,6 +963,12 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                             'show_in_table' => true,
                         ],
                         [
+                            'name' => View_Web::i()->_('PROMO_CODE'),
+                            'urn' => 'promo',
+                            'required' => false,
+                            'datatype' => 'text',
+                        ],
+                        [
                             'name' => View_Web::i()->_('POSTAL_CODE'),
                             'urn' => 'post_code',
                             'required' => true,
@@ -962,18 +983,20 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                         ],
                         [
                             'name' => View_Web::i()->_('CITY'),
-                            'urn' => 'region',
+                            'urn' => 'city',
                             'required' => true,
                             'datatype' => 'text',
                         ],
                         [
                             'name' => View_Web::i()->_('STREET'),
                             'urn' => 'street',
+                            'required' => true,
                             'datatype' => 'text',
                         ],
                         [
                             'name' => View_Web::i()->_('HOUSE'),
                             'urn' => 'house',
+                            'required' => true,
                             'datatype' => 'text',
                         ],
                         [
@@ -989,7 +1012,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                         [
                             'name' => View_Web::i()->_('PICKUP_POINT_ID'),
                             'urn' => 'pickup_point_id',
-                            'vis' => 0,
+                            'vis' => false,
                             'datatype' => 'text',
                         ],
 
@@ -1027,12 +1050,11 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                             'name' => View_Web::i()->_('ORDER_COMMENT'),
                             'urn' => 'description',
                             'datatype' => 'textarea',
-                            'show_in_table' => 0,
                         ],
                         [
                             'name' => View_Web::i()->_('TRACK_NUMBER'),
-                            'vis' => 0,
-                            'urn' => 'description',
+                            'vis' => false,
+                            'urn' => 'barcode',
                             'datatype' => 'text',
                         ],
                         [
@@ -1145,7 +1167,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         );
         $orderStatuses = $this->createOrderStatuses();
         $loaders = $this->createLoaders($catalogType, $catalog);
-        $cart = $this->createCart($cartTypes['cart'], $ajax);
+        $cart = $this->createCart($cartTypes['cart'], $ajax, $forms['order']);
 
 
         $favorites = $this->createFavorites($cartTypes['favorites'], $ajax);
@@ -1296,7 +1318,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         ]);
         $updateRatingTask->commit();
         $sdekPVZImportTask = new Crontab([
-            'name' => View_Web::i()->_('UPDATING_CATALOG_RATING'),
+            'name' => View_Web::i()->_('UPDATING_CDEK_DELIVERY_POINTS'),
             'vis' => 1,
             'once' => 0,
             'minutes' => '0',

@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_cart_types
   name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Name',
   form_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Form ID#',
   no_amount TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Single item of a type',
+  weight_callback TEXT NULL DEFAULT NULL COMMENT 'Weight callback',
+  sizes_callback TEXT NULL DEFAULT NULL COMMENT 'Sizes callback',
 
   PRIMARY KEY (id),
   KEY (form_id)
