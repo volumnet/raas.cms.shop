@@ -602,7 +602,7 @@ $getAdditionals = function (
                 $postalCode,
                 $weight,
                 $sizes,
-                $sumForDelivery,
+                $sumForDelivery
             );
         }
         $newDeliveries = [];

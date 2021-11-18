@@ -42,12 +42,12 @@ class CartItemArrayFormatter
             $itemData = $itemFormatter->format($with);
         }
         $result = array_merge($itemData, [
-            'id' => $this->item->id,
-            'name' => $this->item->name,
-            'meta' => $this->item->meta,
+            'id' => (int)$this->item->id,
+            'name' => trim($this->item->name),
+            'meta' => trim($this->item->meta),
             'metaJSON' => $this->item->metaJSON,
-            'amount' => $this->item->amount,
-            'price' => $this->item->realprice,
+            'amount' => (int)$this->item->amount,
+            'price' => (float)$this->item->realprice,
         ]);
         if ($this->item->additional) {
             $result['additional'] = $this->item->additional;

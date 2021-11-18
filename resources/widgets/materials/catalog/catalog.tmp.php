@@ -219,6 +219,12 @@ if ($Item) {
                     $richValues = array_map(function ($val) use ($field) {
                         return $field->doRich($val);
                     }, $fieldValues);
+                    $richValues = array_values(array_filter($richValues, function ($x) use ($field) {
+                        return $x;
+                    }));
+                    if (!$richValues) {
+                        continue;
+                    }
                     $textValue = implode(', ', $richValues);
                     ob_start();
                     switch ($fieldURN) {
@@ -298,7 +304,7 @@ if ($Item) {
                               <span class="catalog-article-props-item__title" itemprop="name">
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
-                              <span class="catalog-article-props-item__value" itemprop="value">'
+                              <span class="catalog-article-props-item__value" itemprop="value">
                                 <?php echo htmlspecialchars($textValue)?>
                               </span>
                             </div>
@@ -377,7 +383,7 @@ if ($Item) {
               <div class="catalog-article__share-title">
                 <?php echo SHARE?>:
               </div>
-              <div class="catalog-article__share-inner ya-share2" style="display: inline-block; vertical-align: middle" data-services="vkontakte,facebook,twitter,whatsapp"></div>
+              <div class="catalog-article__share-inner ya-share2" style="display: inline-block; vertical-align: middle" data-services="vkontakte,facebook,twitter,whatsapp,telegram"></div>
             </div>
             <!--/noindex-->
           </div>

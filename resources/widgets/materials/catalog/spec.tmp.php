@@ -19,7 +19,7 @@ if ($Set) { ?>
         <div class="spec__list slider__list" data-role="slider-list">
           <div class="spec-list slider-list slider-list_horizontal">
             <?php foreach ((array)$Set as $i => $row) { ?>
-                <div class="spec-list__item slider-list__item" data-role="slider-item" data-v-bind_class="{ 'spec-list__item_active': (vm.activeFrame == <?php echo $i?>), 'slider-list__item_active': (vm.activeFrame == <?php echo $i?>) }">
+                <div class="spec-list__item slider-list__item" data-role="slider-item" data-slider-index="<?php echo (int)$i?>" data-v-bind_class="{ 'spec-list__item_active': (vm.activeFrame == <?php echo $i?>), 'slider-list__item_active': (vm.activeFrame == <?php echo $i?>) }">
                   <?php Snippet::importByURN('catalog_item')->process(['item' => $row]); ?>
                 </div>
             <?php } ?>

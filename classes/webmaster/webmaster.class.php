@@ -653,7 +653,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 ],
                 $ajax
             );
-            $B = new Block_Cart(['cart_type' => (int)$cartType->id]);
+            $B = new Block_Cart([
+                'name' => View_Web::i()->_('FAVORITES'),
+                'cart_type' => (int)$cartType->id,
+            ]);
             $this->createBlock(
                 $B,
                 '',
@@ -731,7 +734,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 ],
                 $ajax
             );
-            $B = new Block_Cart(['cart_type' => (int)$cartType->id]);
+            $B = new Block_Cart([
+                'name' => View_Web::i()->_('COMPARISON'),
+                'cart_type' => (int)$cartType->id,
+            ]);
             $this->createBlock(
                 $B,
                 '',

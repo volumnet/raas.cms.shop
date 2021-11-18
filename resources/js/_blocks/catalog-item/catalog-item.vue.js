@@ -36,12 +36,18 @@ export default {
             ADDED_TO_CART: 'Товар добавлен в корзину',
             ADDED_TO_COMPARE: 'Товар добавлен в сравнение',
             ADDED_TO_FAVORITES: 'Товар добавлен в избранное',
-            CART_DELETE_CONFIRM: 'Вы действительно хотите удалить этот товар?',
+            CART_DELETE_CONFIRM: 'Вы действительно хотите удалить этот товар из корзины?',
+            COMPARE_DELETE_CONFIRM: 'Вы действительно хотите удалить этот товар из сравнения?',
             CONTINUE_SHOPPING: 'Продолжить',
             DELETE: 'Удалить',
+            DELETE_FROM_CART: 'Удалить из корзины',
+            DELETE_FROM_COMPARISON: 'Удалить из сравнения',
+            DELETE_FROM_FAVORITES: 'Удалить из избранного',
             DELETED_FROM_CART: 'Товар удален из корзины',
             DELETED_FROM_COMPARE: 'Товар удален из сравнения',
             DELETED_FROM_FAVORITES: 'Товар удален из избранного',
+            DO_BUY: 'Купить',
+            FAVORITES_DELETE_CONFIRM: 'Вы действительно хотите удалить этот товар из избранного?',
             GO_TO_CART: 'В корзину',
             GO_TO_COMPARE: 'В сравнение',
             GO_TO_FAVORITES: 'В избранное',
@@ -219,7 +225,7 @@ export default {
             return window.app.requestItemDelete(
                 this.actualItem, 
                 window.app.favorites, 
-                this.translations.CART_DELETE_CONFIRM
+                this.translations.FAVORITES_DELETE_CONFIRM
             );
         },
 
@@ -231,7 +237,7 @@ export default {
             return window.app.requestItemDelete(
                 this.actualItem, 
                 window.app.compare, 
-                this.translations.CART_DELETE_CONFIRM
+                this.translations.COMPARE_DELETE_CONFIRM
             );
         },
     },

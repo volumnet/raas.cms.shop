@@ -47,8 +47,8 @@ class ItemArrayFormatter
     {
         $result = [
             'id' => (int)$this->item->id,
-            'name' => $this->item->name,
-            'url' => $this->item->cache_url,
+            'name' => trim($this->item->name),
+            'url' => trim($this->item->cache_url),
         ];
 
         if ($this->usePropsCache) {

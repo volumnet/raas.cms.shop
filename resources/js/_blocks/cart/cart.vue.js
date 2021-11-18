@@ -2,10 +2,6 @@
  * Компонент корзины
  */
 export default {
-    /**
-     * Корзина
-     * @type {Object}
-     */
     props: {
         /**
          * ID# блока
@@ -46,8 +42,8 @@ export default {
         let translations = {
             ARE_YOU_SURE_TO_CLEAR_CART: 'Вы действительно хотите очистить корзину?',
             CART_IS_LOADING: 'Корзина загружается...',
-            YOUR_CART_IS_EMPTY: 'Ваша корзина пуста',
             CHECKOUT_TITLE: 'Оформление заказа',
+            YOUR_CART_IS_EMPTY: 'Ваша корзина пуста',
         };
         if (typeof window.translations == 'object') {
             Object.assign(translations, window.translations);
@@ -77,6 +73,9 @@ export default {
         $(window).on('scroll', () => {
             this.adjustRightPane();
         });
+        $(window).on('raas.shop.cart-updated', () => {
+            this.checkResultForAdditional();
+        });
     },
     methods: {
         getAdditionalData: function () {
@@ -97,6 +96,18 @@ export default {
                 }, delay);
             } else {
                 this.cart.update('action=refresh', this.getAdditionalData());
+            }
+        },
+        /**
+         * Проверяет, нужно ли получить дополнительные данные по POST-у
+         * и при необходимости получает их
+         */
+        checkResultForAdditional: function () {
+            if (this.formData.promo && 
+                !(this.cart.additional && this.cart.additional.discount) && 
+                !this.cart.loading
+            ) {
+                window.setTimeout(this.getAdditional.bind(this), 10);
             }
         },
         /**
@@ -132,7 +143,6 @@ export default {
          */
         updateDiscountCard: function (discountCard) {
             this.formData.promo = discountCard || '';
-            this.getAdditional();
         },
         /**
          * Выравнивает правую часть
@@ -172,6 +182,6 @@ export default {
                 this.oldFormData = JSON.parse(JSON.stringify(this.formData));
             },
             deep: true,
-        }
+        },
     }
 };

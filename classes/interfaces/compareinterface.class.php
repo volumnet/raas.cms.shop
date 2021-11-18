@@ -38,7 +38,8 @@ class CompareInterface extends CartInterface
             case 'clear':
             case 'refresh':
             case 'delete':
-                return parent::process($debug);
+                $result = parent::process($debug);
+                $cart = new Cart($cartType, $user);
                 break;
             case 'deleteGroup':
                 $id = isset($this->get['id']) ? $this->get['id'] : '';
@@ -74,9 +75,7 @@ class CompareInterface extends CartInterface
         $result['Cart_Type'] = $cartType;
         $result['convertMeta'] = [$this, 'convertMeta'];
         $result['interface'] = $this;
-        if (!$this->get['AJAX'] || $this->get['action']) {
-            $result = array_merge($result, $this->getCompareData($cart));
-        }
+        $result = array_merge($result, $this->getCompareData($cart));
         return $result;
     }
 
@@ -96,8 +95,8 @@ class CompareInterface extends CartInterface
         $rootMTypeId = $mTypeSelfAndParentsIds[0];
         $rootMTypeCache = MaterialTypeRecursiveCache::i()->cache[$rootMTypeId];
         $result = [
-            'id' => $rootMTypeCache['id'],
-            'name' => $rootMTypeCache['name']
+            'id' => (int)$rootMTypeCache['id'],
+            'name' => trim($rootMTypeCache['name'])
         ];
         return $result;
     }
@@ -132,7 +131,7 @@ class CompareInterface extends CartInterface
                 $groups[trim($group['id'])] = $group;
                 $groups[trim($group['id'])]['itemsIds'] = [];
             }
-            $groups[trim($group['id'])]['itemsIds'][] = $cartItem->id;
+            $groups[trim($group['id'])]['itemsIds'][] = (int)$cartItem->id;
         }
         $mTypesIds = $cart->cartType->material_types_ids;
         $mTypesIds = MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($mTypesIds);

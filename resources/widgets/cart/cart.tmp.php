@@ -31,7 +31,12 @@ if (!$cartData['formData']->delivery) {
 }
 foreach ($Form->fields as $fieldURN => $field) {
     if (!isset($cartData['formData']->$fieldURN)) {
-        $cartData['formData']->$fieldURN = $field->multiple ? [] : '';
+        $defval = $field->defval;
+        if ($field->multiple) {
+            $cartData['formData']->$fieldURN = $defval ? [$defval] : [];
+        } else {
+            $cartData['formData']->$fieldURN = $defval ?: '';
+        }
     }
 }
 
@@ -119,7 +124,7 @@ if ($Page->mime == 'application/json') {
             'htmlId' => function ($field) use ($Block) {
                 return $field->getHTMLId($Block);
             },
-        ],
+        ]
     );
     $cdekText = file_get_contents(Application::i()->baseDir . '/sdek.pvz.json');
     $cities = [];
@@ -137,7 +142,7 @@ if ($Page->mime == 'application/json') {
     $formArr['fields']['city']['stdSource'] = $cities;
     ?>
     <cart class="cart" :cart="cart" :block-id="<?php echo (int)$Block->id?>" id="cart" :form="<?php echo htmlspecialchars(json_encode($formArr))?>" :initial-form-data="<?php echo htmlspecialchars(json_encode((object)$cartData['formData']))?>">
-      <div v-if="false" class="cart__loading">
+      <div class="cart__loading">
         <?php echo CART_IS_LOADING?>
       </div>
     </cart>
