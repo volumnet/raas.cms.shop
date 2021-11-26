@@ -74,7 +74,7 @@ if ($Page->mime == 'application/json') {
     }
     $result = $cartData;
     if ($success[(int)$Block->id]) {
-        $result['success'] = 1;
+        $result['success'] = true;
         $result['orderId'] = $Item->id;
     }
     if ($localError) {

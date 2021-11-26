@@ -423,7 +423,9 @@ $getSelfTariffs = function (
 
         if ($deliveryMaterial->id) {
             $deliverySum = 0;
-            if ((float)$deliveryMaterial->min_sum > $sum) {
+            if (!(float)$deliveryMaterial->min_sum ||
+                ((float)$deliveryMaterial->min_sum > $sum)
+            ) {
                 $deliverySum = ceil((float)$deliveryMaterial->price);
             }
             $result['delivery'][''] = [

@@ -1,6 +1,6 @@
 /**
  * Компонент списка товаров в сравнении
- * требует наличия CatalogList
+ * @requires CatalogList
  */
 export default {
     props: {

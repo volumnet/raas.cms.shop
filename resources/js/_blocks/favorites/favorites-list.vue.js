@@ -1,6 +1,6 @@
 /**
  * Компонент списка избранного
- * требует компонента CatalogList
+ * @requires CatalogList
  */
 export default {
     props: {

@@ -383,7 +383,9 @@ if ($Item) {
               <div class="catalog-article__share-title">
                 <?php echo SHARE?>:
               </div>
-              <div class="catalog-article__share-inner ya-share2" style="display: inline-block; vertical-align: middle" data-services="vkontakte,facebook,twitter,whatsapp,telegram"></div>
+              <div class="catalog-article__share-inner">
+                <?php Snippet::importByURN('share')->process()?>
+              </div>
             </div>
             <!--/noindex-->
           </div>
