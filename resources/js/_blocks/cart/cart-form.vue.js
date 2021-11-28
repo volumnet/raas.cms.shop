@@ -1,5 +1,6 @@
 /**
  * Компонент формы корзины
+ * @requires AJAXForm
  */
 export default {
     props: {

@@ -64,11 +64,15 @@ class MyOrdersInterface extends AbstractInterface
         );
         $result = [];
 
+        $isAJAX = (
+            $this->post['AJAX'] ||
+            ($this->get['AJAX'] != $this->block->id)
+        );
         if ($order) {
             switch ($this->get['action']) {
                 case 'delete':
                     $redirectURL = '';
-                    if (!$this->post['AJAX']) {
+                    if (!$isAJAX) {
                         if ($this->get['back']) {
                             $redirectURL = 'history:back';
                         } else {
@@ -80,6 +84,9 @@ class MyOrdersInterface extends AbstractInterface
                         }
                     }
                     $result['success'] = $this->deleteOrder($order, $redirectURL);
+                    if ($isAJAX) {
+                        $result['Set'] = $this->getOrdersList($user);
+                    }
                     break;
                 default:
                     $this->processOrder($order, $this->page);

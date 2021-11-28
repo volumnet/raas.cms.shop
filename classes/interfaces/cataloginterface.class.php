@@ -76,8 +76,13 @@ class CatalogInterface extends MaterialInterface
      *                               списка вопросов и ответов
      *         ]
      */
-    public function processMaterial(Block_Material $block, Page $page, Material $item, array $get = [], array $server = [])
-    {
+    public function processMaterial(
+        Block_Material $block,
+        Page $page,
+        Material $item,
+        array $get = [],
+        array $server = []
+    ) {
         $legacy = $this->checkLegacyArbitraryMaterialAddress($block, $page, $item, $server);
         if ($legacy) {
             return;
@@ -151,7 +156,15 @@ class CatalogInterface extends MaterialInterface
         if ($blockParams['metaTemplates']) {
             $metaTemplates = $metaData = [];
             $twig = new Twig_Environment(new Twig_Loader_String());
-            foreach (['name', 'meta_title', 'meta_keywords', 'meta_description', 'h1'] as $key) {
+            foreach ([
+                'name',
+                'meta_title',
+                'meta_keywords',
+                'meta_description',
+                'h1',
+                'breadcrumbs_name',
+                'menu_name'
+            ] as $key) {
                 if (!$item->$key) {
                     if (!$metaData) {
                         $metaData = $this->getItemMetadata($item);

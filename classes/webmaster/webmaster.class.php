@@ -86,10 +86,10 @@ class Webmaster extends CMSWebmaster
                 'name' => 'YML_STANDARD_INTERFACE',
                 'filename' => 'yml_interface',
             ],
-            '__raas_robokassa_interface' => [
-                'name' => 'ROBOKASSA_INTERFACE',
-                'filename' => 'robokassa_interface',
-            ],
+            // '__raas_robokassa_interface' => [
+            //     'name' => 'ROBOKASSA_INTERFACE',
+            //     'filename' => 'robokassa_interface',
+            // ],
             'sberbank_interface' => [
                 'name' => 'SBERBANK_INTERFACE',
                 'filename' => 'sberbank_interface',
@@ -128,8 +128,8 @@ class Webmaster extends CMSWebmaster
             'cart/cart' => View_Web::i()->_('CART'),
             'cart/favorites' => View_Web::i()->_('FAVORITES'),
             'cart/compare' => View_Web::i()->_('COMPARISON'),
-            'cart/order' => View_Web::i()->_('VIEW_ORDER'),
-            'epay/robokassa' => View_Web::i()->_('ROBOKASSA'),
+            // 'cart/order' => View_Web::i()->_('VIEW_ORDER'),
+            // 'epay/robokassa' => View_Web::i()->_('ROBOKASSA'),
             'epay/sberbank' => View_Web::i()->_('SBERBANK'),
             'materials/comments/rating' => View_Web::i()->_('RATING'),
             'cart/cart_main' => View_Web::i()->_('CART_MAIN'),

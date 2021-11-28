@@ -55,7 +55,7 @@ class OrdersTable extends Table
         foreach ($params['columns'] as $key => $col) {
             $columns[$col->urn] = [
                 'caption' => $col->name,
-                'callback' => function ($row) use ($col) {
+                'callback' => function ($row) use ($col, $view) {
                     $text = '<a href="' . $view->url . '&action=view&id=' . (int)$row->id . '" title="' . htmlspecialchars($row->description) . '">';
                     $f = $row->fields[$col->urn];
                     switch ($f->datatype) {

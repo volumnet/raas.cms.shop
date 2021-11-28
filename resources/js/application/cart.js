@@ -107,27 +107,37 @@ export default class {
             }
             this.loading = true;
             return $.ajax(ajaxSettings).then((remoteData) => {
-                for (let key of [
-                    'items', 
-                    'sum', 
-                    'count', 
-                    'rollup', 
-                    'additional'
-                ]) {
-                    if (remoteData[key] !== undefined) {
-                        this[key] = remoteData[key];
-                    } else {
-                        this[key] = null;
-                    }
-                }
-                this.dataLoaded = true;
-                this.loading = false;
-                $(document).trigger(
-                    'raas.shop.cart-updated', 
-                    [{id: this.id, remote: true, data: remoteData}]
-                );
+                this.updateData(remoteData);
             });
         }
+    }
+
+
+    /**
+     * Производит обновление корзины данными
+     * @param {Object} remoteData Данные для обновления
+     */
+    updateData(remoteData) 
+    {
+        for (let key of [
+            'items', 
+            'sum', 
+            'count', 
+            'rollup', 
+            'additional'
+        ]) {
+            if (remoteData[key] !== undefined) {
+                this[key] = remoteData[key];
+            } else {
+                this[key] = null;
+            }
+        }
+        this.dataLoaded = true;
+        this.loading = false;
+        $(document).trigger(
+            'raas.shop.cart-updated', 
+            [{id: this.id, remote: true, data: remoteData}]
+        );
     }
 
     /**

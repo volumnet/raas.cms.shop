@@ -1,7 +1,23 @@
 <?php
 /**
  * Стандартный интерфейс корзины
- * @param Block_Cart $Block Текущий блок
+ * @param Block_Cart $Block Текущий блок <pre><code>Block_Cart(
+ *     'additionalParams' => [
+ *         'cdek' =>? [
+ *             'authLogin' => string Логин
+ *             'secure' => string Пароль,
+ *             'senderCityId' => int ID# города отправителя в системе СДЭК,
+ *             'pickupTariff' => int ID# тарифа самовывоза в системе СДЭК
+ *             'deliveryTariff' => int ID# тарифа доставки в системе СДЭК
+ *         ] Настройки доставки СДЭК,
+ *     ],
+ *     'russianPost' =>? [
+ *         'login' => string Логин,
+ *         'password' => string Пароль,
+ *         'token' => string Токен,
+ *     ], Настройки доставки Почты России,
+ *     'minOrderSum' =>? int Минимальная сумма заказа
+ * )</code></pre>
  * @param Page $Page Текущая страница
  */
 namespace RAAS\CMS\Shop;
