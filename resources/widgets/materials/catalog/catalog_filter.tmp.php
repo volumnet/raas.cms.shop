@@ -90,15 +90,19 @@ foreach ($availableProperties as $propId => $availableProperty) {
             ) ||
                 ($prop->datatype == 'number')
             ) {
-                if (($pageMime == 'application/json') || // Чтобы не перегружать код всеми значениями
-                    ($valueData['checked']) ||
-                    ($prop->datatype == 'number')
-                ) {
+                // 2021-11-30, AVS: закомментировал условие, т.к. фильтр
+                // изначально статический, и на странице с выбранным значением
+                // по умолчанию AJAX-ом не подгружается, оставляя только
+                // выбранное значение
+                // if (($pageMime == 'application/json') || // Чтобы не перегружать код всеми значениями
+                //     ($valueData['checked']) ||
+                //     ($prop->datatype == 'number')
+                // ) {
                     // 2020-05-11, AVS: добавлено условие ($prop->datatype == 'number'),
                     // чтобы цена подгружалась сразу - иначе (т.к. слайдеры не меняются)
                     // слайдер цены (и прочих числовых полей) не работает
                     $result['properties'][trim($propId)]['values'][trim($value)] = $valueData;
-                }
+                // }
             }
         }
     }

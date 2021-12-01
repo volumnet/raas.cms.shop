@@ -20,6 +20,14 @@ export default {
             default: false,
         },
         /**
+         * Перешли к быстрому заказу
+         * @type {Boolean}
+         */
+        quickorder: {
+            type: Boolean,
+            default: false,
+        },
+        /**
          * Промо-код
          */
         promo: {
@@ -37,6 +45,7 @@ export default {
             LOADING: 'Загрузка...',
             APPLY: 'Применить',
             PROMO_CODE_NOT_FOUND: 'Промо-код не найден',
+            QUICK_ORDER: 'Быстрый заказ',
         };
         if (typeof window.translations == 'object') {
             Object.assign(translations, window.translations);

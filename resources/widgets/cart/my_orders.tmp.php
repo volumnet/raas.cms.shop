@@ -1,9 +1,12 @@
 <?php
+/**
+ * Виджет "Мои заказы"
+ * @param Block_PHP $Block Текущий блок
+ * @param Page $Page Текущая страница
+ */
 namespace RAAS\CMS\Shop;
 
-use SOME\Text;
 use RAAS\CMS\Package;
-use RAAS\CMS\Snippet;
 
 ?>
 <div class="my-orders">

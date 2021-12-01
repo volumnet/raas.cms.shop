@@ -44,6 +44,7 @@ export default {
             CART_IS_LOADING: 'Корзина загружается...',
             CHECKOUT_TITLE: 'Оформление заказа',
             YOUR_CART_IS_EMPTY: 'Ваша корзина пуста',
+            QUICK_ORDER: 'Быстрый заказ',
         };
         if (typeof window.translations == 'object') {
             Object.assign(translations, window.translations);
@@ -53,6 +54,7 @@ export default {
             initialDocumentTitle: '', // Изначальный заголовок документы
             translations, // Переводы
             proceed: false, // Оформление заказа
+            quickorder: false, // Быстрый заказ
             success: false, // Заказ оформлен
             oldFormData: Object.assign({}, this.initialFormData), // Старые данные формы
             formData: Object.assign({}, this.initialFormData), // Данные формы
@@ -118,6 +120,13 @@ export default {
             $('.body__title').text(this.translations.CHECKOUT_TITLE);
             document.title = this.translations.CHECKOUT_TITLE;
             $.scrollTo(0);
+        },
+        /**
+         * Переходит к оформлению быстрого заказа
+         */
+        doQuickOrder: function () {
+            this.quickorder = true;
+            this.formData.agree = 1;
         },
         /**
          * Переходит к оформлению заказа

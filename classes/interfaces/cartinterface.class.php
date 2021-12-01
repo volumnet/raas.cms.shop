@@ -6,17 +6,20 @@ namespace RAAS\CMS\Shop;
 
 use Mustache_Engine;
 use SOME\HTTP;
+use SOME\Text;
 use RAAS\Application;
 use RAAS\Controller_Frontend as RAASControllerFrontend;
 use RAAS\Redirector;
 use RAAS\View_Web as RAASViewWeb;
 use RAAS\CMS\AbstractInterface;
+use RAAS\CMS\Block;
 use RAAS\CMS\FormInterface;
 use RAAS\CMS\Material;
 use RAAS\CMS\MaterialTypesRecursiveCache;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 use RAAS\CMS\User;
+use RAAS\CMS\User_Field;
 
 /**
  * Класс стандартного интерфейса корзины
@@ -145,9 +148,6 @@ class CartInterface extends FormInterface
                         // 2019-11-14, AVS: перенес сюда, иначе при AJAX-запросе
                         // первая попавшаяся форма отключает
                         $result['Item'] = $this->getRawOrder($cart);
-
-                        $Item = new Order();
-                        $Item->pid = (int)$cartType->id;
 
                         // Проверка полей на корректность
                         $localError = $this->check(
@@ -306,7 +306,7 @@ class CartInterface extends FormInterface
      */
     public function processOrderForm(
         Cart $cart,
-        Page $page,
+        Page $page = null,
         array $post = [],
         array $server = [],
         array $files = []
@@ -315,6 +315,19 @@ class CartInterface extends FormInterface
         // Для AJAX'а
         $this->processFeedbackReferer($order, $page, $server);
         $user = RAASControllerFrontend::i()->user;
+        if (!$user->id && $this->block->additionalParams['bindUserBy']) {
+            $user = $this->findUser($post, (array)$this->block->additionalParams['bindUserBy']);
+            if (!$user->id && $this->block->additionalParams['createUserBlockId']) {
+                $registerBlock = Block::spawn($this->block->additionalParams['createUserBlockId']);
+                $user = $this->createUser(
+                    $registerBlock,
+                    $page,
+                    $post,
+                    $server,
+                    $files
+                );
+            }
+        }
         $order->uid = ($user instanceof User) ? (int)$user->id : 0;
         $this->processUserData($order, $server);
 
@@ -346,6 +359,134 @@ class CartInterface extends FormInterface
             $order = null;
         }
         return ['Item' => $order, 'Material' => $material];
+    }
+
+
+    /**
+     * Пытается найти пользователя по данным
+     * @param array $post POST-данные
+     * @param string $findBy Массив URN полей пользователя в порядке поиска
+     * @return User|null
+     */
+    public function findUser(array $post, array $findBy)
+    {
+        $userFields = null;
+        foreach ($findBy as $fieldURN) {
+            $localVal = trim($post[$fieldURN]);
+            if ($localVal) {
+                if (in_array($fieldURN, ['login', 'email'])) {
+                    $sqlQuery = "SELECT *
+                                   FROM " . User::_tablename()
+                              . " WHERE " . $fieldURN . " = ?";
+                    $sqlBind = [$localVal];
+                    $sqlResult = User::_SQL()->getline([$sqlQuery, $sqlBind]);
+                    if ($sqlResult) {
+                        $result = new User($sqlResult);
+                        return $result;
+                    }
+                } else {
+                    if ($userFields === null) {
+                        $userFieldsTmp = User_Field::getSet();
+                        $userFields = [];
+                        foreach ($userFieldsTmp as $userField) {
+                            $userFields[trim($userField->urn)] = $userField;
+                        }
+                    }
+                    if ($userField = $userFields[$fieldURN]) {
+                        if (($userField->datatype == 'tel') ||
+                            ($fieldURN == 'phone')
+                        ) {
+                            $sqlQuery = "SELECT tU.*, tD.value AS tmpval
+                                           FROM " . User::_tablename() . " AS tU
+                                           JOIN cms_data AS tD ON tD.pid = tU.id
+                                          WHERE tD.fid = ?
+                                            AND tD.value LIKE ?
+                                          ORDER BY id";
+                            $localVal = Text::beautifyPhone($localVal);
+                            $sqlBind = [
+                                (int)$userField->id,
+                                '%' . implode('%', str_split($localVal)) . '%'
+                            ];
+                            $sqlResult = User::_SQL()->get([$sqlQuery, $sqlBind]);
+                            foreach ($sqlResult as $sqlRow) {
+                                $remoteVal = Text::beautifyPhone($sqlRow['tmpval']);
+                                if ($remoteVal == $localVal) {
+                                    unset($sqlRow['tmpval']);
+                                    $result = new User($sqlRow);
+                                    return $result;
+                                }
+                            }
+                        } else {
+                            $sqlQuery = "SELECT tU.*, tD.value AS tmpval
+                                           FROM " . User::_tablename() . " AS tU
+                                           JOIN cms_data AS tD ON tD.pid = tU.id
+                                          WHERE tD.fid = ?
+                                            AND tD.value = ?
+                                          ORDER BY id";
+                            $sqlBind = [(int)$userField->id, $localVal];
+                            $sqlResult = User::_SQL()->getline([$sqlQuery, $sqlBind]);
+                            if ($sqlResult) {
+                                $result = new User($sqlResult);
+                                return $result;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Создает нового пользователя на основании POST-данных
+     * @param Block $block Блок регистрации
+     * @param Page $page Текущая страница
+     * @param array $post Данные $_POST-полей
+     * @param array $server Данные $_SERVER-полей
+     * @param array $files Данные $_FILES-полей
+     * @return User|null
+     */
+    public function createUser(
+        Block $registerBlock,
+        Page $page,
+        array $post = [],
+        array $server = [],
+        array $files = []
+    ) {
+        $classname = 'RAAS\\CMS\\Users\\RegisterInterface';
+        if (!class_exists($classname)) {
+            return null;
+        }
+        if (!$post['email']) {
+            return null; // Не можем создать пользователя если нет e-mail
+        }
+        $registerInterface = new $classname(
+            $registerBlock,
+            $page,
+            [],
+            $post,
+            [],
+            [],
+            $server,
+            $files
+        );
+        $result = new User();
+        $result = $registerInterface->processRegisterForm(
+            new User(),
+            $registerBlock,
+            $registerBlock->Register_Form,
+            $page,
+            $post,
+            [],
+            $server,
+            $files
+        );
+        $user = $result['User'];
+        if ($user->id) {
+            return $user;
+        }
+        return null;
     }
 
 

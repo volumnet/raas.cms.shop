@@ -1,6 +1,7 @@
 /**
  * Компонент формы корзины
  * @requires AJAXForm
+ * @requires AJAXFormStandalone
  */
 export default {
     props: {
@@ -36,6 +37,7 @@ export default {
             CANNOT_GET_DELIVERY_PRICE_HINT: 'Не удалось получить стоимость доставки. Заказ будет рассчитан без учета доставки.',
             PAYMENT_METHOD: 'Способ оплаты',
             CONTACT_DATA: 'Контактные данные',
+            QUICK_ORDER: 'Быстрый заказ',
         };
         if (typeof window.translations == 'object') {
             Object.assign(translations, window.translations);
@@ -47,30 +49,6 @@ export default {
         };
     },
     methods: {
-        /**
-         * Набор атрибутов поля
-         * @param {Object} field Данные поля
-         * @return {Object}
-         */
-        fieldAttrs: function (field) {
-            let result = { 
-                type: field, 
-                'class': {
-                    'is-invalid': !!this.errors[field.urn]
-                },
-                title: (this.errors[field.urn] || ''),
-            };
-            if ([
-                'checkbox', 
-                'radio', 
-                'htmlarea', 
-                'material'
-            ].indexOf(field.datatype) == -1) {
-                result['class']['form-control'] = true
-            }
-            // console.log(result);
-            return result;
-        },
         /**
          * Устанавливает шаг формы
          * @param {Number}  step  Шаг формы

@@ -16,7 +16,12 @@
  *         'password' => string Пароль,
  *         'token' => string Токен,
  *     ], Настройки доставки Почты России,
- *     'minOrderSum' =>? int Минимальная сумма заказа
+ *     'minOrderSum' =>? int Минимальная сумма заказа,
+ *     'bindUserBy' =>? string[] Привязка заказа к существующему пользователю -
+ *         перечисление URN полей
+ *     'createUserBlockId' =>? int ID# блока регистрации для создания
+ *         нового пользователя, если не удалось найти существующего
+ *         (только при указании bindUserBy)
  * )</code></pre>
  * @param Page $Page Текущая страница
  */
@@ -745,19 +750,37 @@ $delivery = new Material($_POST['delivery']);
 $isDelivery = (bool)(int)$delivery->delivery;
 
 $interface->conditionalRequiredFields = [
+    'delivery' => function ($field, $post) {
+        return !$post['quickorder'];
+    },
+    'payment' => function ($field, $post) {
+        return !$post['quickorder'];
+    },
     'post_code' => function ($field, $post) use ($delivery, $isDelivery) {
         return $delivery->id &&
             $isDelivery &&
             in_array($delivery->service_urn, ['mail']);
     },
+    'region' => function ($field, $post) {
+        return !$post['quickorder'];
+    },
+    'city' => function ($field, $post) {
+        return !$post['quickorder'];
+    },
     'pickup_point' => function ($field, $post) {
-        return $delivery->id && !$isDelivery;
+        return $delivery->id && !$isDelivery && !$post['quickorder'];
     },
     'street' => function ($field, $post) {
-        return $delivery->id && $isDelivery;
+        return $delivery->id && $isDelivery && !$post['quickorder'];
     },
     'house' => function ($field, $post) {
-        return $delivery->id && $isDelivery;
+        return $delivery->id && $isDelivery && !$post['quickorder'];
+    },
+    'last_name' => function ($field, $post) {
+        return !$post['quickorder'];
+    },
+    'first_name' => function ($field, $post) {
+        return !$post['quickorder'];
     },
 ];
 

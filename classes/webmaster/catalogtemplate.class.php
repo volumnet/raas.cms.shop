@@ -169,7 +169,7 @@ class CatalogTemplate extends MaterialTypeTemplate
         $brandsMT = Material_Type::importByURN('brands');
         $brandField = new Material_Field([
             'pid' => $this->materialType->id,
-            'vis' => 0,
+            'vis' => 1,
             'name' => View_Web::i()->_('BRAND'),
             'multiple' => 0,
             'urn' => 'brand',

@@ -2,14 +2,19 @@
 /**
  * Виджет категории для отображения в списке
  * @param Page $page Категория для отоображения
+ * @param int $brandId ID# бренда для отображения
  */
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 
-$queryStringArr = array_intersect_key($_GET, array_flip(['brand']));
-$queryString = http_build_query($queryStringArr);
+if ($brandId) {
+    $get = ['brand' => (int)$brandId];
+} else {
+    $get = array_intersect_key($_GET, array_flip(['brand']));
+}
+$queryString = http_build_query($get);
 $queryString = $queryString ? '?' . $queryString : '';
 ?>
 <a class="catalog-category" href="<?php echo $page->url . $queryString ?>">

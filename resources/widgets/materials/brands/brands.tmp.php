@@ -1,7 +1,11 @@
 <?php
 /**
  * Виджет брендов
- * @param Block_Material $Block Текущий блок
+ * @param Block_Material $Block Текущий блок <pre><code>Block([
+ *     'additionalParams' => [
+ *         'pageLevel' => int Категории какого уровня выводить (абсолютный уровень, 0-based)
+ *     ],
+ * ])</code></pre>
  * @param Page $Page Текущая страница
  * @param Material[]|null $Set Набор материалов для отображения
  * @param Material $Item Активный материал для отображения
@@ -10,12 +14,14 @@ namespace RAAS\CMS\Shop;
 
 use SOME\Pages;
 use RAAS\CMS\Material_Type;
+use RAAS\CMS\Package;
+use RAAS\CMS\Page;
 use RAAS\CMS\PageRecursiveCache;
 use RAAS\CMS\Snippet;
 
 if ($Item) {
-    $catalogMaterialType = Material_Type::importByURN('catalog')
-    $pageLevel = 2;
+    $catalogMaterialType = Material_Type::importByURN('catalog');
+    $pageLevel = (int)$Block->additionalParams['pageLevel'] ?: 2;
     $catalogFilter = CatalogFilter::loadOrBuild(
         $catalogMaterialType,
         true,
@@ -32,10 +38,12 @@ if ($Item) {
     $rootPages = [];
     foreach ($pagesIds as $pageId) {
         $selfAndParentsIds = PageRecursiveCache::i()->getSelfAndParentsIds($pageId);
-        if (isset($selfAndParentsIds[$pageLevel])) {
-            $rootId = $selfAndParentsIds[$pageLevel];
+        $rootId = $selfAndParentsIds[min($pageLevel, count($selfAndParentsIds))];
+        if ($rootId) {
             if (!isset($rootPagesIds[$rootId])) {
-                $rootPages[$rootId] = new Page(PageRecursiveCache::i()->cache[$rootId]);
+                $rootPage = new Page(PageRecursiveCache::i()->cache[$rootId]);
+                $rootPage->counter = count($pagesMapping[$rootId]);
+                $rootPages[$rootId] = $rootPage;
             }
         }
     }
@@ -53,9 +61,8 @@ if ($Item) {
                 <img loading="lazy" src="/<?php echo htmlspecialchars($Item->image->fileURL)?>" alt="<?php echo htmlspecialchars($Item->image->name ?: $row->name)?>" />
               </div>
           <?php } ?>
-            <div class="brands-article__description">
-              <?php echo $Item->description; ?>
-            </div>
+          <div class="brands-article__description">
+            <?php echo $Item->description; ?>
           </div>
           <?php if ($rootPages) { ?>
               <div class="brands-article__pages">
@@ -79,7 +86,10 @@ if ($Item) {
         </div>
       </div>
     </div>
-<?php } elseif ($Set) { ?>
+    <?php
+    Package::i()->requestCSS('/css/brands-article.css');
+    Package::i()->requestJS('/js/brands-article.js');
+} elseif ($Set) { ?>
     <div class="brands">
       <div class="brands__list">
         <div class="brands-list">
@@ -105,5 +115,6 @@ if ($Item) {
       <?php } ?>
     </div>
     <?php
-    Package::i()->requestCSS('/css/brands.css');
+    Package::i()->requestCSS('/css/brands-list.css');
+    Package::i()->requestJS('/js/brands-list.js');
 }
