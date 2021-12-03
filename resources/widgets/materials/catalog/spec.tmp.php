@@ -18,9 +18,13 @@ if ($Set) { ?>
         <a data-v-on_click="vm.prev()" class="spec__arrow spec__arrow_prev slider__arrow slider__arrow_prev" data-v-bind_class="{ 'spec__arrow_active': vm.prevAvailable, 'slider__arrow_active': vm.prevAvailable }"></a>
         <div class="spec__list slider__list" data-role="slider-list">
           <div class="spec-list slider-list slider-list_horizontal">
-            <?php foreach ((array)$Set as $i => $row) { ?>
+            <?php foreach ((array)$Set as $i => $item) { ?>
                 <div class="spec-list__item slider-list__item" data-role="slider-item" data-slider-index="<?php echo (int)$i?>" data-v-bind_class="{ 'spec-list__item_active': (vm.activeFrame == <?php echo $i?>), 'slider-list__item_active': (vm.activeFrame == <?php echo $i?>) }">
-                  <?php Snippet::importByURN('catalog_item')->process(['item' => $row]); ?>
+                  <?php Snippet::importByURN('catalog_item')->process([
+                      'item' => $item,
+                      'page' => $Page,
+                      'position' => $i,
+                  ]); ?>
                 </div>
             <?php } ?>
           </div>

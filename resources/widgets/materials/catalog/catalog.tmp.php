@@ -28,6 +28,9 @@ if ($Item) {
                 ];
             }, (array)$item->visImages);
         },
+        'eCommerce' => function ($item, $propsCache) use ($Page) {
+            return ECommerce::getProduct($item, null, $Page);
+        },
         'modify_date',
         'available',
         'article',
@@ -496,9 +499,13 @@ if ($Item) {
                   <a data-v-on_click="slider.prev()" class="catalog-article-related__arrow catalog-article-related__arrow_prev slider__arrow slider__arrow_prev" data-v-bind_class="{ 'catalog-article-related__arrow_active': slider.prevAvailable, 'slider__arrow_active': slider.prevAvailable }"></a>
                   <div class="catalog-article-related__list slider__list" data-role="slider-list">
                     <div class="catalog-article-related-list slider-list slider-list_horizontal">
-                      <?php foreach ((array)$related as $i => $row) { ?>
+                      <?php foreach ((array)$related as $i => $item) { ?>
                           <div class="catalog-article-related-list__item slider-list__item" data-role="slider-item" data-v-bind_class="{ 'catalog-article-related-list__item_active': (slider.activeFrame == <?php echo $i?>), 'slider-list__item_active': (slider.activeFrame == <?php echo $i?>) }">
-                            <?php Snippet::importByURN('catalog_item')->process(['item' => $row]); ?>
+                            <?php Snippet::importByURN('catalog_item')->process([
+                                'item' => $item,
+                                'page' => $Page,
+                                'position' => $i,
+                            ]); ?>
                           </div>
                       <?php } ?>
                     </div>
@@ -546,9 +553,13 @@ if ($Item) {
                   </div>
                   <div class="catalog__list">
                     <div class="catalog-list" data-role="loader-list" data-vue-role="catalog-list">
-                      <?php foreach ($Set as $row) { ?>
+                      <?php foreach ($Set as $i => $item) { ?>
                           <div class="catalog-list__item" data-role="loader-list-item">
-                            <?php Snippet::importByURN('catalog_item')->process(['item' => $row])?>
+                            <?php Snippet::importByURN('catalog_item')->process([
+                                'item' => $item,
+                                'page' => $Page,
+                                'position' => $i,
+                            ])?>
                           </div>
                       <?php } ?>
                     </div>

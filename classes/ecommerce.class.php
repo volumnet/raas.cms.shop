@@ -30,32 +30,43 @@ class ECommerce
      * @param Material $item Товар
      * @param int $position Позиция
      * @param Page|null $page Категория (страница) для явного указания
+     * @param array|null $propsCache Кэш свойств товара
      * @return array
      */
     public static function getProduct(
         Material $item,
         $position = null,
-        Page $page = null
+        Page $page = null,
+        array $propsCache = null
     ) {
         if ($item->id) {
             $brand = '';
-            if ($field = $item->fields[static::$brandField]) {
+            if ($propsCache && $propsCache[static::$brandField]['values'][0]['name']) {
+                $brand = $propsCache[static::$brandField]['values'][0]['name'];
+            }
+            if (!$brand && ($field = $item->fields[static::$brandField])) {
                 $brand = $field->doRich();
                 if ($brand instanceof Material) {
                     $brand = $brand->name;
                 }
-                $brand = trim($brand);
             }
+            $brand = trim($brand);
             $result = [
                 'id' => (int)$item->id,
                 'name' => trim($item->name),
                 'brand' => $brand,
-                'category' => static::getCategory($page ?: $item->urlParent),
+                'category' => static::getCategory($page ?: $item->cache_url_parent_id),
             ];
             if ($position !== null) {
                 $result['position'] = $position;
             }
-            if ($price = ($item->realprice ?: $item->{static::$priceField})) {
+            if ($propsCache && $propsCache[static::$priceField]['values'][0]) {
+                $price = $propsCache[static::$priceField]['values'][0];
+            }
+            if (!$price) {
+                $price = $item->realprice ?: $item->{static::$priceField};
+            }
+            if ($price) {
                 $result['price'] = (float)$price;
             }
             if ($amount = $item->amount) {
@@ -69,10 +80,10 @@ class ECommerce
 
     /**
      * Получает путь категории
-     * @param Page $page Категория (страница)
+     * @param Page|int $page Категория (страница) или ее ID#
      * @return string
      */
-    public static function getCategory(Page $page)
+    public static function getCategory($page)
     {
         $cache = PageRecursiveCache::i()->getSelfAndParentsCache($page);
         $eCommerceCategory = array_map(function ($x) {

@@ -147,10 +147,36 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     set(item, amount = null, postData = null) {
-        return this.update(
+        let eCommerceData = null;
+        if (item.eCommerce) {
+            let matchingItems = this.items
+                .filter(x => ((x.id == item.id) && (x.meta == (item.meta || ''))));
+            let oldAmount = 0;
+            if (matchingItems && matchingItems[0]) {
+                oldAmount = parseFloat(matchingItems[0].amount) || 0;
+            }
+            // console.log(oldAmount, amount);
+            let deltaAmount = amount - oldAmount;
+            if (deltaAmount != 0) {
+                eCommerceData = {
+                    action: (deltaAmount < 0) ? 'remove' : 'add',
+                    products: [Object.assign(
+                        {}, 
+                        item.eCommerce, 
+                        { amount: Math.abs(deltaAmount) }
+                    )],
+                };
+            }
+        }
+        let result = this.update(
             'action=set' + this.getItemQuery(item, parseInt(amount)), 
             postData
-        );
+        ).then(() => {
+            if (eCommerceData) {
+                $(document).trigger('raas.shop.ecommerce', eCommerceData);
+            }
+        });
+        return result;
     }
 
 
@@ -161,10 +187,28 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     add(item, amount = null, postData = null) {
-        return this.update(
+        let eCommerceData = null;
+        if (item.eCommerce) {
+            if (amount != 0) {
+                eCommerceData = {
+                    action: (amount < 0) ? 'remove' : 'add',
+                    products: [Object.assign(
+                        {}, 
+                        item.eCommerce, 
+                        { amount: Math.abs(amount) }
+                    )],
+                };
+            }
+        }
+        let result = this.update(
             'action=add' + this.getItemQuery(item, parseInt(amount) || 1), 
             postData
-        );
+        ).then(() => {
+            if (eCommerceData) {
+                $(document).trigger('raas.shop.ecommerce', eCommerceData);
+            }
+        });
+        return result;
     }
 
 
@@ -174,7 +218,35 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     delete(item, postData) {
-        return this.update('action=delete' + this.getItemQuery(item), postData);
+        let eCommerceData = null;
+        if (item.eCommerce) {
+            let matchingItems = this.items
+                .filter(x => ((x.id == item.id) && (x.meta == (item.meta || ''))));
+            let oldAmount = 0;
+            if (matchingItems && matchingItems[0]) {
+                oldAmount = parseFloat(matchingItems[0].amount) || 0;
+            }
+            // console.log(oldAmount, amount);
+            if (oldAmount != 0) {
+                eCommerceData = {
+                    action: 'remove',
+                    products: [Object.assign(
+                        {}, 
+                        item.eCommerce, 
+                        { amount: oldAmount }
+                    )],
+                };
+            }
+        }
+        let result = this.update(
+            'action=delete' + this.getItemQuery(item), 
+            postData
+        ).then(() => {
+            if (eCommerceData) {
+                $(document).trigger('raas.shop.ecommerce', eCommerceData);
+            }
+        });
+        return result;
     }
 
 
@@ -183,7 +255,24 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     clear(postData) {
-        return this.update('action=clear', postData);
+        let eCommerceData = null;
+        if (this.items && this.items.length) {
+            eCommerceData = {
+                action: 'remove',
+                products: this.items.filter(x => !!x.eCommerce).map((x) => {
+                    return Object.assign({}, x.eCommerce, { amount: x.amount });
+                }),
+            }
+        }
+        let result = this.update('action=clear', postData).then(() => {
+            if (eCommerceData && 
+                eCommerceData.products && 
+                eCommerceData.products.length
+            ) {
+                $(document).trigger('raas.shop.ecommerce', eCommerceData);
+            }
+        });
+        return result;
     }
 
 

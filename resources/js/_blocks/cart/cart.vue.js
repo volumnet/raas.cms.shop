@@ -173,7 +173,27 @@ export default {
             }
             $float.css('margin-top', margin + 'px');
         },
-
+        /**
+         * Обрабатывает успешную отправку формы
+         * @param {Object} data Данные из корзины
+         */
+        onSuccess: function (data) {
+            this.success = true; 
+            let eCommerceData = null;
+            if (this.cart.items && this.cart.items.length && data.orderId) {
+                eCommerceData = {
+                    action: 'purchase',
+                    products: this.cart.items.filter(x => !!x.eCommerce).map((x) => {
+                        return Object.assign({}, x.eCommerce, { amount: x.amount });
+                    }),
+                    orderId: data.orderId,
+                }
+                if (eCommerceData.products.length) {
+                    $(document).trigger('raas.shop.ecommerce', eCommerceData);
+                }
+            }
+            this.cart.updateData(data);
+        }
     },
     watch: {
         formData: {

@@ -2,6 +2,8 @@
 /**
  * Виджет товара в списке
  * @param Material $item Товар для отображения
+ * @param Page|null $page Страница, на которой отображается товар
+ * @param int|null $position Позиция товара в списке
  * @param Material_Field[] $mainProps Характеристики для карточки
  */
 namespace RAAS\CMS\Shop;
@@ -22,6 +24,9 @@ $itemData = $formatter->format([
                 'smallURL' => $x->smallURL,
             ];
         }, $item->visImages);
+    },
+    'eCommerce' => function ($item, $propsCache) use ($page, $position) {
+        return ECommerce::getProduct($item, $position, $page, $propsCache);
     },
     'available' => function ($item) {
         return (bool)(int)(
@@ -136,7 +141,7 @@ if ($propsCache) {
           <div class="catalog-item__add-to-cart-outer">
             <div class="catalog-item__amount-block" title="<?php echo IN_CART?>" data-v-if="vm.inCart">
               <button type="button" class="catalog-item__decrement" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();">–</button>
-              <input type="number" class="catalog-item__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_input="vm.setAmount($event.target.value); vm.setCart();" />
+              <input type="number" class="catalog-item__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_change="vm.setAmount($event.target.value); vm.setCart();" />
               <button type="button" class="catalog-item__increment" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();">+</button>
             </div>
             <button type="button" data-v-else data-v-on_click="vm.setAmount(Math.max(vm.item.min, 1)); vm.setCart()" class="btn btn-primary catalog-item__add-to-cart">
