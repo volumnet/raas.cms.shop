@@ -44,6 +44,42 @@ class BrandsTemplate extends MaterialTypeTemplate
         ];
     }
 
+
+    public function createBlockSnippet()
+    {
+        $filename = Module::i()->resourcesDir
+                  . '/widgets/materials/brands/brands.tmp.php';
+        $snippet = $this->webmaster->createSnippet(
+            $this->materialType->urn,
+            $this->materialType->name,
+            (int)$this->widgetsFolder->id,
+            $filename,
+            $this->getReplaceData(
+                $this->materialType->name,
+                $this->materialType->urn
+            )
+        );
+        return $snippet;
+    }
+
+
+    public function createMainPageSnippet()
+    {
+        $filename = Module::i()->resourcesDir
+            . '/widgets/materials/brands/brands_main.tmp.php';
+        $snippet = Snippet::importByURN('brands_main');
+        if (!$snippet->id) {
+            $snippet = $this->webmaster->createSnippet(
+                'brands_main',
+                View_Web::i()->_('SPECIAL_OFFER'),
+                (int)$this->widgetsFolder->id,
+                $filename
+            );
+        }
+        return $snippet;
+    }
+
+
     public function createMaterials(array $pagesIds = [])
     {
         $result = [];
@@ -81,7 +117,7 @@ class BrandsTemplate extends MaterialTypeTemplate
         Snippet $widget = null,
         array $additionalData = []
     ) {
-        $additionalData = ['rows_per_page' => 20];
+        $additionalData = array_merge($additionalData, ['rows_per_page' => 20]);
         if (!$page->pid) {
             $additionalData['location'] = 'content5';
         }

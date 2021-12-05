@@ -301,10 +301,17 @@ class CatalogTemplate extends MaterialTypeTemplate
         $snippet = Snippet::importByURN('spec');
         if (!$snippet->id) {
             $snippet = $this->webmaster->createSnippet(
-                'spec',
-                View_Web::i()->_('SPECIAL_OFFER'),
+                $this->materialType->urn . '_main',
+                (
+                    $this->materialType->name . ' — ' .
+                    View_Web::i()->_('MATERIAL_TEMPLATE_MAIN_SUFFIX')
+                ),
                 (int)$this->widgetsFolder->id,
-                $filename
+                $filename,
+                $this->getReplaceData(
+                    $this->materialType->name,
+                    $this->materialType->urn
+                )
             );
         }
         return $snippet;

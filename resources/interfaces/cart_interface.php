@@ -669,6 +669,8 @@ $getAdditionals = function (
                 }
                 if (isset($delivery['price'])) {
                     $result['delivery']['price'] = $delivery['price'];
+                }
+                if ($delivery['price'] || $delivery['isDelivery']) {
                     $result['items'][] = new CartItem([
                         'id' => $delivery['id'],
                         'name' => 'Доставка',
