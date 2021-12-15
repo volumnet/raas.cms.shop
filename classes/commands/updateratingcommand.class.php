@@ -7,6 +7,7 @@ namespace RAAS\CMS\Shop;
 use RAAS\Command;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Type;
+use RAAS\CMS\Page;
 
 /**
  * Команда обновления рейтинга товаров
@@ -71,14 +72,14 @@ class UpdateRatingCommand extends Command
             $this->controller->doLog($logMessage);
             return;
         }
-        $commentsMaterialField = $catalogMaterialType->fields[$commentsMaterialFieldURN];
+        $commentsMaterialField = $commentsMaterialType->fields[$commentsMaterialFieldURN];
         if (!$commentsMaterialField->id) {
             $logMessage = 'Goods comments field "' . $commentsMaterialFieldURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
-        $commentsRatingField = $catalogMaterialType->fields[$commentsRatingFieldURN];
+        $commentsRatingField = $commentsMaterialType->fields[$commentsRatingFieldURN];
         if (!$commentsRatingField->id) {
             $logMessage = 'Goods comments field "' . $commentsRatingFieldURN . '"' .
                 ' is not found';
@@ -86,7 +87,6 @@ class UpdateRatingCommand extends Command
             return;
         }
         $catalogInterface = new CatalogInterface();
-        $modsMapping = $catalogInterface->getModsMapping();
         $result = [];
 
         $sqlQuery = "SELECT tItem.value AS item_id,
@@ -110,20 +110,11 @@ class UpdateRatingCommand extends Command
             $rating = (int)$sqlRow['rating'];
             $votes = (int)$sqlRow['votes'];
             $comments = (int)$sqlRow['comments'];
-            $mods = (array)$modsMapping[$itemId];
-            $mods[trim($itemId)] = (int)$itemId;
-            foreach ($mods as $modId) {
-                if (!isset($result[$modId])) {
-                    $result[trim($modId)] = [
-                        'rating' => 0,
-                        'votes' => 0,
-                        'comments' => 0,
-                    ];
-                }
-                $result[trim($modId)]['rating'] += $rating;
-                $result[trim($modId)]['votes'] += $votes;
-                $result[trim($modId)]['comments'] += $comments;
-            }
+            $result[trim($itemId)] = [
+                'rating' => (int)$rating,
+                'votes' => (int)$votes,
+                'comments' => (int)$comments,
+            ];
         }
         $result = array_map(function ($x) {
             return [

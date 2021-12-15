@@ -7,11 +7,13 @@ namespace RAAS\CMS\Shop;
 use Twig_Environment;
 use Twig_Loader_String;
 use SOME\SOME;
+use Pelago\Emogrifier\CssInliner;
 use RAAS\Application;
 use RAAS\User as RAASUser;
 use RAAS\CMS\Controller_Frontend;
 use RAAS\CMS\Feedback;
 use RAAS\CMS\Form_Field;
+use RAAS\CMS\FormInterface;
 use RAAS\CMS\Material;
 use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
@@ -254,12 +256,22 @@ class Order extends Feedback
             $messageTemplate = strtr($messageTemplate, ['&#39;' => "'"]);
             $message = $twig->render($messageTemplate, $dataArr);
 
+            $formInterface = new FormInterface();
+            $processEmbedded = $formInterface->processEmbedded($message);
+            $message = $processEmbedded['message'];
+            $embedded = (array)$processEmbedded['embedded'];
+
+            $message = CssInliner::fromHtml($message)->inlineCss()->render();
+
             Application::i()->sendmail(
                 $emails,
                 $subject,
                 $message,
                 ViewSub_Orders::i()->_('ADMINISTRATION_OF_SITE') . ' ' . Controller_Frontend::i()->idnHost,
-                'info@' . $_SERVER['HTTP_HOST']
+                'info@' . $_SERVER['HTTP_HOST'],
+                true,
+                [],
+                $embedded
             );
         }
     }

@@ -7,8 +7,10 @@ namespace RAAS\CMS\Shop;
 use RAAS\Command;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
+use RAAS\CMS\Material_Type;
 use RAAS\CMS\Page;
 use RAAS\CMS\Page_Field;
+use RAAS\CMS\PageRecursiveCache;
 
 /**
  * Команда пересчета цен
@@ -79,7 +81,7 @@ class RecalculatePriceCommand extends Command
             return;
         }
 
-        $this->priceRatioMap = $this->getRatios();
+        $this->priceRatioMap = $this->getRatios($pageDiscountField);
 
         $sqlQuery = "SELECT tM.id,
                             IFNULL(tBasePrice.value, 0) AS baseprice,
