@@ -740,7 +740,9 @@ class YMLInterface extends AbstractInterface
             $v = \SOME\Text::cuttext($v, 512, '...');
         }
         if (in_array($key, ['delivery_options', 'pickup_options'])) {
-            $content = $this->getDeliveryOptions($v);
+            // 2021-12-23, AVS: принудительно приводим к массиву, т.к.
+            // объявление функции требует массив
+            $content = $this->getDeliveryOptions((array)$v);
             if (!$content || $asAttr) {
                 return '';
             }
