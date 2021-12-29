@@ -341,6 +341,7 @@ class SDEKInterface extends AbstractInterface
             if ($result[$cityCode]) {
                 continue;
             }
+            $st = microtime(1);
             foreach ([
                 'cityCode' => 'cityCode',
                 'cityName' => 'city',
@@ -364,11 +365,21 @@ class SDEKInterface extends AbstractInterface
                 'region' => trim($pvz['regionName']),
                 'regionCode' => $regionCode,
             ];
-            $result[$cityCode] = $resultArr;
+            $result[trim($pvz['city'])] = $resultArr;
         }
-        usort($result, function ($a, $b) {
-            return strnatcasecmp($a['cityName'], $b['cityName']);
+        uksort($result, function ($a, $b) {
+            // return strnatcasecmp($a['cityName'], $b['cityName']);
+            // return strnatcasecmp($a, $b);
+            // 2021-12-28, AVS: оптимизировали скорость сортировки
+            if ($a < $b) {
+                return -1;
+            }
+            if ($a > $b) {
+                return 1;
+            }
+            return 0;
         });
+        $result = array_values($result);
         return $result;
     }
 
