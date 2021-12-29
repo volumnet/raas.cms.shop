@@ -68,27 +68,22 @@ class Module extends RAASModule
             (int)$this->controller->nav['id'] :
             0
         );
-        $sqlQuery = "SELECT SQL_CALC_FOUND_ROWS tOr.*,
-                            (
-                                SELECT SUM(tOG.amount)
-                                  FROM " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG
-                                 WHERE tOG.order_id = tOr.id
-                            ) AS c,
-                            (
-                                SELECT SUM(tOG.realprice * tOG.amount)
-                                  FROM " . Order::_dbprefix() . "cms_shop_orders_goods AS tOG
-                                 WHERE tOG.order_id = tOr.id
-                            ) AS total_sum
-                       FROM " . Order::_tablename() .  " AS tOr
-                  LEFT JOIN " . Cart_Type::_tablename() . " AS tCT ON tCT.id = tOr.pid
-                  LEFT JOIN " . Field::_tablename() .  " AS tFi ON tFi.pid = tCT.form_id AND tFi.classname = ?
-                  LEFT JOIN " . Order::_dbprefix() . "cms_data AS tD ON tD.pid = tOr.id AND tD.fid = tFi.id
-                      WHERE 1 ";
-        $sqlBind = [Form::class];
+        $sqlWhat = [
+            "tOr.*",
+            "SUM(tOG.amount) AS c",
+            "SUM(tOG.realprice * tOG.amount) AS total_sum",
+        ];
+        $sqlFrom = [
+            Order::_tablename() .  " AS tOr",
+            Order::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.order_id = tOr.id"
+        ];
+        $sqlFromBind = [];
+        $sqlWhereBind = [];
+        $sqlWhere = [];
         $columns = [];
         if ($cartType->id) {
-            $sqlQuery .= " AND tOr.pid = ?";
-            $sqlBind[] = (int)$cartType->id;
+            $sqlWhere[] = "tOr.pid = ?";
+            $sqlWhereBind[] = (int)$cartType->id;
 
             $columns = Form_Field::getSet(['where' => [
                 "classname = 'RAAS\\\\CMS\\\\Form'",
@@ -99,35 +94,38 @@ class Module extends RAASModule
         if (isset($this->controller->nav['search_string']) &&
             $this->controller->nav['search_string']
         ) {
+            $sqlFrom[] = Cart_Type::_tablename() . " AS tCT ON tCT.id = tOr.pid";
+            $sqlFrom[] = Field::_tablename() .  " AS tFi ON tFi.pid = tCT.form_id AND tFi.classname = ?";
+            $sqlFrom[] = Order::_dbprefix() . "cms_data AS tD ON tD.pid = tOr.id AND tD.fid = tFi.id";
+            $sqlFromBind[] = Form::class;
+
             $searchString = $this->controller->nav['search_string'];
             $likeSearchString = '%' . $searchString . '%';
-            $sqlQuery .= " AND (
-                                    (tOr.id = ?)
-                                 OR (tOr.ip LIKE ?)
-                                 OR (tD.value LIKE ?)
-                            ) ";
-            $sqlBind[] = $searchString;
-            $sqlBind[] = $likeSearchString;
-            $sqlBind[] = $likeSearchString;
+            $sqlWhere[] = "(
+                                   (tOr.id = ?)
+                                OR (tOr.ip LIKE ?)
+                                OR (tD.value LIKE ?)
+                           ) ";
+            $sqlWhereBind[] = $searchString;
+            $sqlWhereBind[] = $likeSearchString;
+            $sqlWhereBind[] = $likeSearchString;
         }
-        if (isset($this->controller->nav['status_id']) &&
-            ((string)$this->controller->nav['status_id'] !== '')
-        ) {
-            $sqlQuery .= " AND tOr.status_id = ?";
-            $sqlBind[] = (int)$this->controller->nav['status_id'];
+        if ((string)$this->controller->nav['status_id'] !== '') {
+            $sqlWhere[] = "tOr.status_id = ?";
+            $sqlWhereBind[] = (int)$this->controller->nav['status_id'];
         }
         if (isset($this->controller->nav['paid']) &&
             ($paid = $this->controller->nav['paid'])
         ) {
-            $sqlQuery .= " AND " . ($paid > 0 ? "" : "NOT") . " tOr.paid";
+            $sqlWhere[] = ($paid > 0 ? "" : "NOT") . " tOr.paid";
         }
         if (isset($this->controller->nav['from']) &&
             $this->controller->nav['from']
         ) {
             $t = strtotime($this->controller->nav['from']);
             if ($t > 0) {
-                $sqlQuery .= " AND tOr.post_date >= ?";
-                $sqlBind[] = date('Y-m-d H:i:s', $t);
+                $sqlWhere[] = "tOr.post_date >= ?";
+                $sqlWhereBind[] = date('Y-m-d H:i:s', $t);
             }
         }
         if (isset($this->controller->nav['to']) &&
@@ -135,13 +133,17 @@ class Module extends RAASModule
         ) {
             $t = strtotime($this->controller->nav['to']);
             if ($t > 0) {
-                $sqlQuery .= " AND tOr.post_date <= ?";
-                $sqlBind[] = date('Y-m-d H:i:s', $t);
+                $sqlWhere[] = "tOr.post_date <= ?";
+                $sqlWhereBind[] = date('Y-m-d H:i:s', $t);
             }
         }
 
-        $sqlQuery .= " GROUP BY tOr.id
-                       ORDER BY tOr.post_date DESC ";
+        $sqlQuery = "SELECT SQL_CALC_FOUND_ROWS " . implode(", ", $sqlWhat)
+            . " FROM " . implode(" LEFT JOIN ", $sqlFrom)
+            . ($sqlWhere ? (" WHERE " . implode(" AND ", $sqlWhere)) : "")
+            . " GROUP BY tOr.id
+                ORDER BY tOr.post_date DESC ";
+        $sqlBind = array_merge($sqlFromBind, $sqlWhereBind);
 
         $pageNum = isset($this->controller->nav['page'])
                  ? $this->controller->nav['page']
