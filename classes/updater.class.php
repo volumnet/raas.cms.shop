@@ -59,6 +59,12 @@ class Updater extends \RAAS\Updater
         ) < 0) {
             $this->update20211026();
         }
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.3.20'
+        ) < 0) {
+            $this->update20220112();
+        }
     }
 
 
@@ -333,5 +339,28 @@ class Updater extends \RAAS\Updater
                            ADD sizes_callback TEXT NULL DEFAULT NULL COMMENT 'Sizes callback'";
             $this->SQL->query($sqlQuery);
         }
+    }
+
+
+    /**
+     * Расширяем поля name и meta у товаров заказов
+     */
+    public function update20220112()
+    {
+        $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
+                      DROP PRIMARY KEY";
+        $this->SQL->query($sqlQuery);
+
+        $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
+                    CHANGE name name VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'Name'";
+        $this->SQL->query($sqlQuery);
+
+        $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
+                    CHANGE meta meta VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'Meta data'";
+        $this->SQL->query($sqlQuery);
+
+        $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
+                       ADD PRIMARY KEY (order_id, material_id, meta(64))";
+        $this->SQL->query($sqlQuery);
     }
 }

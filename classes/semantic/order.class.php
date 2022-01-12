@@ -174,7 +174,12 @@ class Order extends Feedback
         // под произвольным именем, а не под именем материала
         // 2020-12-27, AVS: поменял FROM и LEFT JOIN местами, чтобы отображались
         // позиции без материала
-        $sqlQuery = "SELECT tM.*, tOG.meta, tOG.name, tOG.realprice, tOG.amount
+        $sqlQuery = "SELECT tM.*,
+                            tM.name AS originalName,
+                            tOG.meta,
+                            tOG.name,
+                            tOG.realprice,
+                            tOG.amount
                         FROM " . self::_dbprefix() . "cms_shop_orders_goods AS tOG
                    LEFT JOIN " . Material::_tablename() . " AS tM ON tOG.material_id = tM.id
                        WHERE tOG.order_id = " . (int)$this->id . "

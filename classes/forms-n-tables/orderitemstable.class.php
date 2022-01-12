@@ -26,7 +26,7 @@ class OrderItemsTable extends \RAAS\Table
             'caption' => $this->view->_('NAME'),
             'callback' => function($row) use ($view) {
                 if ($row->id) {
-                    return '<a href="' . PackageSubMain::i()->url . '&action=edit_material&id=' . (int)$row->id . '&pid=' . (int)$row->material_type->affectedPages[0]->id . '">' .
+                    return '<a href="' . PackageSubMain::i()->url . '&action=edit_material&id=' . (int)$row->id . '&pid=' . (int)$row->material_type->affectedPages[0]->id . '" title="' . htmlspecialchars($row->originalName) . '">' .
                               htmlspecialchars($row->name) .
                            '</a>';
                 } else {

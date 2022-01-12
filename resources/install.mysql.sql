@@ -68,13 +68,13 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders (
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_goods (
   order_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Order ID#',
   material_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material ID#',
-  name VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'Name',
-  meta VARCHAR(64) NOT NULL DEFAULT '' COMMENT 'Meta data',
+  name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Name',
+  meta VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Meta data',
   realprice DECIMAL(8,2) NOT NULL DEFAULT 0 COMMENT 'Real price',
   amount INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Amount',
   priority INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Priority',
 
-  PRIMARY KEY (order_id, material_id, meta),
+  PRIMARY KEY (order_id, material_id, meta(64)),
   KEY (order_id),
   KEY (material_id),
   KEY (meta),
