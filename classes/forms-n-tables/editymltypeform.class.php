@@ -500,7 +500,7 @@ class EditYMLTypeForm extends RAASForm
             $Block = $this->meta['Block'];
             $MType = $this->meta['MType'];
             $DATA = [];
-            if (isset($Block->types[$MType->id]->settings)) {
+            if ($Block->types[$MType->id]->settings) {
                 $settings = $Block->types[$MType->id]->settings;
                 if (isset($settings['type'])) {
                     $DATA['type'] = $settings['type'];

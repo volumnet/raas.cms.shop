@@ -312,15 +312,17 @@ class CatalogFilter
             $this->properties
         );
         foreach ($this->propsMapping as $propId => $propData) {
-            uksort($this->propsMapping[$propId], function ($a, $b) use ($propId) {
-                $aRich = isset($this->richValues[$propId][$a])
-                       ? $this->richValues[$propId][$a]
-                       : $a;
-                $bRich = isset($this->richValues[$propId][$b])
-                       ? $this->richValues[$propId][$b]
-                       : $b;
-                return strnatcasecmp($aRich, $bRich);
-            });
+            if ($propId != 'priority') {
+                uksort($this->propsMapping[$propId], function ($a, $b) use ($propId) {
+                    $aRich = isset($this->richValues[$propId][$a])
+                           ? $this->richValues[$propId][$a]
+                           : $a;
+                    $bRich = isset($this->richValues[$propId][$b])
+                           ? $this->richValues[$propId][$b]
+                           : $b;
+                    return strnatcasecmp($aRich, $bRich);
+                });
+            }
         }
     }
 
@@ -589,6 +591,18 @@ class CatalogFilter
             $sqlResult = Material::_SQL()->get($sqlQuery);
             foreach ($sqlResult as $sqlRow) {
                 $propsMapping['pages_ids'][(string)$sqlRow['pid']][(string)$sqlRow['id']] = (int)$sqlRow['id'];
+            }
+
+            // Получим маппинг по порядку отображения
+            $sqlQuery = "SELECT id, priority
+                           FROM " . Material::_tablename()
+                      . " WHERE id IN (" . implode(", ", $catalogGoodsIds) . ")";
+            $sqlResult = Material::_SQL()->get($sqlQuery);
+            $nonPrioritized = [];
+            $prioritized = [];
+            foreach ($sqlResult as $sqlRow) {
+                $priority = (int)$sqlRow['priority'] ?: 999999999;
+                $propsMapping['priority'][(string)$priority][(string)$sqlRow['id']] = (int)$sqlRow['id'];
             }
         }
         return $propsMapping;
@@ -1150,14 +1164,15 @@ class CatalogFilter
         }
         if ($availabilityPropId = (int)$availabilityProp->id) {
             $ids = $this->multisort([
+                'priority',
                 ('!' . $availabilityPropId),
                 ((($order < 0) ? '!' : '') . $sortKey)
             ], (array)$this->sortMapping[$sortKey]);
         } else {
-            $ids = $this->sortMapping[$sortKey];
-            if ($sortKey && ($order < 0)) {
-                $ids = array_reverse($ids);
-            }
+            $ids = $this->multisort([
+                'priority',
+                ((($order < 0) ? '!' : '') . $sortKey)
+            ], (array)$this->sortMapping[$sortKey]);
         }
         return array_values($ids);
     }

@@ -30,7 +30,6 @@ if ($children) { ?>
           <div class="popular-cats-list slider-list slider-list_horizontal">
             <?php
             foreach ($children as $item) {
-                $row = $children[$i];
                 if ($item instanceof Menu) {
                     $page = $item->page;
                 } else {

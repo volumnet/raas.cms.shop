@@ -542,7 +542,9 @@ if ($Item) {
                     </div>
                   </div>
               <?php }
-              if ($Set) { ?>
+              if ($Set) {
+                  Field::prefetch((array)$Set);
+                  ?>
                   <div class="catalog__controls" data-role="catalog-controls">
                     <?php Snippet::importByURN('catalog_controls')->process([
                         'sort' => $sort,

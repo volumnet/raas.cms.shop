@@ -1553,6 +1553,10 @@ class PriceloaderInterface extends AbstractInterface
         }
         $sqlQuery .= " GROUP BY tM.id";
         $sqlResult = Material::_SQL()->get($sqlQuery);
+        $materialsIds = array_map(function ($sqlRow) {
+            return (int)$sqlRow['id'];
+        }, $sqlResult);
+        Field::prefetch($materialsIds);
         if (($rows > 0) && !$level) {
             $data[] = $this->exportHeader($loader);
         }

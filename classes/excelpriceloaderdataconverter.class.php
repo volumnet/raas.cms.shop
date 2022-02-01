@@ -143,7 +143,9 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
         $pageRows = [];
         for ($i = 0; $i < count($data); $i++) {
             $maxcol = max($maxcol, count($data[$i]) - 1);
-            $isPage = (count(array_filter($data[$i], 'trim')) == 1);
+            $isPage = (count(array_filter($data[$i], function ($x) {
+                return trim($x) === '';
+            })) == 1);
             if ($isPage) {
                 $pageRows[] = $i;
             }
