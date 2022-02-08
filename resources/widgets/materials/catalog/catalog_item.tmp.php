@@ -28,7 +28,7 @@ $itemData = $formatter->format([
     'eCommerce' => function ($item, $propsCache) use ($page, $position) {
         return ECommerce::getProduct($item, $position, $page, $propsCache);
     },
-    'available' => function ($item) {
+    'available' => function ($item, $propsCache) {
         return (bool)(int)(
             $propsCache['available']['values'] ?
             $propsCache['available']['values'][0] :
