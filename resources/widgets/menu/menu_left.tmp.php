@@ -13,6 +13,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\HTTP;
+use RAAS\AssetManager;
 use RAAS\CMS\Menu;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
@@ -118,5 +119,5 @@ $current = $ajax ? new Page($_GET['id']) : $Page;
   <?php echo $showMenu($menuArr ?: $Item, $current)?>
 </nav>
 <?php
-Package::i()->requestCSS('/css/menu-left.css');
-Package::i()->requestJS('/js/menu-left.js');
+AssetManager::requestCSS('/css/menu-left.css');
+AssetManager::requestJS('/js/menu-left.js');

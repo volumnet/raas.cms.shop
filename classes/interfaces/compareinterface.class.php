@@ -92,7 +92,7 @@ class CompareInterface extends CartInterface
     {
         $mTypeId = $material->pid;
         $mTypeSelfAndParentsIds = MaterialTypeRecursiveCache::i()->getSelfAndParentsIds($mTypeId);
-        $rootMTypeId = $mTypeSelfAndParentsIds[0];
+        $rootMTypeId = $mTypeSelfAndParentsIds[1] ?: $mTypeSelfAndParentsIds[0];
         $rootMTypeCache = MaterialTypeRecursiveCache::i()->cache[$rootMTypeId];
         $result = [
             'id' => (int)$rootMTypeCache['id'],

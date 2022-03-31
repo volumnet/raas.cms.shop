@@ -8,6 +8,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\AssetManager;
 use RAAS\CMS\Menu;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
@@ -48,5 +49,5 @@ if ($children) { ?>
       </div>
     </div>
     <?php
-    Package::i()->requestCSS('/css/popular-cats.css');
+    AssetManager::requestCSS('/css/popular-cats.css');
 }

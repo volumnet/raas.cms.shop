@@ -6,6 +6,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\AssetManager;
 use RAAS\CMS\Package;
 
 ?>
@@ -27,8 +28,8 @@ use RAAS\CMS\Package;
         <my-orders-article :block-id="<?php echo (int)$Block->id?>" :item="<?php echo htmlspecialchars(json_encode($orderData))?>"></my-orders-article>
       </div>
       <?php
-      Package::i()->requestCSS('/css/my-orders-article.css');
-      Package::i()->requestJS('/js/my-orders-article.js');
+      AssetManager::requestCSS('/css/my-orders-article.css');
+      AssetManager::requestJS('/js/my-orders-article.js');
   } else {
       $ordersData = array_map(function ($x) {
           $formatter = new OrderArrayFormatter($x);
@@ -49,7 +50,7 @@ use RAAS\CMS\Package;
         <my-orders-list :block-id="<?php echo (int)$Block->id?>" :initial-items="<?php echo htmlspecialchars(json_encode($ordersData))?>"></my-orders-list>
       </div>
       <?php
-      Package::i()->requestCSS('/css/my-orders-list.css');
-      Package::i()->requestJS('/js/my-orders-list.js');
+      AssetManager::requestCSS('/css/my-orders-list.css');
+      AssetManager::requestJS('/js/my-orders-list.js');
   } ?>
 </div>

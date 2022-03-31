@@ -398,6 +398,7 @@ class CatalogFilter
     {
         $this->catalog = $catalog;
         $this->filter = $this->getFilter($params);
+        // var_dump($this->filter); exit;
         $this->filterHasCheckedOptions = $this->getFilterHasCheckedOptions(
             $this->filter
         );
@@ -676,6 +677,13 @@ class CatalogFilter
                     }))
                 )) {
                     $filter[$prop->id] = $val;
+                    // 2022-03-02, AVS: не работало булево "нет", т.к. из фильтра приходит 0, а в свойствах ""
+                    if (($prop->datatype == 'checkbox') &&
+                        !$prop->multiple &&
+                        in_array(0, $val)
+                    ) {
+                        $filter[$prop->id][] = '';
+                    }
                 }
             }
         }
@@ -1020,6 +1028,9 @@ class CatalogFilter
                     'enabled' => (bool)array_intersect_key($goodsIds, $crossFilterGoodsIds)
                 ];
                 if (!isset($numericFieldsIds[$propId])) {
+                    if (($prop->datatype == 'checkbox') && !$prop->multiple && ($propValue === '')) {
+                        $propValue = 0;
+                    }
                     $valueData['value'] = $propValue;
                     $valueData['doRich'] = isset($richValues[$propId][$propValue])
                                          ? $richValues[$propId][$propValue]
@@ -1073,7 +1084,8 @@ class CatalogFilter
      *     string ID# поля для сортировки (предваряемое знаком ! для обратной сортировки) |
      *     [
      *         string ID# поля для сортировки,
-     *         callback(string $a, string $b): int Функция для сортировки значений
+     *         callback(string $a, string $b): int Функция для сортировки значений | callback(string $x): int Функция перегруппировки значений,
+     *         bool Используется функция перегруппировки значений
      *     ]
      * ></pre> Список сортировки
      * @param array $goodsIds <pre>array<
@@ -1090,6 +1102,7 @@ class CatalogFilter
             if (is_array($currentSort)) {
                 $sortProp = $currentSort[0];
                 $order = $currentSort[1];
+                $regroupFunction = (bool)$currentSort[2];
             } else {
                 $currentSort = trim($currentSort);
                 if ($currentSort[0] == '!') {
@@ -1124,7 +1137,24 @@ class CatalogFilter
                 krsort($referencedPropMapping, SORT_NATURAL);
                 // $referencedPropMapping = array_reverse($referencedPropMapping, true);
             } elseif (is_callable($order)) {
-                uksort($referencedPropMapping, $order);
+                if ($regroupFunction) {
+                    $regrouped = [];
+                    foreach ($referencedPropMapping as $key => $refGoodsIds) {
+                        $sortedKey = $order($key);
+                        $regrouped[$sortedKey] = (array)$regrouped[$sortedKey] + $refGoodsIds;
+                    }
+                    $regrouped = array_map(
+                        function ($x) use ($goodsIds) {
+                            $y = array_intersect_key($goodsIds, $x);
+                            return $y;
+                        },
+                        $regrouped
+                    );
+                    ksort($regrouped);
+                    $referencedPropMapping = $regrouped;
+                } else {
+                    uksort($referencedPropMapping, $order);
+                }
             } else {
                 ksort($referencedPropMapping, SORT_NATURAL);
             }

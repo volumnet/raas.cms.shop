@@ -18,7 +18,16 @@
                 <a href="#" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
                   <i class="icon-white icon-download-alt"></i> <?php echo CMS\Shop\DOWNLOAD_PRICE?> <span class="caret"></span>
                 </a>
-                <ul class="dropdown-menu"><?php echo showMenu((array)$downloadMenu)?></ul>
+                <ul class="dropdown-menu">
+                  <?php $downloadMenu = getMenu((array)$downloadMenu);
+                  foreach ($downloadMenu as $menuItem) { ?>
+                      <li<?php echo ($menuItem['active'] ? ' class="active"' : '')?>>
+                        <a data-href="<?php echo htmlspecialchars($menuItem['data-href'])?>">
+                          <?php echo htmlspecialchars($menuItem['name'])?>
+                        </a>
+                      </li>
+                  <?php } ?>
+                </ul>
               </div>
           <?php } else { ?>
               <a data-href="<?php echo $url?>&action=download" data-role="download-button" class="btn btn-success"><i class="icon-white icon-download-alt"></i> <?php echo CMS\Shop\DOWNLOAD_IMAGES?></a>

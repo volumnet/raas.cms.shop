@@ -134,6 +134,7 @@ export default class {
         }
         this.dataLoaded = true;
         this.loading = false;
+        // console.log('aaa')
         $(document).trigger(
             'raas.shop.cart-updated', 
             [{id: this.id, remote: true, data: remoteData}]

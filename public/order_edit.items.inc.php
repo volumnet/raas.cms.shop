@@ -78,7 +78,7 @@ $_RAASForm_FieldSet = function (FieldSet $FieldSet) use (&$_RAASForm_Form_Tabbed
         <tfoot>
           <tr>
             <td colspan="2">
-              <?php echo rowContextMenu($FieldSet->Form->meta['allContextMenu'], Application::i()->view->context->_('WITH_SELECTED'), '', 'btn-mini')?>
+              <all-context-menu :menu="<?php echo htmlspecialchars(json_encode(getMenu($Table->meta['allContextMenu'])))?>"></all-context-menu>
             </td>
             <th colspan="3" style="text-align: right"><?php echo Module::i()->view->_('TOTAL_SUM')?>: </th>
             <th style="white-space: nowrap" data-role="total-sum"></th>

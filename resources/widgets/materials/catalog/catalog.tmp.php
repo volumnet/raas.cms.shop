@@ -10,6 +10,7 @@ namespace RAAS\CMS\Shop;
 
 use SOME\HTTP;
 use SOME\Text;
+use RAAS\AssetManager;
 use RAAS\Attachment;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Package;
@@ -210,7 +211,7 @@ if ($Item) {
             $props = array_filter($props, function ($field) {
                 return !in_array($field->urn, []) && !in_array(
                     $field->datatype,
-                    ['image', 'file', 'material', 'checkbox']
+                    ['image', 'file', 'material']
                 );
             });
 
@@ -218,9 +219,14 @@ if ($Item) {
             foreach ($props as $fieldURN => $field) {
                 $fieldName = $field->name;
                 $fieldValues = $field->getValues(true);
+                $fieldValues = array_values(array_filter($fieldValues));
                 if ($fieldValues) {
                     $richValues = array_map(function ($val) use ($field) {
-                        return $field->doRich($val);
+                        if (($field->datatype == 'checkbox') && !$field->multiple) {
+                            return $val ? _YES : _NO;
+                        } else {
+                            return $field->doRich($val);
+                        }
                     }, $fieldValues);
                     $richValues = array_values(array_filter($richValues, function ($x) use ($field) {
                         return $x;
@@ -519,8 +525,8 @@ if ($Item) {
     </div>
     <script type="application/ld+json"><?php echo json_encode($jsonLd)?></script>
     <?php
-    Package::i()->requestCSS(['/css/catalog-article.css']);
-    Package::i()->requestJS([
+    AssetManager::requestCSS(['/css/catalog-article.css']);
+    AssetManager::requestJS([
         '//yastatic.net/es5-shims/0.0.2/es5-shims.min.js',
         '//yastatic.net/share2/share.js',
         '/js/catalog-article.js'
@@ -596,6 +602,6 @@ if ($Item) {
       <?php } ?>
     </div>
     <?php
-    Package::i()->requestCSS(['/css/catalog-list.css']);
-    Package::i()->requestJS(['/js/catalog-list.js']);
+    AssetManager::requestCSS(['/css/catalog-list.css']);
+    AssetManager::requestJS(['/js/catalog-list.js']);
 }

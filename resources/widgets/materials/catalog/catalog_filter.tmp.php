@@ -7,6 +7,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
+use RAAS\AssetManager;
 use RAAS\CMS\Block;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
@@ -78,6 +79,19 @@ foreach ($availableProperties as $propId => $availableProperty) {
             'priority' => (int)$prop->priority,
             'values' => []
         ];
+        $isNumericByValues = null;
+        if ($prop->datatype == 'text') {
+            foreach ($availableProperty as $value => $valueData) {
+                if ($valueData['doRich'] && !is_numeric($valueData['doRich'])) {
+                    $isNumericByValues = false;
+                } elseif ($isNumericByValues === null) {
+                    $isNumericByValues = true;
+                }
+            }
+            if ($isNumericByValues) {
+                $result['properties'][trim($propId)]['datatype'] = 'number';
+            }
+        }
         foreach ($availableProperty as $value => $valueData) {
             unset($valueData['prop']);
             if ((
@@ -88,7 +102,8 @@ foreach ($availableProperties as $propId => $availableProperty) {
                     (trim($valueData['value']) !== '0') // Чтобы не отображались нули в материальных полях
                 )
             ) ||
-                ($prop->datatype == 'number')
+                ($prop->datatype == 'number') ||
+                $isNumericByValues
             ) {
                 // 2021-11-30, AVS: закомментировал условие, т.к. фильтр
                 // изначально статический, и на странице с выбранным значением
@@ -279,6 +294,6 @@ $static = (bool)(int)$Block->additionalParams['static'];
   </div>
 </div>
 <?php
-Package::i()->requestCSS(['/css/catalog-filter.css']);
-Package::i()->requestJS(['/js/catalog-filter.js']);
+AssetManager::requestCSS(['/css/catalog-filter.css']);
+AssetManager::requestJS(['/js/catalog-filter.js']);
 ?>

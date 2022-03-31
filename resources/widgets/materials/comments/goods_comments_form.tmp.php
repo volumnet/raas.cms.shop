@@ -6,6 +6,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\AssetManager;
 use RAAS\CMS\Block_Form;
 use RAAS\CMS\Feedback;
 use RAAS\CMS\FormRenderer;
@@ -119,6 +120,6 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
       </form>
     </div>
     <?php
-    Package::i()->requestCSS('/css/feedback.css');
-    Package::i()->requestJS('/js/feedback.js');
+    AssetManager::requestCSS('/css/feedback.css');
+    AssetManager::requestJS('/js/feedback.js');
 }

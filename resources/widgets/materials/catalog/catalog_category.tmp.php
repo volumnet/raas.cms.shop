@@ -6,6 +6,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\AssetManager;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 
@@ -33,4 +34,4 @@ $queryString = $queryString ? '?' . $queryString : '';
   </div>
 </a>
 <?php
-Package::i()->requestCSS('/css/catalog-category.css');
+AssetManager::requestCSS('/css/catalog-category.css');

@@ -22,6 +22,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
+use RAAS\AssetManager;
 use RAAS\CMS\Material;
 use RAAS\CMS\Package;
 use RAAS\CMS\Material_Field;
@@ -122,6 +123,6 @@ if ($Page->mime == 'application/json') {
       </div>
     </compare>
     <?php
-    Package::i()->requestCSS('/css/compare.css');
-    Package::i()->requestJS('/js/compare.js');
+    AssetManager::requestCSS('/css/compare.css');
+    AssetManager::requestJS('/js/compare.js');
 }

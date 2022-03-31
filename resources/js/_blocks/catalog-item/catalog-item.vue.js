@@ -71,6 +71,9 @@ export default {
         $(document).on('raas.shop.cart-updated', () => {
             this.checkCarts();
         });
+        window.setTimeout(() => {
+            this.checkCarts();
+        }, 0); // таймаут чтобы инициализировалась переменная window.app
     },
     methods: {
         /**

@@ -9,6 +9,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Pages;
+use RAAS\AssetManager;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Package;
 use RAAS\CMS\PageRecursiveCache;
@@ -44,5 +45,5 @@ if ($Set) { ?>
       </div>
     </div>
     <?php
-    Package::i()->requestCSS('/css/brands-main.css');
+    AssetManager::requestCSS('/css/brands-main.css');
 }

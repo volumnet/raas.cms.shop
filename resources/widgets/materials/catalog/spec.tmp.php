@@ -7,6 +7,8 @@
  */
 namespace RAAS\CMS;
 
+use RAAS\AssetManager;
+
 if ($Set) { ?>
     <div class="spec">
       <?php if ($Block->name && $Block->name[0] != '.') { ?>
@@ -33,5 +35,5 @@ if ($Set) { ?>
       </div>
     </div>
     <?php
-    Package::i()->requestCSS('/css/spec.css');
+    AssetManager::requestCSS('/css/spec.css');
 }

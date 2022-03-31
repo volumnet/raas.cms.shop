@@ -13,6 +13,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\HTTP;
+use RAAS\AssetManager;
 use RAAS\CMS\Menu;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
@@ -112,4 +113,4 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
   </a>
   <?php echo $showMenu($menuArr ?: $Item, $Page)?>
 </nav>
-<?php Package::i()->requestJS('/js/menu-catalog.js');
+<?php AssetManager::requestJS('/js/menu-catalog.js');

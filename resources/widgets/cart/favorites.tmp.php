@@ -8,6 +8,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
+use RAAS\AssetManager;
 use RAAS\CMS\Material;
 use RAAS\CMS\Package;
 use RAAS\CMS\Material_Field;
@@ -87,6 +88,6 @@ if ($Page->mime == 'application/json') {
       </div>
     </favorites>
     <?php
-    Package::i()->requestCSS('/css/favorites.css');
-    Package::i()->requestJS('/js/favorites.js');
+    AssetManager::requestCSS('/css/favorites.css');
+    AssetManager::requestJS('/js/favorites.js');
 }

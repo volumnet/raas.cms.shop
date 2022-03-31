@@ -11,6 +11,7 @@ namespace RAAS\CMS\Shop;
 
 use SOME\Text;
 use RAAS\Application;
+use RAAS\AssetManager;
 use RAAS\CMS\FieldArrayFormatter;
 use RAAS\CMS\Block;
 use RAAS\CMS\Form;
@@ -147,6 +148,6 @@ if ($Page->mime == 'application/json') {
       </div>
     </cart>
     <?php
-    Package::i()->requestCSS('/css/cart.css');
-    Package::i()->requestJS('/js/cart.js');
+    AssetManager::requestCSS('/css/cart.css');
+    AssetManager::requestJS('/js/cart.js');
 }

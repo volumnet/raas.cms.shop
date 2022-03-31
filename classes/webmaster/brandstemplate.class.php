@@ -71,7 +71,7 @@ class BrandsTemplate extends MaterialTypeTemplate
         if (!$snippet->id) {
             $snippet = $this->webmaster->createSnippet(
                 'brands_main',
-                View_Web::i()->_('SPECIAL_OFFER'),
+                View_Web::i()->_('BRANDS_MAIN'),
                 (int)$this->widgetsFolder->id,
                 $filename
             );

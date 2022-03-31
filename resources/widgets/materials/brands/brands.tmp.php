@@ -13,6 +13,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Pages;
+use RAAS\AssetManager;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
@@ -87,8 +88,8 @@ if ($Item) {
       </div>
     </div>
     <?php
-    Package::i()->requestCSS('/css/brands-article.css');
-    Package::i()->requestJS('/js/brands-article.js');
+    AssetManager::requestCSS('/css/brands-article.css');
+    AssetManager::requestJS('/js/brands-article.js');
 } elseif ($Set) { ?>
     <div class="brands">
       <div class="brands__list">
@@ -115,6 +116,6 @@ if ($Item) {
       <?php } ?>
     </div>
     <?php
-    Package::i()->requestCSS('/css/brands-list.css');
-    Package::i()->requestJS('/js/brands-list.js');
+    AssetManager::requestCSS('/css/brands-list.css');
+    AssetManager::requestJS('/js/brands-list.js');
 }

@@ -9,6 +9,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
+use RAAS\AssetManager;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Package;
 
@@ -154,5 +155,5 @@ if ($propsCache) {
   </div>
 </div>
 <?php
-Package::i()->requestCSS('/css/catalog-item.css');
-Package::i()->requestJS('/js/catalog-item.js');
+AssetManager::requestCSS('/css/catalog-item.css');
+AssetManager::requestJS('/js/catalog-item.js');

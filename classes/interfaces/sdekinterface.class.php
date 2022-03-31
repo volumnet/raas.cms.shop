@@ -353,7 +353,7 @@ class SDEKInterface extends AbstractInterface
                 'countryName' => 'countryName',
                 'country' => 'countryName',
             ] as $getParam => $pvzParam) {
-                if (isset($get[$getParam]) && ($pvz[$pvzParam] != $get[$getParam])) {
+                if (isset($get[$getParam]) && (trim($pvz[$pvzParam]) != trim($get[$getParam]))) {
                     continue 2;
                 }
             }

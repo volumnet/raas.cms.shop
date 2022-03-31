@@ -9,6 +9,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\HTTP;
+use RAAS\AssetManager;
 use RAAS\CMS\Block;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
@@ -94,5 +95,5 @@ $defaultSortVariant = $matchingVariants ? $matchingVariants[0] : $sortVariants[0
   </div>
 </form>
 <?php
-Package::i()->requestCSS(['/css/catalog-controls.css']);
-Package::i()->requestJS(['/js/catalog-controls.js']);
+AssetManager::requestCSS(['/css/catalog-controls.css']);
+AssetManager::requestJS(['/js/catalog-controls.js']);
