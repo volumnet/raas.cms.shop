@@ -143,7 +143,7 @@
   <?php
   ?>
 
-  <script type="text/javascript">
+  <script type="application/javascript">
   <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && $raw_data) { ?>
       var raw_data = <?php echo json_encode($raw_data)?>;
       <?php

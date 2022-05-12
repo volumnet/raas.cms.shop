@@ -35,6 +35,14 @@ export default {
                 return [];
             },
         },
+        /**
+         * Селектор для скролла при обновлении
+         * @type {Object}
+         */
+        scrollToSelector: {
+            type: String,
+            required: false,
+        },
     },
     data: function () {
         return {
@@ -62,6 +70,9 @@ export default {
         }
         $(document).on('raas.shop.catalogupdaterequest', ($event, url) => {
             self.loadCatalog(url, true);
+        });
+        $(document).on('raas.shop.catalogupdaterequestsilent', ($event, url) => {
+            self.loadCatalog(url, true, false);
         });
 
     },
@@ -131,17 +142,19 @@ export default {
          * Загружаем каталог
          * @param {String} url URL для загрузки
          * @param {Boolean} clear Очистить предыдущий список
+         * @param {Boolean} setBusy Устанавливать статус "загрузка"
          * @return jQuery.Deferred Promise, разрешаемый jQuery полученной страницы
          */
-        loadCatalog: function (url, clear) {
-            let self = this;
+        loadCatalog: function (url, clear, setBusy = true) {
             let $dO = $.Deferred();
             let title = document.title;
             if (this.busy) {
                 $dO.reject(false);
                 return $dO;
             }
-            this.busy = true;
+            if (setBusy) {
+                this.busy = true;
+            }
             $.get(url).then((result) => {
                 const rxRes = /\<body.*?\>([\s\S]*?)\<\/body\>/m.exec(result);
                 if (clear) {
@@ -154,17 +167,17 @@ export default {
                     result = $.trim(rxRes[1]);
                 }
                 return $(result);
-            }).then(function ($result) {
-                self.appendData($result, clear);
-                if (clear) {
-                    $.scrollTo(self.$el, 500);
+            }).then(($result) => {
+                this.appendData($result, clear);
+                if (clear && setBusy) {
+                    $.scrollTo(this.scrollToSelector || this.$el, 500);
                 }
                 $(document).trigger('raas.shop.catalog-ready');
                 window.history.pushState({}, title, url);
                 if (clear) {
                     document.title = title;
                 }
-                self.busy = false;
+                this.busy = false;
                 return $result;
             });
             return $dO;

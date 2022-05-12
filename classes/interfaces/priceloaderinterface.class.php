@@ -310,7 +310,14 @@ class PriceloaderInterface extends AbstractInterface
     public function isItemDataRow(array $dataRow = [])
     {
         $filledCellsCounter = count(array_filter($dataRow, 'trim'));
-        return $filledCellsCounter > 1;
+        if ($filledCellsCounter > 1) {
+            return true;
+        } elseif (($this->loader->cats_usage == PriceLoader::CATS_USAGE_DONT_USE) &&
+            ($filledCellsCounter == 1)
+        ) {
+            return true;
+        }
+        return false;
     }
 
 
@@ -675,6 +682,9 @@ class PriceloaderInterface extends AbstractInterface
      */
     public function isPageDataRow(array $dataRow = [])
     {
+        if ($this->loader->cats_usage == PriceLoader::CATS_USAGE_DONT_USE) {
+            return false;
+        }
         $filledCellsCounter = count(array_filter($dataRow, 'trim'));
         return $filledCellsCounter == 1;
     }
@@ -1199,9 +1209,7 @@ class PriceloaderInterface extends AbstractInterface
                     $st,
                     $i
                 );
-            } elseif ($this->isPageDataRow($dataRow) &&
-                ($loader->cats_usage != PriceLoader::CATS_USAGE_DONT_USE)
-            ) {
+            } elseif ($this->isPageDataRow($dataRow)) {
                 // Категория
                 $this->processPageRow(
                     $loader,
