@@ -365,7 +365,7 @@ class SDEKInterface extends AbstractInterface
                 'region' => trim($pvz['regionName']),
                 'regionCode' => $regionCode,
             ];
-            $result[trim($pvz['city'])] = $resultArr;
+            $result[trim($pvz['city'] . '@' . mb_strtolower($pvz['regionName']))] = $resultArr;
         }
         uksort($result, function ($a, $b) {
             // return strnatcasecmp($a['cityName'], $b['cityName']);

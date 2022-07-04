@@ -121,7 +121,7 @@ export default {
                 $('[data-role="loader-list-item"]', $remoteLoader)
             );
             $('[data-vue-role="catalog-item"]', this.$el).attr('data-just-appended', '1')
-            new window.VueW3CValid({ el: '.body' });
+            new window.VueW3CValid({ el: '#' + this.$root.$el.id });
             $('[data-just-appended]', this.$el).each(function () {
                 $(this).removeAttr('data-just-appended')
                     .attr('inline-template', 'inline-template')

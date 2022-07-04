@@ -951,7 +951,9 @@ class YMLInterface extends AbstractInterface
                 if ($settings['field']->multiple) {
                     $att = $att[0];
                 }
-                $x = $this->getCurrentHostURL() . '/' . $att->fileURL;
+                if ($att->id) {
+                    $x = $this->getCurrentHostURL() . '/' . $att->fileURL;
+                }
             } else {
                 $x = $item->fields[$settings['field']->urn]->doRich();
             }
