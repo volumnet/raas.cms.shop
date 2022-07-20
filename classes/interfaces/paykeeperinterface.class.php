@@ -1,6 +1,6 @@
 <?php
 /**
- * Файл класса интерфейса электронной оплаты через Сбербанк России
+ * Файл класса интерфейса электронной оплаты через PayKeeper
  */
 namespace RAAS\CMS\Shop;
 
@@ -13,41 +13,31 @@ use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
 
 /**
- * Класс интерфейса электронной оплаты через Сбербанк России
+ * Класс интерфейса электронной оплаты через PayKeeper
  */
-class SberbankInterface extends EPayInterface
+class PayKeeperInterface extends EPayInterface
 {
     /**
-     * Значение поля Status получении состояния заказа: предавторизованная сумма
-     * захолдирована (для двухстадийных платежей)
-     */
-    const REQUEST_STATUS_HOLD = 1;
-
-    /**
-     * Значение поля Status получении состояния заказа: проведена полная
+     * Значение поля status получении состояния заказа: проведена полная
      * авторизация суммы заказа
      */
-    const REQUEST_STATUS_PAID = 2;
+    const REQUEST_STATUS_PAID = 'paid';
 
     /**
      * Ставка НДС - без НДС
      */
-    const TAX_TYPE_NO_VAT = 0;
+    const TAX_TYPE_NO_VAT = 'vat0';
 
     /**
      * Система налогообложения - упрощенная, доход
      */
-    const TAX_SYSTEM_SIMPLE = 1;
+    const TAX_SYSTEM_SIMPLE = 'none';
 
     /**
-     * Тип оплаты - полная предварительная оплата до момента передачи предмета расчёта
+     * Токен безопасности
+     * @var string
      */
-    const PAYMENT_METHOD_PREPAY = 1;
-
-    /**
-     * Тип оплачиваемой позиции - товар
-     */
-    const PAYMENT_OBJECT_PRODUCT = 1;
+    protected $token = '';
 
     /**
      * Обработка интерфейса
@@ -65,22 +55,32 @@ class SberbankInterface extends EPayInterface
         $out = [];
         $addURN = $this->page->additionalURLArray[0];
         try {
-            if (in_array($addURN, ['result', 'fail']) ||
+            if (in_array($addURN, ['result', 'success', 'fail']) ||
                 ($order->id && $this->post['epay'])
             ) {
-                if (in_array($addURN, ['result', 'fail'])) {
-                    if (!($order && $order->id) &&
-                        $this->get['orderId']
+                if (in_array($addURN, ['result'])) {
+                    if (!($order && $order->id) && $this->post['orderid']) {
+                        $order = new Order($this->post['orderid']);
+                    }
+                } elseif (in_array($addURN, ['success', 'fail'])) {
+                    if ((!$order || !$order->id) &&
+                        $this->session['orderId']
                     ) {
-                        $order = Order::importByPayment(
-                            $this->get['orderId'],
-                            $this->block->EPay_Interface
-                        );
+                        $order = new Order($this->session['orderId']);
                     }
                 }
                 switch ($addURN) {
                     case 'result':
+                        if (!$order) {
+                            $order = new Order();
+                        }
                         $out = $this->result($order, $this->block, $this->page);
+                        break;
+                    case 'success':
+                        $out['success'][(int)$this->block->id] = sprintf(
+                            ORDER_SUCCESSFULLY_PAID,
+                            $order->id
+                        );
                         break;
                     case 'fail':
                         $out = $this->fail(
@@ -132,7 +132,7 @@ class SberbankInterface extends EPayInterface
         if ($order->id) {
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    'paykeeper.log',
                     date('Y-m-d H:i:s ') . 'result: ' .
                     $order->id . ' / ' .
                     $order->payment_id . "\n\n",
@@ -148,14 +148,48 @@ class SberbankInterface extends EPayInterface
                         'status_id' => (int)$order->status_id,
                         'paid' => 1,
                         'post_date' => date('Y-m-d H:i:s'),
-                        'description' => 'Оплачено через Сбербанк'
-                                      .  ' (ID# заказа в системе банка: '
+                        'description' => 'Оплачено через PayKeeper'
+                                      .  ' (ID# заказа в системе: '
                                       .  $order->payment_id . ')'
                     ]);
                     $history->commit();
 
                     $order->paid = 1;
                     $order->commit();
+                }
+                if ($block->epay_pass2 && $this->post['id']) {
+                    $checkKey = md5(
+                        $this->post['id'] .
+                        $this->post['sum'] .
+                        $this->post['clientid'] .
+                        $this->post['orderid'] .
+                        $block->epay_pass2
+                    );
+                    if ($block->epay_test) {
+                        file_put_contents(
+                            'paykeeper.log',
+                            date('Y-m-d H:i:s ') . 'result: checkKey ' .
+                            $this->post['key'] . ' / ' .
+                            $checkKey . "\n\n",
+                            FILE_APPEND
+                        );
+                    }
+                    if ($block->epay_pass2 && ($this->post['key'] == $checkKey)) {
+                        $returnHash = md5($this->post['id'] . $block->epay_pass2);
+                        while (ob_get_level()) {
+                            ob_end_clean();
+                        }
+                        if ($block->epay_test) {
+                            file_put_contents(
+                                'paykeeper.log',
+                                date('Y-m-d H:i:s ') . 'result: returnHash ' .
+                                'OK ' . $returnHash . "\n\n",
+                                FILE_APPEND
+                            );
+                        }
+                        echo 'OK ' . $returnHash;
+                        exit;
+                    }
                 }
                 $out['success'][(int)$block->id] = sprintf(
                     ORDER_SUCCESSFULLY_PAID,
@@ -196,12 +230,9 @@ class SberbankInterface extends EPayInterface
             if ($order->id) {
                 $logMessage .= $order->id . ' / ' . $order->payment_id . "\n\n";
             } else {
-                $logMessage .= "order " . $get['orderId'] . " not found\n\n";
+                $logMessage .= "order not found\n\n";
             }
-            file_put_contents('sberbank.log', $logMessage, FILE_APPEND);
-            if ($order->id) {
-                $this->getOrderIsPaid($order, $block, $page);
-            }
+            file_put_contents('paykeeper.log', $logMessage, FILE_APPEND);
         }
         return ['localError' => [
             'order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)
@@ -215,7 +246,7 @@ class SberbankInterface extends EPayInterface
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
      * @return [
-     *             'paymentURL' ?=> string Платежный URL,
+     *             'localError' ?=> string[] Список ошибок,
      *         ]
      */
     public function init(Order $order, Block_Cart $block, Page $page)
@@ -227,18 +258,17 @@ class SberbankInterface extends EPayInterface
         $localError = [];
         if (!$response) {
             $localError[] = 'Не удалось получить результат запроса на оплату';
-        } elseif ($response['errorCode']) {
+        } elseif ($response['result'] == 'fail') {
             $localError[] = 'В процессе регистрации заказа возникла ошибка: #'
-                          . $response['errorCode'] . ' '
-                          . $response['errorMessage'];
-        } elseif (!$response['orderId'] || !$response['formUrl']) {
+                          . $response['msg'];
+        } elseif (!$response['invoice_id'] || !$response['invoice_url']) {
             $localError[] = 'Не удалось получить адрес для оплаты';
         }
 
         if ($localError) {
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    'paykeeper.log',
                     date('Y-m-d H:i:s ') . 'init: ' .
                     var_export($localError, true) . "\n\n",
                     FILE_APPEND
@@ -246,9 +276,9 @@ class SberbankInterface extends EPayInterface
             }
             return ['localError' => $localError];
         } else {
-            $order->payment_id = $response['orderId'];
+            $order->payment_id = $response['invoice_id'];
             $order->payment_interface_id = (int)$block->EPay_Interface->id;
-            $order->payment_url = $response['formUrl'];
+            $order->payment_url = $response['invoice_url'];
             $order->commit();
             $history = new Order_History([
                 'uid' => (int)Application::i()->user->id,
@@ -256,15 +286,15 @@ class SberbankInterface extends EPayInterface
                 'status_id' => (int)$order->status_id,
                 'paid' => (int)$order->paid,
                 'post_date' => date('Y-m-d H:i:s'),
-                'description' => 'Зарегистрировано в системе Сбербанка'
-                              .  ' (ID# заказа в системе банка: '
+                'description' => 'Зарегистрировано в системе PayKeeper'
+                              .  ' (ID# заказа в системе: '
                               .  $order->payment_id . ', платежный URL: '
                               .  $order->payment_url . ')'
             ]);
             $history->commit();
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    'paykeeper.log',
                     date('Y-m-d H:i:s ') . 'init: ' . (int)$order->id . ' / ' .
                     $response['orderId'] . "\n\n",
                     FILE_APPEND
@@ -292,10 +322,40 @@ class SberbankInterface extends EPayInterface
      */
     public function exec($method, array $requestData = [], $isTest = false)
     {
-        $url = $this->getURL($isTest)
-             . $method . '.do?' . http_build_query($requestData);
-        $result = file_get_contents($url);
-        $json = json_decode($result, true);
+        if (!$this->token && ($method != '/info/settings/token/')) {
+            $tokenJSON = $this->exec('/info/settings/token/', [], $isTest);
+            if ($tokenJSON['token']) {
+                $this->token = $tokenJSON['token'];
+            }
+        }
+        // if ($method != '/info/settings/token/') {
+        //     var_dump($requestData); exit;
+        // }
+        $headers = [
+            'Content-Type: application/x-www-form-urlencoded',
+        ];
+        if ($this->block->epay_login && $this->block->epay_pass1) {
+            $headers[] = 'Authorization: Basic '
+                . base64_encode($this->block->epay_login . ':' . $this->block->epay_pass1);
+        }
+        $url = $this->getURL($isTest) . $method;
+        // var_dump($url, $headers); exit;
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        if ($requestData) {
+            if ($this->token) {
+                $requestData['token'] = $this->token;
+            }
+            $request = http_build_query($requestData);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        } else {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+        }
+        $result = curl_exec($ch);
+        $json = @json_decode($result, true);
         return $json;
     }
 
@@ -309,9 +369,18 @@ class SberbankInterface extends EPayInterface
     public function getURL($isTest = false)
     {
         if ($isTest) {
-            $url = 'https://3dsec.sberbank.ru/payment/rest/';
+            $url = 'https://demo.paykeeper.ru';
         } else {
-            $url = 'https://securepayments.sberbank.ru/payment/rest/';
+            $serverHost = $this->block->additionalParams['paykeeperHost'];
+            if ($serverHost) {
+                if (!stristr($serverHost, '://')) {
+                    $serverHost = 'https://' . $serverHost;
+                }
+                $url = trim($serverHost, '/');
+            } else {
+                $currentHostArr = explode('.', $this->getCurrentHostName());
+                $url = 'https://' . $currentHostArr[0] . '.server.paykeeper.ru';
+            }
         }
         return $url;
     }
@@ -324,10 +393,7 @@ class SberbankInterface extends EPayInterface
      */
     public function isSuccessfulStatus($status)
     {
-        return in_array(
-            $status,
-            [static::REQUEST_STATUS_PAID, static::REQUEST_STATUS_HOLD]
-        );
+        return in_array($status, [static::REQUEST_STATUS_PAID]);
     }
 
 
@@ -336,65 +402,26 @@ class SberbankInterface extends EPayInterface
      * @param Order $order Заказ для регистрации
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
-     * @param string $emailField URN поля E-mail
-     * @param string $phoneField URN поля Телефон
-     * @param string $deliveryAddressField URN поля Адрес доставки
-     * @param string $deliveryCityField URN поля Город доставки
-     * @param string $deliveryCountryField URN поля Страна доставки
-     * @param string $taxTypeField URN поля Ставка НДС
-     * @param string $taxSystemField URN поля Система налогообложения
-     * @param string $paymentMethodField URN поля Тип оплаты
-     * @param string $paymentObjectField URN поля Тип оплачиваемой позиции
      * @return array
      */
     public function getRegisterOrderData(
         Order $order,
         Block_Cart $block,
-        Page $page,
-        $emailField = 'email',
-        $phoneField = 'phone',
-        $deliveryAddressField = 'address',
-        $deliveryCityField = 'city',
-        $deliveryCountryField = 'country',
-        $taxTypeField = 'tax_type',
-        $taxSystemField = 'tax_system',
-        $paymentMethodField = 'sberbank_payment_method',
-        $paymentObjectField = 'sberbank_payment_object'
+        Page $page
     ) {
-        $jsonParams = [];
-        foreach ($order->fields as $field) {
-            if (!in_array($field->datatype, ['image', 'file', 'checkbox']) &&
-                !in_array($field->urn, ['epay'])
-            ) {
-                $val = $field->getValues(true);
-                $val = array_map(function ($x) use ($field) {
-                    $y = $field->doRich($x);
-                    if ($y instanceof Material) {
-                        $y = $y->name;
-                    }
-                    return $y;
-                }, $val);
-                $val = implode(', ', $val);
-                $jsonParams[$field->urn] = $val;
-            }
-        }
-        $orderBundle = [];
-        if (trim($order->$phoneField) !== '') {
-            $beautifiedPhone = Text::beautifyPhone(trim($order->$phoneField));
-            $beautifiedPhoneLength = mb_strlen($beautifiedPhone);
-            $beautifiedPhone = mb_substr('700000', 0, 11 - $beautifiedPhoneLength) . $beautifiedPhone;
-            $orderBundle['customerDetails']['phone'] = $beautifiedPhone;
-        }
-        if (trim($order->$emailField) !== '') {
-            $orderBundle['customerDetails']['email'] = trim($order->$emailField);
-        }
-        if (trim($order->$deliveryAddressField) !== '') {
-            $orderBundle['customerDetails']['deliveryInfo']['postAddress'] = trim($order->$deliveryAddressField);
-            $orderBundle['customerDetails']['deliveryInfo']['city'] = trim($order->$deliveryCityField) ?: '-';
-            $orderBundle['customerDetails']['deliveryInfo']['country'] = trim($order->$deliveryCountryField) ?: 'RU';
+        if ($order->full_name) {
+            $clientId = $order->full_name;
+        } else {
+            $clientIdArr = [
+                $order->last_name,
+                $order->first_name,
+                $order->second_name,
+            ];
+            $clientIdArr = array_values(array_filter($clientIdArr, 'trim'));
+            $clientId = implode(' ', $clientIdArr);
         }
 
-        $orderBundle['cartItems'] = [];
+        $cartData = [];
         $sumWithoutDiscount = 0;
         $discountSum = 0;
         foreach ($order->items as $i => $item) {
@@ -409,56 +436,40 @@ class SberbankInterface extends EPayInterface
         foreach ($order->items as $i => $item) {
             if ($item->realprice > 0) {
                 $itemPrice = (float)$item->realprice;
-                $itemPrice = round($itemPrice * (1 - $discount) * 100);
+                $itemPrice = round($itemPrice * (1 - $discount) * 100) / 100;
                 $itemData = [
-                    'positionId' => ($i + 1),
                     'name' => $item->name,
-                    'quantity' => [
-                        'value' => (int)$item->amount,
-                        'measure' => 'шт.'
-                    ],
-                    'itemPrice' => $itemPrice,
-                    'itemAmount' => $itemPrice * $item->amount,
-                    'itemCode' => (int)$item->id,
-                    'tax' => [
-                        'taxType' => (trim($order->$taxTypeField) !== '')
-                                  ?  $order->$taxTypeField
-                                  :  static::TAX_TYPE_NO_VAT
-                    ],
-                    'itemAttributes' => [
-                        'attributes' => [
-                            [
-                                'name' => 'paymentMethod',
-                                'value' => (trim($order->paymentMethodField) !== '')
-                                        ?  $order->paymentMethodField
-                                        :  static::PAYMENT_METHOD_PREPAY,
-                            ],
-                            [
-                                'name' => 'paymentObject',
-                                'value' => (trim($order->paymentObjectField) !== '')
-                                        ?  $order->paymentObjectField
-                                        :  static::PAYMENT_OBJECT_PRODUCT,
-                            ],
-                        ],
-                    ],
+                    'price' => $itemPrice,
+                    'quantity' => (int)$item->amount,
+                    'sum' => $itemPrice * $item->amount,
+                    'tax' => $order->taxType ?: static::TAX_TYPE_NO_VAT,
                 ];
-                $orderBundle['cartItems']['items'][] = $itemData;
+                $cartData[] = $itemData;
             }
         }
-        $requestData = [
-            'userName' => $block->epay_login,
-            'password' => $block->epay_pass1,
-            'orderNumber' => (int)$order->id,
-            'amount' => ($order->sum * 100),
-            'returnUrl' => $this->getCurrentHostURL() . $page->url . 'result/',
-            'failUrl' => $this->getCurrentHostURL() . $page->url . 'result/',
-            'description' => $this->getOrderDescription($order),
-            'jsonParams' => json_encode($jsonParams),
-            'taxSystem' => (trim($order->$taxSystemField) !== '')
-                        ?  $order->$taxSystemField
-                        :  static::TAX_SYSTEM_SIMPLE,
-            'orderBundle' => json_encode($orderBundle),
+
+        $fz54Data = [
+            'service_name' => $this->getOrderDescription($order),
+            'receipt_properties' => [
+                'client' => [
+                    'identity' => $clientId,
+                ],
+            ],
+            'cart' => $cartData,
         ];
+
+        $requestData = [
+            'pay_amount' => (float)$order->sum,
+            'clientid' => $clientId,
+            'orderid' => (int)$order->id,
+            'service_name' => json_encode($fz54Data),
+        ];
+        if (trim($order->email) !== '') {
+            $requestData['client_email'] = trim($order->email);
+        }
+        if (trim($order->phone) !== '') {
+            $requestData['client_phone'] = trim($order->phone);
+        }
 
         return $requestData;
     }
@@ -474,10 +485,10 @@ class SberbankInterface extends EPayInterface
     public function registerOrder(Order $order, Block_Cart $block, Page $page)
     {
         $requestData = $this->getRegisterOrderData($order, $block, $page);
-        $response = $this->exec('register', $requestData, $block->epay_test);
+        $response = $this->exec('/change/invoice/preview/', $requestData, $block->epay_test);
         if ($block->epay_test) {
             file_put_contents(
-                'sberbank.log',
+                'paykeeper.log',
                 date('Y-m-d H:i:s ') . 'registerOrder: ' .
                 var_export($requestData, true) . "\n" .
                 var_export($response, true) . "\n\n",
@@ -514,72 +525,64 @@ class SberbankInterface extends EPayInterface
      */
     public function getOrderIsPaid(Order $order, Block_Cart $block, Page $page)
     {
-        $requestData = array(
-            'userName' => $block->epay_login,
-            'password' => $block->epay_pass1,
-            'orderId' => $order->payment_id,
-        );
-        $json = $this->exec('getOrderStatus', $requestData, $block->epay_test);
+        if (!$order->payment_id) {
+            $errorText = 'Заказ не отправлен на оплату';
+            throw new Exception($errorText);
+        }
+        $url = '/info/invoice/byid/?id=' . $order->payment_id;
+        $json = $this->exec($url, [], $block->epay_test);
 
         if (!$json) {
             $errorText = 'Не удалось получить результат запроса состояния заказа';
             throw new Exception($errorText);
-        } elseif ($json['errorCode']) {
+        } elseif ($json['result'] == 'fail') {
             $errorText = 'В процессе оплаты заказа'
-                       . (
-                            $json['OrderNumber'] ?
-                            ' #' . (int)$json['OrderNumber'] :
-                            ''
-                        )
-                       . ' возникла ошибка: (' . $json['errorCode'] . ') '
-                       . $json['errorMessage'];
-            if ($json['OrderNumber']) {
-                $order = new Order((int)$json['OrderNumber']);
-                $history = new Order_History([
-                    'uid' => (int)Application::i()->user->id,
-                    'order_id' => (int)$order->id,
-                    'status_id' => (int)$order->status_id,
-                    'paid' => 0,
-                    'post_date' => date('Y-m-d H:i:s'),
-                    'description' => $errorText,
-                ]);
-                $history->commit();
-            }
+                       . ($order->id ? ' #' . $order->id : '')
+                       . ' возникла ошибка: ' . $json['msg'];
+            $history = new Order_History([
+                'uid' => (int)Application::i()->user->id,
+                'order_id' => (int)$order->id,
+                'status_id' => (int)$order->status_id,
+                'paid' => 0,
+                'post_date' => date('Y-m-d H:i:s'),
+                'description' => $errorText,
+            ]);
+            $history->commit();
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    'paykeeper.log',
                     date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
-                    var_export($requestData, true) . "\n" .
+                    $url . "\n" .
                     var_export($json, true) . "\n" .
                     'Error: ' . $errorText . "\n\n",
                     FILE_APPEND
                 );
             }
             throw new Exception($errorText);
-        } elseif (!$json['OrderNumber'] || !$json['OrderStatus']) {
+        } elseif (!$json['id'] || !$json['status']) {
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    'paykeeper.log',
                     date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
-                    var_export($requestData, true) . "\n" .
+                    $url . "\n" .
                     var_export($json, true) . "\n" .
-                    'Error: Не удалось получить адрес для оплаты' . "\n\n",
+                    'Error: Не удалось получить статус состояния заказа' . "\n\n",
                     FILE_APPEND
                 );
             }
-            throw new Exception('Не удалось получить адрес для оплаты');
+            throw new Exception('Не удалось получить статус состояния заказа');
         }
 
         if ($block->epay_test) {
             file_put_contents(
-                'sberbank.log',
+                'paykeeper.log',
                 date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
-                var_export($requestData, true) . "\n\n",
+                $url . "\n\n",
                 FILE_APPEND
             );
         }
 
-        return $this->isSuccessfulStatus($json['OrderStatus']);
+        return $this->isSuccessfulStatus($json['status']);
     }
 
 
@@ -589,6 +592,6 @@ class SberbankInterface extends EPayInterface
      */
     public function getEPayWidget()
     {
-        return Snippet::importByURN('sberbank');
+        return Snippet::importByURN('epay');
     }
 }

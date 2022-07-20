@@ -1416,8 +1416,11 @@ class CatalogFilter
         $cacheId = 'RAASCACHE' . date('YmdHis') . md5(rand());
         $text = '<' . '?php return unserialize(<<' . "<'" . $cacheId . "'\n" . serialize($data) . "\n" . $cacheId . "\n);\n";
         $result = file_put_contents($tmpFilename, $text);
-        @unlink($filename);
-        @rename($tmpFilename, $filename);
+        // 2022-07-07, AVS: сделал условие для удаления файла, убрал @ чтобы видно было ошибки
+        if (is_file($filename)) {
+            unlink($filename);
+        }
+        rename($tmpFilename, $filename);
         if (!is_file($filename)) {
             throw new Exception('Cannot save filter cache data');
         }
@@ -1445,7 +1448,10 @@ class CatalogFilter
         if (!is_file($filename)) {
             throw new Exception('Cannot load filter cache data - filename ' . $filename . ' doesn\'t exist');
         }
-        $data = include $filename;
+        $data = @include $filename;
+        if (!$data) {
+            throw new Exception('Cannot load filter cache data - data is empty or invalid');
+        }
         $filter = static::import($data);
         return $filter;
     }

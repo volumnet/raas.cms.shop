@@ -170,11 +170,17 @@ class CartInterface extends FormInterface
                                 $cart->clear();
                                 $result['success'][(int)$this->block->id] = true;
                             }
-                            new Redirector(
-                                '?action=success&id=' . (int)$result['Item']->id .
-                                '&crc=' . Application::i()->md5It($result['Item']->id) .
-                                ($this->post['epay'] ? ('&epay=' . $this->post['epay']) : '')
-                            );
+                            // 2022-07-12, AVS: сделал проверку, чтобы по AJAX'у не редиректил
+                            if (!(
+                                $this->post['AJAX'] ||
+                                ($this->page->mime == 'application/json')
+                            )) {
+                                new Redirector(
+                                    '?action=success&id=' . (int)$result['Item']->id .
+                                    '&crc=' . Application::i()->md5It($result['Item']->id) .
+                                    ($this->post['epay'] ? ('&epay=' . $this->post['epay']) : '')
+                                );
+                            }
                         }
                         $result['DATA'] = $this->post;
                         $result['localError'] = $localError;

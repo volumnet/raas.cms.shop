@@ -63,6 +63,10 @@ if ($Page->mime == 'application/json') {
     }
     $cartData['items'] = [];
     $cartData['localError'] = (array)$localError;
+    // 2022-07-12, AVS: добавил переменную для редиректа при онлайн-оплате
+    if (isset($redirectUrl) && $redirectUrl) {
+        $cartData['redirectUrl'] = $redirectUrl;
+    }
     $cartData['proceed'] = ($_SERVER['REQUEST_METHOD'] == 'POST');
     foreach ($Cart->items as $i => $cartItem) {
         $cartItemFormatter = new CartItemArrayFormatter($cartItem);

@@ -309,7 +309,11 @@ class PriceloaderInterface extends AbstractInterface
      */
     public function isItemDataRow(array $dataRow = [])
     {
-        $filledCellsCounter = count(array_filter($dataRow, 'trim'));
+        // 2022-07-05, AVS: заменил функцию проверки (было trim),
+        // чтобы поля с нулями тоже учитывались
+        $filledCellsCounter = count(array_filter($dataRow, function ($x) {
+            return trim($x) !== '';
+        }));
         if ($filledCellsCounter > 1) {
             return true;
         } elseif (($this->loader->cats_usage == PriceLoader::CATS_USAGE_DONT_USE) &&
@@ -685,7 +689,11 @@ class PriceloaderInterface extends AbstractInterface
         if ($this->loader->cats_usage == PriceLoader::CATS_USAGE_DONT_USE) {
             return false;
         }
-        $filledCellsCounter = count(array_filter($dataRow, 'trim'));
+        // 2022-07-05, AVS: заменил функцию проверки (было trim),
+        // чтобы поля с нулями тоже учитывались
+        $filledCellsCounter = count(array_filter($dataRow, function ($x) {
+            return trim($x) !== '';
+        }));
         return $filledCellsCounter == 1;
     }
 
