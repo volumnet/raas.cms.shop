@@ -77,7 +77,7 @@ class YMLInterface extends AbstractInterface
             header('Content-Type: application/xml');
         }
         $headerText = '<' . '?xml version="1.0" encoding="UTF-8"?' . '>' . "\n"
-                    . '<yml_catalog date="' . date('Y-m-d H:i') . '">';
+                    . '<yml_catalog date="' . date('Y-m-d') . 'T' . date('H:i') . '">';
         $footerText = '</yml_catalog>';
         $memoryText = $this->getMemoryUsageBlock();
         if ($return) {
