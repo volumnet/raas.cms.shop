@@ -77,7 +77,7 @@ class YMLInterface extends AbstractInterface
             header('Content-Type: application/xml');
         }
         $headerText = '<' . '?xml version="1.0" encoding="UTF-8"?' . '>' . "\n"
-                    . '<yml_catalog date="' . date('Y-m-d') . 'T' . date('H:i') . '">';
+                    . '<yml_catalog date="' . date('Y-m-d') . 'T' . date('H:iP') . '">';
         $footerText = '</yml_catalog>';
         $memoryText = $this->getMemoryUsageBlock();
         if ($return) {
@@ -475,10 +475,16 @@ class YMLInterface extends AbstractInterface
                              AS tMPA
                              ON tMPA.id = tM.id";
         }
+        if ($mtype->settings['fields']['price']['field']->id) {
+            $sqlQuery .= " JOIN " . Material::_dbprefix() . "cms_data AS tPrice ON tPrice.pid = tM.id AND tPrice.fid = " . (int)$mtype->settings['fields']['price']['field']->id;
+        }
         $sqlQuery .= " WHERE tM.vis
                          AND tM.pid IN (" . implode(", ", $mtype->selfAndChildrenIds) . ") ";
         if (!$mtype->global_type && $catalogCatsIds) {
             $sqlQuery .= " AND tMPA.pid IN (" . implode(", ", $catalogCatsIds) . ")";
+        }
+        if ($mtype->settings['fields']['price']['field']->id) {
+            $sqlQuery .= " AND tPrice.value";
         }
         $sqlQuery .= " GROUP BY tM.id";
         $sqlResult = Material::_SQL()->query($sqlQuery);

@@ -85,7 +85,7 @@ class ViewSub_Orders extends \RAAS\Abstract_Sub_View
 
 
     /**
-     * Контекстное меню страницы отзывов
+     * Контекстное меню страницы заказов
      */
     public function getOrdersContextMenu()
     {
