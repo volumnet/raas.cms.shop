@@ -8,7 +8,8 @@ use RAAS\CMS\Material;
 include Module::i()->view->tmp('cms/field.inc.php');
 
 $_RAASForm_FieldSet = function (FieldSet $FieldSet) use (&$_RAASForm_Form_Tabbed, &$_RAASForm_Form_Plain) {
-    $Item = $FieldSet->Form->Item;
+    $item = $FieldSet->Form->Item;
+    $allContextMenu = $FieldSet->Form->meta['allContextMenu'];
     $DATA = $FieldSet->Form->DATA;
     ?>
     <div data-role="multitable">
@@ -78,7 +79,7 @@ $_RAASForm_FieldSet = function (FieldSet $FieldSet) use (&$_RAASForm_Form_Tabbed
         <tfoot>
           <tr>
             <td colspan="2">
-              <all-context-menu :menu="<?php echo htmlspecialchars(json_encode(getMenu((array)$Table->meta['allContextMenu'])))?>"></all-context-menu>
+              <all-context-menu :menu="<?php echo htmlspecialchars(json_encode(getMenu((array)$allContextMenu)))?>"></all-context-menu>
             </td>
             <th colspan="3" style="text-align: right"><?php echo Module::i()->view->_('TOTAL_SUM')?>: </th>
             <th style="white-space: nowrap" data-role="total-sum"></th>

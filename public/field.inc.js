@@ -42,7 +42,7 @@ jQuery(function($) {
                 id = isNaN(id) ? 0 : id;
                 pid = isNaN(pid) ? 0 : pid;
                 if (id > 0) {
-                    var url = methods.getBaseURL() + '&action=edit_material&id=' + id + ((pid > 0) ? '&pid=' + pid : '');
+                    var url = '?p=cms&action=edit_material&id=' + id + ((pid > 0) ? '&pid=' + pid : '');
                     $('[data-role="raas-autotext-link"]', $container).attr('href', url).text($thisObj.attr('data-material-name'));
                     $('[data-role="material-field-with"]', $container).show();
                     $('[data-role="material-field-without"]', $container).hide();
