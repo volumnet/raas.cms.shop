@@ -4,10 +4,14 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\Application;
 use RAAS\Command;
+use RAAS\Controller_Frontend;
 use RAAS\CMS\Block;
+use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 use RAAS\CMS\User;
+use RAAS\CMS\Users\Module as UsersModule;
 
 /**
  * Команда привязки заказов к пользователям
@@ -28,6 +32,13 @@ class BindOrdersToUsersCommand extends Command
         $bindUserBy = explode(',', $bindUserBy);
         $bindUserBy = array_map('trim', $bindUserBy);
         $registerBlock = Block::spawn($createNewBlockId);
+        if ($registerBlock->id && $registerBlock->pages[0]->lang) {
+            $lang = $registerBlock->pages[0]->lang;
+            Controller_Frontend::i()->exportLang(Application::i(), $lang);
+            Controller_Frontend::i()->exportLang(Package::i(), $lang);
+            Controller_Frontend::i()->exportLang(Module::i(), $lang);
+            Controller_Frontend::i()->exportLang(UsersModule::i(), $lang);
+        }
         $sqlQuery = "SELECT *
                        FROM " . Order::_tablename()
                   . " WHERE NOT uid
@@ -37,7 +48,7 @@ class BindOrdersToUsersCommand extends Command
         foreach ($sqlResult as $order) {
             $postData = [];
             foreach (['login', 'email'] as $fieldURN) {
-                if ($val = $order->fieldURN) {
+                if ($val = trim($order->fieldURN)) {
                     $postData[$fieldURN] = $val;
                 }
             }

@@ -271,6 +271,16 @@ class CatalogInterface extends MaterialInterface
     }
 
 
+    public function getIdsList(
+        Block_Material $block,
+        Page $page,
+        array $get = []
+    ) {
+        $this->filterIds = $this->getFilterIds($block, $get, $page->catalogFilter);
+        return parent::getIdsList($block, $page, $get);
+    }
+
+
     /**
      * Получает части SQL-выражения
      * @param Block_Material|null $block Блок, для которого применяется
