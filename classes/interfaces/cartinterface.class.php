@@ -187,11 +187,16 @@ class CartInterface extends FormInterface
                     } else {
                         $result['DATA'] = [];
                         foreach ($form->fields as $fieldURN => $row) {
-                            if ($row->defval) {
-                                $result['DATA'][$fieldURN] = $row->defval;
-                            } elseif ($userVal = $user->{$fieldURN}) {
+                            $userVal = $user->{$fieldURN};
+                            if ((is_scalar($userVal) && (trim($userVal) !== '')) ||
+                                (!is_scalar($userVal) && $userVal)
+                            ) {
                                 $result['DATA'][$fieldURN] = $userVal;
+                            } elseif ($row->defval) {
+                                $result['DATA'][$fieldURN] = $row->defval;
                             }
+                            // 2022-10-13, AVS: поменял порядок следования (чтобы заполнялось),
+                            // также сделал строгую проверку на непустую строку
                         }
                         $result['localError'] = [];
                     }

@@ -1,26 +1,16 @@
 {
     "name": "volumnet/raas.cms.shop",
     "description": "RAAS.CMS.Shop",
-    "version": "4.3.33",
+    "version": "4.3.34",
     "license": "GPL-3.0-or-later",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": ">=7.0",
-        "ext-session": ">=0",
-        "ext-iconv": ">=0",
-        "ext-pcre": ">=0",
-        "ext-date": ">=0",
-        "ext-zlib": ">=0",
-        "ext-SimpleXML": ">=0",
-        "ext-xml": ">=0",
-        "ext-gd": ">=0",
-        "ext-PDO": ">=0",
-        "ext-mbstring": ">=0",
         "mustache/mustache": ">=2.5",
         "twig/twig": "1.x",
         "phpoffice/phpexcel": ">=1.8",
         "volumnet/some4": "^4.5.12",
+        "volumnet/raas.kernel": ">=4.3.0",
         "volumnet/raas.cms": "^4.3.41",
         "pelago/emogrifier": "*"
     },
@@ -36,11 +26,5 @@
     ],
     "autoload": {
         "classmap": ["classes/"] 
-    },
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://asset-packagist.org"
-        }
-    ]
+    }
 }
