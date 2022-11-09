@@ -12,6 +12,7 @@ use SOME\HTTP;
 use SOME\Text;
 use RAAS\AssetManager;
 use RAAS\Attachment;
+use RAAS\CMS\Field;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Package;
 use RAAS\CMS\Snippet;
