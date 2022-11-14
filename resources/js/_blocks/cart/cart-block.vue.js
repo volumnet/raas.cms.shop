@@ -70,13 +70,14 @@ export default {
     methods: {
         /**
          * Проверяет правильность заполнения полей
-         * @return {bool}
+         * @param {Boolean} silent Проверить втихую и выдать значение
+         * @return {Boolean}
          */
-        validate: function () {
+        validate: function (silent = false) {
             let $fields = $('input, select, textarea', this.$el);
             let valid = true;
             $fields.each(function () {
-                let result = this.reportValidity();
+                let result = silent ? this.validity.valid : this.reportValidity();
                 if (!result) {
                     valid = false;
                     return false;

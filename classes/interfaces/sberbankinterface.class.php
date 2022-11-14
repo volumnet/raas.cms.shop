@@ -406,10 +406,16 @@ class SberbankInterface extends EPayInterface
             }
         }
         $discount = $discountSum / (float)$sumWithoutDiscount;
+        $totalSumKop = 0; // Ввели сумму в копейках, чтобы не было расхождений при погрешности округления
+        $c = count($order->items);
         foreach ($order->items as $i => $item) {
             if ($item->realprice > 0) {
-                $itemPrice = (float)$item->realprice;
-                $itemPrice = round($itemPrice * (1 - $discount) * 100);
+                if ($i < $c - 1) { // До последнего товара
+                    $itemPrice = (float)$item->realprice;
+                    $itemPrice = round($itemPrice * (1 - $discount) * 100);
+                } else { // $i == $c - 1  - последний товар
+                    $itemPrice = floor(($order->sum * 100 - $totalSumKop) / $item->amount); // floor - чтобы пользователь не переплатил финальную сумму
+                }
                 $itemData = [
                     'positionId' => ($i + 1),
                     'name' => $item->name,
@@ -443,13 +449,14 @@ class SberbankInterface extends EPayInterface
                     ],
                 ];
                 $orderBundle['cartItems']['items'][] = $itemData;
+                $totalSumKop += $itemPrice * $item->amount;
             }
         }
         $requestData = [
             'userName' => $block->epay_login,
             'password' => $block->epay_pass1,
             'orderNumber' => (int)$order->id,
-            'amount' => ($order->sum * 100),
+            'amount' => $totalSumKop, // Заменили $order->sum * 100 на $totalSumKop, чтобы не было расхождений при погрешности округления
             'returnUrl' => $this->getCurrentHostURL() . $page->url . 'result/',
             'failUrl' => $this->getCurrentHostURL() . $page->url . 'result/',
             'description' => $this->getOrderDescription($order),
