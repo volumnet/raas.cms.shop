@@ -251,9 +251,12 @@ class Cart
         $cookieItems = (array)$this->items;
         $result = [];
         foreach ((array)$cookieItems as $materialId => $metaItems) {
-            foreach ((array)$metaItems as $meta => $amount) {
-                if ($amount > 0) {
-                    $result[trim($materialId)][trim($meta)] = $amount;
+            $material = new Material((int)$materialId);
+            if ($material->id) {
+                foreach ((array)$metaItems as $meta => $amount) {
+                    if ($amount > 0) {
+                        $result[trim($materialId)][trim($meta)] = $amount;
+                    }
                 }
             }
         }
