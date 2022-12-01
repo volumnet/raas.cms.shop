@@ -347,20 +347,22 @@ class Updater extends \RAAS\Updater
      */
     public function update20220112()
     {
-        $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
-                      DROP PRIMARY KEY";
-        $this->SQL->query($sqlQuery);
+        if (in_array(SOME::_dbprefix() . "cms_shop_orders_goods", $this->tables)) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
+                          DROP PRIMARY KEY";
+            $this->SQL->query($sqlQuery);
 
-        $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
-                    CHANGE name name VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'Name'";
-        $this->SQL->query($sqlQuery);
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
+                        CHANGE name name VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'Name'";
+            $this->SQL->query($sqlQuery);
 
-        $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
-                    CHANGE meta meta VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'Meta data'";
-        $this->SQL->query($sqlQuery);
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
+                        CHANGE meta meta VARCHAR(256) NOT NULL DEFAULT '' COMMENT 'Meta data'";
+            $this->SQL->query($sqlQuery);
 
-        $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
-                       ADD PRIMARY KEY (order_id, material_id, meta(64))";
-        $this->SQL->query($sqlQuery);
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
+                           ADD PRIMARY KEY (order_id, material_id, meta(64))";
+            $this->SQL->query($sqlQuery);
+        }
     }
 }

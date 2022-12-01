@@ -397,18 +397,21 @@ class CatalogTemplate extends MaterialTypeTemplate
         );
         shuffle($categoriesImages);
         $i = 0;
-        foreach ($result as $category) {
-            $att = Attachment::createFromFile(
-                $categoriesImages[$i % count($categoriesImages)],
-                $category->fields['image']
-            );
-            $category->fields['image']->addValue(json_encode([
-                'vis' => 1,
-                'name' => '',
-                'description' => '',
-                'attachment' => (int)$att->id
-            ]));
-            $i++;
+        $imageField = $category->fields['image'] ?: $category->fields['images'];
+        if ($imageField) {
+            foreach ($result as $category) {
+                $att = Attachment::createFromFile(
+                    $categoriesImages[$i % count($categoriesImages)],
+                    $category->fields['image']
+                );
+                $category->fields['image']->addValue(json_encode([
+                    'vis' => 1,
+                    'name' => '',
+                    'description' => '',
+                    'attachment' => (int)$att->id
+                ]));
+                $i++;
+            }
         }
         return $result;
     }
@@ -659,6 +662,7 @@ class CatalogTemplate extends MaterialTypeTemplate
             ]]);
             if ($temp) {
                 $page = $temp[0];
+                $block = $this->createBlock($page, $widget);
             } else {
                 $pages = $this->createPages($this->webmaster->Site);
                 $page = $pages['catalog'];
@@ -684,7 +688,7 @@ class CatalogTemplate extends MaterialTypeTemplate
         }
 
         if ($this->createPage) {
-            return $pages['catalog'];
+            return $page;
         }
     }
 }

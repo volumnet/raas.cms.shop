@@ -738,6 +738,14 @@ class YMLInterface extends AbstractInterface
         if (!$settings) {
             return '';
         }
+        // 2022-11-28, AVS Добавил условие для потерянных полей, где нет значения по умолчанию
+        if (isset($settings['field_id']) &&
+            is_numeric($settings['field_id']) &&
+            (!isset($settings['field']) || !$settings['field']->id) &&
+            (!isset($settings['value']) || (trim($settings['value']) === ''))
+        ) {
+            return '';
+        }
         $v = $this->getValue($material, $key, $settings);
         if ($asDescription) {
             $v = strip_tags($v);
