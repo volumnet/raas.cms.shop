@@ -27,17 +27,13 @@ if ($Set) { ?>
         <div class="brands-main__list slider__list" data-role="slider-list">
           <div class="brands-main-list slider-list slider-list_horizontal">
             <?php foreach ($Set as $item) { ?>
-                <div class="brands-main-list__item">
-                  <div class="brands-main-item">
-                    <a class="brands-main-item__image" href="<?php echo htmlspecialchars($item->url)?>">
-                      <?php if ($item->image->id) { ?>
-                          <img loading="lazy" src="/<?php echo htmlspecialchars($item->image->fileURL)?>" alt="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" title="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" />
-                      <?php } else {
-                          echo htmlspecialchars($item->name);
-                      } ?>
-                    </a>
-                  </div>
-                </div>
+                <a class="brands-main-list__item slider-list__item brands-main-item" href="<?php echo htmlspecialchars($item->url)?>">
+                  <?php if ($item->image->id) { ?>
+                      <img class="brands-main-item__image" loading="lazy" src="/<?php echo htmlspecialchars($item->image->fileURL)?>" alt="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" title="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" />
+                  <?php } else {
+                      echo htmlspecialchars($item->name);
+                  } ?>
+                </a>
             <?php } ?>
           </div>
         </div>

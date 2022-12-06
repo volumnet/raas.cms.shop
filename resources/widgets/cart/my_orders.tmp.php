@@ -46,9 +46,7 @@ use RAAS\CMS\Package;
           exit;
       }
       ?>
-      <div class="my-orders__list">
-        <my-orders-list :block-id="<?php echo (int)$Block->id?>" :initial-items="<?php echo htmlspecialchars(json_encode($ordersData))?>"></my-orders-list>
-      </div>
+      <my-orders-list class="my-orders__list" :block-id="<?php echo (int)$Block->id?>" :initial-items="<?php echo htmlspecialchars(json_encode($ordersData))?>"></my-orders-list>
       <?php
       AssetManager::requestCSS('/css/my-orders-list.css');
       AssetManager::requestJS('/js/my-orders-list.js');

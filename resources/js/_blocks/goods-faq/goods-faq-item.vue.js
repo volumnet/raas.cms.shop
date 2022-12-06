@@ -21,7 +21,7 @@ export default {
          * Устанавливает значение превышения текста
          * @param {Boolean} isOverflowed
          */
-        setOverflows: function (isOverflowed) {
+        setOverflows(isOverflowed) {
             if (!this.active) {
                 this.overflowed = isOverflowed;
             }
@@ -29,7 +29,7 @@ export default {
         /**
          * Меняет активность
          */
-        toggle: function () {
+        toggle() {
             this.active = !this.active;
         },
     },
@@ -38,7 +38,7 @@ export default {
          * Распаковка текущего экземпляра для слота
          * @return {Object}
          */
-        self: function () { 
+        self() { 
             return { ...this };
         },
     },

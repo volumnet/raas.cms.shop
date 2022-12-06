@@ -125,35 +125,37 @@ if ($Item) {
               <?php } ?>
             </div>
             <!--noindex-->
-            <div class="catalog-article__images-list">
-              <div class="catalog-article-images-list slider slider_horizontal" data-vue-role="raas-slider" data-vue-type="horizontal" data-v-bind_wrap="false" data-v-bind_autoscroll="false" data-v-slot="slider">
-                <a data-v-on_click="slider.prev()" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev slider__arrow slider__arrow_prev" data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.prevAvailable, 'slider__arrow_active': slider.prevAvailable }"></a>
-                <div class="catalog-article-images-list__inner slider__list" data-role="slider-list">
-                  <div class="catalog-article-images-list__list slider-list slider-list_horizontal">
-                    <?php foreach ($photoVideo as $i => $row) {
-                        if ($row['ytid']) {
-                            $image = 'https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg';
-                            $href = 'https://youtube.com/embed/' . $ytid;
-                        } else {
-                            $image = '/' . $row['smallURL'];
-                            $href = '/' . $row['fileURL'];
-                        }
-                        ?>
-                        <div class="catalog-article-images-list__item slider-list__item" data-role="slider-item" data-v-bind_class="{ 'catalog-article-images-list__item_active': (slider.activeFrame == <?php echo $i?>), 'slider-list__item_active': (slider.activeFrame == <?php echo $i?>) }">
-                          <a class="catalog-article-images-item<?php echo $row['ytid'] ? ' catalog-article-images-item_video' : ''?>" href="<?php echo htmlspecialchars($href)?>" data-v-on_click="vm.clickThumbnail(<?php echo (int)$i?>, $event)" data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__images">
-                            <img loading="lazy" src="<?php echo htmlspecialchars($image)?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" />
-                          </a>
-                        </div>
-                    <?php }
-                    if (!$photoVideo) { ?>
-                        <span class="catalog-article-images-list__item slider-list__item" data-role="slider-item" data-v-bind_class="{ 'catalog-article-images-list__item_active': true, 'slider-list__item_active': true }">
-                          <img loading="lazy" src="/files/cms/common/image/design/nophoto.jpg" alt="" />
-                        </span>
-                    <?php } ?>
-                  </div>
+            <div class="catalog-article__images-list catalog-article-images-list slider slider_horizontal" data-vue-role="raas-slider" data-vue-type="horizontal" data-v-bind_wrap="false" data-v-bind_autoscroll="false" data-v-slot="slider">
+              <a data-v-on_click="slider.prev()" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev slider__arrow slider__arrow_prev" data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.prevAvailable, 'slider__arrow_active': slider.prevAvailable }"></a>
+              <div class="catalog-article-images-list__inner slider__list" data-role="slider-list">
+                <div class="catalog-article-images-list__list slider-list slider-list_horizontal">
+                  <?php foreach ($photoVideo as $i => $row) {
+                      if ($row['ytid']) {
+                          $image = 'https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg';
+                          $href = 'https://youtube.com/embed/' . $ytid;
+                      } else {
+                          $image = '/' . $row['smallURL'];
+                          $href = '/' . $row['fileURL'];
+                      }
+                      ?>
+                      <a class="catalog-article-images-list__item slider-list__item catalog-article-images-item<?php echo $row['ytid'] ? ' catalog-article-images-item_video' : ''?>"
+                        href="<?php echo htmlspecialchars($href)?>"
+                        data-v-on_click="vm.clickThumbnail(<?php echo (int)$i?>, $event)"
+                        data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__images"
+                        data-role="slider-item"
+                        data-v-bind_class="{ 'catalog-article-images-list__item_active': (slider.activeFrame == <?php echo $i?>), 'slider-list__item_active': (slider.activeFrame == <?php echo $i?>) }"
+                      >
+                        <img loading="lazy" src="<?php echo htmlspecialchars($image)?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" />
+                      </a>
+                  <?php }
+                  if (!$photoVideo) { ?>
+                      <span class="catalog-article-images-list__item slider-list__item catalog-article-images-item" data-role="slider-item" data-v-bind_class="{ 'catalog-article-images-list__item_active': true, 'slider-list__item_active': true }">
+                        <img loading="lazy" src="/files/cms/common/image/design/nophoto.jpg" alt="" />
+                      </span>
+                  <?php } ?>
                 </div>
-                <a data-v-on_click="slider.next()" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next slider__arrow slider__arrow_next" data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.nextAvailable, 'slider__arrow_active': slider.nextAvailable }"></a>
               </div>
+              <a data-v-on_click="slider.next()" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next slider__arrow slider__arrow_next" data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.nextAvailable, 'slider__arrow_active': slider.nextAvailable }"></a>
             </div>
             <!--/noindex-->
           </div>
@@ -173,23 +175,15 @@ if ($Item) {
                   <meta itemprop="sku" content="<?php echo htmlspecialchars($itemData['article'])?>" />
                 </div>
               </div>
-              <div class="catalog-article__header-right">
-                <div class="catalog-article__brand">
-                  <?php if ($brand = $Item->brand) { ?>
-                      <a href="<?php echo htmlspecialchars($brand->url)?>" class="catalog-article-brand" title="<?php echo htmlspecialchars($brand->name)?>">
-                        <?php if ($brand->image->id) { ?>
-                            <div class="catalog-article-brand__image">
-                              <img src="/<?php echo htmlspecialchars($brand->image->fileURL)?>" alt="<?php echo htmlspecialchars($brand->name)?>">
-                            </div>
-                        <?php } else { ?>
-                            <div class="catalog-article-brand__name">
-                              <?php echo htmlspecialchars($brand->name)?>
-                            </div>
-                        <?php } ?>
-                      </a>
-                  <?php } ?>
-                </div>
-              </div>
+                <?php if ($brand = $Item->brand) { ?>
+                    <a href="<?php echo htmlspecialchars($brand->url)?>" class="catalog-article__header-right catalog-article__brand" title="<?php echo htmlspecialchars($brand->name)?>">
+                      <?php if ($brand->image->id) { ?>
+                          <img src="/<?php echo htmlspecialchars($brand->image->fileURL)?>" alt="<?php echo htmlspecialchars($brand->name)?>">
+                      <?php } else {
+                          echo htmlspecialchars($brand->name);
+                      } ?>
+                    </a>
+                <?php } ?>
             </div>
             <?php
 
@@ -258,7 +252,7 @@ if ($Item) {
                                 'unitCode' => $unitCode,
                             ];
                             ?>
-                            <div class="catalog-article-props-item">
+                            <div class="catalog-article-props-list__item catalog-article-props-item">
                               <span class="catalog-article-props-item__title">
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
@@ -275,7 +269,7 @@ if ($Item) {
                             $jsonLd['productID'] = $textValue;
                             $jsonLd['sku'] = $textValue;
                             ?>
-                            <div class="catalog-article-props-item">
+                            <div class="catalog-article-props-list__item catalog-article-props-item">
                               <span class="catalog-article-props-item__title">
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
@@ -291,7 +285,7 @@ if ($Item) {
                                 'name' => $textValue,
                             ];
                             ?>
-                            <div class="catalog-article-props-item">
+                            <div class="catalog-article-props-list__item catalog-article-props-item">
                               <span class="catalog-article-props-item__title">
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
@@ -310,7 +304,7 @@ if ($Item) {
                                 'value' => $textValue
                             ];
                             ?>
-                            <div class="catalog-article-props-item" itemprop="additionalProperty" itemscope itemtype="http://schema.org/PropertyValue">
+                            <div class="catalog-article-props-list__item catalog-article-props-item" itemprop="additionalProperty" itemscope itemtype="http://schema.org/PropertyValue">
                               <span class="catalog-article-props-item__title" itemprop="name">
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
@@ -325,14 +319,8 @@ if ($Item) {
                 }
             }
             if ($propsArr) { ?>
-                <div class="catalog-article__props-list">
-                  <div class="catalog-article-props-list">
-                    <?php foreach ($propsArr as $propText) { ?>
-                        <div class="catalog-article-props-list__item">
-                          <?php echo $propText?>
-                        </div>
-                    <?php } ?>
-                  </div>
+                <div class="catalog-article__props-list catalog-article-props-list">
+                  <?php echo implode(' ', $propsArr); ?>
                 </div>
             <?php } ?>
 
@@ -340,12 +328,11 @@ if ($Item) {
             <div class="catalog-article__offer" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
               <meta itemprop="sku" content="<?php echo htmlspecialchars($itemData['article'])?>" />
               <link itemprop="url" href="<?php echo htmlspecialchars($host . $itemData['url'])?>" />
+              <link itemprop="availability" href="http://schema.org/<?php echo $itemData['available'] ? 'InStock' : 'PreOrder'?>" />
               <div class="catalog-article__price-container" data-price="<?php echo (float)$itemData['price']?>">
                 <?php if ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) { ?>
-                    <span class="catalog-article__price catalog-article__price_old" data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)">
-                      <span data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount))">
-                        <?php echo Text::formatPrice((float)$itemData['price_old'])?>
-                      </span>
+                    <span class="catalog-article__price catalog-article__price_old" data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)" data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount))">
+                      <?php echo Text::formatPrice((float)$itemData['price_old'])?>
                     </span>
                 <?php } ?>
                 <span class="catalog-article__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) ? ' catalog-article__price_new' : ''?>">
@@ -361,7 +348,6 @@ if ($Item) {
                 <?php } ?>
               </div>
               <div class="catalog-article__available catalog-article__available_<?php echo $itemData['available'] ? '' : 'not-'?>available">
-                <link itemprop="availability" href="http://schema.org/<?php echo $itemData['available'] ? 'InStock' : 'PreOrder'?>" />
                 <?php echo $itemData['available'] ? AVAILABLE : AVAILABLE_CUSTOM?>
               </div>
             </div>
@@ -432,11 +418,9 @@ if ($Item) {
                     if ($files = $Item->files) { ?>
                         <div class="catalog-article-files-list">
                           <?php foreach ($files as $file) { ?>
-                              <div class="catalog-article-files-list__item">
-                                <a href="/<?php echo htmlspecialchars($file->fileURL)?>" class="catalog-article-files-item catalog-article-files-item_<?php echo mb_strtolower(pathinfo($file->fileURL, PATHINFO_EXTENSION))?>">
-                                  <?php echo htmlspecialchars($file->name ?: basename($file->fileURL))?>
-                                </a>
-                              </div>
+                              <a href="/<?php echo htmlspecialchars($file->fileURL)?>" class="catalog-article-files-list__item catalog-article-files-item catalog-article-files-item_<?php echo mb_strtolower(pathinfo($file->fileURL, PATHINFO_EXTENSION))?>">
+                                <?php echo htmlspecialchars($file->name ?: basename($file->fileURL))?>
+                              </a>
                           <?php } ?>
                         </div>
                     <?php }
@@ -560,18 +544,16 @@ if ($Item) {
                         'Block' => $Block,
                     ])?>
                   </div>
-                  <div class="catalog__list">
-                    <div class="catalog-list" data-role="loader-list" data-vue-role="catalog-list">
-                      <?php foreach ($Set as $i => $item) { ?>
-                          <div class="catalog-list__item" data-role="loader-list-item">
-                            <?php Snippet::importByURN('catalog_item')->process([
-                                'item' => $item,
-                                'page' => $Page,
-                                'position' => $i,
-                            ])?>
-                          </div>
-                      <?php } ?>
-                    </div>
+                  <div class="catalog__list catalog-list" data-role="loader-list" data-vue-role="catalog-list">
+                    <?php foreach ($Set as $i => $item) { ?>
+                        <div class="catalog-list__item" data-role="loader-list-item">
+                          <?php Snippet::importByURN('catalog_item')->process([
+                              'item' => $item,
+                              'page' => $Page,
+                              'position' => $i,
+                          ])?>
+                        </div>
+                    <?php } ?>
                   </div>
               <?php } ?>
           <?php } else { ?>

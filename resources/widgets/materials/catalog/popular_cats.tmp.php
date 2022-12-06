@@ -37,7 +37,7 @@ if ($children) { ?>
                     $page = new Page($item['page_id']);
                 }
                 ?>
-                <div class="popular-cats-list__item">
+                <div class="popular-cats-list__item slider-list__item">
                   <?php Snippet::importByURN('catalog_category')->process([
                       'page' => $page,
                   ]); ?>

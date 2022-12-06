@@ -54,71 +54,56 @@ $getField = function($row) {
   <?php
   ob_start();
   if ($order->items) { ?>
-      <div class="cart__list">
-        <div class="cart-list">
-          <div class="cart-list__header">
-            <div class="cart-list__item cart-list__item_header">
-              <div class="cart-item cart-item_header">
+      <div class="cart__list cart-list">
+        <div class="cart-list__header cart-list__item cart-list__item_header cart-item cart-item_header">
+          <div class="cart-item__title">
+            <?php echo NAME?>
+          </div>
+          <div class="cart-item__price">
+            <?php echo PRICE?>
+          </div>
+          <div class="cart-item__amount-block">
+            <?php echo AMOUNT?>
+          </div>
+          <div class="cart-item__sum">
+            <?php echo SUM?>
+          </div>
+        </div>
+        <div class="cart-list__list">
+          <?php foreach ($order->items as $item) { ?>
+              <div class="cart-list__item cart-item">
                 <div class="cart-item__image">
-                  <?php echo IMAGE?>
+                  <?php if ($item->visImages) { ?>
+                      <a <?php echo $item->url ? 'href="' . htmlspecialchars($item->url) . '" target="_blank"' : ''?>>
+                        <img loading="lazy" src="/<?php echo htmlspecialchars(addslashes($item->visImages[0]->tnURL))?>" alt="<?php echo htmlspecialchars($item->visImages[0]->name ?: $item->name)?>" target="_blank" /></a>
+                  <?php } ?>
                 </div>
                 <div class="cart-item__title">
-                  <?php echo NAME?>
+                  <a <?php echo $item->url ? 'href="' . htmlspecialchars($item->url) . '" target="_blank"' : ''?>>
+                    <?php echo htmlspecialchars($item->name)?>
+                  </a>
                 </div>
                 <div class="cart-item__price">
-                  <?php echo PRICE?>
+                  <?php echo htmlspecialchars(Text::formatPrice($item->realprice))?> ₽
                 </div>
                 <div class="cart-item__amount-block">
-                  <?php echo AMOUNT?>
+                  <?php echo (float)$item->amount?>
                 </div>
                 <div class="cart-item__sum">
-                  <?php echo SUM?>
+                  <?php echo htmlspecialchars(Text::formatPrice($item->realprice * $item->amount))?> ₽
                 </div>
               </div>
-            </div>
+          <?php } ?>
+        </div>
+        <div class="cart-list__summary cart-list__item cart-list__item_summary cart-item cart-item_summary">
+          <div class="cart-item__title">
+            <?php echo TOTAL_SUM?>:
           </div>
-          <div class="cart-list__list">
-            <?php foreach ($order->items as $item) { ?>
-                <div class="cart-list__item">
-                  <div class="cart-item">
-                    <div class="cart-item__image">
-                      <?php if ($item->visImages) { ?>
-                          <a <?php echo $item->url ? 'href="' . htmlspecialchars($item->url) . '" target="_blank"' : ''?>>
-                            <img loading="lazy" src="/<?php echo htmlspecialchars(addslashes($item->visImages[0]->tnURL))?>" alt="<?php echo htmlspecialchars($item->visImages[0]->name ?: $item->name)?>" target="_blank" /></a>
-                      <?php } ?>
-                    </div>
-                    <div class="cart-item__title">
-                      <a <?php echo $item->url ? 'href="' . htmlspecialchars($item->url) . '" target="_blank"' : ''?>>
-                        <?php echo htmlspecialchars($item->name)?>
-                      </a>
-                    </div>
-                    <div class="cart-item__price">
-                      <?php echo htmlspecialchars(Text::formatPrice($item->realprice))?> ₽
-                    </div>
-                    <div class="cart-item__amount-block">
-                      <?php echo (float)$item->amount?>
-                    </div>
-                    <div class="cart-item__sum">
-                      <?php echo htmlspecialchars(Text::formatPrice($item->realprice * $item->amount))?> ₽
-                    </div>
-                  </div>
-                </div>
-            <?php } ?>
+          <div class="cart-item__amount-block">
+            <?php echo htmlspecialchars($order->count)?>
           </div>
-          <div class="cart-list__summary">
-            <div class="cart-list__item cart-list__item_summary">
-              <div class="cart-item cart-item_summary">
-                <div class="cart-item__title">
-                  <?php echo TOTAL_SUM?>:
-                </div>
-                <div class="cart-item__amount-block">
-                  <?php echo htmlspecialchars($order->count)?>
-                </div>
-                <div class="cart-item__sum">
-                   <?php echo htmlspecialchars(Text::formatPrice($order->sum))?> ₽
-                </div>
-              </div>
-            </div>
+          <div class="cart-item__sum">
+             <?php echo htmlspecialchars(Text::formatPrice($order->sum))?> ₽
           </div>
         </div>
       </div>
@@ -126,42 +111,40 @@ $getField = function($row) {
   $itemsData = ob_get_clean();
   ob_start();
   ?>
-  <div class="cart__form">
-    <div class="cart-form cart-form_proceed form-horizontal">
-      <?php if ($showPaymentStatus) { ?>
-          <div class="form-group">
-            <label class="control-label col-sm-3 col-md-2">
-              <?php echo STATUS?>:
-            </label>
-            <div class="col-sm-9 col-md-4">
-              <div class="cart-form__self-status">
-                <?php echo htmlspecialchars($order->status->name ?: ORDER_STATUS_NEW)?>
-              </div>
-              <?php if ($order->paid) { ?>
-                  <div class="cart-form__payment-status cart-form__payment-status_paid">
-                    <?php echo PAYMENT_PAID?>
-                  </div>
-              <?php } else { ?>
-                  <div class="cart-form__payment-status cart-form__payment-status_not-paid">
-                    <?php echo PAYMENT_NOT_PAID?>
-                  </div>
-              <?php } ?>
+  <div class="cart__form cart-form cart-form_proceed form-horizontal">
+    <?php if ($showPaymentStatus) { ?>
+        <div class="form-group">
+          <label class="control-label col-sm-3 col-md-2">
+            <?php echo STATUS?>:
+          </label>
+          <div class="col-sm-9 col-md-4">
+            <div class="cart-form__self-status">
+              <?php echo htmlspecialchars($order->status->name ?: ORDER_STATUS_NEW)?>
             </div>
-          </div>
-      <?php } ?>
-      <?php foreach ($order->fields as $fieldURN => $field) {
-          if (!in_array($fieldURN, []) && ($value = $getField($field))) { ?>
-              <div class="form-group">
-                <label class="control-label col-sm-4 col-md-3">
-                  <?php echo htmlspecialchars($field->name)?>:
-                </label>
-                <div class="col-sm-8 col-md-4">
-                  <?php echo $value?>
+            <?php if ($order->paid) { ?>
+                <div class="cart-form__payment-status cart-form__payment-status_paid">
+                  <?php echo PAYMENT_PAID?>
                 </div>
+            <?php } else { ?>
+                <div class="cart-form__payment-status cart-form__payment-status_not-paid">
+                  <?php echo PAYMENT_NOT_PAID?>
+                </div>
+            <?php } ?>
+          </div>
+        </div>
+    <?php } ?>
+    <?php foreach ($order->fields as $fieldURN => $field) {
+        if (!in_array($fieldURN, []) && ($value = $getField($field))) { ?>
+            <div class="form-group">
+              <label class="control-label col-sm-4 col-md-3">
+                <?php echo htmlspecialchars($field->name)?>:
+              </label>
+              <div class="col-sm-8 col-md-4">
+                <?php echo $value?>
               </div>
-          <?php } ?>
-      <?php } ?>
-    </div>
+            </div>
+        <?php } ?>
+    <?php } ?>
   </div>
   <?php
   $fieldsData = ob_get_clean();

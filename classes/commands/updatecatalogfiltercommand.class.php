@@ -4,7 +4,7 @@
  */
 namespace RAAS\CMS\Shop;
 
-use RAAS\LockCommand;
+use RAAS\Command;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 use RAAS\CMS\Material;
@@ -13,7 +13,7 @@ use RAAS\CMS\Material_Type;
 /**
  * Команда обновления фильтра каталога
  */
-class UpdateCatalogFilterCommand extends LockCommand
+class UpdateCatalogFilterCommand extends Command
 {
     /**
      * Выполнение команды
@@ -21,6 +21,7 @@ class UpdateCatalogFilterCommand extends LockCommand
      * @param bool $withChildrenGoods с дочерними товарами
      * @param bool $forceUpdate Принудительно выполнить обновление, даже если материалы не были обновлены
      * @param bool $forceLockUpdate Принудительно выполнить обновление, даже если есть параллельный процесс
+     *      {@deprecated больше не используется}
      */
     public function process(
         $materialTypeURN = 'catalog',
@@ -29,9 +30,6 @@ class UpdateCatalogFilterCommand extends LockCommand
         $forceLockUpdate = false
     ) {
         $t = $this;
-        if (!$forceLockUpdate && $this->checkLock()) {
-            return;
-        }
         $materialType = Material_Type::importByURN($materialTypeURN);
         if ($materialType->id) {
             $catalogFilter = new CatalogFilter($materialType, $withChildrenGoods, []);
@@ -52,12 +50,10 @@ class UpdateCatalogFilterCommand extends LockCommand
                     }
                 }
             }
-            $this->lock();
             $catalogFilter->build();
             $catalogFilter->save();
             Package::i()->clearCache(true);
             $this->controller->doLog('Completed');
         }
-        $this->unlock();
     }
 }

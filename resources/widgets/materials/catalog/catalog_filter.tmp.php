@@ -157,114 +157,102 @@ $static = (bool)(int)$Block->additionalParams['static'];
       </div>
     </div>
     <form action="" method="get" class="catalog-filter__inner">
-      <div class="catalog-filter__list">
-        <div class="catalog-filter-properties-list" data-vue-role="catalog-filter-properties-list" data-v-bind_form-data="vm.formData" data-v-bind_filter="vm.filter" data-v-bind_properties="vm.properties" data-v-bind_multiple="vm.multiple" data-v-on_input="vm.change($event)">
-          <?php if ($static) {
-              foreach ($availableProperties as $propId => $values) {
-                  if (count((array)$values) <= 1) {
-                      continue;
-                  }
-                  $property = $catalog->catalogFilter->properties[$propId];
-                  ?>
-                  <div class="catalog-filter-properties-list__item">
-                    <div class="catalog-filter-property catalog-filter-property_active">
-                      <div class="catalog-filter-property__title">
-                        <?php echo htmlspecialchars($property->name)?>
-                      </div>
-                      <div class="catalog-filter-property__inner">
-                        <?php if (($property->datatype == 'number') || in_array($property->urn, [])) {
-                            $valueKeys = array_keys($values);
-                            $valueKeys = array_filter($valueKeys);
-                            $min = $max = 0;
-                            $step = 1;
-                            if ($valueKeys) {
-                                $min = min($valueKeys);
-                                $max = max($valueKeys);
-                                $minRealStep = null;
-                                for ($i = 0; $i < count($valueKeys) - 1; $i++) {
-                                    $delta = $valueKeys[$i + 1] - $valueKeys[$i];
-                                    if (($delta > 0) && (!$minRealStep || ($delta < $minRealStep))) {
-                                        $minRealStep = $delta;
-                                    }
-                                }
-                                $step = pow(10, floor(log10($minRealStep)));
-                            }
-                            ?>
-                            <div class="catalog-filter-range">
-                              <div class="catalog-filter-range__controls">
-                                <div class="catalog-filter-range__control-label"><?php echo FROM?></div>
-                                <div class="catalog-filter-range__control">
-                                  <input type="number" class="form-control" name="<?php echo htmlspecialchars($property->urn . '_from')?>" min="<?php echo $min?>" max="<?php echo $max?>" step="<?php echo $step?>" placeholder="<?php echo $min?>" value="<?php echo htmlspecialchars($DATA[$property->urn . '_from'])?>" />
-                                </div>
-                                <div class="catalog-filter-range__control-label"><?php echo TO?></div>
-                                <div class="catalog-filter-range__control">
-                                  <input type="number" class="form-control" name="<?php echo htmlspecialchars($property->urn . '_to')?>" min="<?php echo $min?>" max="<?php echo $max?>" step="<?php echo $step?>" placeholder="<?php echo $min?>" value="<?php echo htmlspecialchars($DATA[$property->urn . '_to'])?>" />
-                                </div>
-                              </div>
-                            </div>
-                        <?php } elseif ($multiple = true) { // Выбор множественного значения ?>
-                            <div class="catalog-filter-property__list">
-                              <div class="catalog-filter-property-values-list">
-                                <?php
-                                if (($property->datatype == 'checkbox') && !$property->multiple) {
-                                    $values = ['' => [
-                                        'enabled' => true,
-                                        'value' => '',
-                                        'doRich' => DOESNT_MATTER,
-                                    ]] + $values;
-                                    $values = array_map(function ($x) {
-                                        if (trim($x['value']) === '1') {
-                                            $x['doRich'] = _YES;
-                                        } elseif (trim($x['value']) === '0') {
-                                            $x['doRich'] = _NO;
-                                        }
-                                        return $x;
-                                    }, $values);
-                                    for ($i = 1; $i >= 0; $i--) {
-                                        if (!isset($values[$i])) {
-                                            $values[trim($i)] = [
-                                                'enabled' => false,
-                                                'value' => trim($i),
-                                                'doRich' => $i ? _YES : _NO,
-                                                'checked' => false,
-                                            ];
-                                        }
-                                    }
-                                }
-                                foreach ($values as $key => $value) {
-                                    if (trim($value['doRich']) && trim($value['value'])) { ?>
-                                        <div class="catalog-filter-property-values-list__item">
-                                          <label class="catalog-filter-property-value<?php echo !$value['enabled'] ? ' catalog-filter-property-value_disabled' : ''?>">
-                                            <input type="<?php echo (($property->datatype == 'checkbox') && !$property->multiple) ? 'radio' : 'checkbox'?>" class="catalog-filter-property-value__input" name="<?php echo htmlspecialchars($property->urn) . (($property->datatype == 'checkbox' && !$property->multiple) ? '' : '[]')?>" value="<?php echo htmlspecialchars($value['value'])?>"<?php echo ($value['checked'] ? ' checked="checked"' : '') . (!$value['enabled'] ? ' disabled="disabled"' : '')?>>
-                                            <a href="<?php echo htmlspecialchars($catalog->catalogFilter->getCanonicalURLFromFilter($catalog->catalogFilter->filter, $property->urn, $value['value']))?>" rel="nofollow">
-                                              <?php echo htmlspecialchars($value['doRich'])?>
-                                            </a>
-                                          </label>
-                                        </div>
-                                    <?php }
-                                } ?>
-                              </div>
-                            </div>
-                        <?php } else { ?>
-                            <select class="catalog-filter-property-selector form-control" name="<?php echo htmlspecialchars($property->urn)?>">
-                              <option value=""<?php echo !$DATA[$property->urn] ? ' selected="selected"' : ''?>>
-                                <?php echo DOESNT_MATTER?>
-                              </option>
-                              <?php foreach ($values as $key => $value) {
-                                  if (!$value || $value['enabled']) { ?>
-                                      <option value="<?php echo htmlspecialchars($value['doRich'])?>"<?php echo $value['checked'] ? ' selected="selected"' : ''?>>
-                                        <?php echo htmlspecialchars($value['doRich'])?>
-                                      </option>
-                                  <?php }
-                              } ?>
-                            </select>
-                        <?php } ?>
-                      </div>
-                    </div>
+      <div class="catalog-filter__listcatalog-filter-properties-list" data-vue-role="catalog-filter-properties-list" data-v-bind_form-data="vm.formData" data-v-bind_filter="vm.filter" data-v-bind_properties="vm.properties" data-v-bind_multiple="vm.multiple" data-v-on_input="vm.change($event)">
+        <?php if ($static) {
+            foreach ($availableProperties as $propId => $values) {
+                if (count((array)$values) <= 1) {
+                    continue;
+                }
+                $property = $catalog->catalogFilter->properties[$propId];
+                ?>
+                <div class="catalog-filter-properties-list__itemcatalog-filter-property catalog-filter-property_active">
+                  <div class="catalog-filter-property__title">
+                    <?php echo htmlspecialchars($property->name)?>
                   </div>
-              <?php }
-          } ?>
-        </div>
+                  <div class="catalog-filter-property__inner">
+                    <?php if (($property->datatype == 'number') || in_array($property->urn, [])) {
+                        $valueKeys = array_keys($values);
+                        $valueKeys = array_filter($valueKeys);
+                        $min = $max = 0;
+                        $step = 1;
+                        if ($valueKeys) {
+                            $min = min($valueKeys);
+                            $max = max($valueKeys);
+                            $minRealStep = null;
+                            for ($i = 0; $i < count($valueKeys) - 1; $i++) {
+                                $delta = $valueKeys[$i + 1] - $valueKeys[$i];
+                                if (($delta > 0) && (!$minRealStep || ($delta < $minRealStep))) {
+                                    $minRealStep = $delta;
+                                }
+                            }
+                            $step = pow(10, floor(log10($minRealStep)));
+                        }
+                        ?>
+                        <div class="catalog-filter-range">
+                          <div class="catalog-filter-range__controls">
+                            <?php echo FROM?>
+                            <input type="number" class="catalog-filter-range__control form-control" name="<?php echo htmlspecialchars($property->urn . '_from')?>" min="<?php echo $min?>" max="<?php echo $max?>" step="<?php echo $step?>" placeholder="<?php echo $min?>" value="<?php echo htmlspecialchars($DATA[$property->urn . '_from'])?>" />
+                            <?php echo TO?>
+                            <input type="number" class="catalog-filter-range__control form-control" name="<?php echo htmlspecialchars($property->urn . '_to')?>" min="<?php echo $min?>" max="<?php echo $max?>" step="<?php echo $step?>" placeholder="<?php echo $min?>" value="<?php echo htmlspecialchars($DATA[$property->urn . '_to'])?>" />
+                          </div>
+                        </div>
+                    <?php } elseif ($multiple = true) { // Выбор множественного значения ?>
+                        <div class="catalog-filter-property__list catalog-filter-property-values-list">
+                          <?php
+                          if (($property->datatype == 'checkbox') && !$property->multiple) {
+                              $values = ['' => [
+                                  'enabled' => true,
+                                  'value' => '',
+                                  'doRich' => DOESNT_MATTER,
+                              ]] + $values;
+                              $values = array_map(function ($x) {
+                                  if (trim($x['value']) === '1') {
+                                      $x['doRich'] = _YES;
+                                  } elseif (trim($x['value']) === '0') {
+                                      $x['doRich'] = _NO;
+                                  }
+                                  return $x;
+                              }, $values);
+                              for ($i = 1; $i >= 0; $i--) {
+                                  if (!isset($values[$i])) {
+                                      $values[trim($i)] = [
+                                          'enabled' => false,
+                                          'value' => trim($i),
+                                          'doRich' => $i ? _YES : _NO,
+                                          'checked' => false,
+                                      ];
+                                  }
+                              }
+                          }
+                          foreach ($values as $key => $value) {
+                              if (trim($value['doRich']) && trim($value['value'])) { ?>
+                                <label class="catalog-filter-property-values-list__item catalog-filter-property-value<?php echo !$value['enabled'] ? ' catalog-filter-property-value_disabled' : ''?>">
+                                  <input type="<?php echo (($property->datatype == 'checkbox') && !$property->multiple) ? 'radio' : 'checkbox'?>" class="catalog-filter-property-value__input" name="<?php echo htmlspecialchars($property->urn) . (($property->datatype == 'checkbox' && !$property->multiple) ? '' : '[]')?>" value="<?php echo htmlspecialchars($value['value'])?>"<?php echo ($value['checked'] ? ' checked="checked"' : '') . (!$value['enabled'] ? ' disabled="disabled"' : '')?>>
+                                  <a href="<?php echo htmlspecialchars($catalog->catalogFilter->getCanonicalURLFromFilter($catalog->catalogFilter->filter, $property->urn, $value['value']))?>" rel="nofollow">
+                                    <?php echo htmlspecialchars($value['doRich'])?>
+                                  </a>
+                                </label>
+                              <?php }
+                          } ?>
+                        </div>
+                    <?php } else { ?>
+                        <select class="catalog-filter-property-selector form-control" name="<?php echo htmlspecialchars($property->urn)?>">
+                          <option value=""<?php echo !$DATA[$property->urn] ? ' selected="selected"' : ''?>>
+                            <?php echo DOESNT_MATTER?>
+                          </option>
+                          <?php foreach ($values as $key => $value) {
+                              if (!$value || $value['enabled']) { ?>
+                                  <option value="<?php echo htmlspecialchars($value['doRich'])?>"<?php echo $value['checked'] ? ' selected="selected"' : ''?>>
+                                    <?php echo htmlspecialchars($value['doRich'])?>
+                                  </option>
+                              <?php }
+                          } ?>
+                        </select>
+                    <?php } ?>
+                  </div>
+                </div>
+            <?php }
+        } ?>
       </div>
       <div class="catalog-filter-preview-marker" data-vue-role="catalog-filter-preview-marker" data-v-bind_counter="vm.counter" data-v-bind_active="!!vm.previewTimeoutId" data-v-bind_last-active-element="vm.lastActiveElement" data-v-bind_float="vm.floatingMarker" data-v-on_submit="vm.submit()">
         <?php if ($static) { ?>
@@ -273,12 +261,10 @@ $static = (bool)(int)$Block->additionalParams['static'];
               <span class="catalog-filter-preview-marker__counter">
                 <?php echo (int)$result['counter']?>
               </span>
-              <span class="catalog-filter-preview-marker__items-text">
-                <?php echo htmlspecialchars(Text::numTxt(
-                    (int)$result['counter'],
-                    [FOUND_0_ITEMS, FOUND_1_ITEM, FOUND_2_ITEMS]
-                ))?>
-              </span>
+              <?php echo htmlspecialchars(Text::numTxt(
+                  (int)$result['counter'],
+                  [FOUND_0_ITEMS, FOUND_1_ITEM, FOUND_2_ITEMS]
+              ))?>
             </span>
         <?php } ?>
       </div>

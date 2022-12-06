@@ -4,7 +4,7 @@
  */
 namespace RAAS\CMS\Shop;
 
-use RAAS\LockCommand;
+use RAAS\Command;
 use SOME\EventProcessor;
 use RAAS\CMS\Page;
 use RAAS\CMS\Material;
@@ -12,17 +12,16 @@ use RAAS\CMS\Material;
 /**
  * Команда обновления файла Яндекс-Маркета
  */
-class UpdateYMLCommand extends LockCommand
+class UpdateYMLCommand extends Command
 {
     /**
      * Выполнение команды
      * @param string|null $ymlPageURL URL страницы Яндекс.Маркета
      * @param string $outputFile Файл для вывода
      * @param bool $https Включен ли HTTPS
-     * @param bool $forceUpdate Принудительно выполнить обновление,
-     *                          даже если материалы не были обновлены
-     * @param bool $forceLockUpdate Принудительно выполнить обновление,
-     *                              даже если есть параллельный процесс
+     * @param bool $forceUpdate Принудительно выполнить обновление, даже если материалы не были обновлены
+     * @param bool $forceLockUpdate Принудительно выполнить обновление, даже если есть параллельный процесс
+     *      {@deprecated больше не используется}
      * @param int $limit Лимит обновляемых товаров (для отладки)
      */
     public function process(
@@ -34,9 +33,6 @@ class UpdateYMLCommand extends LockCommand
         $limit = 0
     ) {
         $t = $this;
-        if (!$forceLockUpdate && $this->checkLock()) {
-            return;
-        }
         if (!$forceUpdate) {
             $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(last_modified))
                            FROM " . Material::_tablename()
@@ -56,7 +52,6 @@ class UpdateYMLCommand extends LockCommand
                 }
             }
         }
-        $this->lock();
         $typesize = 0;
         $i = 0;
         EventProcessor::on(
@@ -114,6 +109,5 @@ class UpdateYMLCommand extends LockCommand
         } else {
             $this->controller->doLog('Yandex Market file not found');
         }
-        $this->unlock();
     }
 }

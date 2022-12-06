@@ -128,7 +128,7 @@ export default {
             let result = {
                 items: [Object.assign({}, this.actualItem, { amount })],
                 title: this.translations[titleURN + suffix],
-                href: '/cart/', 
+                href: '/' + cart.id + '/', 
                 submitTitle: this.translations['GO_TO' + suffix], 
                 dismissTitle: this.translations.CONTINUE_SHOPPING,
             };

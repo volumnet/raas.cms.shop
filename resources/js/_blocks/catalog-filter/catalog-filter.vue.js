@@ -93,7 +93,7 @@ export default {
             default: 3000,
         },
     },
-    data: function () {
+    data() {
         let result = {
             timeoutId: null, // ID# таймаута
             lastActiveElement: null, // Последний активный элемент (для выравнивания маркера)
@@ -113,7 +113,7 @@ export default {
         }
         return result;
     },
-    mounted: function () {
+    mounted() {
         window.setTimeout(() => {
             this.fixHtml();
         }, 0)
@@ -146,6 +146,9 @@ export default {
                     return false;
                 });
             }
+            if (this.properties.length) {
+                $(document).trigger('raas.shop.displayfiltertrigger');
+            }
         }, 0); // Задержка чтобы успел инициализироваться window.app
         // 2021-10-05, AVS: добавили условие чтобы лишний раз 
         // не обновлялось при статическом фильтре
@@ -157,7 +160,7 @@ export default {
         /**
          * Перемещает блок для мобильной версии (поскольку левая колонка скрыта)
          */
-        fixHtml: function () {
+        fixHtml() {
             if (window.app.windowWidth >= window.app.mediaTypes.lg) {
                 if (!$(this.$el).closest('.catalog-filter__outer').length) {
                     $(this.$el).appendTo('.catalog-filter__outer');
@@ -169,26 +172,26 @@ export default {
         /**
          * Открывает фильтр
          */
-        open: function () {
+        open() {
             this.isActive = true;
         },
         /**
          * Закрывает фильтр
          */
-        close: function () {
+        close() {
             this.isActive = false;
         },
         /**
          * Переключает видимость фильтра
          */
-        toggle: function () {
+        toggle() {
             this.isActive = !this.isActive;
         },
         /**
          * Изменение данных фильтра
          * @param {Event} event Событие, которое вызвало изменение данных
          */
-        change: function (event) {
+        change(event) {
             if (event.target) {
                 this.lastActiveElement = event.target;
             }
@@ -207,7 +210,7 @@ export default {
          * Получение URL-параметров формы
          * @return {String}
          */
-        getFormUrl: function () {
+        getFormUrl() {
             // 2021-10-05, AVS: убрали всё лишнее, оставили только updateQuery
             // let query = window.queryString.parse(
             //     document.location.search, 
@@ -241,7 +244,7 @@ export default {
          * Получение URL для предпросмотра
          * @return {String}
          */
-        getPreviewUrl: function () {
+        getPreviewUrl() {
             let url = this.ajaxPreviewUrl
                     + '?id=' + this.catalogId
                     + '&block_id=' + this.blockId
@@ -253,7 +256,7 @@ export default {
          * Получение URL для обновления
          * @return {String}
          */
-        getRefreshUrl: function () {
+        getRefreshUrl() {
             let url = this.ajaxPreviewUrl + document.location.search;
             url += (/\?/.test(url) ? '&' : '?')
                 +  'id=' + this.catalogId +
@@ -264,7 +267,7 @@ export default {
         /**
          * Предпросмотр
          */
-        preview: function () {
+        preview() {
             let url = this.getPreviewUrl();
             $.getJSON(url, (result) => {
                 this.update(result);
@@ -284,7 +287,7 @@ export default {
         /**
          * Обновление (сброс)
          */
-        refresh: function () {
+        refresh() {
             let url = this.getRefreshUrl();
             $.getJSON(url, this.update.bind(this));
         },
@@ -293,7 +296,7 @@ export default {
          * Обновление фильтра входящими данными
          * @param {Object} result Входящие данные
          */
-        update: function (result) {
+        update(result) {
             this.formData = result.formData;
             this.filter = result.filter;
             this.properties = result.properties;
@@ -307,7 +310,7 @@ export default {
          * Применение фильтра
          * @param {Event} event Событие, которое вызвало изменение данных
          */
-        submit: function (event) {
+        submit(event) {
             let url = document.location.pathname + '?' + this.getFormUrl();
             $(document).trigger('raas.shop.catalogupdaterequest', url)
             if (event) {
@@ -321,7 +324,7 @@ export default {
          * Распаковка текущего экземпляра для слота
          * @return {Object}
          */
-        self: function () { 
+        self() { 
             return { ...this };
         },
     },

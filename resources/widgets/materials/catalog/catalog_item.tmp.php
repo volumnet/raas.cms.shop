@@ -90,42 +90,32 @@ if ($propsCache) {
   </div>
   <div class="catalog-item__text">
     <div class="catalog-item__text-inner">
-      <div class="catalog-item__title">
-        <a href="<?php echo $itemData['url']?>">
-          <?php echo htmlspecialchars($itemData['name'])?>
-        </a>
-      </div>
+      <a class="catalog-item__title" href="<?php echo $itemData['url']?>">
+        <?php echo htmlspecialchars($itemData['name'])?>
+      </a>
       <?php if ($propsTable) { ?>
-          <div class="catalog-item__props">
-            <div class="catalog-item-props-list">
-              <?php foreach ($propsTable as $propRow) { ?>
-                  <div class="catalog-item-props-list__item">
-                    <div class="catalog-item-props-item">
-                      <span class="catalog-item-props-item__title">
-                        <?php echo htmlspecialchars($propRow['name'])?>:
-                      </span>
-                      <span class="catalog-item-props-item__value">
-                        <?php echo htmlspecialchars($propRow['value'])?>
-                      </span>
-                    </div>
-                  </div>
-              <?php } ?>
-            </div>
+          <div class="catalog-item__props catalog-item-props-list">
+            <?php foreach ($propsTable as $propRow) { ?>
+                <div class="catalog-item-props-list__item catalog-item-props-item">
+                  <span class="catalog-item-props-item__title">
+                    <?php echo htmlspecialchars($propRow['name'])?>:
+                  </span>
+                  <span class="catalog-item-props-item__value">
+                    <?php echo htmlspecialchars($propRow['value'])?>
+                  </span>
+                </div>
+            <?php } ?>
           </div>
       <?php } ?>
     </div>
     <div class="catalog-item__offer">
       <div class="catalog-item__price-container">
-        <span class="catalog-item__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) ? ' catalog-item__price_new' : ''?>">
-          <span data-v-html="vm.formatPrice(vm.item.price * Math.max(vm.item.min || 1, vm.amount))">
-            <?php echo Text::formatPrice((float)$itemData['price'])?>
-          </span> ₽
+        <span class="catalog-item__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) ? ' catalog-item__price_new' : ''?>"  data-v-html="vm.formatPrice(vm.item.price * Math.max(vm.item.min || 1, vm.amount)) + ' ₽'">
+          <?php echo Text::formatPrice((float)$itemData['price'])?> ₽
         </span>
-        <?php if ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) { ?>
-            <span class="catalog-item__price catalog-item__price_old" data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)">
-              <span data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount))">
-                <?php echo Text::formatPrice((float)$itemData['price_old'])?>
-              </span> ₽
+        <?php if ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) { ?>
+            <span class="catalog-item__price catalog-item__price_old" data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)" data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount)) + ' ₽'">
+              <?php echo Text::formatPrice((float)$itemData['price_old'])?> ₽
             </span>
         <?php } ?>
         <?php if ($itemData['unit'] && !stristr($itemData['unit'], 'шт')) { ?>

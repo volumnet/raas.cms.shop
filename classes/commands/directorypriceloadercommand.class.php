@@ -5,7 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
-use RAAS\LockCommand;
+use RAAS\Command;
 use SOME\EventProcessor;
 use RAAS\CMS\Page;
 use RAAS\CMS\Material;
@@ -13,23 +13,18 @@ use RAAS\CMS\Material;
 /**
  * Команда загрузки прайсов из папки
  */
-class DirectoryPriceLoaderCommand extends LockCommand
+class DirectoryPriceLoaderCommand extends Command
 {
     /**
      * Выполнение команды
      * @param string $dir Директория, из которой берем файлы
-     *                    Файлы должны быть названы по URN загрузчика с любым
-     *                    из доступных расширений
-     *                    (относительно корня приложения)
-     * @param bool $forceLockUpdate Принудительно выполнить обновление,
-     *                              даже если есть параллельный процесс
+     *     Файлы должны быть названы по URN загрузчика с любым из доступных расширений (относительно корня приложения)
+     * @param bool $forceLockUpdate Принудительно выполнить обновление, даже если есть параллельный процесс
+     *      {@deprecated больше не используется}
      */
     public function process($dir = '', $forceLockUpdate = false)
     {
         $t = $this;
-        if (!$forceLockUpdate && $this->checkLock()) {
-            return;
-        }
         if (!$dir) {
             $this->controller->doLog('Directory is not set');
             return;
@@ -84,7 +79,6 @@ class DirectoryPriceLoaderCommand extends LockCommand
                 $this->controller->doLog('Data parsed');
             }
         );
-        $this->lock();
         $_SERVER['REQUEST_METHOD'] = 'POST'; // Для интерфейса загрузчиков
         foreach ($files as $file) {
             $priceloaderURN = pathinfo($file, PATHINFO_FILENAME);
@@ -99,6 +93,5 @@ class DirectoryPriceLoaderCommand extends LockCommand
             $this->controller->doLog('Priceloader "' . $priceloaderURN . '" finished');
             unlink($file);
         }
-        $this->unlock();
     }
 }
