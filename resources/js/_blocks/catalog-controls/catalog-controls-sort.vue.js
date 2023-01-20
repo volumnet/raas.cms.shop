@@ -24,13 +24,13 @@ export default {
             type: String,
         },
     },
-    data: function () {
+    data() {
         let result = {
             menuActive: false, // Меню раскрыто
         };
         return result;
     },
-    mounted: function () {
+    mounted() {
         $('body').on('click', () => {
             this.menuActive = false;
         });
@@ -47,7 +47,7 @@ export default {
          *     order: 'asc'|'desc'|null Направление сортировки
          * }></code></pre>
          */
-        getVariantURNParams: function (urn, useAscAsDefault = false) {
+        getVariantURNParams(urn, useAscAsDefault = false) {
             let result = {};
             let sortOrder = urn.split(':');
             result.sort = sortOrder[0];
@@ -71,7 +71,7 @@ export default {
          *     order: 'asc'|'desc'|null Направление сортировки
          * }></code></pre>
          */
-        getVariantParams: function (variant, useAscAsDefault = false) {
+        getVariantParams(variant, useAscAsDefault = false) {
             let result = Object.assign(
                 {}, 
                 variant, 
@@ -85,7 +85,7 @@ export default {
          * Аналог this для привязки к слоту
          * @return {Object}
          */
-        self: function () {
+        self() {
             return { ...this };
         },
         /**
@@ -96,7 +96,7 @@ export default {
          *     name: String Наименование варианта
          * }></code></pre>
          */
-        sort: function () {
+        sort() {
             if (this.source.length) {
                 for (let variant of this.source) {
                     if (variant.urn == this.value) {

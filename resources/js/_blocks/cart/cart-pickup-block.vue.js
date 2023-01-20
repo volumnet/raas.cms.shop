@@ -1,7 +1,10 @@
+import CartAdditionalMixin from './cart-additional-mixin.vue.js';
+
 /**
  * Компонент блока самовывоза
  */
 export default {
+    mixins: [CartAdditionalMixin],
     props: {
         /**
          * Способы получения 

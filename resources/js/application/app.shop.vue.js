@@ -39,9 +39,11 @@ export default {
             if (!confirmText) {
                 confirmText = this.translations.CART_DELETE_CONFIRM;
             }
-            if (await this.confirm(confirmText)) {
-                cart.delete(item);
-            }
+            try {
+                if (await this.confirm(confirmText)) {
+                    cart.delete(item);
+                }
+            } catch (e) {}
         },
         /**
          * Запрос на очистку корзины
@@ -52,9 +54,11 @@ export default {
             if (!confirmText) {
                 confirmText = this.translations.ARE_YOU_SURE_TO_CLEAR_CART;
             }
-            if (await this.confirm(confirmText)) {
-                cart.clear();
-            }
+            try {
+                if (await this.confirm(confirmText)) {
+                    cart.clear();
+                }
+            } catch (e) {}
         },
     },
     computed: {

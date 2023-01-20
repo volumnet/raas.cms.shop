@@ -19,30 +19,7 @@ export default {
             }
         }
         $(document).on('raas.shop.ecommerce', (e, data) => {
-            let actionData = {
-                products: data.products || []
-            };
-            if ((data.action == 'purchase') && data.orderId) {
-                actionData.actionField = {
-                    id: data.orderId,
-                };
-                if (this.couponId) {
-                    actionData.actionField.coupon = this.couponId;
-                }
-                if (this.purchaseGoalId) {
-                    actionData.actionField.goal_id = this.purchaseGoalId;
-                }
-            }
-            let eCommerceData = {
-                ecommerce: {
-                    currencyCode: this.currencyCode
-                }
-            };
-            eCommerceData.ecommerce[data.action] = actionData;
-
-            let dataLayer = (window.dataLayer || []);
-            dataLayer.push(eCommerceData);
-            console.log(eCommerceData, window.dataLayer);
+            this.cart.eCommerce.trigger(data);
         });
-    }
+    },
 }

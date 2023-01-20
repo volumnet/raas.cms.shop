@@ -93,25 +93,44 @@ class CartInterface extends FormInterface
             case 'add':
             case 'reduce':
             case 'delete':
-                $id = isset($this->get['id']) ? $this->get['id'] : '';
-                $material = new Material((int)$id);
-                $meta = isset($this->get['meta']) ? $this->get['meta'] : '';
-                $amount = 0;
-                if (($action != 'delete') && isset($this->get['amount'])) {
-                    $amount = (int)$this->get['amount'];
-                }
-                if ($material->id) {
-                    switch ($action) {
-                        case 'set':
-                        case 'delete':
-                            $cart->set($material, $amount, $meta);
-                            break;
-                        case 'add':
-                            $cart->add($material, $amount ?: 1, $meta);
-                            break;
-                        case 'reduce':
-                            $cart->reduce($material, $amount ?: 1, $meta);
-                            break;
+                if (isset($this->get['id'])) {
+                    $items = [];
+                    if (is_array($this->get['id'])) {
+                        foreach ($this->get['id'] as $idMeta => $amount) {
+                            list($id, $meta) = explode('_', $idMeta);
+                            $id = (int)$id;
+                            $material = new Material((int)$id);
+                            $amount = (int)$amount;
+                            if ($action == 'delete') {
+                                $amount = 0;
+                            }
+                            $items[] = ['material' => $material, 'amount' => $amount, 'meta' => $meta];
+                        }
+                    } else {
+                        $id = isset($this->get['id']) ? (int)$this->get['id'] : 0;
+                        $material = new Material((int)$id);
+                        $meta = isset($this->get['meta']) ? $this->get['meta'] : '';
+                        $amount = 0;
+                        if (($action != 'delete') && isset($this->get['amount'])) {
+                            $amount = (int)$this->get['amount'];
+                        }
+                        $items[] = ['material' => $material, 'amount' => $amount, 'meta' => $meta];
+                    }
+                    foreach ($items as $item) {
+                        if ($item['material']->id) {
+                            switch ($action) {
+                                case 'set':
+                                case 'delete':
+                                    $cart->set($item['material'], $item['amount'], $item['meta']);
+                                    break;
+                                case 'add':
+                                    $cart->add($item['material'], $item['amount'] ?: 1, $item['meta']);
+                                    break;
+                                case 'reduce':
+                                    $cart->reduce($item['material'], $item['amount'] ?: 1, $item['meta']);
+                                    break;
+                            }
+                        }
                     }
                 }
                 break;

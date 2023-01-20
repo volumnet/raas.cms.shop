@@ -2,7 +2,7 @@
  * Меню каталога
  */
 export default {
-    data: function () {
+    data() {
         return {
             /**
              * Активность меню по кнопке
@@ -11,7 +11,7 @@ export default {
             active: false,
         };
     },
-    mounted: function () {
+    mounted() {
         $('body').on('click', () => {
             this.active = false;
         })
@@ -20,7 +20,7 @@ export default {
         /**
          * Переключение меню
          */
-        toggle: function () {
+        toggle() {
             this.active = !this.active;
         }
     },
@@ -29,7 +29,7 @@ export default {
          * Распаковка текущего экземпляра для слота
          * @return {Object}
          */
-        self: function () {
+        self() {
             return { ...this };
         },
     },

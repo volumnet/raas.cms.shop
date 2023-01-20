@@ -13,7 +13,7 @@ export default {
             required: false,
         },
     },
-    data: function () {
+    data() {
         let query = Object.assign(
             { sort: '', order: '' }, 
             window.queryString.parse(
@@ -27,16 +27,17 @@ export default {
             query: query, // Запрос
         };
     },
-    mounted: function () {
+    mounted() {
         window.setTimeout(() => { // Поскольку app.vue инициализируется после компонента
             this.changeView(Cookie.get('view_as'));
-            if (this.defaultSort) {
-                this.changeSort(this.defaultSort);
-            }
+            // 2022-12-08, AVS: запутывает, непонятно зачем сделано
+            // if (this.defaultSort) {
+            //     this.changeSort(this.defaultSort);
+            // }
         }, 0);
     },
     methods: {
-        update: function () {
+        update() {
             let query = window.queryString.parse(
                 document.location.search, 
                 { arrayFormat: 'bracket' }
@@ -67,13 +68,13 @@ export default {
          * @param {String} sortVariant URN варианта - совпадает с GET-параметрами 
          *     sort:order, либо sort
          */
-        changeSort: function (sortVariant) {
+        changeSort(sortVariant) {
             let sortArr = sortVariant.trim().split(':');
             this.query.sort = sortArr[0];
             this.query.order = sortArr[1] || 'asc';
             this.$forceUpdate();
         },
-        changeView: function (viewVariant) {
+        changeView(viewVariant) {
             Cookie.set(
                 'view_as', 
                 viewVariant, 
@@ -88,7 +89,7 @@ export default {
          * Аналог this для привязки к слоту
          * @return {Object}
          */
-        self: function () {
+        self() {
             return { ...this };
         },
         /**
@@ -96,9 +97,10 @@ export default {
          * совпадает с GET-параметрами sort:order, либо sort
          * @return {String}
          */
-        sort: function () {
+        sort() {
             let sort = this.query.sort;
             let order = this.query.order;
+            // alert(sort + ' ' + order)
             if (!sort) {
                 if (this.defaultSort) {
                     return this.defaultSort;

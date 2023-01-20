@@ -1,7 +1,10 @@
+import CartAdditionalMixin from './cart-additional-mixin.vue.js';
+
 /**
  * Компонент корзины
  */
 export default {
+    mixins: [CartAdditionalMixin],
     props: {
         /**
          * ID# блока
@@ -33,12 +36,12 @@ export default {
          */
         initialFormData: {
             type: Object,
-            default: function () {
+            default() {
                 return {};
             }
         }
     },
-    data: function () {
+    data() {
         let translations = {
             ARE_YOU_SURE_TO_CLEAR_CART: 'Вы действительно хотите очистить корзину?',
             CART_IS_LOADING: 'Корзина загружается...',
@@ -69,7 +72,7 @@ export default {
             delayUpdateFields: ['post_code'], // Поля, обновление которых требует отложенного получения доп. данных
         };
     },
-    mounted: function () {
+    mounted() {
         this.initialHeader = $('.body__title').text();
         this.initialDocumentTitle = document.title;
         $(window).on('scroll', () => {
@@ -80,7 +83,7 @@ export default {
         });
     },
     methods: {
-        getAdditionalData: function () {
+        getAdditionalData() {
             let result = this.formData;
             return result;
         },
@@ -88,7 +91,7 @@ export default {
          * Получает дополнительные данные
          * @param {Number} delay Получить данные через столько миллисекунд
          */
-        getAdditional: function (delay) {
+        getAdditional(delay) {
             if (this.getAdditionalTimeout) {
                 window.clearTimeout(this.getAdditionalTimeout);
             }
@@ -104,7 +107,7 @@ export default {
          * Проверяет, нужно ли получить дополнительные данные по POST-у
          * и при необходимости получает их
          */
-        checkResultForAdditional: function () {
+        checkResultForAdditional() {
             if (this.formData.promo && 
                 !(this.cart.additional && this.cart.additional.discount) && 
                 !this.cart.loading
@@ -115,7 +118,7 @@ export default {
         /**
          * Переходит к оформлению заказа
          */
-        doProcess: function () {
+        doProcess() {
             this.proceed = true;
             $('.body__title').text(this.translations.CHECKOUT_TITLE);
             document.title = this.translations.CHECKOUT_TITLE;
@@ -124,14 +127,14 @@ export default {
         /**
          * Переходит к оформлению быстрого заказа
          */
-        doQuickOrder: function () {
+        doQuickOrder() {
             this.quickorder = true;
             this.formData.agree = 1;
         },
         /**
          * Переходит к оформлению заказа
          */
-        goBack: function () {
+        goBack() {
             this.proceed = false;
             $('.body__title').text(this.initialHeader);
             document.title = this.initialDocumentTitle;
@@ -140,7 +143,7 @@ export default {
         /**
          * Запрос на очистку корзины
          */
-        requestClear: function () {
+        requestClear() {
             return this.$root.requestCartClear(
                 this.cart, 
                 this.translations.ARE_YOU_SURE_TO_CLEAR_CART
@@ -150,13 +153,13 @@ export default {
          * Обновляет промо-код (дисконтную карту)
          * @param {String} discountCard Дисконтная карта
          */
-        updateDiscountCard: function (discountCard) {
+        updateDiscountCard(discountCard) {
             this.formData.promo = discountCard || '';
         },
         /**
          * Выравнивает правую часть
          */
-        adjustRightPane: function () {
+        adjustRightPane() {
             let margin = 0;
             let $pane = $(this.$refs.rightPane);
             let $float = $(this.$refs.rightPaneFloat);
@@ -177,7 +180,7 @@ export default {
          * Обрабатывает успешную отправку формы
          * @param {Object} data Данные из корзины
          */
-        onSuccess: function (data) {
+        onSuccess(data) {
             this.success = true; 
             let eCommerceData = null;
             if (this.cart.items && this.cart.items.length && data.orderId) {
@@ -193,11 +196,21 @@ export default {
                 }
             }
             this.cart.updateData(data);
+            $.scrollTo(0);
         }
+    },
+    computed: {
+        /**
+         * Дополнительная информация из корзины
+         * @return {Object}
+         */
+        additional() {
+            return this.cart.additional || {};
+        },
     },
     watch: {
         formData: {
-            handler: function () {
+            handler() {
                 for (let key of this.instantUpdateFields) {
                     if (this.formData[key] != this.oldFormData[key]) {
                         this.getAdditional();

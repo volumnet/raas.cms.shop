@@ -146,6 +146,9 @@ if ($pageMime == 'application/json') {
 
 $static = (bool)(int)$Block->additionalParams['static'];
 ?>
+<!--nodesktop-->
+<!--raas-teleport-from#catalog-filter-->
+<!--/nodesktop-->
 <div class="catalog-filter__outer">
   <div class="catalog-filter" <?php echo $static ? '': ' style="display: none" data-v-bind_style="{ display: \'block\' }"'?> data-vue-role="catalog-filter" data-v-bind_catalog-id="<?php echo (int)$catalog->id?>" data-v-bind_block-id="<?php echo (int)$catalogBlock->id?>" data-v-bind_source="<?php echo htmlspecialchars(json_encode($result))?>" data-v-slot="vm">
     <div class="catalog-filter__header">
@@ -157,7 +160,7 @@ $static = (bool)(int)$Block->additionalParams['static'];
       </div>
     </div>
     <form action="" method="get" class="catalog-filter__inner">
-      <div class="catalog-filter__listcatalog-filter-properties-list" data-vue-role="catalog-filter-properties-list" data-v-bind_form-data="vm.formData" data-v-bind_filter="vm.filter" data-v-bind_properties="vm.properties" data-v-bind_multiple="vm.multiple" data-v-on_input="vm.change($event)">
+      <div class="catalog-filter__list catalog-filter-properties-list" data-vue-role="catalog-filter-properties-list" data-v-bind_form-data="vm.formData" data-v-bind_filter="vm.filter" data-v-bind_properties="vm.properties" data-v-bind_multiple="vm.multiple" data-v-on_input="vm.change($event)">
         <?php if ($static) {
             foreach ($availableProperties as $propId => $values) {
                 if (count((array)$values) <= 1) {
@@ -165,7 +168,7 @@ $static = (bool)(int)$Block->additionalParams['static'];
                 }
                 $property = $catalog->catalogFilter->properties[$propId];
                 ?>
-                <div class="catalog-filter-properties-list__itemcatalog-filter-property catalog-filter-property_active">
+                <div class="catalog-filter-properties-list__item catalog-filter-property catalog-filter-property_active">
                   <div class="catalog-filter-property__title">
                     <?php echo htmlspecialchars($property->name)?>
                   </div>
@@ -283,3 +286,6 @@ $static = (bool)(int)$Block->additionalParams['static'];
 AssetManager::requestCSS(['/css/catalog-filter.css']);
 AssetManager::requestJS(['/js/catalog-filter.js']);
 ?>
+<!--nodesktop-->
+<!--/raas-teleport-from#catalog-filter-->
+<!--/nodesktop-->

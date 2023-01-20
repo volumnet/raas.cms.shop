@@ -1,3 +1,6 @@
+import ECommerce from './ecommerce.js';
+
+
 /**
  * Класс корзины
  */
@@ -67,17 +70,40 @@ export default class {
 
     /**
      * Получает часть строки запроса для товара
-     * @param {Object} item Товар для получения строки запроса
+     * @param {Object|Object[]} items Товар или набор товаров
      * @param {Number} amount Количество единиц товара
      * @return {String}
      */
-    getItemQuery(item, amount = null) {
-        let query = '&id=' + (parseInt(item.id) || 0);
-        if (item.meta) {
-            query += '&meta=' + encodeURIComponent(item.meta);
+    getItemQuery(items, amount = null) {
+        let query = '';
+        let item = null;
+        if (items instanceof Array) {
+            if (items.length == 1) {
+                item = items[0];
+            } else if (!items.length) {
+                return '';
+            }
+        } else {
+            item = items;
         }
-        if (amount !== null) {
-            query += '&amount=' + (parseInt(amount) || 0);
+
+        if (item) {
+            query = '&id=' + (parseInt(item.id) || 0);
+            if (item.meta) {
+                query += '&meta=' + encodeURIComponent(item.meta);
+            }
+            if (amount !== null) {
+                query += '&amount=' + (parseInt(amount) || 0);
+            }
+        } else {
+            for (let item of items) {
+                query += '&id[' + item.id + (item.meta ? ('_' + item.meta) : '') + ']=';
+                if (item.amount !== null) {
+                    query += (parseInt(item.amount) || 0);
+                } else {
+                    query += 1;
+                }
+            }
         }
         return query;
     }
@@ -88,7 +114,7 @@ export default class {
      * @param  {String} query GET-параметры запроса
      * @param  {Object} postData POST-параметры запроса
      */
-    update(query, postData) {
+    async update(query, postData) {
         let self = this;
         let url = this.updateUrl;
         if (query) {
@@ -106,9 +132,8 @@ export default class {
                 ajaxSettings.data = postData;
             }
             this.loading = true;
-            return $.ajax(ajaxSettings).then((remoteData) => {
-                this.updateData(remoteData);
-            });
+            const remoteData = await $.ajax(ajaxSettings);
+            this.updateData(remoteData);
         }
     }
 
@@ -135,119 +160,57 @@ export default class {
         this.dataLoaded = true;
         this.loading = false;
         // console.log('aaa')
-        $(document).trigger(
-            'raas.shop.cart-updated', 
-            [{id: this.id, remote: true, data: remoteData}]
-        );
+        $(document).trigger('raas.shop.cart-updated',  [{id: this.id, remote: true, data: remoteData}]);
     }
+
 
     /**
      * Устанавливает количество товара
-     * @param {Object} item Товар
+     * @param {Object|Object[]} items Товар или набор товаров
      * @param {Number} amount Количество единиц товара
      * @param {Object} postData Дополнительные POST-данные
      */
-    set(item, amount = null, postData = null) {
-        let eCommerceData = null;
-        if (item.eCommerce) {
-            let matchingItems = this.items
-                .filter(x => ((x.id == item.id) && (x.meta == (item.meta || ''))));
-            let oldAmount = 0;
-            if (matchingItems && matchingItems[0]) {
-                oldAmount = parseFloat(matchingItems[0].amount) || 0;
-            }
-            // console.log(oldAmount, amount);
-            let deltaAmount = amount - oldAmount;
-            if (deltaAmount != 0) {
-                eCommerceData = {
-                    action: (deltaAmount < 0) ? 'remove' : 'add',
-                    products: [Object.assign(
-                        {}, 
-                        item.eCommerce, 
-                        { amount: Math.abs(deltaAmount) }
-                    )],
-                };
-            }
+    async set(items, amount = null, postData = null) {
+        const eCommerce = this.getECommerce();
+        await this.update('action=set' + this.getItemQuery(items, parseInt(amount)), postData);
+        if (items instanceof Array) {
+            items.forEach(x => eCommerce.set(item, item.amount));
+        } else {
+            eCommerce.set(items, amount);
         }
-        let result = this.update(
-            'action=set' + this.getItemQuery(item, parseInt(amount)), 
-            postData
-        ).then(() => {
-            if (eCommerceData) {
-                $(document).trigger('raas.shop.ecommerce', eCommerceData);
-            }
-        });
-        return result;
     }
 
 
     /**
      * Добавляет товар
-     * @param {Object} item Товар
+     * @param {Object|Object[]} items Товар или набор товаров
      * @param {Number} amount Количество единиц товара
      * @param {Object} postData Дополнительные POST-данные
      */
-    add(item, amount = null, postData = null) {
-        let eCommerceData = null;
-        if (item.eCommerce) {
-            if (amount != 0) {
-                eCommerceData = {
-                    action: (amount < 0) ? 'remove' : 'add',
-                    products: [Object.assign(
-                        {}, 
-                        item.eCommerce, 
-                        { amount: Math.abs(amount) }
-                    )],
-                };
-            }
+    async add(items, amount = null, postData = null) {
+        const eCommerce = this.getECommerce();
+        await this.update('action=add' + this.getItemQuery(items, parseInt(amount) || 1), postData);
+        if (items instanceof Array) {
+            items.forEach(x => eCommerce.add(item, item.amount));
+        } else {
+            eCommerce.add(items, amount);
         }
-        let result = this.update(
-            'action=add' + this.getItemQuery(item, parseInt(amount) || 1), 
-            postData
-        ).then(() => {
-            if (eCommerceData) {
-                $(document).trigger('raas.shop.ecommerce', eCommerceData);
-            }
-        });
-        return result;
     }
 
 
     /**
      * Удаляет товар
-     * @param {Object} item Товар
+     * @param {Object|Object[]} items Товар или набор товаров
      * @param {Object} postData Дополнительные POST-данные
      */
-    delete(item, postData) {
-        let eCommerceData = null;
-        if (item.eCommerce) {
-            let matchingItems = this.items
-                .filter(x => ((x.id == item.id) && (x.meta == (item.meta || ''))));
-            let oldAmount = 0;
-            if (matchingItems && matchingItems[0]) {
-                oldAmount = parseFloat(matchingItems[0].amount) || 0;
-            }
-            // console.log(oldAmount, amount);
-            if (oldAmount != 0) {
-                eCommerceData = {
-                    action: 'remove',
-                    products: [Object.assign(
-                        {}, 
-                        item.eCommerce, 
-                        { amount: oldAmount }
-                    )],
-                };
-            }
+    async delete(items, postData) {
+        const eCommerce = this.getECommerce();
+        await this.update('action=delete' + this.getItemQuery(items), postData);
+        if (items instanceof Array) {
+            items.forEach(x => eCommerce.delete(item));
+        } else {
+            eCommerce.delete(items);
         }
-        let result = this.update(
-            'action=delete' + this.getItemQuery(item), 
-            postData
-        ).then(() => {
-            if (eCommerceData) {
-                $(document).trigger('raas.shop.ecommerce', eCommerceData);
-            }
-        });
-        return result;
     }
 
 
@@ -255,25 +218,10 @@ export default class {
      * Очищает корзину
      * @param {Object} postData Дополнительные POST-данные
      */
-    clear(postData) {
-        let eCommerceData = null;
-        if (this.items && this.items.length) {
-            eCommerceData = {
-                action: 'remove',
-                products: this.items.filter(x => !!x.eCommerce).map((x) => {
-                    return Object.assign({}, x.eCommerce, { amount: x.amount });
-                }),
-            }
-        }
-        let result = this.update('action=clear', postData).then(() => {
-            if (eCommerceData && 
-                eCommerceData.products && 
-                eCommerceData.products.length
-            ) {
-                $(document).trigger('raas.shop.ecommerce', eCommerceData);
-            }
-        });
-        return result;
+    async clear(postData) {
+        const eCommerce = this.getECommerce();
+        await this.update('action=clear', postData);
+        eCommerce.clear(item, amount)
     }
 
 
@@ -294,5 +242,15 @@ export default class {
         } catch (e) {
             return 0;
         }
+    }
+
+
+    /**
+     * Получает экземпляр ECommerce
+     * @param {Boolean} autoTrigger Автоматически генерировать событие
+     * @return {ECommerce}
+     */
+    getECommerce(autoTrigger = true) {
+        return new ECommerce(this, autoTrigger);
     }
 }

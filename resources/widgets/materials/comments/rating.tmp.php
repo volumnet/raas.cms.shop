@@ -5,6 +5,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\AssetManager;
 ?>
 <ol class="rating rating__list">
   <?php for ($i = 1; $i <= 5; $i++) {
@@ -14,3 +15,5 @@ namespace RAAS\CMS\Shop;
       <li class="rating__item rating__item_<?php echo $starClass[$halfStar]?>"></li>
   <?php } ?>
 </ol>
+<?php
+AssetManager::requestCSS('/css/rating.css');

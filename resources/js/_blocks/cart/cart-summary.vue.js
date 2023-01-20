@@ -1,7 +1,10 @@
+import CartAdditionalMixin from './cart-additional-mixin.vue.js';
+
 /**
  * Компонент сводки по корзине
  */
 export default {
+    mixins: [CartAdditionalMixin],
     props: {
         /**
          * Корзина
@@ -32,7 +35,17 @@ export default {
          */
         promo: {
             required: false,
-        }
+        },
+        /**
+         * Данные формы
+         * @type {Object}
+         */
+        formData: {
+            type: Object,
+            default() {
+                return {};
+            },
+        },
     },
     data: function () {
         let translations = {
@@ -64,5 +77,29 @@ export default {
         formatPrice: function (x) {
             return window.formatPrice(x);
         },
+    },
+    computed: {
+        /**
+         * Дополнительная информация из корзины
+         * @return {Object}
+         */
+        additional() {
+            return this.cart.additional || {};
+        },
+        /**
+         * Текст адреса доставки
+         * @return {String}
+         */
+        deliveryAddress: function () {
+            let result = [];
+            result.push(this.formData.city);
+            for (let key of ['street', 'house', 'building', 'apartment']) {
+                if (this.formData[key]) {
+                    result.push(this.formData[key]);
+                }
+            }
+            return result.join(', ');
+        },
+
     }
 }

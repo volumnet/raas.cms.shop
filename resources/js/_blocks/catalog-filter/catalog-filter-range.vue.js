@@ -38,20 +38,20 @@ export default {
             required: true,
         },
     },
-    data: function () {
+    data() {
         return {
             valueFrom: null, // Значение с
             valueTo: null, // Значение по
         };
     },
-    mounted: function () {
+    mounted() {
         this.init();
     },
     methods: {
         /**
          * Установка
          */
-        init: function () {
+        init() {
             this.valueFrom = (this.filter[this.property.id + ''] && parseFloat(this.filter[this.property.id + '']['from'])) || null;
             this.valueTo = (this.filter[this.property.id + ''] && parseFloat(this.filter[this.property.id + '']['to'])) || null;
         },
@@ -60,7 +60,7 @@ export default {
          * Изменение через поле
          * @param {Event} event Событие изменения
          */
-        changeByInput: function (event) {
+        changeByInput(event) {
             if (this.valueFrom) {
                 this.valueFrom = parseFloat(this.valueFrom) || 0;
                 this.valueFrom = Math.min(this.valueFrom, this.max);
@@ -79,7 +79,7 @@ export default {
          * Изменение через слайдер
          * @param {Event} event Событие изменения
          */
-        changeBySlider: function (event) {
+        changeBySlider(event) {
             var val = event.value;
             switch (event.index) {
                 case 0:
@@ -97,7 +97,7 @@ export default {
          * Доступные значения
          * @return {Array}
          */
-        values: function () {
+        values() {
             var values = Object.keys(this.property.values || []).map(function (x) {
                 return parseFloat(x) || 0;
             }).filter(function (x) {
@@ -110,7 +110,7 @@ export default {
          * Минимальное значение
          * @return {Number}
          */
-        min: function () {
+        min() {
             if (this.values.length) {
                 return Math.min.apply(null, this.values) || 0;
             }
@@ -121,7 +121,7 @@ export default {
          * Максимальное значение
          * @return {Number}
          */
-        max: function () {
+        max() {
             if (this.values.length) {
                 return Math.max.apply(null, this.values) || 0;
             }
@@ -132,12 +132,15 @@ export default {
          * Шаг диапазона
          * @return {Number}
          */
-        step: function () {
+        step() {
             if (this.values.length > 1) {
+                const vals = this.values;
+                vals.sort((a, b) => (a - b));
+
                 var minRealStep = null;
                 var delta;
-                for (var i = 0; i < this.values.length - 1; i++) {
-                    delta = this.values[i + 1] - this.values[i];
+                for (var i = 0; i < vals.length - 1; i++) {
+                    delta = vals[i + 1] - vals[i];
                     if ((delta > 0) && (!minRealStep || (delta < minRealStep))) {
                         minRealStep = delta;
                     }
@@ -149,7 +152,7 @@ export default {
         },
     },
     watch: {
-        filter: function (x) {
+        filter(x) {
             this.init();
         }
     },

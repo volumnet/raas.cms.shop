@@ -1071,7 +1071,10 @@ class CatalogFilter
         $catalogReduced = $this->reduceMappingToGoodsIds($catalogPropsMapping);
         $sortMapping = [];
         foreach ($catalogReduced as $propId => $propGoodsIds) {
-            $sortMapping[$propId] = array_intersect_key($propGoodsIds, $goodsIds);
+            // 2022-12-08, AVS: добавим товары без значения свойства, чтобы не было дополнительной фильтрации
+            // при сортировке. По идее такого быть не должно, т.к. все товары должны обладать свойствами
+            $restGoodsIds = array_diff($goodsIds, $propGoodsIds);
+            $sortMapping[$propId] = array_intersect_key($propGoodsIds, $goodsIds) + $restGoodsIds;
         }
         $sortMapping[''] = $goodsIds;
         return $sortMapping;

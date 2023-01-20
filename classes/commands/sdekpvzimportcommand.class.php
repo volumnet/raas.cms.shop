@@ -23,8 +23,14 @@ class SDEKPVZImportCommand extends Command
         $sdek = new SDEKInterface();
         $url = $sdek->getDomain() . '/pvzlist/v1/json';
         $text = $sdek->rawMethod($url);
-        $tmpname = tempnam(sys_get_temp_dir(), '');
-        file_put_contents($tmpname, $text);
-        rename($tmpname, $filepath);
+        $json = json_decode($text, true);
+        if ($json) {
+            $tmpname = tempnam(sys_get_temp_dir(), '');
+            file_put_contents($tmpname, $text);
+            rename($tmpname, $filepath);
+            $this->controller->doLog('Pickup points imported');
+        } else {
+            $this->controller->doLog('Invalid data received');
+        }
     }
 }

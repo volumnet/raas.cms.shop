@@ -129,17 +129,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 Material::_SQL()->query($SQL_query);
 
                 // Чистим файлы
-                foreach ($filesToClear as $val) {
-                    $val = realpath(Package::i()->filesDir) . '/' . str_replace('.', '*.', $val);
-                    $arr = glob($val);
-                    foreach ($arr as $row) {
-                        unlink($row);
-                    }
-                }
+                // 2022-12-15, AVS: САМИ ФАЙЛЫ НЕ ТРОГАЕМ!!! Т.К. ЕСЛИ НЕСКОЛЬКО ТОВАРОВ ССЫЛАЮТСЯ НА ОДИН ATTACHMENT, ОН ПРОПАДЕТ У ВСЕХ!!!
+                // 2022-12-27, AVS: вернул в виде Field::clearLostAttachments()
+                // foreach ($filesToClear as $val) {
+                //     $val = realpath(Package::i()->filesDir) . '/' . str_replace('.', '*.', $val);
+                //     $arr = glob($val);
+                //     foreach ($arr as $row) {
+                //         unlink($row);
+                //     }
+                // }
 
-                // Чистим сами attachment'ы
-                $SQL_query = "DELETE FROM " . Attachment::_tablename() . " WHERE id IN (" . implode(", ", $attachmentsToClear ?: array(0)) . ")";
-                Material::_SQL()->query($SQL_query);
+                // // Чистим сами attachment'ы
+                // $SQL_query = "DELETE FROM " . Attachment::_tablename() . " WHERE id IN (" . implode(", ", $attachmentsToClear ?: array(0)) . ")";
+                // Material::_SQL()->query($SQL_query);
             } else {
                 foreach ($attachmentsToClear as $val) {
                     $row = new Attachment($val);
@@ -194,6 +196,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     );
                 }
             }
+        }
+        if (!$test) {
+            // 2022-12-27, AVS: вернул чистку в виде Field::clearLostAttachments()
+            $Loader->Image_Field->clearLostAttachments();
         }
     }
     return array('log' => $log, 'ok' => true);

@@ -427,9 +427,11 @@ if ($Item) {
                     break;
                 case 'comments':
                     if ($comments || $commentFormBlock->id) { ?>
-                        <div class="catalog-article__comments-list">
-                          <?php echo $commentsListText?>
-                        </div>
+                        <?php if ($commentsListText) { ?>
+                            <div class="catalog-article__comments-list">
+                              <?php echo $commentsListText?>
+                            </div>
+                        <?php } ?>
                         <?php if ($commentFormBlock->id) { ?>
                             <div class="catalog-article__comments-form">
                               <?php $commentFormBlock->process($Page)?>
@@ -439,9 +441,11 @@ if ($Item) {
                     break;
                 case 'faq':
                     if ($faq || $faqFormBlock->id) { ?>
-                        <div class="catalog-article__faq-list">
-                          <?php echo $faqListText?>
-                        </div>
+                        <?php if ($faqListText) { ?>
+                            <div class="catalog-article__faq-list">
+                              <?php echo $faqListText?>
+                            </div>
+                        <?php } ?>
                         <?php if ($faqFormBlock->id) { ?>
                             <div class="catalog-article__faq-form">
                               <?php $faqFormBlock->process($Page)?>
@@ -578,7 +582,7 @@ if ($Item) {
             </div>
         <?php } ?>
       </div>
-      <?php if ($description = $Page->_description) { ?>
+      <?php if ($description = $Page->_description_) { ?>
           <div class="catalog__description">
             <?php echo $description?>
           </div>

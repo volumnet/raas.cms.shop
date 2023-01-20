@@ -44,7 +44,7 @@ export default {
             required: false,
         },
     },
-    mounted: function () {
+    mounted() {
         var $slider = $(this.$el);
         var sliderOptions = {
             range: true,
@@ -67,7 +67,7 @@ export default {
          * Значения от/до
          * @return {[Number, Number]}
          */
-        values: function () {
+        values() {
             var values = [
                 parseFloat(this.valueFrom) || parseFloat(this.min) || 0,
                 parseFloat(this.valueTo) || parseFloat(this.max) || 0
@@ -76,10 +76,10 @@ export default {
         }
     },
     watch: {
-        valueFrom: function () {
+        valueFrom() {
             $(this.$el).slider('values', this.values);
         },
-        valueTo: function () {
+        valueTo() {
             $(this.$el).slider('values', this.values);
         },
     }

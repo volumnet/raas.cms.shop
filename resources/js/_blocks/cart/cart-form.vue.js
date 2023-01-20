@@ -1,9 +1,12 @@
+import CartAdditionalMixin from './cart-additional-mixin.vue.js';
+
 /**
  * Компонент формы корзины
  * @requires AJAXForm
  * @requires AJAXFormStandalone
  */
 export default {
+    mixins: [CartAdditionalMixin],
     props: {
         /**
          * Данные формы
@@ -19,12 +22,12 @@ export default {
          */
         additional: {
             type: Object,
-            default: function () {
+            default() {
                 return {};
             },
         },
     },
-    data: function () {
+    data() {
        let translations = {
             ASTERISK_MARKED_FIELDS_ARE_REQUIRED: 'Поля, помеченные звездочкой (*), обязательны для заполнения',
             ORDER_SUCCESSFULLY_SENT: 'Спасибо! Ваш заказ #%s успешно отправлен. В ближайшее время наш менеджер свяжется с Вами.',
@@ -55,7 +58,7 @@ export default {
          * @param {Boolean} force Принудительно установить 
          *     (не проверять, что устанавливаемый шаг меньше текущего)
          */
-        setStep: function (step, force = false) {
+        setStep(step, force = false) {
             if (force || (step < this.step)) {
                 this.step = step;
             }
@@ -66,7 +69,7 @@ export default {
          * HTML-код подсказки об обязательных полях
          * @return {String}
          */
-        asteriskHintHTML: function () {
+        asteriskHintHTML() {
             let result = this.translations.ASTERISK_MARKED_FIELDS_ARE_REQUIRED;
             result = result.replace(
                 '*', 
@@ -75,33 +78,10 @@ export default {
             return result;
         },
         /**
-         * Выбранный способ получения
-         * @return {Object|null} <pre><code>{
-         *     id: Number ID# способа получения,
-         *     name: String Краткое наименование,
-         *     isDelivery: Boolean Доставка
-         *     fullName: String Полное наименование,
-         *     serviceURN: String URN сервиса,
-         *     price?: Number Стоимость доставки,
-         *     dateFrom?: String Минимальная дата доставки (ГГГГ-ММ-ДД)
-         *     dateTo?: String Максимальная дата доставки (ГГГГ-ММ-ДД)
-         * }</code></pre>, либо null если не найден
-         */
-        selectedReceivingMethod: function () {
-            let result = ((
-                this.additional && 
-                this.additional.delivery && 
-                this.additional.delivery.methods
-            ) || []).filter((method) => {
-                return method.id == this.formData.delivery;
-            });
-            return result[0] || null;
-        },
-        /**
          * Валидность вкладки способа получения
          * @return {Boolean}
          */
-        deliveryTabValidity: function () {
+        deliveryTabValidity() {
             if (!this.formData.city || !this.formData.region) {
                 return false;
             }
@@ -137,29 +117,10 @@ export default {
             return true;
         },
         /**
-         * Выбранный способ оплаты
-         * @return {Object|null} <pre><code>{
-         *     id: Number ID# способа получения,
-         *     name: String Краткое наименование,
-         *     epay: Boolean Электронная оплата,
-         *     price?: Number Комиссия,
-         * }</code></pre>, либо null если не найден
-         */
-        selectedPaymentMethod: function () {
-            let result = ((
-                this.additional && 
-                this.additional.payment && 
-                this.additional.payment.methods
-            ) || []).filter((method) => {
-                return method.id == this.formData.payment;
-            });
-            return result[0] || null;
-        },
-        /**
          * Валидность вкладки контактных данных
          * @return {Boolean}
          */
-        contactsTabValidity: function () {
+        contactsTabValidity() {
             for (let key of ([
                 'last_name', 
                 'first_name', 
@@ -169,7 +130,8 @@ export default {
                 '_description_', 
                 'agree'
             ])) {
-                if (this.form.fields[key].required && 
+                if (this.form.fields[key] && 
+                    this.form.fields[key].required && 
                     !(this.formData[key] && this.formData[key].trim())
                 ) {
                     return false;

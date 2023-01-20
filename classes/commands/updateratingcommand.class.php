@@ -5,7 +5,9 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\Command;
+use RAAS\CMS\Field;
 use RAAS\CMS\Material;
+use RAAS\CMS\MaterialTypeRecursiveCache;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Page;
 
@@ -124,6 +126,7 @@ class UpdateRatingCommand extends Command
         }, $result);
 
         $sqlArr = [];
+        $affectedMaterialsIds = array_map('intval', array_keys($result));
         foreach ($result as $itemId => $itemData) {
             $rating = (float)$itemData['rating'];
             $comments = (float)$itemData['comments'];
@@ -147,6 +150,27 @@ class UpdateRatingCommand extends Command
             $catalogReviewsCounterField->id
         ]);
         Material::_SQL()->add('cms_data', $sqlArr);
+
+        // 2022-12-08, AVS: добавим недостающие рейтинги (у кого нет комментариев),
+        // чтобы не было выпадений при сортировке через CatalogFilter
+        $sqlQuery = "INSERT IGNORE INTO cms_data(pid, fid, fii, value)
+                      SELECT tM.id AS pid,
+                             tF.id AS fid,
+                             0 AS fii,
+                             0 AS value
+                        FROM " . Material::_tablename() . " AS tM
+                        JOIN " . Field::_tablename() . " AS tF
+                        WHERE tM.pid IN (" . implode(", ", MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id)) . ")
+                          AND tF.id IN (?, ?) ";
+        if ($affectedMaterialsIds) {
+            $sqlQuery .= " AND tM.id NOT IN (" . implode(", ", $affectedMaterialsIds) . ")";
+        }
+        Material::_SQL()->query([
+            $sqlQuery,
+            $catalogRatingField->id,
+            $catalogReviewsCounterField->id
+        ]);
+
         Module::i()->registrySet(
             'rating_updated',
             date('Y-m-d H:i:s')
