@@ -277,6 +277,7 @@ class CatalogFilter
      */
     public function build()
     {
+        $st = microtime(1);
         $this->materialTypesIds = $this->materialType->selfAndChildrenIds;
         $properties = $this->getAllProperties(
             $this->materialTypesIds,

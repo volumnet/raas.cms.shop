@@ -418,7 +418,7 @@ if ($Item) {
                     if ($files = $Item->files) { ?>
                         <div class="catalog-article-files-list">
                           <?php foreach ($files as $file) { ?>
-                              <a href="/<?php echo htmlspecialchars($file->fileURL)?>" class="catalog-article-files-list__item catalog-article-files-item catalog-article-files-item_<?php echo mb_strtolower(pathinfo($file->fileURL, PATHINFO_EXTENSION))?>">
+                              <a href="/<?php echo htmlspecialchars($file->fileURL)?>" class="catalog-article-files-list__item catalog-article-files-item catalog-article-files-item_<?php echo mb_strtolower(pathinfo($file->fileURL, PATHINFO_EXTENSION))?>" target="_blank">
                                 <?php echo htmlspecialchars($file->name ?: basename($file->fileURL))?>
                               </a>
                           <?php } ?>

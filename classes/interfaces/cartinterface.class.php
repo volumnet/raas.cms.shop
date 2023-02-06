@@ -116,6 +116,9 @@ class CartInterface extends FormInterface
                         }
                         $items[] = ['material' => $material, 'amount' => $amount, 'meta' => $meta];
                     }
+                    if (($action == 'set') && (($this->get['clear'] ?? false) || ($this->get['init'] ?? false))) {
+                        $cart->clear();
+                    }
                     foreach ($items as $item) {
                         if ($item['material']->id) {
                             switch ($action) {

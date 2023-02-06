@@ -207,6 +207,15 @@ export default {
 
 
         /**
+         * Устанавливает последний активный элемент
+         * @param {HTMLElement} lastActiveElement
+         */
+        setLastActiveElement(lastActiveElement) {
+            this.lastActiveElement = lastActiveElement;
+        },
+
+
+        /**
          * Получение URL-параметров формы
          * @return {String}
          */

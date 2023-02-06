@@ -160,7 +160,16 @@ $static = (bool)(int)$Block->additionalParams['static'];
       </div>
     </div>
     <form action="" method="get" class="catalog-filter__inner">
-      <div class="catalog-filter__list catalog-filter-properties-list" data-vue-role="catalog-filter-properties-list" data-v-bind_form-data="vm.formData" data-v-bind_filter="vm.filter" data-v-bind_properties="vm.properties" data-v-bind_multiple="vm.multiple" data-v-on_input="vm.change($event)">
+      <div
+        class="catalog-filter__list catalog-filter-properties-list"
+        data-vue-role="catalog-filter-properties-list"
+        data-v-bind_form-data="vm.formData"
+        data-v-bind_filter="vm.filter"
+        data-v-bind_properties="vm.properties"
+        data-v-bind_multiple="vm.multiple"
+        data-v-on_input="vm.change($event)"
+        data-v-on_setactiveelement="vm.setLastActiveElement($event)"
+      >
         <?php if ($static) {
             foreach ($availableProperties as $propId => $values) {
                 if (count((array)$values) <= 1) {
