@@ -110,7 +110,7 @@ class Module extends RAASModule
             $sqlWhereBind[] = $likeSearchString;
             $sqlWhereBind[] = $likeSearchString;
         }
-        if ((string)$this->controller->nav['status_id'] !== '') {
+        if ((string)($this->controller->nav['status_id'] ?? '') !== '') {
             $sqlWhere[] = "tOr.status_id = ?";
             $sqlWhereBind[] = (int)$this->controller->nav['status_id'];
         }

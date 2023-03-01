@@ -120,7 +120,7 @@ class Order extends Feedback
 
     public function commit()
     {
-        if (($this->updates['status_id'] !== null) &&
+        if ((($this->updates['status_id'] ?? null) !== null) &&
             ($this->properties['status_id'] != $this->updates['status_id']) &&
             $this->status->do_notify
         ) {

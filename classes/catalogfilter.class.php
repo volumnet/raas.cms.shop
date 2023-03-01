@@ -20,65 +20,59 @@ use RAAS\CMS\Page;
 /**
  * Класс фильтра каталога
  * @property-read Material_Type $materialType Тип материалов
- * @property-read array<int> $materialTypesIds  ID# типов материалов
+ * @property-read int[] $materialTypesIds  ID# типов материалов
  * @property-read bool $withChildrenGoods Учитывать товары из дочерних категорий
- * @property-read array<
- *                    int ID# поля | string URN поля
- *                > $ignoredFields Игнорируемые поля
+ * @property-read array $ignoredFields <pre><code>array<int ID# поля | string URN поля></code></pre> Игнорируемые поля
  * @property-read Page $catalog Текущий каталог
- * @property-read array<
- *                    int[] ID# свойства => Material_Field
- *                > $properties Список свойств
- * @property-read array<
- *                    string[] URN свойства => Material_Field
- *                > $propertiesByURNs Список свойств по URN
- * @property-read array<
- *                    int[] ID# свойства (только те, у которых rich-значения
- *                              отличаются от сырых значений) => array<
- *                        mixed[] сырое значение => mixed rich-значение
- *                    >
- *                > $richValues Rich-значения свойств, у которых могут заведомо
- *                              отличаться от сырых значений
- * @property-read array<
- *                    string ID# поля => int ID# поля
- *                > $numericFieldsIds Массив ID# числовых полей (number или range)
- * @property-read array<
- *                    string[] ID# свойства => array<
- *                        mixed[] значение => array<
- *                            string[] ID# товара => int ID# товара
- *                        >
- *                    >
- *                > $propsMapping Маппинг свойств к товарам
- * @property-read array<
- *                    string[] ID# свойства => array<
- *                        string[] ID# товара => int ID# товара
- *                    >
- *                > $sortMapping Маппинг свойств для сортировки
- *                               (в пустом ключе - товары без сортировки (по порядку отображения))
- * @property-read array<
- *                    string[] ID# товара => int ID# товара
- *                > $catalogGoodsIds ID# товаров, доступные по страницам
- *                                   без учета фильтров
- * @property-read array<
- *                    string[] ID# товара => int ID# товара
- *                > $categoryGoodsIds ID# товаров, доступные на текущей странице
- *                                    без учета фильтров
- * @property-read array<
+ * @property-read array $properties <pre><code>array<int[] ID# свойства => Material_Field></code></pre> Список свойств
+ * @property-read array $propertiesByURNs <pre><code>array<
+ *     string[] URN свойства => Material_Field
+ * ></code></pre> Список свойств по URN
+ * @property-read array $richValues <pre><code>array<
+ *     int[] ID# свойства (только те, у которых rich-значения отличаются от сырых значений) => array<
+ *         mixed[] сырое значение => mixed rich-значение
+ *     >
+ * ></code></pre> Rich-значения свойств, у которых могут заведомо отличаться от сырых значений
+ * @property-read array $numericFieldsIds <pre><code>array<
+ *     string ID# поля => int ID# поля
+ * ></code></pre> Массив ID# числовых полей (number или range)
+ * @property-read array $propsMapping <pre><code>array<
+ *     string[] ID# свойства => array<mixed[] значение => array<string[] ID# товара => int ID# товара>>
+ * ></code></pre> Маппинг свойств к товарам
+ * @property-read array $catalogPropsMapping <pre><code>array<
+ *     string[] ID# свойства => array<mixed[] значение => array<string[] ID# товара => int ID# товара>>
+ * ></code></pre> Маппинг свойств к товарам (только в категории)
+ * @property-read array $sortMapping <pre><code>array<
+ *     string[] ID# свойства => array<string[] ID# товара => int ID# товара>
+ * ></code></pre> Маппинг свойств для сортировки (в пустом ключе - товары без сортировки (по порядку отображения))
+ * @property-read array $catalogGoodsIds <pre><code>array<
+ *     string[] ID# товара => int ID# товара
+ * ></code></pre> ID# товаров, доступные по страницам без учета фильтров
+ * @property-read array $categoryGoodsIds <pre><code>array<
+ *     string[] ID# товара => int ID# товара
+ * ></code></pre> ID# товаров, доступные на текущей странице без учета фильтров
+ * @property-read array $filter <pre><code>array<
  *                    string[] ID# свойства => mixed|array<mixed> значение или набор значений
- *                > $filter Значения фильтра
+ *                ></code></pre> Значения фильтра
  * @property-read bool $filterHasCheckedOptions Есть ли у фильтра отмеченные опции
- * @property-read array<string[] ID# свойства => array<
- *                    mixed[] значение => [
- *                        'value' => mixed значение,
- *                        'enabled' => bool Активно ли значение
- *                    ]
- *                >> $availableProperties Доступные для фильтра свойства
- * @property-read array<
- *                    string ID# категории => int количество товаров
- *                > $counter Счетчик товаров в категориях с учетом подкатегорий
- * @property-read array<
- *                    string ID# категории => int количество товаров
- *                > $selfCounter Счетчик товаров в категориях без учета подкатегорий
+ * @property-read array $availableProperties <pre><code>array<string[] ID# свойства => array<
+ *     mixed[] значение => [
+ *         'value' => mixed значение,
+ *         'enabled' => bool Активно ли значение
+ *     ]
+ * >></code></pre> Доступные для фильтра свойства
+ * @property-read array $counter <pre><code>array<
+ *     string ID# категории => int количество товаров
+ * ></code></pre> Счетчик товаров в категориях с учетом подкатегорий
+ * @property-read array $selfCounter <pre><code>array<
+ *     string ID# категории => int количество товаров
+ * ></code></pre> Счетчик товаров в категориях без учета подкатегорий
+ * @property-read array $goodsIdsMapping <pre><code>array<
+ *     string[] ID# свойства => array<string[] ID# товара => int ID# товара>
+ * ></code></pre> Объединенные товары по свойствам (без учета значения)
+ * @property-read array <pre><code>array<
+ *     string[] ID# свойства => array<string[] ID# товара => int ID# товара>
+ * ></code></pre> $crossFilterMapping Кросс-фильтры.
  */
 class CatalogFilter
 {
@@ -96,7 +90,7 @@ class CatalogFilter
 
     /**
      * ID# всех типов материалов
-     * @var array<string[] ID# типа материалов => int ID# типа материалов>
+     * @var array <pre><code>array<string[] ID# типа материалов => int ID# типа материалов></code></pre>
      */
     protected $materialTypesIds = [];
 
@@ -108,7 +102,7 @@ class CatalogFilter
 
     /**
      * Игнорируемые поля
-     * @var array<int ID# поля | string URN поля>
+     * @var array <pre><code>array<int ID# поля | string URN поля></code></pre>
      */
     protected $ignoredFields = [];
 
@@ -120,75 +114,74 @@ class CatalogFilter
 
     /**
      * ID# товаров, доступные по страницам без учета фильтров
-     * @var array<string[] ID# товара => int ID# товара>
+     * @var array <pre><code>array<string[] ID# товара => int ID# товара></code></pre>
      */
     protected $catalogGoodsIds = [];
 
     /**
      * ID# товаров, доступные на текущей странице без учета фильтров
-     * @var array<string[] ID# товара => int ID# товара>
+     * @var array <pre><code>array<string[] ID# товара => int ID# товара></code></pre>
      */
     protected $categoryGoodsIds = [];
 
     /**
      * Маппинг свойств к товарам
-     * @var array<
-     *          int[] ID# свойства => array<
-     *              mixed[] значение => array<
-     *                  string[] ID# товара => int ID# товара
-     *              >
-     *          >
-     *      >
+     * @var array <pre><code>array<
+     *     int[] ID# свойства => array<mixed[] значение => array<string[] ID# товара => int ID# товара>>
+     * ></code></pre>
      */
     protected $propsMapping = [];
+
+    /**
+     * Маппинг свойств к товарам только товаров, которые есть в категории, без учета pages_ids
+     * @var array <pre><code>array<
+     *     int[] ID# свойства => array<mixed[] значение => array<string[] ID# товара => int ID# товара>>
+     * ></code></pre>
+     */
+    protected $catalogPropsMapping = [];
 
     /**
      * Маппинг свойств для сортировки
      * (в пустом ключе - товары без сортировки (по порядку отображения))
      * Уже после применения каталога и фильтров
-     * @var array<
-     *          string[] ID# свойства => array<
-     *              string[] ID# товара => int ID# товара
-     *          >
-     *      >
+     * @var array <pre><code>array<string[] ID# свойства => array<string[] ID# товара => int ID# товара>></code></pre>
      */
     protected $sortMapping = [];
 
     /**
      * Список свойств
-     * @var array<int[] ID# свойства => Material_Field>
+     * @var array <pre><code>array<int[] ID# свойства => Material_Field></code></pre>
      */
     protected $properties = [];
 
     /**
      * Список свойств по URN
-     * @var array<string[] URN свойства => Material_Field>
+     * @var array <pre><code>array<string[] URN свойства => Material_Field></code></pre>
      */
     protected $propertiesByURNs = [];
 
     /**
      * Rich-значения свойств, у которых могут заведомо отличаться от сырых значений
-     * @var array<
-     *          int[] ID# свойства (только те, у которых rich-значения
-     *                    отличаются от сырых значений) => array<
-     *              mixed[] сырое значение => mixed rich-значение
-     *          >
-     *      >
+     * @var array <pre><code>array<
+     *     int[] ID# свойства (только те, у которых rich-значения отличаются от сырых значений) => array<
+     *         mixed[] сырое значение => mixed rich-значение
+     *     >
+     * ></code></pre>
      */
     protected $richValues = [];
 
 
     /**
      * Массив ID# числовых полей (number или range)
-     * @var array<string ID# поля => int ID# поля>
+     * @var array <pre><code>array<string ID# поля => int ID# поля></code></pre>
      */
     protected $numericFieldsIds = [];
 
     /**
      * Значения фильтра
-     * @var array<
-     *          string[] ID# свойства => mixed|array<mixed> значение или набор значений
-     *      >
+     * @var array <pre><code>array<
+     *     string[] ID# свойства => mixed|array<mixed> значение или набор значений
+     * ></code></pre>
      */
     protected $filter = [];
 
@@ -200,26 +193,50 @@ class CatalogFilter
 
     /**
      * Доступные для фильтра свойства
-     * @var array<string[] ID# свойства => array<
-     *          mixed[] значение => [
-     *              'value' => mixed значение,
-     *              'enabled' => bool Активно ли значение
-     *          ]
-     *      >>
+     * @var array <pre><code>array<string[] ID# свойства => array<mixed[] значение => [
+     *     'value' => mixed значение,
+     *     'enabled' => bool Активно ли значение
+     * ]>></code></pre>
      */
     protected $availableProperties = [];
 
     /**
      * Счетчик товаров в категориях с учетом подкатегорий
-     * @var array<string ID# категории => int количество товаров>
+     * @var array <pre><code>array<string ID# категории => int количество товаров></code></pre>
      */
     protected $counter = [];
 
     /**
      * Счетчик товаров в категориях без учета подкатегорий
-     * @var array<string ID# категории => int количество товаров>
+     * @var array <pre><code>array<string ID# категории => int количество товаров></code></pre>
      */
     protected $selfCounter = [];
+
+    /**
+     * Объединенные товары по свойствам (без учета значения).
+     *
+     * $goodsIdsMapping['price'] - это те ID# товаров, которые находятся в текущей категории и удовлетворяют
+     * фильтру по цене.
+     * Cвойства только те, которые есть в фильтре.
+     * @var array <pre><code>array<
+     *     string[] ID# свойства => array<string[] ID# товара => int ID# товара>
+     * ></code></pre>
+     */
+    protected $goodsIdsMapping = [];
+
+    /**
+     * Кросс-фильтры.
+     *
+     * $crossFilterMapping['price'] - это все товары, у которых применяется весь фильтр, кроме фильтра по цене
+     * (сделано для того, чтобы потом получить все возможные значения по свойству для фильтра, не обращая внимания
+     * на ограничения собственно по этому свойству)
+     * ВАЖНАЯ ЧАСТЬ - под пустым индексом [''] находится список товаров, с применением ВСЕГО фильтра,
+     * т.е. фактически отображаемые товары
+     * @var array <pre><code>array<
+     *     string[] ID# свойства => array<string[] ID# товара => int ID# товара>
+     * ></code></pre>
+     */
+    protected $crossFilterMapping = [];
 
     public function __get($var)
     {
@@ -234,15 +251,29 @@ class CatalogFilter
             case 'richValues':
             case 'numericFieldsIds':
             case 'propsMapping':
+            case 'catalogPropsMapping':
             case 'sortMapping':
             case 'catalogGoodsIds':
             case 'categoryGoodsIds':
             case 'filter':
             case 'filterHasCheckedOptions':
-            case 'availableProperties':
             case 'counter':
             case 'selfCounter':
+            case 'goodsIdsMapping':
+            case 'crossFilterMapping':
                 return $this->$var;
+                break;
+            case 'availableProperties':
+                if (!$this->availableProperties) {
+                    $this->availableProperties = $this->getAvailableProperties(
+                        $this->catalogPropsMapping,
+                        $this->crossFilterMapping,
+                        $this->filter,
+                        $this->numericFieldsIds,
+                        $this->richValues
+                    );
+                }
+                return $this->availableProperties;
                 break;
         }
     }
@@ -409,7 +440,7 @@ class CatalogFilter
         // Отфильтруем $this->propsMapping, оставив только те товары, которые есть
         // в данной категории ($this->categoryGoodsIds), попутно уберем из него
         // элемент pages_ids
-        $catalogPropsMapping = $this->applyCatalog(
+        $this->catalogPropsMapping = $this->applyCatalog(
             $this->propsMapping,
             $this->catalog->id
         );
@@ -419,7 +450,7 @@ class CatalogFilter
         // Иными словами, в $filteredMapping остаются только те свойства
         // и значения, которые удовлетворяют фильтру
         $filteredMapping = $this->applyFilter(
-            $catalogPropsMapping,
+            $this->catalogPropsMapping,
             $this->filter
         );
 
@@ -427,7 +458,7 @@ class CatalogFilter
         // Иными словами, $goodsIdsMapping['price'] - это те ID# товаров, которые
         // находятся в текущей категории и удовлетворяют фильтру по цене.
         // Как и в предыдущем пункте, свойства только те, которые есть в фильтре.
-        $goodsIdsMapping = $this->reduceMappingToGoodsIds($filteredMapping);
+        $this->goodsIdsMapping = $this->reduceMappingToGoodsIds($filteredMapping);
 
         // Получим кросс-фильтры.
         // В противоположность предыдущему пункту,
@@ -437,8 +468,8 @@ class CatalogFilter
         // не обращая внимания на ограничения собственно по этому свойству)
         // ВАЖНАЯ ЧАСТЬ - под пустым индексом [''] находится список товаров, с
         // применением ВСЕГО фильтра, т.е. фактически отображаемые товары
-        $crossFilterMapping = $this->applyCrossFilter(
-            $goodsIdsMapping,
+        $this->crossFilterMapping = $this->applyCrossFilter(
+            $this->goodsIdsMapping,
             (array)$this->categoryGoodsIds
         );
 
@@ -446,17 +477,8 @@ class CatalogFilter
         // список товаров с применением каталога и фильтра, а затем объединим по
         // свойствам
         $this->sortMapping = $this->getSortMapping(
-            $catalogPropsMapping,
-            $crossFilterMapping[''] // Фактически отображаемые товары
-        );
-
-        // Получим список доступных свойств и значений
-        $this->availableProperties = $this->getAvailableProperties(
-            $catalogPropsMapping,
-            $crossFilterMapping,
-            $this->filter,
-            $this->numericFieldsIds,
-            $this->richValues
+            $this->catalogPropsMapping,
+            $this->crossFilterMapping[''] // Фактически отображаемые товары
         );
     }
 
@@ -568,6 +590,11 @@ class CatalogFilter
         array $catalogGoodsIds
     ) {
         $propsMapping = [];
+        if ($this->useAvailabilityOrder && isset($this->propertiesByURNs[$this->useAvailabilityOrder])) {
+            $availabilityProp = $this->propertiesByURNs[$this->useAvailabilityOrder];
+        } else {
+            $availabilityProp = null;
+        }
         if ($catalogGoodsIds && $propertiesIds) {
             $sqlQuery = "SELECT *
                            FROM cms_data
@@ -575,7 +602,11 @@ class CatalogFilter
                             AND fid IN (" . implode(", ", $propertiesIds) . ")";
             $sqlResult = Material::_SQL()->query($sqlQuery);
             foreach ($sqlResult as $sqlRow) {
-                $propsMapping[trim($sqlRow['fid'])][trim($sqlRow['value'])][(string)$sqlRow['pid']] = (int)$sqlRow['pid'];
+                $value = trim($sqlRow['value']);
+                if ($availabilityProp && ($sqlRow['fid'] == $availabilityProp->id)) {
+                    $value = trim((int)(bool)$value);
+                }
+                $propsMapping[trim($sqlRow['fid'])][$value][(string)$sqlRow['pid']] = (int)$sqlRow['pid'];
             }
             // 2019-02-06, AVS: Пока уберем сортировку, сортировать будем
             // в build'е сразу по свойству $this->propsMapping

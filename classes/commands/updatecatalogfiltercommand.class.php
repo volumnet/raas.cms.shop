@@ -22,12 +22,14 @@ class UpdateCatalogFilterCommand extends Command
      * @param bool $forceUpdate Принудительно выполнить обновление, даже если материалы не были обновлены
      * @param bool $forceLockUpdate Принудительно выполнить обновление, даже если есть параллельный процесс
      *      {@deprecated больше не используется}
+     * @param string $availabilityURN URN поля наличия
      */
     public function process(
         $materialTypeURN = 'catalog',
         $withChildrenGoods = true,
         $forceUpdate = false,
-        $forceLockUpdate = false
+        $forceLockUpdate = false,
+        $availabilityURN = 'available'
     ) {
         $t = $this;
         $materialType = Material_Type::importByURN($materialTypeURN);
@@ -50,6 +52,7 @@ class UpdateCatalogFilterCommand extends Command
                     }
                 }
             }
+            $catalogFilter->useAvailabilityOrder = $availabilityURN;
             $catalogFilter->build();
             $catalogFilter->save();
             Package::i()->clearCache(true);

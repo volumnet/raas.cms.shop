@@ -35,4 +35,9 @@ export default {
             required: true,
         },
     },
+    mounted() {
+        if (this.source.length == 1) {
+            this.$emit('input', this.source[0].id);
+        }
+    },
 }

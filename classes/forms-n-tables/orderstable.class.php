@@ -130,12 +130,12 @@ class OrdersTable extends Table
                     $Row->class = 'info';
                 }
             },
-            'Set' => $params['Set'],
-            'Pages' => $params['Pages'],
+            'Set' => $params['Set'] ?? [],
+            'Pages' => $params['Pages'] ?? null,
             'data-role' => 'multitable',
             'meta' => [
                 'allContextMenu' => $view->getAllOrdersContextMenu(),
-                'allValue' => 'all&pid=' . (int)$Item->id,
+                'allValue' => 'all&pid=' . (int)($Item->id ?? 0),
             ],
         ];
         unset($params['columns']);
