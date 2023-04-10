@@ -41,7 +41,7 @@ foreach ($Form->fields as $fieldURN => $field) {
     }
 }
 
-if ($Page->mime == 'application/json') {
+if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
     $cartData['count'] = (int)$Cart->count;
     $cartData['additional'] = (array)$additional ?: null;
     if ($cartData['additional']['items']) {
@@ -120,10 +120,9 @@ if ($Page->mime == 'application/json') {
     </script>
 <?php } else {
     $formArrayFormatter = new FormArrayFormatter($Form);
-    $ajaxBlock = Block::spawn((int)$Block->additionalParams['ajaxBlockId']);
     $formArr = $formArrayFormatter->format(
-        ['signature' => function ($form) use ($ajaxBlock) {
-            return $form->getSignature($ajaxBlock);
+        ['signature' => function ($form) use ($Block) {
+            return $form->getSignature($Block);
         }],
         [
             'htmlId' => function ($field) use ($Block) {

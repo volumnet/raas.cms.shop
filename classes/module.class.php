@@ -35,13 +35,16 @@ class Module extends RAASModule
             Page::class,
             [Block_YML::class, 'pageCommitEventListener']
         );
-        EventProcessor::on(
-            Package::class . ':clearCache:clearCache',
-            Package::class,
-            function () {
-                CatalogFilter::clearCaches();
-            }
-        );
+        // 2023-04-05, AVS: Кэш фильтра НЕ ДОЛЖЕН чиститься при сбросе общих кэшей, поскольку во-первых,
+        // он может быть очень тяжелым, во-вторых, многие блоки не учитывают сортировку по наличию (1/0), а пишут реальное
+        // количество товара
+        // EventProcessor::on(
+        //     Package::class . ':clearCache:clearCache',
+        //     Package::class,
+        //     function () {
+        //         CatalogFilter::clearCaches();
+        //     }
+        // );
         parent::init();
     }
 

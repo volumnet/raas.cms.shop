@@ -107,6 +107,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
 
     public function createMaterials(array $pagesIds = [])
     {
+        $result = [];
         $item = new Material([
             'pid' => (int)$this->materialType->id,
             'vis' => 1,
@@ -119,6 +120,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
         $item->fields['price']->addValue(0);
         $item->fields['min_sum']->addValue(0);
         $item->fields['delivery']->addValue(0);
+        $result[] = $item;
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -131,6 +133,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
         $item->fields['price']->addValue(300);
         $item->fields['min_sum']->addValue(1000);
         $item->fields['delivery']->addValue(1);
+        $result[] = $item;
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -144,6 +147,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
         $item->fields['brief']->addValue(View_Web::i()->_('CDEK'));
         $item->fields['delivery']->addValue(0);
         $item->fields['service_urn']->addValue('cdek');
+        $result[] = $item;
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -157,6 +161,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
         $item->fields['brief']->addValue(View_Web::i()->_('CDEK'));
         $item->fields['delivery']->addValue(1);
         $item->fields['service_urn']->addValue('cdek');
+        $result[] = $item;
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -170,6 +175,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
         $item->fields['brief']->addValue(View_Web::i()->_('RUSSIAN_POST'));
         $item->fields['delivery']->addValue(1);
         $item->fields['service_urn']->addValue('russianpost');
+        $result[] = $item;
 
         return $result;
     }

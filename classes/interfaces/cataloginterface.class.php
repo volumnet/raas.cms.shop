@@ -236,21 +236,11 @@ class CatalogInterface extends MaterialInterface
     }
 
 
-    public function getList(
-        Block_Material $block,
-        Page $page,
-        array $get = [],
-        Pages $pages = null
-    ) {
+    public function getList(Block_Material $block, Page $page, array $get = [], Pages $pages = null) {
         $st = microtime(1);
         $this->filterIds = $this->getFilterIds($block, $get, $page->catalogFilter);
         $sqlParts = $this->getSQLParts($block, $page, $get, $pages);
-        $sqlQuery = $this->getSQLQuery(
-            $sqlParts['from'],
-            $sqlParts['where'],
-            $sqlParts['sort'],
-            $sqlParts['order']
-        );
+        $sqlQuery = $this->getSQLQuery($sqlParts['from'], $sqlParts['where'], $sqlParts['sort'], $sqlParts['order']);
 
         // var_dump(microtime(1) - $st, $sqlQuery, $sqlParts['bind']); exit;
         $st = microtime(1);
@@ -522,11 +512,8 @@ class CatalogInterface extends MaterialInterface
      * @param CatalogFilter $catalogFilter Фильтр каталога
      * @return int[]
      */
-    public function getRawFilterIds(
-        Block_Material $block,
-        array $get,
-        CatalogFilter $catalogFilter
-    ) {
+    public function getRawFilterIds(Block_Material $block, array $get, CatalogFilter $catalogFilter)
+    {
         $sortVar = (string)$block->sort_var_name;
         $sortVal = isset($get[$sortVar]) ? $get[$sortVar] : '';
         $orderVar = (string)$block->order_var_name;
@@ -758,6 +745,7 @@ class CatalogInterface extends MaterialInterface
         $metaData = [
             'id' => $item->id,
             'name' => $item->name,
+            'description' => $item->description,
             'urn' => $item->urn,
             'url' => $item->url,
             'h1' => $item->getH1(),
@@ -937,11 +925,15 @@ class CatalogInterface extends MaterialInterface
             $catalogFilter = $classname::loadOrBuild(
                 $block->Material_Type,
                 $withChildrenGoods,
-                []
+                [],
+                null,
+                true,
+                $block->additionalParams['useAvailabilityOrder'] ?: null
             );
-            if ($useAvailabilityOrder = $block->additionalParams['useAvailabilityOrder']) {
-                $catalogFilter->useAvailabilityOrder = $useAvailabilityOrder;
-            }
+            // // 2023-04-05, AVS: Актуально только при загрузке, т.к. build выполняется до этого
+            // if ($useAvailabilityOrder = $block->additionalParams['useAvailabilityOrder']) {
+            //     $catalogFilter->useAvailabilityOrder = $useAvailabilityOrder;
+            // }
             $filterParams = $this->getFilterParams($block, $catalogFilter, $get);
             $catalogFilter->apply($page, $filterParams);
             $page->catalogFilter = $catalogFilter;

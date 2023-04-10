@@ -75,6 +75,7 @@ class DiscountTemplate extends MaterialTypeTemplate
 
     public function createMaterials(array $pagesIds = [])
     {
+        $result = [];
         $item = new Material([
             'pid' => (int)$this->materialType->id,
             'vis' => 1,
@@ -85,6 +86,7 @@ class DiscountTemplate extends MaterialTypeTemplate
         $item->commit();
         $item->fields['discount']->addValue(10);
         $item->fields['code']->addValue('test10');
+        $result[] = $item;
 
         return $result;
     }

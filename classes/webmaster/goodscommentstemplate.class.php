@@ -402,7 +402,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
     ) {
         $newMaterialType = false;
         $materialType = Material_Type::importByURN($urn);
-        if (!$materialType->id) {
+        if (!($materialType && $materialType->id)) {
             $materialType = new Material_Type([
                 'name' => $name,
                 'urn' => $urn,
@@ -421,20 +421,9 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
 
     public function create()
     {
-        $form = Form::importByURN($urn);
-        if (!$form->id) {
-            $form = $this->createForm();
-        }
-
-        $widget = Snippet::importByURN($urn);
-        if (!$widget->id) {
-            $widget = $this->createBlockSnippet();
-        }
-
-        $formWidget = Snippet::importByURN($urn . '_form');
-        if (!$formWidget->id) {
-            $formWidget = $this->createFormSnippet();
-        }
+        $form = $this->createForm();
+        $widget = $this->createBlockSnippet();
+        $formWidget = $this->createFormSnippet();
 
         $pagesIds = (array)$this->catalogBlock->pages_ids;
         $pageId = min($pagesIds);

@@ -145,7 +145,7 @@ class Webmaster extends CMSWebmaster
             $urn = explode('/', $url);
             $urn = $urn[count($urn) - 1];
             $widget = Snippet::importByURN($urn);
-            if (!$widget->id) {
+            if (!($widget && $widget->id)) {
                 $widget = $this->createSnippet(
                     $urn,
                     $name,
@@ -178,7 +178,7 @@ class Webmaster extends CMSWebmaster
     ) {
         $cartTypes = [];
         $CT = Cart_Type::importByURN('cart');
-        if (!$CT->id) {
+        if (!($CT && $CT->id)) {
             $CT = new Cart_Type([
                 'id' => 1,
                 'name' => View_Web::i()->_('CART'),
@@ -203,7 +203,7 @@ class Webmaster extends CMSWebmaster
         $cartTypes['cart'] = $CT;
 
         $CT = Cart_Type::importByURN('favorites');
-        if (!$CT->id) {
+        if (!($CT && $CT->id)) {
             $CT = new Cart_Type([
                 'id' => 2,
                 'name' => View_Web::i()->_('FAVORITES'),
@@ -219,7 +219,7 @@ class Webmaster extends CMSWebmaster
         $cartTypes['favorites'] = $CT;
 
         $CT = Cart_Type::importByURN('compare');
-        if (!$CT->id) {
+        if (!($CT && $CT->id)) {
             $CT = new Cart_Type([
                 'id' => 3,
                 'name' => View_Web::i()->_('COMPARISON'),
@@ -251,7 +251,7 @@ class Webmaster extends CMSWebmaster
             'canceled' => 'CANCELED'
         ] as $key => $val) {
             $OS = Order_Status::importByURN($key);
-            if (!$OS->id) {
+            if (!($OS && $OS->id)) {
                 $OS = new Order_Status([
                     'name' => View_Web::i()->_($val),
                     'urn' => $key
@@ -277,7 +277,7 @@ class Webmaster extends CMSWebmaster
     {
         $loaders = [];
         $IL = ImageLoader::importByURN('default');
-        if (!$IL->id) {
+        if (!($IL && $IL->id)) {
             $IL = new ImageLoader([
                 'mtype' => $catalogType->id,
                 'ufid' => $catalogType->fields['article']->id,
@@ -294,7 +294,7 @@ class Webmaster extends CMSWebmaster
         $loaders['imageloader'] = $IL;
 
         $PL = PriceLoader::importByURN('default');
-        if (!$PL->id) {
+        if (!($PL && $PL->id)) {
             $PL = new PriceLoader([
                 'mtype' => (int)$catalogType->id,
                 'ufid' => $catalogType->fields['article']->id,
@@ -481,7 +481,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         ]);
         foreach ($fieldsData as $row) {
             $field = Page_Field::importByURN($row['urn']);
-            if (!$field->id) {
+            if (!($field && $field->id)) {
                 $field = new Page_Field($row);
                 $field->commit();
             }
@@ -501,37 +501,38 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
      */
     public function createCart(Cart_Type $cartType, Page $ajax, Form $form)
     {
-        $temp = Page::getSet([
-            'where' => ["pid = " . (int)$ajax->id, "urn = 'cart'"]
-        ]);
-        if ($temp) {
-            $ajaxCart = $temp[0];
-            $ajaxCart->trust();
-        } else {
-            $ajaxCart = $this->createPage(
-                [
-                    'name' => View_Web::i()->_('CART'),
-                    'urn' => 'cart',
-                    'template' => 0,
-                    'cache' => 0,
-                    'response_code' => 200,
-                    'mime' => 'application/json',
-                ],
-                $ajax
-            );
-            $ajaxBlock = $this->createBlock(new Block_Cart([
-                'cart_type' => (int)$cartType->id,
-                'params' => 'cdek[authLogin]='
-                    . '&cdek[secure]='
-                    . '&cdek[senderCityId]=250'
-                    . '&cdek[pickupTariff]=136'
-                    . '&cdek[deliveryTariff]=137'
-                    . '&russianpost[login]='
-                    . '&russianpost[password]='
-                    . '&russianpost[token]='
-                    . '&minOrderSum=0',
-            ]), '', 'cart_interface', 'cart', $ajaxCart);
-        }
+        // @deprecated 2023-03-05, AVS: создание AJAX-страниц для корзин устарело, используется X-RAAS-Block-Id
+        // $temp = Page::getSet([
+        //     'where' => ["pid = " . (int)$ajax->id, "urn = 'cart'"]
+        // ]);
+        // if ($temp) {
+        //     $ajaxCart = $temp[0];
+        //     $ajaxCart->trust();
+        // } else {
+        //     $ajaxCart = $this->createPage(
+        //         [
+        //             'name' => View_Web::i()->_('CART'),
+        //             'urn' => 'cart',
+        //             'template' => 0,
+        //             'cache' => 0,
+        //             'response_code' => 200,
+        //             'mime' => 'application/json',
+        //         ],
+        //         $ajax
+        //     );
+        //     $ajaxBlock = $this->createBlock(new Block_Cart([
+        //         'cart_type' => (int)$cartType->id,
+        //         'params' => 'cdek[authLogin]='
+        //             . '&cdek[secure]='
+        //             . '&cdek[senderCityId]=250'
+        //             . '&cdek[pickupTariff]=136'
+        //             . '&cdek[deliveryTariff]=137'
+        //             . '&russianpost[login]='
+        //             . '&russianpost[password]='
+        //             . '&russianpost[token]='
+        //             . '&minOrderSum=0',
+        //     ]), '', 'cart_interface', 'cart', $ajaxCart);
+        // }
 
 
         $temp = Page::getSet([
@@ -549,7 +550,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             ], $this->Site);
             $this->createBlock(new Block_Cart([
                 'cart_type' => (int)$cartType->id,
-                'params' => 'ajaxBlockId=' . (int)$ajaxBlock->id,
+                // 'params' => 'ajaxBlockId=' . (int)$ajaxBlock->id,
             ]), 'content', 'cart_interface', 'cart', $cart);
 
             $this->createBlock(
@@ -580,10 +581,12 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
 
         $deliveryMaterialType = Material_Type::importByURN('delivery');
         $paymentMaterialType = Material_Type::importByURN('payment');
-        $form->fields['delivery']->source = (int)$deliveryMaterialType->id;
-        $form->fields['delivery']->commit();
-        $form->fields['payment']->source = (int)$paymentMaterialType->id;
-        $form->fields['payment']->commit();
+        $deliveryField = $form->fields['delivery'];
+        $deliveryField->source = (int)$deliveryMaterialType->id;
+        $deliveryField->commit();
+        $paymentField = $form->fields['payment'];
+        $paymentField->source = (int)$paymentMaterialType->id;
+        $paymentField->commit();
         return $cart;
     }
 
@@ -782,9 +785,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
      */
     public function createFilter(Block_Material $catalogBlock)
     {
-        $ajax = array_shift(Page::getSet([
+        $pagesSet = Page::getSet([
             'where' => ["pid = " . (int)$this->Site->id, "urn = 'ajax'"]
-        ]));
+        ]);
+        $ajax = array_shift($pagesSet);
         $catalogFilterPages = Page::getSet([
             'where' => ["pid = " . (int)$ajax->id, "urn = 'catalog_filter'"]
         ]);
@@ -1083,12 +1087,12 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $catalogType = $materialTemplate->materialType;
         $catalog = $materialTemplate->create();
 
-        $catalog->fields['main_props']->addValue((int)$catalogType->props['article']->id);
-        $catalog->fields['main_props']->addValue((int)$catalogType->props['brand']->id);
-        $catalog->fields['main_props']->addValue((int)$catalogType->props['length']->id);
-        $catalog->fields['main_props']->addValue((int)$catalogType->props['height']->id);
-        $catalog->fields['main_props']->addValue((int)$catalogType->props['width']->id);
-        $catalog->fields['main_props']->addValue((int)$catalogType->props['weight']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->fields['article']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->fields['brand']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->fields['length']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->fields['height']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->fields['width']->id);
+        $catalog->fields['main_props']->addValue((int)$catalogType->fields['weight']->id);
 
         GoodsCommentsTemplate::spawn(
             View_Web::i()->_('GOODS_REVIEWS'),
@@ -1104,9 +1108,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $materialTemplate->catalogBlock
         )->create();
 
-        $ajax = array_shift(Page::getSet([
+        $pagesSet = Page::getSet([
             'where' => "urn = 'ajax' AND pid = " . (int)$this->Site->id
-        ]));
+        ]);
+        $ajax = array_shift($pagesSet);
         $menus = $this->createMenus([
             [
                 'pageId' => (int)$catalog->id,
@@ -1147,7 +1152,8 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             ],
         ]);
 
-        $this->createAJAXMenus($ajax);
+        // @deprecated 2023-03-05, AVS: создание AJAX-страниц для меню устарело, используется X-RAAS-Block-Id
+        // $this->createAJAXMenus($ajax);
         $sqlQuery = "SELECT tB.id
                        FROM " . Block::_tablename() . " AS tB
                        JOIN cms_blocks_menu AS tBM
@@ -1188,73 +1194,74 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
 
     /**
      * Создает AJAX-меню
+     * @deprecated 2023-03-05, AVS: создание AJAX-страниц для меню устарело, используется X-RAAS-Block-Id
      */
     public function createAJAXMenus(Page $ajax)
     {
         $cacheInterfaceId = Snippet::importByURN('__raas_cache_interface')->id;
         $menuInterface =  Snippet::importByURN('__raas_menu_interface');
-        $temp = Page::getSet([
-            'where' => ["pid = " . (int)$ajax->id, "urn = 'menu_left'"]
-        ]);
-        if ($temp) {
-            $leftMenuPage = $temp[0];
-        } else {
-            $leftMenuPageData = [
-                'name' => View_Web::i()->_('LEFT_MENU'),
-                'urn' => 'menu_left',
-                'template' => 0,
-                'cache' => 0,
-                'response_code' => 200
-            ];
-            $leftMenu = Menu::importByURN('left');
-            $leftMenuPage = $this->createPage($leftMenuPageData, $ajax);
-            $leftMenuWidget = Snippet::importByURN('menu_left');
-            $leftMenuBlock = new Block_Menu([
-                'menu' => (int)$leftMenu->id,
-                'full_menu' => 1,
-                'cache_type' => Block::CACHE_DATA,
-                'cache_interface_id' => (int)$cacheInterfaceId,
-            ]);
-            $this->createBlock(
-                $leftMenuBlock,
-                '',
-                $menuInterface,
-                $leftMenuWidget,
-                $leftMenuPage,
-                false
-            );
-        }
-        $temp = Page::getSet([
-            'where' => ["pid = " . (int)$ajax->id, "urn = 'menu_mobile'"]
-        ]);
-        if ($temp) {
-            $mobileMenuPage = $temp[0];
-        } else {
-            $mobileMenuPageData = [
-                'name' => View_Web::i()->_('MOBILE_MENU'),
-                'urn' => 'menu_mobile',
-                'template' => 0,
-                'cache' => 0,
-                'response_code' => 200
-            ];
-            $mobileMenu = Menu::importByURN('mobile');
-            $mobileMenuPage = $this->createPage($mobileMenuPageData, $ajax);
-            $mobileMenuWidget = Snippet::importByURN('menu_mobile');
-            $mobileMenuBlock = new Block_Menu([
-                'menu' => (int)$mobileMenu->id,
-                'full_menu' => 1,
-                'cache_type' => Block::CACHE_DATA,
-                'cache_interface_id' => (int)$cacheInterfaceId,
-            ]);
-            $this->createBlock(
-                $mobileMenuBlock,
-                '',
-                $menuInterface,
-                $mobileMenuWidget,
-                $mobileMenuPage,
-                false
-            );
-        }
+        // $temp = Page::getSet([
+        //     'where' => ["pid = " . (int)$ajax->id, "urn = 'menu_left'"]
+        // ]);
+        // if ($temp) {
+        //     $leftMenuPage = $temp[0];
+        // } else {
+        //     $leftMenuPageData = [
+        //         'name' => View_Web::i()->_('LEFT_MENU'),
+        //         'urn' => 'menu_left',
+        //         'template' => 0,
+        //         'cache' => 0,
+        //         'response_code' => 200
+        //     ];
+        //     $leftMenu = Menu::importByURN('left');
+        //     $leftMenuPage = $this->createPage($leftMenuPageData, $ajax);
+        //     $leftMenuWidget = Snippet::importByURN('menu_left');
+        //     $leftMenuBlock = new Block_Menu([
+        //         'menu' => (int)$leftMenu->id,
+        //         'full_menu' => 1,
+        //         'cache_type' => Block::CACHE_DATA,
+        //         'cache_interface_id' => (int)$cacheInterfaceId,
+        //     ]);
+        //     $this->createBlock(
+        //         $leftMenuBlock,
+        //         '',
+        //         $menuInterface,
+        //         $leftMenuWidget,
+        //         $leftMenuPage,
+        //         false
+        //     );
+        // }
+        // $temp = Page::getSet([
+        //     'where' => ["pid = " . (int)$ajax->id, "urn = 'menu_mobile'"]
+        // ]);
+        // if ($temp) {
+        //     $mobileMenuPage = $temp[0];
+        // } else {
+        //     $mobileMenuPageData = [
+        //         'name' => View_Web::i()->_('MOBILE_MENU'),
+        //         'urn' => 'menu_mobile',
+        //         'template' => 0,
+        //         'cache' => 0,
+        //         'response_code' => 200
+        //     ];
+        //     $mobileMenu = Menu::importByURN('mobile');
+        //     $mobileMenuPage = $this->createPage($mobileMenuPageData, $ajax);
+        //     $mobileMenuWidget = Snippet::importByURN('menu_mobile');
+        //     $mobileMenuBlock = new Block_Menu([
+        //         'menu' => (int)$mobileMenu->id,
+        //         'full_menu' => 1,
+        //         'cache_type' => Block::CACHE_DATA,
+        //         'cache_interface_id' => (int)$cacheInterfaceId,
+        //     ]);
+        //     $this->createBlock(
+        //         $mobileMenuBlock,
+        //         '',
+        //         $menuInterface,
+        //         $mobileMenuWidget,
+        //         $mobileMenuPage,
+        //         false
+        //     );
+        // }
     }
 
 

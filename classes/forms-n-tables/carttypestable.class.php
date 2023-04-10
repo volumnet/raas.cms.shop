@@ -40,7 +40,7 @@ class CartTypesTable extends \RAAS\Table
                 ],
                 'urn' => [
                     'caption' => $this->view->_('URN'),
-                    'callback' => function ($row) use ($view, $Item) {
+                    'callback' => function ($row) use ($view) {
                         return '<a href="' . $view->url . '&action=edit_cart_type&id=' . (int)$row->id . '">
                                   ' . htmlspecialchars($row->urn) . '
                                 </a>';
@@ -52,7 +52,6 @@ class CartTypesTable extends \RAAS\Table
                         $i
                     ) use (
                         $view,
-                        $contextMenuName,
                         $params
                     ) {
                         return rowContextMenu($view->getCartTypeContextMenu($row, $i, count((array)$params['Set'])));

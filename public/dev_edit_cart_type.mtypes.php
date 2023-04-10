@@ -30,7 +30,7 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
                   </select>
                 </td>
                 <td>
-                  <input type="text" name="price_callback[<?php echo (int)$mtype->id?>]" value="<?php echo htmlspecialchars($DATA['price_callback'][$mtype->id])?>" <?php echo $DATA['price_id'][$mtype->id] ? 'disabled="disabled"' : ''?> data-role="callback" />
+                  <input type="text" name="price_callback[<?php echo (int)$mtype->id?>]" value="<?php echo htmlspecialchars($DATA['price_callback'][$mtype->id] ?? '')?>" <?php echo ($DATA['price_id'][$mtype->id] ?? 0) ? 'disabled="disabled"' : ''?> data-role="callback" />
                 </td>
               </tr>
           <?php } ?>

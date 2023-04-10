@@ -126,7 +126,6 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
             $nameField->urn => $nameField,
             $phoneField->urn => $phoneField,
             $emailField->urn => $emailField,
-            $imageField->urn => $imageField,
             $answerDateField->urn => $answerDateField,
             $answerNameField->urn => $answerNameField,
             $answerGenderField->urn => $answerGenderField,

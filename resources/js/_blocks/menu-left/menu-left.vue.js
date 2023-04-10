@@ -17,8 +17,16 @@ export default {
             type: Boolean,
             default: false,
         },
+        /**
+         * ID# блока (использовать AJAX-загрузку с той же страницы)
+         * @type {Number|null}
+         */
+        blockId: {
+            type: Number,
+            default: null,
+        },
     },
-    mounted: function () {
+    mounted() {
         if (this.useAjax) {
             $(window).one('load', () => {
                 window.setTimeout(() => {
@@ -39,15 +47,14 @@ export default {
         /**
          * Получает полное меню через AJAX
          */
-        getAJAXMenu: function () {
-            $.get(this.ajaxURL, (result) => {
-                let $remoteMenu = $(result);
-                let $localMenu = $(this.$el);
+        async getAJAXMenu() {
+            const response = await this.$root.api(this.ajaxURL, null, this.blockId, 'text/html');
+            let $remoteMenu = $(response);
+            let $localMenu = $(this.$el);
 
-                let $localCatalogList = $('.menu-left__list_main', $localMenu);
-                let $remoteCatalogList = $('.menu-left__list_main', $remoteMenu);
-                $localCatalogList.replaceWith($remoteCatalogList);
-            })
+            let $localCatalogList = $('.menu-left__list_main', $localMenu);
+            let $remoteCatalogList = $('.menu-left__list_main', $remoteMenu);
+            $localCatalogList.replaceWith($remoteCatalogList);
         },
     },
     computed: {
@@ -55,14 +62,18 @@ export default {
          * Путь для AJAX-запроса
          * @return {String}
          */
-        ajaxURL: function () {
-            return '/ajax/menu_left/?id=' + this.pageId;
+        ajaxURL() {
+            if (this.blockId) {
+                return window.location.pathname;
+            } else {
+                return '/ajax/menu_left/?id=' + this.pageId;
+            }
         },
         /**
          * Аналог this для привязки к слоту
          * @return {Object}
          */
-        self: function () {
+        self() {
             return { ...this };
         },
     }

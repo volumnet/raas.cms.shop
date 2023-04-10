@@ -356,7 +356,7 @@ if ($Item) {
                 <div class="catalog-article__add-to-cart-outer">
                   <div class="catalog-article__amount-block" title="<?php echo IN_CART?>" data-v-if="vm.inCart">
                     <a class="catalog-article__decrement" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();">–</a>
-                    <input type="number" class="form-control catalog-article__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_input="vm.setAmount($event.target.value); vm.setCart();" />
+                    <input type="number" class="form-control catalog-article__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_change="vm.setAmount($event.target.value); vm.setCart();" />
                     <a class="catalog-article__increment" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();">+</a>
                   </div>
                   <button type="button" data-v-else data-v-on_click="vm.setAmount(Math.max(vm.item.min, 1)); vm.setCart()" class="btn btn-primary catalog-article__add-to-cart">

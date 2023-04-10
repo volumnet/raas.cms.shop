@@ -40,7 +40,7 @@ class PriceLoadersTable extends \RAAS\Table
                 ],
                 'urn' => [
                     'caption' => $this->view->_('URN'),
-                    'callback' => function ($row) use ($view, $Item) {
+                    'callback' => function ($row) use ($view) {
                         return '<a href="' . $view->url . '&action=edit_priceloader&id=' . (int)$row->id . '">
                                   ' . htmlspecialchars($row->urn) . '
                                 </a>';
@@ -52,7 +52,6 @@ class PriceLoadersTable extends \RAAS\Table
                         $i
                     ) use (
                         $view,
-                        $contextMenuName,
                         $params
                     ) {
                         return rowContextMenu($view->getPriceLoaderContextMenu($row, $i, count((array)$params['Set'])));

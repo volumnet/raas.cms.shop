@@ -1468,6 +1468,7 @@ class CatalogFilter
      * @param bool $withChildrenGoods Учитывать товары из дочерних категорий
      * @param string|null $filename Путь, откуда загружаем. Если не указан,
      *                              будет использован путь по умолчанию
+     * @param string|null $useAvailabilityOrder Использовать поле наличия (URN поля)
      * @return static
      * @throws Exception Выбрасывает исключение, если не удалось загрузить файл
      *                   (или каскадно, если файл не распознан)
@@ -1475,7 +1476,8 @@ class CatalogFilter
     public static function load(
         Material_Type $materialType,
         $withChildrenGoods = false,
-        $filename = null
+        $filename = null,
+        $useAvailabilityOrder = null
     ) {
         if (!$filename) {
             $filename = static::getDefaultFilename($materialType->id, $withChildrenGoods);
@@ -1488,6 +1490,9 @@ class CatalogFilter
             throw new Exception('Cannot load filter cache data - data is empty or invalid');
         }
         $filter = static::import($data);
+        if ($useAvailabilityOrder) {
+            $filter->useAvailabilityOrder = $useAvailabilityOrder;
+        }
         return $filter;
     }
 
@@ -1496,12 +1501,12 @@ class CatalogFilter
      * Загружает или строит кэш
      * @param Material_Type $materialType Тип материала
      * @param bool $withChildrenGoods Учитывать товары из дочерних категорий
-     * @param array<
-     *            int ID# поля | string URN поля | Material_Field поле
-     *        > $ignored Игнорируемые поля
-     * @param string|null $filename Путь для загрузки/сохранения. Если не указан,
-     *                              будет использован путь по умолчанию
+     * @param array $ignored <pre><code>array<
+     *     int ID# поля | string URN поля | Material_Field поле
+     * ></code></pre> Игнорируемые поля
+     * @param string|null $filename Путь для загрузки/сохранения. Если не указан, будет использован путь по умолчанию
      * @param bool $save Сохранять кэш при построении
+     * @param string|null $useAvailabilityOrder Использовать поле наличия (URN поля)
      * @return static
      */
     public static function loadOrBuild(
@@ -1509,12 +1514,16 @@ class CatalogFilter
         $withChildrenGoods = false,
         array $ignored = [],
         $filename = null,
-        $save = true
+        $save = true,
+        $useAvailabilityOrder = null
     ) {
         try {
-            $filter = static::load($materialType, $withChildrenGoods, $filename);
+            $filter = static::load($materialType, $withChildrenGoods, $filename, $useAvailabilityOrder);
         } catch (Exception $e) {
             $filter = new static($materialType, $withChildrenGoods, $ignored);
+            if ($useAvailabilityOrder) {
+                $filter->useAvailabilityOrder = $useAvailabilityOrder;
+            }
             $filter->build();
             if ($save) {
                 $filter->save($filename);

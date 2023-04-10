@@ -9,13 +9,25 @@ export default class {
      * Конструктор класса
      * @param {String} id Идентификатор (URN) корзины
      * @param {String|null} updateUrl URL для обновления
+     * @param {Number} blockId ID# блока
      */
-    constructor(id, updateUrl = null) {
+    constructor(id, updateUrl = null, blockId = null) {
         /**
          * Идентификатор (URN) корзины
          * @type {String}
          */
         this.id = id;
+
+        /**
+         * ID# блока
+         * @type {Number}
+         */
+        this.blockId = blockId;
+        
+        /**
+         * URL для обновления
+         * @type {String}
+         */
         if (updateUrl) {
             this.updateUrl = updateUrl;
         } else {
@@ -122,17 +134,18 @@ export default class {
             url += query;
         }
         if (url) {
-            let ajaxSettings = {
-                url: url,
-                method: 'GET',
-                dataType: 'json',
-            };
-            if (postData) {
-                ajaxSettings.method = 'POST';
-                ajaxSettings.data = postData;
-            }
+            // let ajaxSettings = {
+            //     url: url,
+            //     method: 'GET',
+            //     dataType: 'json',
+            // };
+            // if (postData) {
+            //     ajaxSettings.method = 'POST';
+            //     ajaxSettings.data = postData;
+            // }
             this.loading = true;
-            const remoteData = await $.ajax(ajaxSettings);
+            const remoteData = await window.app.api(url, postData || null, this.blockId);
+            console.log(remoteData);
             this.updateData(remoteData);
         }
     }

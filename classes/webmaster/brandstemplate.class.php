@@ -40,7 +40,7 @@ class BrandsTemplate extends MaterialTypeTemplate
         $imageField->commit();
 
         return [
-            $imageField->urn => $imagesField,
+            $imageField->urn => $imageField,
         ];
     }
 
@@ -68,7 +68,7 @@ class BrandsTemplate extends MaterialTypeTemplate
         $filename = Module::i()->resourcesDir
             . '/widgets/materials/brands/brands_main.tmp.php';
         $snippet = Snippet::importByURN('brands_main');
-        if (!$snippet->id) {
+        if (!($snippet && $snippet->id)) {
             $snippet = $this->webmaster->createSnippet(
                 'brands_main',
                 View_Web::i()->_('BRANDS_MAIN'),

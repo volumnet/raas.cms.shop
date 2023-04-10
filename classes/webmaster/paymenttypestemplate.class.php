@@ -94,26 +94,32 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
 
     public function createMaterials(array $pagesIds = [])
     {
+        $result = [];
         $deliveryMaterialType = Material_Type::importByURN('delivery');
         $deliveries = Material::getSet(['where' => [
             "pid = " . (int)$deliveryMaterialType->id,
         ], 'orderBy' => "id"]);
 
-        $pickup = array_shift(array_filter($deliveries, function ($x) {
+        $pickupSet = array_filter($deliveries, function ($x) {
             return ($x->receiving_method == 0) && !$x->service_urn;
-        }));
-        $courierDelivery = array_shift(array_filter($deliveries, function ($x) {
+        });
+        $pickup = array_shift($pickupSet);
+        $courierDeliverySet = array_filter($deliveries, function ($x) {
             return ($x->receiving_method == 1) && !$x->service_urn;
-        }));
-        $cdekPickup = array_shift(array_filter($deliveries, function ($x) {
+        });
+        $courierDelivery = array_shift($courierDeliverySet);
+        $cdekPickupSet = array_filter($deliveries, function ($x) {
             return ($x->receiving_method == 0) && ($x->service_urn == 'cdek');
-        }));
-        $cdekDelivery = array_shift(array_filter($deliveries, function ($x) {
+        });
+        $cdekPickup = array_shift($cdekPickupSet);
+        $cdekDeliverySet = array_filter($deliveries, function ($x) {
             return ($x->receiving_method == 1) && ($x->service_urn == 'cdek');
-        }));
-        $russianPost = array_shift(array_filter($deliveries, function ($x) {
+        });
+        $cdekDelivery = array_shift($cdekDeliverySet);
+        $russianPostSet = array_filter($deliveries, function ($x) {
             return ($x->receiving_method == 1) && ($x->service_urn == 'russianpost');
-        }));
+        });
+        $russianPost = array_shift($russianPostSet);
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -123,6 +129,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
             'sitemaps_priority' => 0.5,
         ]);
         $item->commit();
+        $result[] = $item;
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -132,6 +139,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
             'sitemaps_priority' => 0.5,
         ]);
         $item->commit();
+        $result[] = $item;
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -141,6 +149,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
             'sitemaps_priority' => 0.5,
         ]);
         $item->commit();
+        $result[] = $item;
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -150,6 +159,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
             'sitemaps_priority' => 0.5,
         ]);
         $item->commit();
+        $result[] = $item;
 
         $item = new Material([
             'pid' => (int)$this->materialType->id,
@@ -160,6 +170,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
         ]);
         $item->commit();
         $item->fields['epay']->addValue(1);
+        $result[] = $item;
 
         return $result;
     }

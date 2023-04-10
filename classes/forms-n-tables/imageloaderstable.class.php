@@ -40,14 +40,14 @@ class ImageLoadersTable extends \RAAS\Table
                 ],
                 'urn' => [
                     'caption' => $this->view->_('URN'),
-                    'callback' => function ($row) use ($view, $Item) {
+                    'callback' => function ($row) use ($view) {
                         return '<a href="' . $view->url . '&action=edit_imageloader&id=' . (int)$row->id . '">
                                   ' . htmlspecialchars($row->urn) . '
                                 </a>';
                     }
                 ],
                 ' ' => [
-                    'callback' => function ($row, $i) use ($view, $contextMenuName, $params) {
+                    'callback' => function ($row, $i) use ($view, $params) {
                         return rowContextMenu($view->getImageLoaderContextMenu($row, $i, count((array)$params['Set'])));
                     }
                 ]

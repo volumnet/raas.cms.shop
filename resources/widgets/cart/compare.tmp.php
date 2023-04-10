@@ -27,7 +27,7 @@ use RAAS\CMS\Material;
 use RAAS\CMS\Package;
 use RAAS\CMS\Material_Field;
 
-if ($Page->mime == 'application/json') {
+if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
     $allowedHiddenFields = ['brand'];
 
     $cartData = [];

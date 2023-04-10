@@ -338,7 +338,7 @@ class CatalogTemplate extends MaterialTypeTemplate
             $urn = $urn[count($urn) - 1];
             $urn = str_replace('catalog_', $this->materialType->urn . '_', $urn);
             $widget = Snippet::importByURN($urn);
-            if (!$widget->id) {
+            if (!($widget && $widget->id)) {
                 $widget = $this->webmaster->createSnippet(
                     $urn,
                     $name,
@@ -397,7 +397,7 @@ class CatalogTemplate extends MaterialTypeTemplate
         );
         shuffle($categoriesImages);
         $i = 0;
-        $imageField = $category->fields['image'] ?: $category->fields['images'];
+        $imageField = $rootPage->fields['image'] ?: $rootPage->fields['images'];
         if ($imageField) {
             foreach ($result as $category) {
                 $att = Attachment::createFromFile(
@@ -643,7 +643,7 @@ class CatalogTemplate extends MaterialTypeTemplate
     public function create()
     {
         $widget = Snippet::importByURN($this->materialType->urn);
-        if (!$widget->id) {
+        if (!($widget && $widget->id)) {
             $widget = $this->createBlockSnippet();
         }
 
