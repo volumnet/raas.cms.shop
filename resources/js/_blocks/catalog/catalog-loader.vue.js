@@ -91,7 +91,7 @@ export default {
             }
             this.currentPage = parseInt($remoteLoader.attr('data-v-bind_page')) || 1;
             this.pagesTotal = parseInt($remoteLoader.attr('data-v-bind_pages')) || 1;
-            
+
             [
                 'h1', 
                 '.catalog__description',
@@ -134,7 +134,8 @@ export default {
                     propsData: { item: itemData },
                 });
                 raasShopCatalogItem.$mount(this);
-            })
+            });
+            this.$root.lightBoxInit();
         },
 
 

@@ -534,13 +534,14 @@ $getAdditionals = function (
     &$getRussianPostTariffs,
     &$getSelfTariffs,
     &$getSelfPoints,
-    $cdekJSON,
-    $weight,
-    $sizes
+    $cdekJSON
 ) {
     $result = [];
 
     $sum = (float)$cart->sum;
+    $weight = $cart->weight;
+    $sizes = $cart->sizes;
+    $_POST['weight'] = $post['weight'] = $weight;
     $sumForDiscount = 0;
     foreach ($cart->items as $cartItem) {
         if ($cartItem->amount) {

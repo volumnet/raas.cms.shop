@@ -73,7 +73,7 @@ if ($propsCache) {
     }
 }
 ?>
-<div class="catalog-item" data-vue-role="catalog-item" data-v-bind_item="<?php echo htmlspecialchars(json_encode($itemData))?>" data-v-bind_bind-amount-to-cart="true" data-v-slot="vm" data-id="<?php echo (int)$item->id?>">
+<div class="catalog-item" data-vue-role="catalog-item" data-v-bind_item="<?php echo htmlspecialchars(json_encode($itemData))?>" data-v-bind_bind-amount-to-cart="true" data-v-slot="vm" data-id="<?php echo (int)$itemData['id']?>">
   <div class="catalog-item__image<?php echo (count($itemData['visImages']) > 1) ? ' catalog-item__image_swap' : ''?>">
     <a href="<?php echo $itemData['url']?>">
       <img loading="lazy" src="<?php echo htmlspecialchars($itemData['image'] ?: '/files/cms/common/image/design/nophoto.jpg')?>" alt="<?php echo htmlspecialchars($itemData['visImages'][0]['name'] ?: $itemData['name'])?>" />

@@ -20,7 +20,7 @@ export default {
             required: true,
         },
     },
-    data: function () {
+    data() {
         let translations = {
             DATE: 'Дата',
             GOODS: 'Товары',
@@ -44,10 +44,15 @@ export default {
          *     result: Object Результат (список заказов) после удаления заказа
          * }</code></pre>
          */
-        onDeleteItem: function (event) {
+        onDeleteItem(event) {
             if (event.result && event.result.items) {
                 this.items = event.result.items;
             }
+        },
+    },
+    watch: {
+        initialItems() {
+            this.items = this.initialItems;
         },
     },
 };

@@ -10,6 +10,7 @@ namespace RAAS\CMS\Shop;
 
 use SOME\Text;
 use RAAS\Controller_Frontend as ControllerFrontend;
+use RAAS\CMS\DiagTimer;
 use RAAS\CMS\Form_Field;
 use RAAS\CMS\NotificationFieldRenderer;
 
@@ -44,7 +45,8 @@ if ($SMS) {
       foreach ($fields as $field) {
           $renderer = NotificationFieldRenderer::spawn($field);
           echo $renderer->render(['admin' => !$forUser, 'sms' => false]);
-      } ?>
+      }
+      ?>
     </div>
     <?php if ($Item->items) { ?>
         <br />
@@ -63,15 +65,18 @@ if ($SMS) {
             $sum = 0;
             foreach ($Item->items as $item) {
                 $url = '';
-                if (!$forUser || $item->url) {
+                if (($item->id && !$forUser) || $item->url) {
                     if ($forUser) {
                         $url = $cf->schemeHost . $item->url;
-                    } else {
+                    } elseif ($item->id) {
                         $url = $cf->schemeHost
                             . '/admin/?p=cms&sub=main&action=edit_material&id='
-                            . $item->id
-                            . '&pid='
-                            . ($item->material_type->affectedPages[0]->id);
+                            . $item->id;
+                        if ($item->cache_url_parent_id) {
+                            // 2023-04-12, AVS: переписал на cache_url_parent_id (было через affectedPages) -
+                            // при большом количестве товаров дико тормозило (до 3 секунд на позицию)
+                            $url .= '&pid=' . (int)$item->cache_url_parent_id;
+                        }
                     }
                 }
                 $itemSum = $item->amount * $item->realprice;

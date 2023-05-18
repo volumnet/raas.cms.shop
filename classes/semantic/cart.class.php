@@ -67,8 +67,8 @@ class Cart
                             'id' => $material->id,
                             'name' => $material->name,
                             'meta' => $meta,
-                            'realprice' => (float)$this->getPrice($material),
-                            'amount' => (int)$c,
+                            'realprice' => (float)$this->getPrice($material, (float)$c),
+                            'amount' => (float)$c,
                         ]);
                         $result[] = $row;
                     }
@@ -137,7 +137,7 @@ class Cart
      * @param int $amount Количество
      * @param string $meta Мета-данные
      */
-    public function set(Material $item, $amount, $meta = '')
+    public function set(Material $item, $amount, $meta = '', $save = true)
     {
         $amount = max(0, (int)$amount);
         if ($this->cartType->no_amount) {
@@ -153,7 +153,9 @@ class Cart
         } else {
             unset($this->items[(int)$item->id][(string)$meta]);
         }
-        $this->save();
+        if ($save) {
+            $this->save();
+        }
     }
 
 
@@ -267,7 +269,7 @@ class Cart
     /**
      * Сохраняет корзину
      */
-    protected function save()
+    public function save()
     {
         $var = 'cart_' . (int)$this->cartType->id;
         $this->purge();
@@ -353,9 +355,10 @@ class Cart
     /**
      * Получает стоимость товара
      * @param Material $material Материал товара
+     * @param float $amount Количество товара
      * @return float
      */
-    public function getPrice(Material $material)
+    public function getPrice(Material $material, $amount = 1)
     {
         $materialType = $this->getCartMaterialType($material->material_type);
         $priceURN = $this->getPriceURN($materialType);

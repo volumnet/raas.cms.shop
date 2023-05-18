@@ -112,6 +112,9 @@ export default {
             if ((step > 0) && (newAmount % step != 0)) {
                 newAmount = Math.ceil(newAmount / step) * step;
             }
+            if (this.actualItem.max) {
+                newAmount = Math.min(this.actualItem.max, newAmount);
+            }
             this.amount = newAmount;
         },
 
@@ -156,6 +159,7 @@ export default {
          * Устанавливает количество товара в корзине
          */
         setCart: function () {
+            this.setAmount(this.amount);
             this.inCart = this.amount;
             window.app.cart.set(this.actualItem, this.amount);
         },
@@ -165,8 +169,16 @@ export default {
          * Добавляет/убирает товара в корзине
          */
         toggleCart: function () {
-            window.app.cart.set(this.actualItem, this.inCart ? 0 : this.amount);
-            this.inCart = this.inCart ? 0 : this.amount;
+            let newAmount;
+            if (this.inCart) {
+                newAmount = 0;
+            } else if (this.bindAmountToCart) {
+                newAmount = this.actualItem.min || 1;
+            } else {
+                newAmount = this.amount;
+            }
+            window.app.cart.set(this.actualItem, newAmount);
+            this.inCart = newAmount;
             $(document).one('raas.shop.cart-updated', () => {
                 let modalData = this.getCartModalData(
                     window.app.cart, 

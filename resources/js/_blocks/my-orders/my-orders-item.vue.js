@@ -28,7 +28,7 @@ export default {
             default: 64,
         },
     },
-    data: function () {
+    data() {
         let translations = {
             ARE_YOU_SURE_TO_DELETE_ORDER: 'Вы действительно хотите удалить заказ?',
             BACK_TO_ORDERS: 'Назад к заказам',
@@ -37,6 +37,7 @@ export default {
             ORDER_STATUS_NEW: 'Новый',
             PAYMENT_PAID: 'Оплачен',
             PAYMENT_NOT_PAID: 'Не оплачен',
+            REPEAT_ORDER: 'Повторить заказ',
         };
         if (typeof window.translations == 'object') {
             Object.assign(translations, window.translations);
@@ -51,8 +52,14 @@ export default {
          * @param {Number} x Цена для форматирования
          * @return {String}
          */
-        formatPrice: function (x) {
+        formatPrice(x) {
             return window.formatPrice(x);
+        },
+        /**
+         * Повтор заказа
+         */
+        repeatItem() {
+            window.location.href = '/cart/?repeat_order=' + this.item.id;
         },
         /**
          * Удаление товара с запросом
@@ -76,7 +83,7 @@ export default {
          * Может ли пользователь удалить заказ
          * @return {Boolean}
          */
-        canBeDeleted: function () {
+        canBeDeleted() {
             if (this.item.status && this.item.status.id) {
                 return false;
             } 
@@ -92,7 +99,7 @@ export default {
          * Возвращает форматированную дату заказа
          * @return {String}
          */
-        formattedDate: function () {
+        formattedDate() {
             let lang = $('html').attr('lang') || 'ru';
             let momentFormat;
             switch (lang) {
@@ -119,7 +126,7 @@ export default {
          * Описание заказа
          * @return {String}
          */
-        description: function () {
+        description() {
             let length = 0;
             let resultArr = [];
             for (let item of this.item.items) {
@@ -148,7 +155,7 @@ export default {
          * URL конкретного заказа
          * @return {String}
          */
-        itemURL: function () {
+        itemURL() {
             let result = window.location.pathname + '?id=' + this.item.id;
             return result;
         },
@@ -156,7 +163,7 @@ export default {
          * URL на удаление заказа
          * @return {String}
          */
-        itemDeleteURL: function () {
+        itemDeleteURL() {
             let result = this.itemURL + '&action=delete&AJAX=' + this.blockId;
             return result;
         },

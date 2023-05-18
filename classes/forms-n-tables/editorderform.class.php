@@ -1,17 +1,17 @@
 <?php
 namespace RAAS\CMS\Shop;
 
+use RAAS\Application;
 use RAAS\Field as RAASField;
+use RAAS\FieldSet;
+use RAAS\Form;
 use RAAS\Option;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Form as CMSForm;
-use RAAS\FieldSet;
 use RAAS\CMS\Snippet_Folder;
 use RAAS\CMS\Snippet;
-use RAAS\Form;
 use RAAS\CMS\Material;
-use RAAS\Application;
 
 class EditOrderForm extends Form
 {
@@ -28,28 +28,35 @@ class EditOrderForm extends Form
     }
 
 
-    public function __construct(array $params = array())
+    public function __construct(array $params = [])
     {
         $view = $this->view;
         $t = Module::i();
         $Item = isset($params['Item']) ? $params['Item'] : null;
         $Parent = isset($params['Parent']) ? $params['Parent'] : null;
 
-        $defaultParams = array(
+        $defaultParams = [
             'caption' => $Item->id ? $view->_('EDIT_ORDER') . ' #' . (int)$Item->id : $view->_('NEW_ORDER'),
             'parentUrl' => Sub_Orders::i()->url . '&id=' . (int)$Parent->id,
-            'meta' => array(
+            'meta' => [
                 'allContextMenu' => $view->getAllOrderGoodsContextMenu($Item),
-            ),
-            'children' => array(),
+            ],
+            'children' => [],
             'export' => function ($Form) use ($view) {
                 $Item = $Form->Item;
                 $Form->exportDefault();
                 $Item->vis = (int)Application::i()->user->id;
                 if ($Item->id) {
-                    $dataChanged = array();
+                    $dataChanged = [];
                     foreach ($Item->fields as $field) {
                         $vals = $field->getValues();
+                        if (is_array($vals)) {
+                            $vals = array_map(function ($x) {
+                                return ($x instanceof Material) ? (int)$x->id : $x;
+                            }, $vals);
+                        } elseif ($vals instanceof Material) {
+                            $vals = (int)$vals->id;
+                        }
                         if ($vals != $_POST[$field->urn]) {
                             $dataChanged[$field->name] = print_r($vals, true) . ' => ' . print_r($_POST[$field->urn], true);
                         }
@@ -64,7 +71,7 @@ class EditOrderForm extends Form
                         $dataChanged[$view->_('NEW_GOODS')] = implode("\n", $addedItems);
                     }
                     if ($dataChanged) {
-                        $newComment = array();
+                        $newComment = [];
                         foreach ($dataChanged as $key => $val) {
                             $newComment[] = $key . ': ' . $val;
                         }
@@ -76,56 +83,61 @@ class EditOrderForm extends Form
                 $Form->oncommitDefault();
                 $Item = $Form->Item;
                 if ($Item->newComment) {
-                    $comment = new Order_History(array(
+                    $comment = new Order_History([
                         'uid' => (int)Application::i()->user->id,
                         'order_id' => (int)$Item->id,
                         'post_date' => date('Y-m-d H:i:s'),
                         'status_id' => $Item->status_id,
                         'paid' => $Item->paid,
                         'description' => $view->_('ORDER_CHANGED') . ": \n" . $Item->newComment
-                    ));
+                    ]);
                     $comment->commit();
                 }
             }
-        );
+        ];
         foreach ($Item->fields as $field) {
             $defaultParams['children'][$field->urn] = $field->Field;
         }
-        $defaultParams['children']['goods'] = new FieldSet(array(
-            'children' => array(
-                'material' => array(
+        $defaultParams['children']['goods'] = new FieldSet([
+            'children' => [
+                'material' => [
                     'type' => 'material',
                     'name' => 'material',
                     'multiple' => true,
-                    'caption' => $view->_('NAME')
-                ),
-                'meta' => array(
+                    'caption' => $view->_('MATERIAL'),
+                ],
+                'material_name' => [
+                    'name' => 'material_name',
+                    'multiple' => true,
+                    'caption' => $view->_('NAME'),
+                ],
+                'meta' => [
                     'type' => 'string',
                     'name' => 'meta',
                     'multiple' => 'true',
-                    'caption' => $view->_('ADDITIONAL_INFO')
-                ),
-                'realprice' => array(
+                    'caption' => $view->_('ADDITIONAL_INFO'),
+                ],
+                'realprice' => [
                     'type' => 'number',
                     'name' => 'realprice',
                     'multiple' => true,
                     'caption' => $view->_('PRICE'),
                     'step' => 0.01,
                     'min' => 0
-                ),
-                'amount' => array(
+                ],
+                'amount' => [
                     'type' => 'number',
                     'name' => 'amount',
                     'multiple' => true,
-                    'caption' => $view->_('AMOUNT')
-                ),
-            ),
+                    'caption' => $view->_('AMOUNT'),
+                ],
+            ],
             'template' => 'order_edit.items.inc.php',
-            'meta' => array(
+            'meta' => [
                 'Cart_Type' => $Parent,
-            ),
+            ],
             'import' => function ($FieldSet) {
-                $DATA = array();
+                $DATA = [];
                 if ($FieldSet->Form->Item->items) {
                     foreach ((array)$FieldSet->Form->Item->items as $row) {
                         $DATA['material'][] = (int)$row->id;
@@ -139,24 +151,24 @@ class EditOrderForm extends Form
             },
             'export' => function ($FieldSet) {
                 $Item = $FieldSet->Form->Item;
-                $items = array();
+                $items = [];
                 foreach ($_POST['material'] as $key => $val) {
                     $row = new Material($val);
-                    if ($row->id && ($_POST['amount'][$key] > 0)) {
-                        $items[] = array(
+                    if (($_POST['amount'][$key] > 0)) {
+                        $items[] = [
                             'material_id' => (int)$val,
                             'name' => trim($_POST['material_name'][$key]) ?: $row->name,
                             'meta' => $_POST['meta'][$key],
                             'realprice' => (float)$_POST['realprice'][$key],
                             'amount' => (int)$_POST['amount'][$key]
-                        );
+                        ];
                     }
                 }
                 if ($items) {
                     $Item->meta_items = $items;
                 }
             }
-        ));
+        ]);
         $arr = array_merge($defaultParams, $params);
         parent::__construct($arr);
     }

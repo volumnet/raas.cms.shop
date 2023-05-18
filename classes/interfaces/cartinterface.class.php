@@ -14,6 +14,7 @@ use RAAS\Redirector;
 use RAAS\View_Web as RAASViewWeb;
 use RAAS\CMS\AbstractInterface;
 use RAAS\CMS\Block;
+use RAAS\CMS\DiagTimer;
 use RAAS\CMS\FormInterface;
 use RAAS\CMS\Material;
 use RAAS\CMS\MaterialTypesRecursiveCache;
@@ -149,6 +150,13 @@ class CartInterface extends FormInterface
             case 'refresh':
                 break;
             default:
+                $orderToRepeat = null;
+                if ($user->id && ($this->get['repeat_order'] ?? 0)) {
+                    $temp = new Order($this->get['repeat_order']);
+                    if ($temp->uid == $user->id) {
+                        $orderToRepeat = $temp;
+                    }
+                }
                 $form = $cartType->Form;
                 if (isset($this->post['amount'])) {
                     foreach ((array)$this->post['amount'] as $key => $val) {
@@ -156,6 +164,12 @@ class CartInterface extends FormInterface
                         $material = new Material($id);
                         $cart->set($material, (int)$val, $meta);
                     }
+                } elseif ($orderToRepeat) {
+                    $orderToRepeat->items;
+                    foreach ($orderToRepeat->items as $itemToRepeat) {
+                        $cart->set($itemToRepeat, (int)$itemToRepeat->amount, $itemToRepeat->meta, false);
+                    }
+                    $cart->save();
                 }
                 if ($form->id && $cart->items) {
                     $localError = [];
@@ -208,15 +222,20 @@ class CartInterface extends FormInterface
                         $result['localError'] = $localError;
                     } else {
                         $result['DATA'] = [];
-                        foreach ($form->fields as $fieldURN => $row) {
-                            $userVal = $user->{$fieldURN};
-                            if ((is_scalar($userVal) && (trim($userVal) !== '')) ||
-                                (!is_scalar($userVal) && $userVal)
-                            ) {
-                                $result['DATA'][$fieldURN] = $userVal;
-                            } elseif ($row->defval) {
-                                $result['DATA'][$fieldURN] = $row->defval;
-                            }
+                        foreach ($form->visFields as $fieldURN => $row) {
+                            // 2023-04-18, AVS: убрано, сомнительно по версии клиента
+                            // if ($orderToRepeat && trim($orderVal = $orderToRepeat->{$fieldURN})) {
+                            //     $result['DATA'][$fieldURN] = $orderVal;
+                            // } else {
+                                $userVal = $user->{$fieldURN};
+                                if ((is_scalar($userVal) && (trim($userVal) !== '')) ||
+                                    (!is_scalar($userVal) && $userVal)
+                                ) {
+                                    $result['DATA'][$fieldURN] = $userVal;
+                                } elseif ($row->defval) {
+                                    $result['DATA'][$fieldURN] = $row->defval;
+                                }
+                            // }
                             // 2022-10-13, AVS: поменял порядок следования (чтобы заполнялось),
                             // также сделал строгую проверку на непустую строку
                         }
@@ -549,13 +568,13 @@ class CartInterface extends FormInterface
         foreach ($cart->items as $cartItem) {
             if ($cartItem->amount) {
                 $material = new Material($cartItem->id);
-                $price = $cart->getPrice($material);
+                $price = $cart->getPrice($material, (float)$cartItem->amount);
                 $orderItems[] = [
                     'material_id' => $cartItem->id,
                     'name' => $cartItem->name,
                     'meta' => $this->convertMeta($cartItem->meta),
                     'realprice' => (float)$price,
-                    'amount' => (int)$cartItem->amount,
+                    'amount' => (float)$cartItem->amount,
                 ];
             }
         }

@@ -212,12 +212,12 @@ class Order extends Feedback
         $arr = [];
         foreach ($items as $item) {
             if ($item instanceof Material) {
-                $arr[] = '#' . $item->id . ' ' . $item->name
+                $arr[] = '#' . (int)$item->id . ' ' . $item->name
                        . ($item->meta['meta'] ? ' (' . $item->meta['meta'] . ')' : '')
                        . ': ' . (float)$item->realprice . ' x ' . (int)$item->amount
                        . ' = ' . (float)($item->realprice * $item->amount);
             } elseif (is_array($item)) {
-                $arr[] = '#' . $item['material_id'] . ' ' . $item['name']
+                $arr[] = '#' . (int)$item['material_id'] . ' ' . $item['name']
                        . ($item['meta'] ? ' (' . $item['meta'] . ')' : '')
                        . ': ' . (float)$item['realprice'] . ' x ' . (int)$item['amount']
                        . ' = ' . (float)($item['realprice'] * $item['amount']);

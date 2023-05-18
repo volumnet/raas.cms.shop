@@ -2,6 +2,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\SOME;
+use RAAS\Application;
 use RAAS\IContext;
 use RAAS\CMS\Snippet;
 use RAAS\CMS\Snippet_Folder;
@@ -64,6 +65,12 @@ class Updater extends \RAAS\Updater
             '4.3.20'
         ) < 0) {
             $this->update20220112();
+        }
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.3.44'
+        ) < 0) {
+            $this->update20220516();
         }
     }
 
@@ -363,6 +370,25 @@ class Updater extends \RAAS\Updater
             $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders_goods
                            ADD PRIMARY KEY (order_id, material_id, meta(64))";
             $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     *
+     */
+    public function update20220516()
+    {
+        $sqlQuery = "SELECT COUNT(*)
+                       FROM information_schema.statistics
+                      WHERE TABLE_SCHEMA = ?
+                        AND table_name = 'cms_shop_orders_goods'
+                        AND index_name = 'PRIMARY'";
+        $sqlBind = [Application::i()->dbname];
+        $sqlResult = (int)$this->SQL->getvalue([$sqlQuery, $sqlBind]);
+        if ($sqlResult) {
+            $sqlQuery = "ALTER TABLE `cms_shop_orders_goods` DROP PRIMARY KEY";
+            $this->SQL->query([$sqlQuery, $sqlBind]);
         }
     }
 }
