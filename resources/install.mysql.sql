@@ -74,7 +74,6 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_goo
   amount INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Amount',
   priority INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Priority',
 
-  PRIMARY KEY (order_id, material_id, meta(64)),
   KEY (order_id),
   KEY (material_id),
   KEY (meta),

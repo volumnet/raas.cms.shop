@@ -70,7 +70,7 @@ class Updater extends \RAAS\Updater
             $this->Context->registryGet('baseVersion'),
             '4.3.44'
         ) < 0) {
-            $this->update20220516();
+            $this->update20230516();
         }
     }
 
@@ -377,7 +377,7 @@ class Updater extends \RAAS\Updater
     /**
      *
      */
-    public function update20220516()
+    public function update20230516()
     {
         $sqlQuery = "SELECT COUNT(*)
                        FROM information_schema.statistics
