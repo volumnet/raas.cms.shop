@@ -60,7 +60,7 @@ export default {
             required: true,
         },
     },
-    data: function () {
+    data() {
         let result = {
             methodsFilter: this.methods.map(x => x.id), // Фильтр по ТК
             listActive: true,
@@ -86,7 +86,7 @@ export default {
          *     images?: String[] URL картинок,
          * }</code></pre> Пункт выдачи
          */
-        selectMapPoint: function (point) {
+        selectMapPoint(point) {
             this.listActive = true;
             this.$emit('input', point.id);
             window.setTimeout(() => {
@@ -115,7 +115,7 @@ export default {
          *     images?: String[] URL картинок,
          * }</code></pre> Пункт выдачи
          */
-        bindMapPointListener: function (point) {
+        bindMapPointListener(point) {
             document.getElementById('ymapsBalloonSelector').addEventListener(
                 'click', 
                 this.selectMapPoint.bind(this, point)
@@ -139,7 +139,7 @@ export default {
          *     images?: String[] URL картинок,
          * }</code></pre> Пункт выдачи
          */
-        unbindMapPointListener: function (point) {
+        unbindMapPointListener(point) {
             document.getElementById('ymapsBalloonSelector').removeEventListener(
                 'click', 
                 this.selectMapPoint.bind(this, point)
@@ -151,7 +151,7 @@ export default {
          * Источник данных для фильтра
          * @return {Object[]}
          */
-        filterSource: function () {
+        filterSource() {
             let result = this.methods.map((x) => {
                 return { value: x.id, name: x.name };
             });
@@ -176,7 +176,7 @@ export default {
          *     images?: String[] URL картинок,
          * }></code></pre>
          */
-        filteredPoints: function () {
+        filteredPoints() {
             let result = [];
             for (let point of this.points) {
                 let matchingMethods = this.methods.filter((method) => { 
@@ -201,6 +201,9 @@ export default {
                     result.push(newPoint);
                 }
             }
+            if (result.length == 1) {
+
+            }
             return result;
         },
         /**
@@ -210,7 +213,7 @@ export default {
          *     [Number максимальная широта, Number максимальная долгота]
          * ]</code></pre>
          */
-        mapBounds: function () {
+        mapBounds() {
             let minLat = 0;
             let minLon = 0;
             let maxLat = 0;
@@ -244,7 +247,7 @@ export default {
          *     Number долгота
          * ]</code></pre>
          */
-        mapCoords: function () {
+        mapCoords() {
             let lat = 0;
             let lon = 0;
             let c = 0;
@@ -263,10 +266,15 @@ export default {
         },
     },
     watch: {
-        methodsFilter: function () {
+        methodsFilter() {
             let matchingPoints = this.filteredPoints.filter(x => x.id == this.value);
             if (!matchingPoints.length) {
                 this.$emit('input', '');
+            }
+        },
+        filteredPoints() {
+            if (this.filteredPoints.length == 1) {
+                this.$emit('input', this.filteredPoints[0].id);
             }
         }
     }

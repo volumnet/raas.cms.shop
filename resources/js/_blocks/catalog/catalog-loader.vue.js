@@ -6,7 +6,7 @@ export default {
          */
         page: {
             type: Number,
-            required: true,
+            default: 1,
         },
         /**
          * Количество страниц (исходное)
@@ -14,7 +14,7 @@ export default {
          */
         pages: {
             type: Number,
-            required: true,
+            default: 1,
         },
         /**
          * CSS-селектор внутренних ссылок (по отношению к загрузчику) 
@@ -31,7 +31,7 @@ export default {
          */
         updatableBlockSelectors: {
             type: Array,
-            default: function () {
+            default() {
                 return [];
             },
         },
@@ -43,15 +43,23 @@ export default {
             type: String,
             required: false,
         },
+        /**
+         * ID# блока
+         * @type {Object}
+         */
+        blockId: {
+            type: Number,
+            required: false,
+        },
     },
-    data: function () {
+    data() {
         return {
             currentPage: this.page, // Номер текущей страницы (динамический, начиная с 1)
             pagesTotal: this.pages, // Количество страниц (динамическое)
             busy: false,
         };
     },
-    mounted: function () {
+    mounted() {
         let self = this;
 
         $(this.$el).on('click', '[data-role="loader-more"] a', function () {
@@ -82,10 +90,9 @@ export default {
          * @param jQuery $remote jQuery, полученный как результат запроса
          * @param bool clear Очищать 
          */
-        appendData: function ($remote, clear) {
-            let self = this;
-            
+        appendData($remote, clear) {
             const $remoteLoader = $('[data-vue-role="catalog-loader"]', $remote);
+            console.log($remote.html());
             if (!$remoteLoader.length) {
                 return;
             }
@@ -144,44 +151,41 @@ export default {
          * @param {String} url URL для загрузки
          * @param {Boolean} clear Очистить предыдущий список
          * @param {Boolean} setBusy Устанавливать статус "загрузка"
-         * @return jQuery.Deferred Promise, разрешаемый jQuery полученной страницы
+         * @return {jQuery} jQuery полученной страницы
          */
-        loadCatalog: function (url, clear, setBusy = true) {
-            let $dO = $.Deferred();
+        async loadCatalog(url, clear, setBusy = true, writeToHistory = true) {
             let title = document.title;
             if (this.busy) {
-                $dO.reject(false);
-                return $dO;
+                throw new Error('Catalog is busy');
             }
             if (setBusy) {
                 this.busy = true;
             }
-            $.get(url).then((result) => {
-                const rxRes = /\<body.*?\>([\s\S]*?)\<\/body\>/m.exec(result);
-                if (clear) {
-                    let rxTitle = /<title>(.*)<\/title>/.exec(result);
-                    if (rxTitle && rxTitle[1]) {
-                        title = rxTitle[1];
-                    }
+            let result = await this.$root.api(url, null, null, 'text/html');
+            const rxRes = /\<body.*?\>([\s\S]*?)\<\/body\>/m.exec(result);
+            if (clear) {
+                let rxTitle = /<title>(.*)<\/title>/.exec(result);
+                if (rxTitle && rxTitle[1]) {
+                    title = rxTitle[1];
                 }
-                if (rxRes) {
-                    result = $.trim(rxRes[1]);
-                }
-                return $(result);
-            }).then(($result) => {
-                this.appendData($result, clear);
-                if (clear && setBusy) {
-                    $.scrollTo(this.scrollToSelector || this.$el, 500);
-                }
-                $(document).trigger('raas.shop.catalog-ready');
+            }
+            if (rxRes) {
+                result = $.trim(rxRes[1]);
+            }
+            const $result = $(result);
+            this.appendData($result, clear);
+            if (clear && setBusy) {
+                $.scrollTo(this.scrollToSelector || this.$el, 500);
+            }
+            $(document).trigger('raas.shop.catalog-ready');
+            if (writeToHistory) {
                 window.history.pushState({}, title, url);
-                if (clear) {
-                    document.title = title;
-                }
-                this.busy = false;
-                return $result;
-            });
-            return $dO;
+            }
+            if (clear) {
+                document.title = title;
+            }
+            this.busy = false;
+            return $result;
         },
     },
     computed: {
@@ -189,7 +193,7 @@ export default {
          * Распаковка текущего экземпляра для слота
          * @return {Object}
          */
-        self: function () { 
+        self() { 
             return { ...this };
         },
     },
