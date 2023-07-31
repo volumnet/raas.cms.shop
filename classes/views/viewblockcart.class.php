@@ -6,7 +6,7 @@ use \RAAS\CMS\Location;
 
 class ViewBlockCart extends ViewBlock
 {
-    const blockListItemClass = 'cms-block-shop-cart';
+    const BLOCK_LIST_ITEM_CLASS = 'cms-block_shop-cart';
 
     public function renderBlockTypeName()
     {

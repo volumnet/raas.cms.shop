@@ -12,7 +12,7 @@ export default {
             required: true,
         },
         /**
-         * ID# блока
+         * ID# блока каталога (НЕ ФИЛЬТРА!!!)
          * @type {Number}
          */
         blockId: {
@@ -276,29 +276,29 @@ export default {
         /**
          * Предпросмотр
          */
-        preview() {
+        async preview() {
             let url = this.getPreviewUrl();
-            $.getJSON(url, (result) => {
-                this.update(result);
-                if (this.previewTimeoutId) {
-                    window.clearTimeout(this.previewTimeoutId);
+            const result = await this.$root.api(url);
+            this.update(result);
+            if (this.previewTimeoutId) {
+                window.clearTimeout(this.previewTimeoutId);
+                this.previewTimeoutId = null;
+            }
+            if (this.lastActiveElement) {
+                this.previewTimeoutId = window.setTimeout(() => {
                     this.previewTimeoutId = null;
-                }
-                if (this.lastActiveElement) {
-                    this.previewTimeoutId = window.setTimeout(() => {
-                        this.previewTimeoutId = null;
-                        this.lastActiveElement = null;
-                    }, this.previewTimeout);
-                }
-            });
+                    this.lastActiveElement = null;
+                }, this.previewTimeout);
+            }
         },
         
         /**
          * Обновление (сброс)
          */
-        refresh() {
+        async refresh() {
             let url = this.getRefreshUrl();
-            $.getJSON(url, this.update.bind(this));
+            const result = await this.$root.api(url);
+            this.update(result);
         },
         
         /**

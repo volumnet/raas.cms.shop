@@ -520,66 +520,89 @@ if ($Item) {
         '//yastatic.net/share2/share.js',
         '/js/catalog-article.js'
     ]);
-} else { ?>
+} else {
+    $itemsData = [
+        'pages' => (int)$Pages->pages,
+        'page' => (int)$Pages->page,
+        'items' => [],
+    ];
+    $nextPage = min($Pages->pages, $Pages->page + 1);
+    if ($nextPage > 1) {
+        $itemsData['nextUrl'] = HTTP::queryString('AJAX=&page=' . $nextPage);
+    }
+    if ($Set) {
+        Field::prefetch((array)$Set);
+        foreach ($Set as $i => $item) {
+            $formatter = new CatalogItemArrayFormatter($item, (bool)(array)json_decode($item->cache_shop_props, true));
+            $formatter->page = $Page ?? null;
+            $formatter->position = $i ?? null;
+            $itemData = $formatter->format();
+            $itemsData['items'][] = $itemData;
+        }
+    }
+    if ($_GET['AJAX'] == $Block->id) {
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+        header('Content-Type: application/json');
+        echo json_encode($itemsData);
+        exit;
+    }
+    ?>
     <div class="catalog">
-      <div data-vue-role="catalog-loader" data-v-bind_page="<?php echo (int)$Pages->page?>" data-v-bind_pages="<?php echo (int)$Pages->pages?>" data-v-slot="vm">
-        <div class="catalog__inner">
-          <?php
-          if ($Set || $subcats) {
-              if ($subcats) { ?>
-                  <div class="catalog__categories-list">
-                    <div class="catalog-categories-list">
-                      <?php foreach ($subcats as $row) { ?>
-                          <div class="catalog-categories-list__item">
-                            <?php Snippet::importByURN('catalog_category')->process(['page' => $row])?>
-                          </div>
-                      <?php } ?>
-                    </div>
-                  </div>
-              <?php }
-              if ($Set) {
-                  Field::prefetch((array)$Set);
-                  ?>
-                  <div class="catalog__controls" data-role="catalog-controls">
-                    <?php Snippet::importByURN('catalog_controls')->process([
-                        'sort' => $sort,
-                        'order' => $order,
-                        'Page' => $Page,
-                        'Block' => $Block,
-                    ])?>
-                  </div>
-                  <div class="catalog__list catalog-list" data-role="loader-list" data-vue-role="catalog-list">
-                    <?php foreach ($Set as $i => $item) { ?>
-                        <div class="catalog-list__item" data-role="loader-list-item">
-                          <?php Snippet::importByURN('catalog_item')->process([
-                              'item' => $item,
-                              'page' => $Page,
-                              'position' => $i,
-                          ])?>
-                        </div>
-                    <?php } ?>
+      <?php if ($subcats) { ?>
+            <div class="catalog__categories-list catalog-categories-list">
+              <?php foreach ($subcats as $row) { ?>
+                  <div class="catalog-categories-list__item">
+                    <?php Snippet::importByURN('catalog_category')->process(['page' => $row])?>
                   </div>
               <?php } ?>
-          <?php } else { ?>
-              <p><?php echo NO_RESULTS_FOUND?></p>
-          <?php } ?>
-        </div>
-        <?php if ($Set) {
-            $nextPage = min($Pages->pages, $Pages->page + 1);
-            if ($nextPage == 1) {
-                $nextPage = '';
-            }
-            ?>
-            <div class="catalog__pagination-outer">
-              <div class="catalog__pagination" data-role="loader-pagination">
-                <?php Snippet::importByURN('pagination')->process(['pages' => $Pages]); ?>
-              </div>
-              <div class="catalog__more" data-role="loader-more" data-v-if="vm.currentPage < vm.pagesTotal">
-                <a href="<?php echo HTTP::queryString('page=' . $nextPage)?>" class="btn btn-primary">
-                  <?php echo SHOW_MORE_CATALOG?>
-                </a>
-              </div>
             </div>
+      <?php } ?>
+      <div class="catalog__controls" data-role="catalog-controls">
+        <?php Snippet::importByURN('catalog_controls')->process([
+            'sort' => $sort,
+            'order' => $order,
+            'Page' => $Page,
+            'Block' => $Block,
+        ])?>
+      </div>
+      <div
+        class="catalog-loader"
+        data-vue-role="catalog-loader"
+        data-v-bind_initial-data="<?php echo htmlspecialchars(json_encode($itemsData))?>"
+        data-v-bind_page="<?php echo (int)$Pages->page?>"
+        data-v-bind_pages="<?php echo (int)$Pages->pages?>"
+        data-v-bind_block-id="<?php echo (int)$Block->id?>"
+        data-v-slot="vm"
+      >
+        <?php if ($itemsData['items']) { ?>
+            <div class="catalog__list catalog-list">
+              <?php foreach ($itemsData['items'] as $i => $itemData) { ?>
+                  <div class="catalog-list__item">
+                    <?php Snippet::importByURN('catalog_item')->process([
+                        'item' => $itemData,
+                        'noVue' => true,
+                    ])?>
+                  </div>
+              <?php } ?>
+            </div>
+            <?php if ($itemsData['pages'] > 1) { ?>
+                <div class="catalog__pagination-outer">
+                  <div class="catalog__pagination">
+                    <?php Snippet::importByURN('pagination')->process(['pages' => $Pages]); ?>
+                  </div>
+                  <?php if ($itemsData['nextUrl']) { ?>
+                      <div class="catalog__more">
+                        <a href="<?php echo htmlspecialchars($itemsData['nextUrl'])?>" class="btn btn-primary">
+                          <?php echo SHOW_MORE_CATALOG?>
+                        </a>
+                      </div>
+                  <?php } ?>
+                </div>
+            <?php } ?>
+        <?php } else { ?>
+            <p><?php echo NO_RESULTS_FOUND?></p>
         <?php } ?>
       </div>
       <?php if ($description = $Page->_description_) { ?>

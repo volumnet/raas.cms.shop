@@ -120,6 +120,11 @@ export default {
                 'click', 
                 this.selectMapPoint.bind(this, point)
             );
+            document.querySelectorAll('ymaps .cart-pickup-map-point__image img').forEach((x) => { 
+                if (x.attributes['data-src'].value && !x.src) { 
+                    x.src = x.attributes['data-src'].value; 
+                } 
+            });
         },
         /**
          * Отвязать обработчик события от балуна точки

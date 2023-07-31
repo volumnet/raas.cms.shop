@@ -2,7 +2,8 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
-use RAAS\CMS\Material_Type as Material_Type;
+use RAAS\CMS\Material_Field;
+use RAAS\CMS\Material_Type;
 use RAAS\CMS\Package;
 
 class Controller_Ajax extends Abstract_Controller

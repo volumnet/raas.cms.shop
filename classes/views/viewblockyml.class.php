@@ -6,7 +6,7 @@ use \RAAS\CMS\Location;
 
 class ViewBlockYML extends ViewBlock
 {
-    const blockListItemClass = 'cms-block-shop-yml';
+    const BLOCK_LIST_ITEM_CLASS = 'cms-block_shop-yml';
 
     public function renderBlockTypeName()
     {

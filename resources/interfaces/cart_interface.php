@@ -128,6 +128,7 @@ $getCDEKTariffs = function (
         $request = [
             'from_location' => ['code' => (int)$params['senderCityId']],
             'to_location' => ['code' => (int)$cdekCityId],
+            'currency' => 1, // Рубль
             'packages' => [[
                 'weight' => (int)($weight * 1000),
                 'length' => (int)$sizes[0],
@@ -309,76 +310,51 @@ $getRussianPostTariffs = function (
 ) use (
     $Block
 ) {
-    $sessionArr = array_merge([trim($postalCode)], $sizes, [$weight, $sum]);
+    $sessionArr = [trim($postalCode), $weight];
     $sessionVar = implode('x', $sessionArr);
     $sessionTime = (int)$_SESSION['russianPostTariffs'][$sessionVar]['timestamp'];
     if (Application::i()->debug || ($sessionTime < time() - 600)) {
         $result = [];
         $params = $Block->additionalParams['russianpost'];
 
-        if (!$postalCode ||
-            !$params['login'] ||
-            !$params['password'] ||
-            !$params['token']
-        ) {
-            return null;
-        }
-        $userKey = base64_encode($params['login'] . ':' . $params['password']);
-
-        $request = [
-            'courier' => false,
-            'declared-value' => ceil((float)$sum * 100),
-            'dimension' => [
-                'length' => (int)$sizes[0],
-                'width' => (int)$sizes[1],
-                'height' => (int)$sizes[2],
-            ],
-            'index-to' => $postalCode,
-            'inventory' => true,
-            'mail-category' => 'ORDINARY',
-            'mail-type' => 'POSTAL_PARCEL',
-            'mass' => (float)($weight * 1000),
-            'with-order-of-notice' => false,
+        $baseUrl = 'https://tariff.pochta.ru/v2/calculate/tariff/delivery';
+        $baseRequestParams = [
+            'json' => 1,
+            'from' => $params['senderIndex'],
+            'to' => $postalCode,
+            'weight' => $weight * 1000,
+            'group' => 0, // Единичное отправление (0)
+            'service' => implode(',', (array)$params['services']), // Пакет СМС уведомлений отправителю при единичном приеме (41), Пакет СМС уведомлений получателю при единичном приеме (42)
+            'closed' => 0, // Расчет при запрете доставки на дату расчета (closed): нет (не используется).
         ];
 
+        foreach (['pickup', 'delivery'] as $tariffURN) {
+            // 23030 - Посылка онлайн обыкновенная
+            if ($tariffId = $params[$tariffURN . 'Tariff'] ?? null) {
+                $request = $baseRequestParams;
+                $request['object'] = (int)$tariffId;
+                $url = $baseUrl . '?' . http_build_query($request);
+                $response = file_get_contents($url);
+                $response = (array)json_decode($response, true);
+                // var_dump($url, $response); exit;
 
-        $ch = curl_init('https://otpravka-api.pochta.ru/1.0/tariff');
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Accept: application/json;charset=UTF-8',
-            'Authorization: AccessToken ' . $params['token'],
-            'X-User-Authorization: Basic ' . $userKey
-        ]);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($request));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $response = curl_exec($ch);
-        $response = (array)json_decode($response, true);
-
-        if (!$response['total-rate']) {
-            return null;
+                $tariff = [
+                    'id' => $tariffId,
+                    'isDelivery' => ($tariffURN == 'delivery'),
+                    'price' => ceil((float)$response['pay'] / 100),
+                ];
+                if ($response['delivery']['min'] ?? 0) {
+                    $tariff['dateFrom'] = date(
+                        'Y-m-d',
+                        time() + (86400 * (1 + $response['delivery']['min']))
+                    );
+                }
+                if ($response['delivery']['deadline'] ?? null) {
+                    $tariff['dateTo'] = date('Y-m-d', strtotime($response['delivery']['deadline']) + 86400);
+                }
+                $result[$tariffURN][$tariffId] = $tariff;
+            }
         }
-
-        $tariff = [
-            'id' => '',
-            'isDelivery' => true,
-            'price' => ceil((float)$response['total-rate'] / 100),
-        ];
-        if ($response['delivery-time']['min-days']) {
-            $tariff['dateFrom'] = date(
-                'Y-m-d',
-                time() + (86400 * (1 + $response['delivery-time']['min-days']))
-            );
-        }
-        if ($response['delivery-time']['max-days']) {
-            $tariff['dateTo'] = date(
-                'Y-m-d',
-                time() + (86400 * (1 + $response['delivery-time']['max-days']))
-            );
-        }
-        $result['delivery'][''] = $tariff;
         $sessionVal = ['data' => $result, 'timestamp' => time()];
         $_SESSION['russianPostTariffs'][$sessionVar] = $sessionVal;
     }

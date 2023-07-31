@@ -2,6 +2,18 @@
  * Список товаров
  */
 export default {
+    props: {
+        /**
+         * Данные элементов для отображения
+         * @type {Object}
+         */
+        items: {
+            type: Array,
+            default() {
+                return [];
+            },
+        },
+    },
     data: function () {
         return {
             viewAs: '', // Отображение (блоками или списком)

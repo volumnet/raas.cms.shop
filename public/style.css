@@ -1,7 +1,6 @@
-.cms-block-shop-cart { background-color: #fc9; }
-.cms-block-shop-yml { background-color: white; color: red; }
-.cms-block-shop-yml a { color: red; }
-.cms-block-shop-yml span { color: red; }
+.cms-block.cms-block_shop-cart { background-color: #fc9; }
+.cms-block.cms-block_shop-yml { background-color: white; color: red; }
+.cms-block_shop-yml .cms-block__title { color: red; }
 .cms-shop-headers-table { 
     width: auto; 
     border: 1px solid silver; 

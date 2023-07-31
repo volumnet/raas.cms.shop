@@ -356,7 +356,7 @@ class EditYMLTypeForm extends RAASForm
             'type' => 'textarea',
             'name' => 'field_callback[' . $ymlURN . ']'
         ];
-        if ($ymlField['callback']) {
+        if ($ymlField['callback'] ?? null) {
             $callbackFieldData['placeholder'] = $ymlField['callback'];
         }
         $valueFieldData = ['name' => 'field_value[' . $ymlURN . ']'];

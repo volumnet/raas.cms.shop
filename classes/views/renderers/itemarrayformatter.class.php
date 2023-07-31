@@ -61,8 +61,8 @@ class ItemArrayFormatter
             $result['price'] = (float)$this->item->price;
         }
 
-        if ($this->usePropsCache && isset($propsCache['price']['values'][0])) {
-            $result['price_old'] = $result['priceold'] = (float)$propsCache['price']['values'][0];
+        if ($this->usePropsCache && isset($propsCache['price_old']['values'][0])) {
+            $result['price_old'] = $result['priceold'] = (float)$propsCache['price_old']['values'][0];
         } else {
             $result['price_old'] = $result['priceold'] = (float)$this->item->price_old;
         }

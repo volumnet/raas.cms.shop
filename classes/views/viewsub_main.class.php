@@ -35,7 +35,7 @@ class ViewSub_Main extends \RAAS\Abstract_Sub_View
     {
         $arr = array();
         if ($Item->id) {
-            $showlist = ($this->view->action != 'edit_yml_type');
+            $showlist = ($this->action != 'edit_yml_type');
             $arr[] = array(
                 'href' => $this->url . '&action=edit_yml_type&id=' . (int)$Block->id . '&mtype=' . (int)$Item->id, 'name' => $this->_('EDIT'), 'icon' => 'edit'
             );

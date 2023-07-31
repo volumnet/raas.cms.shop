@@ -76,14 +76,15 @@ export default {
         change: function (value, useAutocompletion = false, emitOuter = false) {
             let found;
             // console.log(value, useAutocompletion, emitOuter)
+            let matches = this.getMatches(value);
             if (found = this.getCityByName(value)) {
                 value = found.name;
             }
             this.pValue = value || '';
             // console.log(this.pValue)
-            this.useAutocompletion = useAutocompletion;
+            this.useAutocompletion = useAutocompletion && (!found || (matches.length > 1));
             // console.log(this.allowArbitrary, value, useAutocompletion, found)
-            if (this.allowArbitrary || !value || (!useAutocompletion && found)) {
+            if (this.allowArbitrary || !value || ((!useAutocompletion || (matches.length == 1)) && found)) {
                 this.$emit('input', value);
                 this.$emit('citychange', this.selectedCity);
                 // console.log(value)

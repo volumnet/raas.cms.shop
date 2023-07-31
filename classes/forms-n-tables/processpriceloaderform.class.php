@@ -22,6 +22,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
         $view = $this->view;
         $t = Module::i();
         $p = new Page();
+        $Item = $params['Item'] ?? null;
         $CONTENT['pages'] = array('Set' => $p->children);
         if ($CONTENT['loaders'] = PriceLoader::getSet()) {
             $loader = $CONTENT['loaders'][0];
@@ -30,7 +31,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
         }
 
         $defaultParams = array(
-            'caption' => $Item->id ? $Item->name : $view->_('PRICELOADERS'),
+            'caption' => ($Item && $Item->id) ? $Item->name : $view->_('PRICELOADERS'),
             'parentUrl' => Sub_Priceloaders::i()->url . '&action=priceloaders',
             'action' => Sub_Priceloaders::i()->url . '&action=priceloaders',
             'data-role' => 'loader-form',

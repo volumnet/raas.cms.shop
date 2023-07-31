@@ -114,7 +114,9 @@ class CompareInterface extends CartInterface
      *         'itemsIds' => int[] ID# товаров в группе
      *     ]> Набор групп,
      *     'rawData' => array<string[] ID# материала => array<
-     *         string[] ID# поля => string Сырое значение поля материала
+     *         string[] ID# поля => array<
+     *             string[] Индекс поля => string Сырое значение поля материала
+     *         >
      *     >> Сырые данные по материалам,
      *     'fields' => array<string[] ID# поля => Material_Field Поле>
      *         Задействованные поля

@@ -13,7 +13,8 @@ class Sub_Main extends \RAAS\Abstract_Sub_Controller
     public function run()
     {
         switch ($this->action) {
-            case 'edit_yml_type': case 'delete_yml_type':
+            case 'edit_yml_type':
+            case 'delete_yml_type':
                 $this->{$this->action}();
                 break;
             default:
@@ -25,9 +26,9 @@ class Sub_Main extends \RAAS\Abstract_Sub_Controller
     protected function edit_yml_type()
     {
         $Item =  Block::spawn($this->id);
-        $Parent = new Page((int)$this->nav['pid']);
+        $Parent = new Page((int)($this->nav['pid'] ?? 0));
         $MType = new Material_Type((int)$this->nav['mtype']);
-        $type = isset(Block_YML::$ymlTypes[strtolower($_GET['yml_type'])]) ? strtolower($_GET['yml_type']) : '';
+        $type = Block_YML::$ymlTypes[strtolower($_GET['yml_type'] ?? '')] ?? '';
         $Form = new EditYMLTypeForm(array('Block' => $Item, 'MType' => $MType, 'type' => $type, 'Page' => $Parent));
 
         $OUT = array('Parent' => $Parent, 'Item' => $Item);

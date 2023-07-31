@@ -1,4 +1,4 @@
-<?php if ($localSuccess) { ?>
+<?php if ($localSuccess ?? null) { ?>
     <div class="alert alert-success alert-block">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
       <p><?php echo htmlspecialchars($localSuccess['description'])?></p>
@@ -19,9 +19,9 @@
                   <i class="icon-white icon-download-alt"></i> <?php echo CMS\Shop\DOWNLOAD_PRICE?> <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu">
-                  <?php $downloadMenu = getMenu((array)$downloadMenu);
+                  <?php $downloadMenu = getMenu((array)($downloadMenu ?? []));
                   foreach ($downloadMenu as $menuItem) { ?>
-                      <li<?php echo ($menuItem['active'] ? ' class="active"' : '')?>>
+                      <li<?php echo (($menuItem['active'] ?? false) ? ' class="active"' : '')?>>
                         <a data-href="<?php echo htmlspecialchars($menuItem['data-href'])?>">
                           <?php echo htmlspecialchars($menuItem['name'])?>
                         </a>
@@ -144,18 +144,18 @@
   ?>
 
   <script type="application/javascript">
-  <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && $raw_data) { ?>
+  <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && ($raw_data ?? null)) { ?>
       var raw_data = <?php echo json_encode($raw_data)?>;
       <?php
   }
-  if ($log) {
+  if ($log ?? null) {
       $log = array_map(function($x) { $y = $x; $y['time'] = number_format($y['time'], 3, '.', ' '); return $y; }, $log);
       ?>
       var log = <?php echo json_encode($log)?>;
   <?php } ?>
   var timeName = '<?php echo addslashes(CMS\Shop\TIME_SEC)?>';
   </script>
-  <?php if ($raw_data || $log) { ?>
+  <?php if (($raw_data ?? null) || ($log ?? null)) { ?>
       <h2><?php echo CMS\Shop\LOADER_REPORT?></h2>
       <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && $raw_data && $log) { ?>
           <div role="tabpanel">

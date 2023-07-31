@@ -1,7 +1,7 @@
 <?php
 $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_Tabbed, &$_RAASForm_Form_Plain, &$_RAASForm_Control) {
     $Form = $FieldSet->Form;
-    $DATA = &$Form->DATA;
+    $DATA = $Form->DATA;
     $MType = $Form->meta['MType'];
     $fields = $Form->filterFieldsByType($MType);
     ?>

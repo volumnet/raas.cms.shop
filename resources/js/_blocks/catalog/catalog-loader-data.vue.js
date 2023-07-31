@@ -41,9 +41,18 @@ export default {
         this.appendData(this.initialData, true);
     },
     data() {
+        let translations = {
+            SHOW_MORE_CATALOG: 'Показать еще',
+            NO_RESULTS_FOUND: 'По вашему запросу ничего не найдено',
+        };
+        if (typeof window.translations == 'object') {
+            Object.assign(translations, window.translations);
+        }
+
         return {
             items: this.initialData.items || [],
             nextUrl: this.initialData.nextUrl || '',
+            translations, // Переводы
         };
     },
     methods: {
