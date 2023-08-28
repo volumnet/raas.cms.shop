@@ -550,7 +550,17 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             ], $this->Site);
             $this->createBlock(new Block_Cart([
                 'cart_type' => (int)$cartType->id,
-                // 'params' => 'ajaxBlockId=' . (int)$ajaxBlock->id,
+                'params' => 'cdek[authLogin]='
+                    . '&cdek[secure]='
+                    . '&cdek[senderCityId]=250'
+                    . '&cdek[pickupTariff]=136'
+                    . '&cdek[deliveryTariff]=137'
+                    . '&russianpost[senderIndex]='
+                    . '&russianpost[pickupTariff]=23030'
+                    . '&russianpost[deliveryTariff]=23030'
+                    . '&russianpost[services][]=41'
+                    . '&russianpost[services][]=42'
+                    . '&minOrderSum=0',
             ]), 'content', 'cart_interface', 'cart', $cart);
 
             $this->createBlock(
@@ -1331,14 +1341,14 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         ]);
         $updateRatingTask->commit();
         $sdekPVZImportTask = new Crontab([
-            'name' => View_Web::i()->_('UPDATING_CDEK_DELIVERY_POINTS'),
-            'vis' => 1,
+            'name' => View_Web::i()->_('UPDATING_PICKUP_POINTS'),
+            'vis' => 0,
             'once' => 0,
             'minutes' => '0',
             'hours' => '0',
             'days' => '*',
             'weekdays' => '*',
-            'command_classname' => SDEKPVZImportCommand::class,
+            'command_classname' => UpdatePickupPointsCommand::class,
             'args' => '[]'
         ]);
         $sdekPVZImportTask->commit();

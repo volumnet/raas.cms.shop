@@ -1,6 +1,7 @@
 <?php
 /**
  * Команда импорта пунктов выдачи заказа СДЭК
+ * @deprecated 2023-08-10 заменено общим сервисом UpdatePickupPointsCommand
  */
 namespace RAAS\CMS\Shop;
 

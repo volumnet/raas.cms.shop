@@ -72,6 +72,12 @@ class Updater extends \RAAS\Updater
         ) < 0) {
             $this->update20230516();
         }
+        if (version_compare(
+            $this->Context->registryGet('baseVersion'),
+            '4.3.49'
+        ) < 0) {
+            $this->update20230814();
+        }
     }
 
 
@@ -375,7 +381,7 @@ class Updater extends \RAAS\Updater
 
 
     /**
-     *
+     * Убрал первичный ключ из товаров заказов, т.к. может быть несколько виртуальных товрраов
      */
     public function update20230516()
     {
@@ -389,6 +395,21 @@ class Updater extends \RAAS\Updater
         if ($sqlResult) {
             $sqlQuery = "ALTER TABLE `cms_shop_orders_goods` DROP PRIMARY KEY";
             $this->SQL->query([$sqlQuery, $sqlBind]);
+        }
+    }
+
+
+    /**
+     * Добавляем флаг проверки остатков в корзине
+     */
+    public function update20230814()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_cart_types", $this->tables) &&
+            !in_array('check_amount', $this->columns(SOME::_dbprefix() . "cms_shop_cart_types"))
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_cart_types
+                           ADD check_amount TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Check amount' AFTER no_amount";
+            $this->SQL->query($sqlQuery);
         }
     }
 }

@@ -252,13 +252,24 @@ class Cart
     {
         $cookieItems = (array)$this->items;
         $result = [];
+        $checkAmount = (bool)(int)$this->cartType->check_amount;
         foreach ((array)$cookieItems as $materialId => $metaItems) {
             $material = new Material((int)$materialId);
-            if ($material->id) {
-                foreach ((array)$metaItems as $meta => $amount) {
-                    if ($amount > 0) {
-                        $result[trim($materialId)][trim($meta)] = $amount;
+            if (!$material->id) {
+                continue;
+            }
+            $materialAvailable = (int)$material->available;
+            if ($checkAmount && !($material->vis && $material->price && $materialAvailable)) {
+                continue;
+            }
+            foreach ((array)$metaItems as $meta => $amount) {
+                if ($amount > 0) {
+                    $newAmount = $amount;
+                    if ($checkAmount) {
+                        $newAmount = min($newAmount, $materialAvailable);
+                        $materialAvailable -= $newAmount;
                     }
+                    $result[trim($materialId)][trim($meta)] = $newAmount;
                 }
             }
         }

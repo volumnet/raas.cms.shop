@@ -19,7 +19,7 @@ export default {
             }
         }
         $(document).on('raas.shop.ecommerce', (e, data) => {
-            this.cart.eCommerce.trigger(data);
+            this.cart.getECommerce().trigger(data);
         });
     },
 }

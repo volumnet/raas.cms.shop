@@ -225,10 +225,18 @@ export default {
             //     document.location.search, 
             //     { arrayFormat: 'bracket' }
             // );
-            let updateQuery = window.queryString.parse(
-                $(this.$el).formSerialize(), 
-                { arrayFormat: 'bracket' }
-            );
+            // 2023-08-09, AVS: добавил поиск формы вверх и вниз, чтобы не ограничиваться тегами
+            let $form;
+            if ($(this.$el).is('form')) {
+                $form = $(this.$el);
+            } else if ($(this.$el).closest('form').length) {
+                $form = $(this.$el).closest('form');
+            } else if ($(this.$el).find('form').length) {
+                $form = $(this.$el).find('form');
+            } else {
+                $form = $(this.$el);
+            }
+            let updateQuery = window.queryString.parse($form.formSerialize(), { arrayFormat: 'bracket' });
             let query = updateQuery;
             delete query.page;
             // for (let key in updateQuery) {

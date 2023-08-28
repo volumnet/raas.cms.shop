@@ -131,20 +131,8 @@ if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
             },
         ]
     );
-    $cdekText = file_get_contents(Application::i()->baseDir . '/sdek.pvz.json');
-    $cities = [];
-    foreach ($cdekJSON as $pvz) {
-        $cities[trim($pvz['cityCode'])] = [
-            'value' => trim($pvz['city']),
-            'name' => trim($pvz['city']),
-            'region' => trim($pvz['regionName'])
-        ];
-    }
-    usort($cities, function ($a, $b) {
-        return strnatcasecmp($a['name'], $b['name']);
-    });
     $formArr['fields']['city']['datatype'] = 'city';
-    $formArr['fields']['city']['stdSource'] = $cities;
+    $formArr['fields']['city']['stdSource'] = array_values($cities);
     ?>
     <cart class="cart" :cart="cart" :block-id="<?php echo (int)$Block->id?>" id="cart" :form="<?php echo htmlspecialchars(json_encode($formArr))?>" :initial-form-data="<?php echo htmlspecialchars(json_encode((object)$cartData['formData']))?>">
       <div class="cart__loading">

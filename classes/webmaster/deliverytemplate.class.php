@@ -65,21 +65,31 @@ class DeliveryTemplate extends MaterialTypeTemplate
         ]);
         $receivingMethodsField->commit();
 
-        $serviceURN = new Material_Field([
+        $serviceURNField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 1,
             'name' => View_Web::i()->_('SERVICE_URN'),
             'urn' => 'service_urn',
             'datatype' => 'text',
         ]);
-        $serviceURN->commit();
+        $serviceURNField->commit();
+
+        $citiesField = new Material_Field([
+            'pid' => $this->materialType->id,
+            'vis' => 1,
+            'name' => View_Web::i()->_('CITIES'),
+            'urn' => 'service_urn',
+            'datatype' => 'text',
+        ]);
+        $citiesField->commit();
 
         return [
             $briefNameField->urn => $briefNameField,
             $priceField->urn => $priceField,
             $minSumField->urn => $minSumField,
             $receivingMethodsField->urn => $receivingMethodsField,
-            $serviceURN->urn => $serviceURN,
+            $serviceURNField->urn => $serviceURNField,
+            $citiesField->urn => $citiesField,
         ];
     }
 

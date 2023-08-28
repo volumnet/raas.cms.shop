@@ -19,26 +19,7 @@ use RAAS\CMS\Snippet;
 
 if ($Item) {
     $formatter = new ItemArrayFormatter($Item);
-    $itemData = $formatter->format([
-        'visImages' => function ($item) {
-            return array_map(function ($x) {
-                return [
-                    'id' => $x->id,
-                    'name' => $x->name,
-                    'fileURL' => $x->fileURL,
-                    'smallURL' => $x->smallURL,
-                ];
-            }, (array)$item->visImages);
-        },
-        'eCommerce' => function ($item, $propsCache) use ($Page) {
-            return ECommerce::getProduct($item, null, $Page);
-        },
-        'modify_date',
-        'available',
-        'article',
-        'unit',
-        'videos',
-    ]);
+    $itemData = $formatter->format(['modify_date', 'videos']);
     $itemData['videos'] = (array)$itemData['videos'];
     $photoVideo = (array)$itemData['visImages'];
     foreach ($itemData['videos'] as $video) {
@@ -116,8 +97,8 @@ if ($Item) {
                       <script type="application/ld+json"><?php echo json_encode($videoJsonLd)?></script>
                   <?php } else {
                       $jsonLd['image'][] = '/' . $row['fileURL']; ?>
-                      <a itemprop="image" href="/<?php echo $row['fileURL']?>" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((vm.selectedImage == <?php echo $i?>) ? 'block' : 'none')}" data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__image">
-                        <img loading="lazy" src="/<?php echo Package::i()->tn($row['fileURL'], 461, null, 'inline')?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" /></a>
+                      <a itemprop="image" href="<?php echo $row['fileURL']?>" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((vm.selectedImage == <?php echo $i?>) ? 'block' : 'none')}" data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__image">
+                        <img loading="lazy" src="/<?php echo Package::i()->tn(ltrim($row['fileURL'], '/'), 461, null, 'inline')?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" /></a>
                   <?php }
               }
               if (!$photoVideo) { ?>
@@ -134,8 +115,8 @@ if ($Item) {
                           $image = 'https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg';
                           $href = 'https://youtube.com/embed/' . $ytid;
                       } else {
-                          $image = '/' . $row['smallURL'];
-                          $href = '/' . $row['fileURL'];
+                          $image = $row['smallURL'];
+                          $href = $row['fileURL'];
                       }
                       ?>
                       <a class="catalog-article-images-list__item slider-list__item catalog-article-images-item<?php echo $row['ytid'] ? ' catalog-article-images-item_video' : ''?>"
@@ -329,35 +310,37 @@ if ($Item) {
               <meta itemprop="sku" content="<?php echo htmlspecialchars($itemData['article'])?>" />
               <link itemprop="url" href="<?php echo htmlspecialchars($host . $itemData['url'])?>" />
               <link itemprop="availability" href="http://schema.org/<?php echo $itemData['available'] ? 'InStock' : 'PreOrder'?>" />
-              <div class="catalog-article__price-container" data-price="<?php echo (float)$itemData['price']?>">
-                <?php if ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) { ?>
-                    <span class="catalog-article__price catalog-article__price_old" data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)" data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount))">
-                      <?php echo Text::formatPrice((float)$itemData['price_old'])?>
+              <?php if ($itemData['price']) { ?>
+                  <div class="catalog-article__price-container" data-price="<?php echo (float)$itemData['price']?>">
+                    <?php if ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) { ?>
+                        <span class="catalog-article__price catalog-article__price_old" data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)" data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount))">
+                          <?php echo Text::formatPrice((float)$itemData['price_old'])?>
+                        </span>
+                    <?php } ?>
+                    <span class="catalog-article__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) ? ' catalog-article__price_new' : ''?>">
+                      <span data-role="price-container" itemprop="price" content="<?php echo (float)$itemData['price']?>" data-v-html="vm.formatPrice(vm.item.price * Math.max(vm.item.min || 1, vm.amount))">
+                        <?php echo Text::formatPrice((float)$itemData['price'])?>
+                      </span>
+                      <span itemprop="priceCurrency" content="RUB" class="catalog-article__currency">₽</span>
                     </span>
-                <?php } ?>
-                <span class="catalog-article__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) ? ' catalog-article__price_new' : ''?>">
-                  <span data-role="price-container" itemprop="price" content="<?php echo (float)$itemData['price']?>" data-v-html="vm.formatPrice(vm.item.price * Math.max(vm.item.min || 1, vm.amount))">
-                    <?php echo Text::formatPrice((float)$itemData['price'])?>
-                  </span>
-                  <span itemprop="priceCurrency" content="RUB" class="catalog-article__currency">₽</span>
-                </span>
-                <?php if ($itemData['unit'] && !stristr($itemData['unit'], 'шт')) { ?>
-                    <span class="catalog-article__unit">
-                      / <?php echo htmlspecialchars($itemData['unit'])?>
-                    </span>
-                <?php } ?>
-              </div>
+                    <?php if ($itemData['unit'] && !stristr($itemData['unit'], 'шт')) { ?>
+                        <span class="catalog-article__unit">
+                          / <?php echo htmlspecialchars($itemData['unit'])?>
+                        </span>
+                    <?php } ?>
+                  </div>
+              <?php } ?>
               <div class="catalog-article__available catalog-article__available_<?php echo $itemData['available'] ? '' : 'not-'?>available">
                 <?php echo $itemData['available'] ? AVAILABLE : AVAILABLE_CUSTOM?>
               </div>
             </div>
             <!--noindex-->
-            <?php if ($itemData['available']) { ?>
+            <?php if ($itemData['price'] && $itemData['available']) { ?>
                 <div class="catalog-article__add-to-cart-outer">
                   <div class="catalog-article__amount-block" title="<?php echo IN_CART?>" data-v-if="vm.inCart">
-                    <a class="catalog-article__decrement" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();">–</a>
-                    <input type="number" class="form-control catalog-article__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>" data-v-bind_value="vm.amount" data-v-on_change="vm.setAmount($event.target.value); vm.setCart();" />
-                    <a class="catalog-article__increment" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();">+</a>
+                    <button type="button" class="catalog-article__decrement" data-v-bind_disabled="vm.amount <= 0" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();">–</button>
+                    <input type="number" class="form-control catalog-article__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>"<?php echo $itemData['max'] ? (' max="' . (int)$itemData['max'] . '"') : ''?> data-v-bind_value="vm.amount" data-v-on_change="vm.setAmount($event.target.value); vm.setCart();" />
+                    <button type="button" class="catalog-article__increment" data-v-bind_disabled="vm.item.max && (vm.amount >= vm.item.max)" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();">+</button>
                   </div>
                   <button type="button" data-v-else data-v-on_click="vm.setAmount(Math.max(vm.item.min, 1)); vm.setCart()" class="btn btn-primary catalog-article__add-to-cart">
                     <?php echo DO_BUY?>
@@ -533,7 +516,7 @@ if ($Item) {
     if ($Set) {
         Field::prefetch((array)$Set);
         foreach ($Set as $i => $item) {
-            $formatter = new CatalogItemArrayFormatter($item, (bool)(array)json_decode($item->cache_shop_props, true));
+            $formatter = new ItemArrayFormatter($item, (bool)(array)json_decode($item->cache_shop_props, true));
             $formatter->page = $Page ?? null;
             $formatter->position = $i ?? null;
             $itemData = $formatter->format();

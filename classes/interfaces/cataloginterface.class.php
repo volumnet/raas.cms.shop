@@ -454,6 +454,21 @@ class CatalogInterface extends MaterialInterface
     }
 
 
+    public function getFilteringItemSQL($sqlField, $relation, $val)
+    {
+        $result = [];
+        switch ($relation) {
+            case 'FULLTEXT':
+                $result = [];
+                break;
+            default:
+                return parent::getFilteringItemSQL($sqlField, $relation, $val);
+                break;
+        }
+        return $result;
+    }
+
+
     /**
      * Получает список ID#, найденных при полнотекстовом поиске
      * @param array $filter <pre><code>array<[

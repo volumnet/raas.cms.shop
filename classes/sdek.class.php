@@ -1,6 +1,8 @@
 <?php
 /**
  * Класс интеграции со СДЭК (версия API 2)
+ * @deprecated 2023-08-10, AVS: в корзине используется прямой вызов,
+ *     обновление точек идет через UpdatePickupPointsCommand
  */
 namespace RAAS\CMS\Shop\SDEK;
 

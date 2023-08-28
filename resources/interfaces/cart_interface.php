@@ -42,20 +42,8 @@ $weight = $cart->weight;
 $sizes = $cart->sizes;
 $_POST['weight'] = $weight;
 
-$interface = new CartInterface(
-    $Block,
-    $Page,
-    $_GET,
-    $_POST,
-    $_COOKIE,
-    $_SESSION,
-    $_SERVER,
-    $_FILES
-);
-
-$cdekText = file_get_contents(Application::i()->baseDir . '/sdek.pvz.json');
-$cdekJSON = (array)json_decode($cdekText, true);
-$cdekJSON = (array)$cdekJSON['pvz'];
+$interface = new CartInterface($Block, $Page, $_GET, $_POST, $_COOKIE, $_SESSION, $_SERVER, $_FILES);
+$cities = include Application::i()->baseDir . '/cities.brief.php';
 
 /**
  * Получает тарифы на доставку СДЭК
@@ -74,29 +62,15 @@ $cdekJSON = (array)$cdekJSON['pvz'];
  *     >
  * ></code></pre>, либо null, если не найдено
  */
-$getCDEKTariffs = function (
-    $city,
-    $weight,
-    array $sizes
-) use (
-    $cdekJSON,
-    $Block
-) {
+$getCDEKTariffs = function ($city, $weight, array $sizes) use ($Block, $cities) {
     $sessionVar = implode('x', array_merge([trim($city)], $sizes, [$weight]));
     $sessionTime = (int)$_SESSION['cdekTariffs'][$sessionVar]['timestamp'];
     if (Application::i()->debug || ($sessionTime < time() - 600)) {
+        $cityURN = Text::beautify($city);
         $result = [];
         $params = $Block->additionalParams['cdek'];
-        $matchingPVZ = array_filter($cdekJSON, function ($x) use ($city) {
-            return trim(mb_strtolower($x['city'])) == trim(mb_strtolower($city));
-        });
-        $matchingPVZ = array_values($matchingPVZ);
-        if ($matchingPVZ) {
-            $cdekCityId = $matchingPVZ[0]['cityCode'];
-        }
 
-        $response = null;
-        if (!$cdekCityId ||
+        if (!isset($cities[$cityURN]['cdekCityId']) ||
             !$params['authLogin'] ||
             !$params['secure'] ||
             !$params['senderCityId']
@@ -104,6 +78,7 @@ $getCDEKTariffs = function (
             return null;
         }
 
+        $response = null;
         $authRequest = [
             'grant_type' => 'client_credentials',
             'client_id' => $params['authLogin'],
@@ -127,7 +102,7 @@ $getCDEKTariffs = function (
 
         $request = [
             'from_location' => ['code' => (int)$params['senderCityId']],
-            'to_location' => ['code' => (int)$cdekCityId],
+            'to_location' => ['code' => (int)$cities[$cityURN]['cdekCityId']],
             'currency' => 1, // Рубль
             'packages' => [[
                 'weight' => (int)($weight * 1000),
@@ -166,121 +141,27 @@ $getCDEKTariffs = function (
                     continue 2;
                     break;
             }
+            $tariffSum = (float)$tariff['delivery_sum'];
+            if ($params['priceRatio'] ?? '') {
+                if (stristr($params['priceRatio'], '%')) {
+                    $tariffSum *= (100 + (float)$params['priceRatio']) / 100;
+                } else {
+                    $tariffSum += (float)$params['priceRatio'];
+                }
+            }
+            $tariffSum = ceil($tariffSum);
             $result[$tariffType][trim($tariff['tariff_code'])] = [
                 'id' => trim($tariff['tariff_code']),
                 'isDelivery' => ($tariffType == 'delivery'),
-                'price' => ceil((float)$tariff['delivery_sum']),
-                'dateFrom' => date(
-                    'Y-m-d',
-                    time() + (86400 * (1 + $tariff['period_min']))
-                ),
-                'dateTo' => date(
-                    'Y-m-d',
-                    time() + (86400 * (1 + $tariff['period_max']))
-                ),
+                'price' => $tariffSum,
+                'dateFrom' => date('Y-m-d', time() + (86400 * (1 + $tariff['period_min']))),
+                'dateTo' => date('Y-m-d', time() + (86400 * (1 + $tariff['period_max']))),
             ];
         }
         $sessionVal = ['data' => $result, 'timestamp' => time()];
         $_SESSION['cdekTariffs'][$sessionVar] = $sessionVal;
     }
     return $_SESSION['cdekTariffs'][$sessionVar]['data'];
-};
-
-
-/**
- * Получает список пунктов выдачи СДЭК
- * @param string $city Наименование города
- * @param float $weight Вес, кг
- * @param int[] $sizes Размеры (ДxШxВ) в см
- * @return array <pre><code>array<[
- *     'id' => string ID# пункта выдачи,
- *     'name' => string Наименование пункта выдачи,
- *     'address' => string Адрес пункта выдачи
- *     'description' => string Подсказка к адресу,
- *     'lat' => float Широта,
- *     'lon' => float Долгота,
- *     'schedule' ?=> string Время работы,
- *     'phones' ?=> string[] Телефоны (Последние 10 цифр),
- *     'images' ?=> string[] URL картинок,
- * ]></code></pre>
- */
-$getCDEKPoints = function ($city, $weight, $sizes) use ($cdekJSON) {
-    $pvz = array_values(array_filter(
-        $cdekJSON,
-        function ($x) use ($city, $sizes) {
-            if (trim(mb_strtolower($x['city'])) != trim(mb_strtolower($city))) {
-                return false;
-            }
-            $pvzSizes = array_values($x['dimensions']);
-            if ($pvzSizes && count($pvzSizes) >= 3) {
-                $selfSizes = $sizes;
-                sort($selfSizes);
-                sort($pvzSizes);
-                for ($i = 0; $i < 3; $i++) {
-                    if ($selfSizes[$i] >= $pvzSizes[$i]) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-    ));
-
-    $result = [];
-    foreach ($pvz as $item) {
-        $resultItem = [
-            'id' => trim($item['code']),
-            'name' => trim($item['name']),
-            'address' => trim($item['address']),
-            'description' => trim($item['addressComment']),
-            'lat' => (float)$item['coordY'],
-            'lon' => (float)$item['coordX'],
-        ];
-        if ($item['workTime']) {
-            $resultItem['schedule'] = $item['workTime'];
-        }
-        if ($item['phoneDetailList']) {
-            $resultItem['phones'] = array_map(function ($x) {
-                return Text::beautifyPhone($x['number'], 10);
-            }, $item['phoneDetailList']);
-        }
-        if ($item['officeImageList']) {
-            $resultItem['images'] = array_map(function ($x) {
-                return $x['url'];
-            }, $item['officeImageList']);
-        }
-        $result[] = $resultItem;
-    }
-    return $result;
-};
-
-
-/**
- * Получает почтовый индекс города
- * @param string $city Наименование города
- * @return string|null null, если не найдено
- */
-$getPostalCode = function ($city) use ($cdekJSON) {
-    $pvz = array_values(array_filter($cdekJSON, function ($x) use ($city) {
-        return trim(mb_strtolower($x['city'])) == trim(mb_strtolower($city));
-    }));
-    if (!$pvz) {
-        return null;
-    }
-    $postalCodes = array_values(array_unique(array_map(function ($x) {
-        return $x['postalCode'];
-    }, $pvz)));
-    if (count($postalCodes) == 1) {
-        return $postalCodes[0];
-    }
-    sort($postalCodes);
-    $firstCode = $postalCodes[0];
-    $lastCode = $postalCodes[count($postalCodes) - 1];
-    $result = '000000';
-    for ($i = 0; ($firstCode[$i] == $lastCode[$i]) && ($i < 6); $i++) {
-        $result[$i] = $firstCode[$i];
-    }
-    return $result;
 };
 
 
@@ -302,14 +183,7 @@ $getPostalCode = function ($city) use ($cdekJSON) {
  *     >
  * ></code></pre>, либо null, если не найдено
  */
-$getRussianPostTariffs = function (
-    $postalCode,
-    $weight,
-    array $sizes,
-    $sum
-) use (
-    $Block
-) {
+$getRussianPostTariffs = function ($postalCode, $weight, array $sizes, $sum) use ($Block) {
     $sessionArr = [trim($postalCode), $weight];
     $sessionVar = implode('x', $sessionArr);
     $sessionTime = (int)$_SESSION['russianPostTariffs'][$sessionVar]['timestamp'];
@@ -338,16 +212,22 @@ $getRussianPostTariffs = function (
                 $response = (array)json_decode($response, true);
                 // var_dump($url, $response); exit;
 
+                $tariffSum = (float)$response['pay'] / 100;
+                if ($params['priceRatio'] ?? '') {
+                    if (stristr($params['priceRatio'], '%')) {
+                        $tariffSum *= (100 + (float)$params['priceRatio']) / 100;
+                    } else {
+                        $tariffSum += (float)$params['priceRatio'];
+                    }
+                }
+                $tariffSum = ceil($tariffSum);
                 $tariff = [
                     'id' => $tariffId,
                     'isDelivery' => ($tariffURN == 'delivery'),
-                    'price' => ceil((float)$response['pay'] / 100),
+                    'price' => $tariffSum,
                 ];
                 if ($response['delivery']['min'] ?? 0) {
-                    $tariff['dateFrom'] = date(
-                        'Y-m-d',
-                        time() + (86400 * (1 + $response['delivery']['min']))
-                    );
+                    $tariff['dateFrom'] = date('Y-m-d', time() + (86400 * (1 + $response['delivery']['min'])));
                 }
                 if ($response['delivery']['deadline'] ?? null) {
                     $tariff['dateTo'] = date('Y-m-d', strtotime($response['delivery']['deadline']) + 86400);
@@ -381,15 +261,7 @@ $getRussianPostTariffs = function (
  *     >
  * ></code></pre>, либо null, если не найдено
  */
-$getSelfTariffs = function (
-    $city,
-    $weight,
-    array $sizes,
-    $sum,
-    $deliveryMaterial
-) use (
-    $Block
-) {
+$getSelfTariffs = function ($city, $weight, array $sizes, $sum, $deliveryMaterial) use ($Block) {
     $sessionArr = array_merge([trim($city)], $sizes, [$weight, $sum]);
     $sessionVar = implode('x', $sessionArr);
     $sessionTime = (int)$_SESSION['selfTariffs'][$sessionVar]['timestamp'];
@@ -414,15 +286,11 @@ $getSelfTariffs = function (
             'id' => '',
             'isDelivery' => false,
             'price' => 0,
-            'dateFrom' => date('Y-m-d', time() + 86400),
-            'dateTo' => date('Y-m-d', time() + 86400),
         ];
 
         if ($deliveryMaterial->id) {
             $deliverySum = 0;
-            if (!(float)$deliveryMaterial->min_sum ||
-                ((float)$deliveryMaterial->min_sum > $sum)
-            ) {
+            if (!(float)$deliveryMaterial->min_sum || ((float)$deliveryMaterial->min_sum > $sum)) {
                 $deliverySum = ceil((float)$deliveryMaterial->price);
             }
             $result['delivery'][''] = [
@@ -483,6 +351,7 @@ $getSelfPoints = function ($city) {
             'phones' => array_map(function ($x) {
                 return Text::beautifyPhone($x, 10);
             }, (array)$company->fields['phone']->getValues()),
+            'serviceURN' => '',
         ];
     }
     return $result;
@@ -505,19 +374,16 @@ $getAdditionals = function (
     User $user = null
 ) use (
     &$getCDEKTariffs,
-    &$getCDEKPoints,
-    &$getPostalCode,
     &$getRussianPostTariffs,
     &$getSelfTariffs,
-    &$getSelfPoints,
-    $cdekJSON
+    &$getSelfPoints
 ) {
     $result = [];
 
     $sum = (float)$cart->sum;
-    $weight = $cart->weight;
-    $sizes = $cart->sizes;
-    $_POST['weight'] = $post['weight'] = $weight;
+    $result['weight'] = $_POST['weight'] = $post['weight'] = $weight = ceil($cart->weight * 1000) / 1000;
+    $result['sizes'] = $sizes = $cart->sizes;
+    $_POST['sizes'] = $post['sizes'] = implode('x', $sizes);
     $sumForDiscount = 0;
     foreach ($cart->items as $cartItem) {
         if ($cartItem->amount) {
@@ -558,6 +424,34 @@ $getAdditionals = function (
     }
 
     if ($post['city']) {
+        $cityURN = Text::beautify($_POST['city']);
+        if (!Application::i()->debug && isset($_SESSION['citiesData@' . $cityURN])) {
+            $cityData = $_SESSION['citiesData@' . $cityURN];
+        } else {
+            $citiesJSON = include Application::i()->baseDir . '/cities.php';
+            $cityData = $citiesJSON[$cityURN];
+            $_SESSION['citiesData@' . $cityURN] = $cityData;
+        }
+        $points = $cityData['points'] ?? [];
+        $points = array_values(array_filter(
+            $points,
+            function ($x) use ($sizes, $weight) {
+                if ($x['sizes']) {
+                    $selfSizes = $sizes;
+                    sort($selfSizes);
+                    for ($i = 0; $i < 3; $i++) {
+                        if ($selfSizes[$i] >= $x['sizes'][$i]) {
+                            return false;
+                        }
+                    }
+                }
+                if ($x['weight'] && $weight > $x['weight']) {
+                    return false;
+                }
+                return true;
+            }
+        ));
+
         // Указан город, найдем варианты доставки
         $sumForDelivery = $cart->sum + $discountSum;
         $deliveryMaterialType = Material_Type::importByURN('delivery');
@@ -566,16 +460,24 @@ $getAdditionals = function (
             'orderBy' => "NOT priority, priority, name",
         ]);
         $affectedServicesURNs = [];
-        $deliveries = $tariffs = $points = $payments = [];
+        $deliveries = $tariffs = $payments = [];
         $selfDelivery = null;
         foreach ($deliveryMaterials as $deliveryMaterial) {
             $delivery = [
                 'id' => (int)$deliveryMaterial->id,
                 'name' => trim($deliveryMaterial->brief ?: $deliveryMaterial->name),
+                'description' => trim($deliveryMaterial->description),
                 'fullName' => trim($deliveryMaterial->name),
                 'isDelivery' => (bool)(int)$deliveryMaterial->delivery,
                 'serviceURN' => trim($deliveryMaterial->service_urn),
             ];
+            $citiesBeautified = array_map(function ($x) {
+                return Text::beautify($x);
+            }, (array)$deliveryMaterial->cities);
+            $delivery['citiesBeautified'] = $citiesBeautified;
+            if ($citiesBeautified && !in_array(Text::beautify($post['city']), $citiesBeautified)) {
+                continue;
+            }
             $affectedServicesURNs[$delivery['serviceURN']] = $delivery['serviceURN'];
             $deliveries[trim($deliveryMaterial->id)] = $delivery;
             if (!$delivery['serviceURN'] && $delivery['isDelivery']) {
@@ -583,27 +485,15 @@ $getAdditionals = function (
             }
         }
         if (isset($affectedServicesURNs[''])) {
-            $tariffs[''] = $getSelfTariffs(
-                $post['city'],
-                $weight,
-                $sizes,
-                $sumForDelivery,
-                $selfDelivery
-            );
-            $points[''] = $getSelfPoints($post['city']);
+            $tariffs[''] = $getSelfTariffs($post['city'], $weight, $sizes, $sumForDelivery, $selfDelivery);
+            $points = array_merge($points, $getSelfPoints($post['city']));
         }
         if ($affectedServicesURNs['cdek']) {
             $tariffs['cdek'] = $getCDEKTariffs($post['city'], $weight, $sizes);
-            $points['cdek'] = $getCDEKPoints($post['city'], $weight, $sizes);
         }
         if ($affectedServicesURNs['russianpost']) {
-            $postalCode = trim($post['post_code']) ?: $getPostalCode($post['city']);
-            $tariffs['russianpost'] = $getRussianPostTariffs(
-                $postalCode,
-                $weight,
-                $sizes,
-                $sumForDelivery
-            );
+            $postalCode = trim($post['post_code']) ?: $cityData['postalCode'];
+            $tariffs['russianpost'] = $getRussianPostTariffs($postalCode, $weight, $sizes, $sumForDelivery);
         }
         $newDeliveries = [];
         foreach ($deliveries as $deliveryId => $delivery) {
@@ -629,12 +519,8 @@ $getAdditionals = function (
             $result['delivery']['methods'][] = $delivery;
         }
         $deliveries = $newDeliveries;
-        foreach ($points as $serviceURN => $servicePoints) {
-            foreach ($servicePoints as $point) {
-                $point['serviceURN'] = $serviceURN;
-                $result['delivery']['points'][] = $point;
-            }
-        }
+        $result['delivery']['points'] = $points;
+
         if ($post['delivery']) {
             if ($delivery = $deliveries[$post['delivery']]) {
                 $result['delivery']['tariffId'] = $delivery['tariffId'];
@@ -669,12 +555,10 @@ $getAdditionals = function (
             $paymentMaterials = array_filter(
                 $paymentMaterials,
                 function ($x) use ($post) {
-                    $paymentDeliveries = array_values(array_filter(
-                        array_map(function ($x) {
-                            return (int)$x->id;
-                        }, (array)$x->delivery),
-                        'trim'
-                    ));
+                    $paymentDeliveries = array_map(function ($x) {
+                        return (int)$x->id;
+                    }, (array)$x->delivery);
+                    $paymentDeliveries = array_values(array_filter($paymentDeliveries, 'trim'));
                     if ($paymentDeliveries &&
                         !in_array($post['delivery'], $paymentDeliveries)
                     ) {
@@ -695,6 +579,7 @@ $getAdditionals = function (
                 $payment = [
                     'id' => (int)$paymentMaterial->id,
                     'name' => trim($paymentMaterial->name),
+                    'description' => trim($paymentMaterial->description),
                     'epay' => (bool)(int)$paymentMaterial->epay,
                     'price' => $commission,
                 ];
@@ -764,8 +649,8 @@ $interface->conditionalRequiredFields = [
 ];
 
 $result = $interface->process();
-$result['cdekJSON'] = $cdekJSON;
 if ((int)$Block->additionalParams['minOrderSum']) {
     $result['minOrderSum'] = (int)$Block->additionalParams['minOrderSum'];
 }
+$result['cities'] = $cities;
 return $result;

@@ -15,7 +15,7 @@ use RAAS\CMS\Material_Field;
 use RAAS\CMS\Package;
 
 if ($item instanceof Material) {
-    $formatter = new CatalogItemArrayFormatter($item, (bool)(array)json_decode($item->cache_shop_props, true));
+    $formatter = new ItemArrayFormatter($item, (bool)(array)json_decode($item->cache_shop_props, true));
     $formatter->page = $page ?? null;
     $formatter->position = $position ?? null;
     $itemData = $formatter->format();
@@ -62,25 +62,27 @@ if ($item instanceof Material) {
       <?php } ?>
     </div>
     <div class="catalog-item__offer">
-      <div class="catalog-item__price-container">
-        <span class="catalog-item__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) ? ' catalog-item__price_new' : ''?>">
-          <?php echo Text::formatPrice((float)$itemData['price'])?> ₽
-        </span>
-        <?php if ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) { ?>
-            <span class="catalog-item__price catalog-item__price_old">
-              <?php echo Text::formatPrice((float)$itemData['price_old'])?> ₽
+      <?php if ($itemData['price']) { ?>
+          <div class="catalog-item__price-container">
+            <span class="catalog-item__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) ? ' catalog-item__price_new' : ''?>">
+              <?php echo Text::formatPrice((float)$itemData['price'])?> ₽
             </span>
-        <?php } ?>
-        <?php if ($itemData['unit'] && !stristr($itemData['unit'], 'шт')) { ?>
-            <span class="catalog-item__unit">
-              / <?php echo htmlspecialchars($itemData['unit'])?>
-            </span>
-        <?php } ?>
-      </div>
+            <?php if ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) { ?>
+                <span class="catalog-item__price catalog-item__price_old">
+                  <?php echo Text::formatPrice((float)$itemData['price_old'])?> ₽
+                </span>
+            <?php } ?>
+            <?php if ($itemData['unit'] && !stristr($itemData['unit'], 'шт')) { ?>
+                <span class="catalog-item__unit">
+                  / <?php echo htmlspecialchars($itemData['unit'])?>
+                </span>
+            <?php } ?>
+          </div>
+      <?php } ?>
       <div class="catalog-item__available catalog-item__available_<?php echo $itemData['available'] ? '' : 'not-'?>available">
         <?php echo $itemData['available'] ? 'В наличии' : 'Под заказ'?>
       </div>
-      <?php if ($itemData['available']) { ?>
+      <?php if ($itemData['price'] && $itemData['available']) { ?>
           <!--noindex-->
           <div class="catalog-item__add-to-cart-outer">
             <button type="button" class="btn btn-primary catalog-item__add-to-cart">

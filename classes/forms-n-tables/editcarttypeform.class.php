@@ -114,9 +114,39 @@ class EditCartTypeForm extends RAASForm
                     'data-hint' => $view->_('SIZES_CALLBACK_HINT'),
                 ],
                 [
-                    'type' => 'checkbox',
-                    'name' => 'no_amount',
-                    'caption' => $view->_('FAVORITES_MODE')
+                    'type' => 'select',
+                    'name' => 'amount_type',
+                    'required' => true,
+                    'caption' => $view->_('CHECK_AMOUNT_TYPE'),
+                    'children' => [
+                        [
+                            'value' => -1,
+                            'caption' => $view->_('FAVORITES_MODE')
+                        ],
+                        [
+                            'value' => 0,
+                            'caption' => $view->_('NORMAL_CHECK_AMOUNT_MODE'),
+                        ],
+                        [
+                            'value' => 1,
+                            'caption' => $view->_('STRICT_CHECK_AMOUNT_MODE'),
+                        ],
+                    ],
+                    'import' => function ($field) {
+                        $item = $field->Form->Item;
+                        if ($item->no_amount) {
+                            return -1;
+                        } elseif ($item->check_amount) {
+                            return 1;
+                        }
+                        return 0;
+                    },
+                    'export' => function ($field) {
+                        $item = $field->Form->Item;
+                        $val = (int)($_POST[$field->name] ?? 0);
+                        $item->no_amount = (int)($val == -1);
+                        $item->check_amount = (int)($val == 1);
+                    },
                 ],
                 new FieldSet([
                     'template' => 'dev_edit_cart_type.mtypes.php',

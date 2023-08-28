@@ -382,8 +382,8 @@ class CatalogFilter
         $result = [];
         $materialPropsIds = $materialsToRetrieve = [];
         foreach ($propsMapping as $propId => $propValues) {
-            $prop = $properties[$propId];
-            if ($prop->id) {
+            $prop = $properties[$propId] ?? null;
+            if ($prop && $prop->id) {
                 if (in_array($prop->datatype, ['radio', 'select']) ||
                     (($prop->datatype == 'checkbox') && $prop->multiple)
                 ) {

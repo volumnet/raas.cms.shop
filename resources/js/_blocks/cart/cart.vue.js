@@ -130,6 +130,15 @@ export default {
         doQuickOrder() {
             this.quickorder = true;
             this.formData.agree = 1;
+            window.setTimeout(() => {
+                if (this.$refs.quickorder) {
+                    window.scrollTo({
+                        left: 0, 
+                        top: $(this.$refs.quickorder).offset().top + this.$root.getScrollOffset(),
+                        behavior: 'smooth',
+                    })
+                }
+            })
         },
         /**
          * Переходит к оформлению заказа
