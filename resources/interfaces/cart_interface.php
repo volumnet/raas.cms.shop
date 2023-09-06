@@ -211,6 +211,9 @@ $getRussianPostTariffs = function ($postalCode, $weight, array $sizes, $sum) use
                 $response = file_get_contents($url);
                 $response = (array)json_decode($response, true);
                 // var_dump($url, $response); exit;
+                if (!$response) {
+                    continue;
+                }
 
                 $tariffSum = (float)$response['pay'] / 100;
                 if ($params['priceRatio'] ?? '') {
@@ -623,7 +626,7 @@ $interface->conditionalRequiredFields = [
     'post_code' => function ($field, $post) use ($delivery, $isDelivery) {
         return $delivery->id &&
             $isDelivery &&
-            in_array($delivery->service_urn, ['mail']);
+            in_array($delivery->service_urn, ['russianpost']);
     },
     'region' => function ($field, $post) {
         return !$post['quickorder'];

@@ -120,6 +120,25 @@ foreach ($availableProperties as $propId => $availableProperty) {
                 // }
             }
         }
+        usort($result['properties'][trim($propId)]['values'], function ($a, $b) use ($propId) {
+            $aNum = $bNum = null;
+            if (preg_match('/^(\\d|,|\\.)+/umis', $a['doRich'], $regs)) {
+                $aNum = (float)$regs[0];
+            }
+            if (preg_match('/^(\\d|,|\\.)+/umis', $b['doRich'], $regs)) {
+                $bNum = (float)$regs[0];
+            }
+            if ($aNum && $bNum) {
+                return (int)($aNum * 100) - (int)($bNum * 100);
+            }
+            if ($aNum) {
+                return -1;
+            }
+            if ($bNum) {
+                return 1;
+            }
+            return strnatcasecmp($a, $b);
+        });
     }
 }
 $properties = array_values($result['properties']); // Для сохранения сортировки JavaScript

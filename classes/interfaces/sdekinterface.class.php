@@ -498,8 +498,12 @@ class SDEKInterface extends AbstractInterface
         $data['lang'] = $lang;
         $formData = ['json' => json_encode($data)];
         $result = $this->methodJSON($url, $formData, 'https://api.cdek.ru');
-        $result['result']['price'] = ceil($result['result']['price'] * $this->priceRatio);
-        $result['result']['priceByCurrency'] = ceil($result['result']['priceByCurrency'] * $this->priceRatio);
+        if ($result && ($result['result']['price'])) {
+            $result['result']['price'] = ceil($result['result']['price'] * $this->priceRatio);
+            $result['result']['priceByCurrency'] = ceil($result['result']['priceByCurrency'] * $this->priceRatio);
+        } else {
+            $result['error'] = true;
+        }
         return $result;
     }
 

@@ -130,6 +130,22 @@ export default {
             values = Object.values(this.property.values).sort((a, b) => {
                 let aRich = (a.doRich || a) + '';
                 let bRich = (b.doRich || b) + '';
+                let aNum, bNum, regs;
+                if (regs = /^(\d|,|\.)+/gi.exec(aRich)) {
+                    aNum = parseFloat(regs[0]);
+                }
+                if (regs = /^(\d|,|\.)+/gi.exec(bRich)) {
+                    bNum = parseFloat(regs[0]);
+                }
+                if (aNum && bNum) {
+                    return Math.ceil(aNum * 100) - Math.ceil(bNum * 100);
+                }
+                if (aNum) {
+                    return -1;
+                }
+                if (bNum) {
+                    return 1;
+                }
                 return aRich.localeCompare(bRich);
             });
             return values;

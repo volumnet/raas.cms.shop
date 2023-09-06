@@ -167,7 +167,7 @@ class PayMasterInterface extends EPayInterface
                 }
             }
             if ($order->paid) {
-                $out['success'][(int)$block->id] = 'Ваш заказ №' . $order->id . ' был успешно оплачен. Все материалы вы можете увидеть в личном кабинете';
+                $out['success'][(int)$block->id] = sprintf(ORDER_SUCCESSFULLY_PAID, $order->id);
             } else {
                 $out['localError'] = ['order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)];
             }

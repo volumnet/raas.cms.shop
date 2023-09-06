@@ -604,7 +604,7 @@ class CatalogFilter
             foreach ($sqlResult as $sqlRow) {
                 $value = trim($sqlRow['value']);
                 if ($availabilityProp && ($sqlRow['fid'] == $availabilityProp->id)) {
-                    $value = trim((int)(bool)$value);
+                    $value = $this->getAvailabilityOrderByValue($value);
                 }
                 $propsMapping[trim($sqlRow['fid'])][$value][(string)$sqlRow['pid']] = (int)$sqlRow['pid'];
             }
@@ -639,6 +639,18 @@ class CatalogFilter
             }
         }
         return $propsMapping;
+    }
+
+
+    /**
+     * Получает порядок отображения по наличию
+     * @param mixed $value Исходное значение наличия
+     * @return int
+     */
+    public function getAvailabilityOrderByValue($value): int
+    {
+        $result = trim((int)(bool)$value);
+        return $result;
     }
 
 

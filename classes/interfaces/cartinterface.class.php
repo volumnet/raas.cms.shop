@@ -411,7 +411,11 @@ class CartInterface extends FormInterface
             Order::delete($order);
             $order = null;
         }
-        return ['Item' => $order, 'Material' => $material];
+        $result = ['Item' => $order, 'Material' => $material];
+        if ($user ?? null) {
+            $result['user'] = $user;
+        }
+        return $result;
     }
 
 
@@ -536,6 +540,7 @@ class CartInterface extends FormInterface
             $files
         );
         $user = $result['User'];
+        $user->new = true;
         if ($user->id) {
             return $user;
         }
