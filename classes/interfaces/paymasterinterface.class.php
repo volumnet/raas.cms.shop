@@ -149,7 +149,7 @@ class PayMasterInterface extends EPayInterface
             }
             if ($block->epay_test) {
                 file_put_contents(
-                    'paymaster.log',
+                    Application::i()->baseDir . '/logs/paymaster.log',
                     date('Y-m-d H:i:s ') . 'result: ' .
                     $order->id . ' / ' .
                     $order->payment_id . "\n\n",
@@ -199,7 +199,7 @@ class PayMasterInterface extends EPayInterface
             } else {
                 $logMessage .= "order not found\n\n";
             }
-            file_put_contents('paymaster.log', $logMessage, FILE_APPEND);
+            file_put_contents(Application::i()->baseDir . '/logs/paymaster.log', $logMessage, FILE_APPEND);
         }
         return ['localError' => [
             'order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)
@@ -234,7 +234,7 @@ class PayMasterInterface extends EPayInterface
         if ($localError) {
             if ($block->epay_test) {
                 file_put_contents(
-                    'paymaster.log',
+                    Application::i()->baseDir . '/logs/paymaster.log',
                     date('Y-m-d H:i:s ') . 'init: ' .
                     var_export($localError, true) . "\n\n",
                     FILE_APPEND
@@ -260,7 +260,7 @@ class PayMasterInterface extends EPayInterface
             $history->commit();
             if ($block->epay_test) {
                 file_put_contents(
-                    'paymaster.log',
+                    Application::i()->baseDir . '/logs/paymaster.log',
                     date('Y-m-d H:i:s ') . 'init: ' . (int)$order->id . ' / ' .
                     $response['orderId'] . "\n\n",
                     FILE_APPEND
@@ -465,7 +465,7 @@ class PayMasterInterface extends EPayInterface
         $response = $this->exec('invoices', $requestData, $block->epay_test);
         if ($block->epay_test) {
             file_put_contents(
-                'paymaster.log',
+                Application::i()->baseDir . '/logs/paymaster.log',
                 date('Y-m-d H:i:s ') . 'registerOrder: ' .
                 var_export($requestData, true) . "\n" .
                 var_export($response, true) . "\n\n",
@@ -523,7 +523,7 @@ class PayMasterInterface extends EPayInterface
             $history->commit();
             if ($block->epay_test) {
                 file_put_contents(
-                    'paymaster.log',
+                    Application::i()->baseDir . '/logs/paymaster.log',
                     date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
                     $url . "\n" .
                     var_export($json, true) . "\n" .
@@ -535,7 +535,7 @@ class PayMasterInterface extends EPayInterface
         } elseif (!$json['id'] || !$json['status']) {
             if ($block->epay_test) {
                 file_put_contents(
-                    'paymaster.log',
+                    Application::i()->baseDir . '/logs/paymaster.log',
                     date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
                     $url . "\n" .
                     var_export($json, true) . "\n" .
@@ -548,7 +548,7 @@ class PayMasterInterface extends EPayInterface
 
         if ($block->epay_test) {
             file_put_contents(
-                'paymaster.log',
+                Application::i()->baseDir . '/logs/paymaster.log',
                 date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
                 $url . "\n\n",
                 FILE_APPEND
