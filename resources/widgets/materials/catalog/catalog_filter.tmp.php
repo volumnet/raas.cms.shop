@@ -9,6 +9,7 @@ namespace RAAS\CMS\Shop;
 use SOME\Text;
 use RAAS\AssetManager;
 use RAAS\CMS\Block;
+use RAAS\CMS\Block_Material;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Package;
@@ -30,6 +31,14 @@ if ($pageMime == 'application/json') {
 } else {
     $catalogBlock = Block::spawn((int)$Block->additionalParams['catalogBlockId']);
     $catalog = $Page;
+}
+if (!($catalogBlock instanceof Block_Material)) { // Для защиты от прямого доступа
+    if ($pageMime == 'application/json') {
+        echo '{}';
+        exit;
+    } else {
+        return;
+    }
 }
 $catalogInterface = new CatalogInterface();
 $catalogInterface->setCatalogFilter($catalogBlock, $catalog, $DATA);

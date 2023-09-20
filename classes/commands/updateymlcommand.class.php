@@ -4,6 +4,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use RAAS\Application;
 use RAAS\Command;
 use SOME\EventProcessor;
 use RAAS\CMS\Page;
@@ -17,7 +18,7 @@ class UpdateYMLCommand extends Command
     /**
      * Выполнение команды
      * @param string|null $ymlPageURL URL страницы Яндекс.Маркета
-     * @param string $outputFile Файл для вывода
+     * @param string $outputFile Файл для вывода (по умолчанию yandex.market.xml в корне сайта)
      * @param bool $https Включен ли HTTPS
      * @param bool $forceUpdate Принудительно выполнить обновление, даже если материалы не были обновлены
      * @param bool $forceLockUpdate Принудительно выполнить обновление, даже если есть параллельный процесс
@@ -26,13 +27,18 @@ class UpdateYMLCommand extends Command
      */
     public function process(
         $ymlPageURL = '/yml/',
-        $outputFile = '../yandex.market.xml',
+        $outputFile = null,
         $https = false,
         $forceUpdate = false,
         $forceLockUpdate = false,
         $limit = 0
     ) {
         $t = $this;
+
+        if ($outputFile === null) {
+            $outputFile = Application::i()->baseDir . '/yandex.market.xml';
+        }
+
         if (!$forceUpdate) {
             $sqlQuery = "SELECT MAX(UNIX_TIMESTAMP(last_modified))
                            FROM " . Material::_tablename()

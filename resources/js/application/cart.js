@@ -187,10 +187,32 @@ export default class {
         const eCommerce = this.getECommerce();
         await this.update('action=set' + this.getItemQuery(items, parseInt(amount)), postData);
         if (items instanceof Array) {
-            items.forEach(x => eCommerce.set(item, item.amount));
+            items.forEach(item => eCommerce.set(item, item.amount));
         } else {
             eCommerce.set(items, amount);
         }
+    }
+
+
+    /**
+     * Устанавливает все товары с заменой
+     * @param {Object[]} items Набор товаров
+     * @param {Object} postData Дополнительные POST-данные
+     */
+    async setAll(items, postData = null) {
+        const eCommerce = this.getECommerce();
+        let itemsToDelete = JSON.parse(JSON.stringify(this.items)).filter(oldItem => {
+            let matchingNewItems = items.filter(newItem => ((newItem.id == oldItem.id) && (newItem.meta == oldItem.meta)));
+            return matchingNewItems.length == 0;
+        }).map((oldItem) => {
+            oldItem.amount = 0;
+            return oldItem;
+        });
+
+        await this.update('action=set&clear=1' + this.getItemQuery(items), postData);
+        
+        itemsToDelete.forEach(item => eCommerce.set(item, 0));
+        items.forEach(item => eCommerce.set(item, item.amount));
     }
 
 
@@ -204,7 +226,7 @@ export default class {
         const eCommerce = this.getECommerce();
         await this.update('action=add' + this.getItemQuery(items, parseInt(amount) || 1), postData);
         if (items instanceof Array) {
-            items.forEach(x => eCommerce.add(item, item.amount));
+            items.forEach(item => eCommerce.add(item, item.amount));
         } else {
             eCommerce.add(items, amount);
         }
@@ -220,7 +242,7 @@ export default class {
         const eCommerce = this.getECommerce();
         await this.update('action=delete' + this.getItemQuery(items), postData);
         if (items instanceof Array) {
-            items.forEach(x => eCommerce.delete(item));
+            items.forEach(item => eCommerce.delete(item));
         } else {
             eCommerce.delete(items);
         }
@@ -234,7 +256,7 @@ export default class {
     async clear(postData) {
         const eCommerce = this.getECommerce();
         await this.update('action=clear', postData);
-        eCommerce.clear(item, amount)
+        eCommerce.clear()
     }
 
 

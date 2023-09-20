@@ -254,7 +254,7 @@ class CartInterface extends FormInterface
             if ($this->get['back']) {
                 $url = 'history:back';
             } else {
-                $url = HTTP::queryString('action=&id=&meta=&amount=') ?: '?';
+                $url = HTTP::queryString('action=&id=&meta=&amount=&clear=') ?: '?';
             }
             if ($debug) {
                 return $url;

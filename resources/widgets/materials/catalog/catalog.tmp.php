@@ -19,8 +19,7 @@ use RAAS\CMS\Snippet;
 
 if ($Item) {
     $formatter = new ItemArrayFormatter($Item);
-    $itemData = $formatter->format(['modify_date', 'videos']);
-    $itemData['videos'] = (array)$itemData['videos'];
+    $itemData = $formatter->format();
     $photoVideo = (array)$itemData['visImages'];
     foreach ($itemData['videos'] as $video) {
         $ytid = $ytname = '';

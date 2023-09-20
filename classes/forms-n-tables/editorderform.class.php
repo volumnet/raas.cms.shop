@@ -2,12 +2,14 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
+use RAAS\Attachment;
 use RAAS\Field as RAASField;
 use RAAS\FieldSet;
 use RAAS\Form;
 use RAAS\Option;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Material_Field;
+use RAAS\CMS\Field as CMSField;
 use RAAS\CMS\Form as CMSForm;
 use RAAS\CMS\Snippet_Folder;
 use RAAS\CMS\Snippet;
@@ -49,16 +51,19 @@ class EditOrderForm extends Form
                 if ($Item->id) {
                     $dataChanged = [];
                     foreach ($Item->fields as $field) {
-                        $vals = $field->getValues();
-                        if (is_array($vals)) {
-                            $vals = array_map(function ($x) {
-                                return ($x instanceof Material) ? (int)$x->id : $x;
-                            }, $vals);
-                        } elseif ($vals instanceof Material) {
-                            $vals = (int)$vals->id;
-                        }
-                        if ($vals != $_POST[$field->urn]) {
-                            $dataChanged[$field->name] = print_r($vals, true) . ' => ' . print_r($_POST[$field->urn], true);
+                        if (in_array($field->datatype, ['file', 'image'])) {
+                            $newVals = $this->formatFieldValue($field, $_FILES[$field->urn]['name'] ?? null);
+                            if ($newVals) {
+                                $dataChanged[$field->name] = $newVals;
+                            }
+                        } else {
+                            $oldVals = $field->getValues();
+                            $oldVals = $this->formatFieldValue($field, $oldVals);
+                            $newVals = $_POST[$field->urn] ?? null;
+                            $newVals = $this->formatFieldValue($field, $newVals);
+                            if ($oldVals != $newVals) {
+                                $dataChanged[$field->name] = $oldVals . ' => ' . $newVals;
+                            }
                         }
                     }
 
@@ -171,5 +176,47 @@ class EditOrderForm extends Form
         ]);
         $arr = array_merge($defaultParams, $params);
         parent::__construct($arr);
+    }
+
+
+    /**
+     * Форматирует значение поля
+     * @param CMSField $field Поле
+     * @param mixed $value Значение
+     * @return mixed;
+     */
+    public function formatFieldValue(CMSField $field, $value)
+    {
+        if (is_array($value)) {
+            $result = array_map(function ($x) use ($field) {
+                return $this->formatFieldValue($field, $x);
+            }, $value);
+            $result = array_values(array_filter($result));
+            if (count($result) > 1) {
+                $result = json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            } elseif ($result) {
+                $result = $result[0];
+            } else {
+                $result = '';
+            }
+            return $result;
+        }
+        if ($value instanceof Material) {
+            if ($value->id) {
+                return $value->name . ' (#' . (int)$value->id . ')';
+            }
+        } elseif ($value && is_scalar($value)) {
+            if (in_array($field->datatype, ['file', 'image'])) {
+                return 'Загружен: ' . $value;
+            } elseif ($field->datatype == 'material') {
+                $material = new Material($value);
+                if ($material->id) {
+                    return $material->name . ' (#' . (int)$material->id . ')';
+                }
+            } else {
+                return $field->doRich($value);
+            }
+        }
+        return '';
     }
 }
