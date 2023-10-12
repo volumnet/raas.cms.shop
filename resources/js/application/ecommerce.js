@@ -12,8 +12,9 @@ export default class {
         this.autoTrigger = autoTrigger;
         if (window.eCommerce) {
             for (let key of ['currencyCode', 'purchaseGoalId', 'couponId']) {
-                if (window.eCommerce[key]) {
-                    this[key] = window.eCommerce[key];
+                let eCommerceVal = window.app[key] || window.eCommerce[key];
+                if (eCommerceVal) {
+                    this[key] = eCommerceVal;
                 }
             }
         }

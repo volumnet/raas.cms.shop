@@ -201,7 +201,7 @@ export default {
                     orderId: data.orderId,
                 }
                 if (eCommerceData.products.length) {
-                    $(document).trigger('raas.shop.ecommerce', eCommerceData);
+                    this.cart.getECommerce().trigger(eCommerceData);
                 }
             }
             this.cart.updateData(data);

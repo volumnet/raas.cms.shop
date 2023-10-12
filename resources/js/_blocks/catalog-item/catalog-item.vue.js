@@ -31,7 +31,7 @@ export default {
             default: false,
         },
     },
-    data: function () {
+    data() {
         let translations = {
             ADDED_TO_CART: 'Товар добавлен в корзину',
             ADDED_TO_COMPARE: 'Товар добавлен в сравнение',
@@ -67,7 +67,7 @@ export default {
             translations, // Переводы
         };
     },
-    mounted: function () {
+    mounted() {
         $(document).on('raas.shop.cart-updated', () => {
             this.checkCarts();
         });
@@ -81,7 +81,7 @@ export default {
          * @param  {Number} x Цена
          * @return {String}
          */
-        formatPrice: function (x) {
+        formatPrice(x) {
             return window.formatPrice(x);
         },
 
@@ -89,7 +89,7 @@ export default {
         /**
          * Проверяет наличие в корзинах
          */
-        checkCarts: function () {
+        checkCarts() {
             if (window.app.cart) {
                 this.inCart = window.app.cart.checkAmount(this.actualItem);
                 if (this.bindAmountToCart) {
@@ -109,7 +109,7 @@ export default {
          * Устанавливает количество товара (не ниже минимума)
          * @param {Number} amount Количество для установки
          */
-        setAmount: function (amount) {
+        setAmount(amount) {
             let newAmount = Math.max(
                 this.bindAmountToCart ? 0 : this.actualItem.min, 
                 amount
@@ -131,7 +131,7 @@ export default {
          * @param {Number} amount 1 - товар добавлен, -1 - товар удален
          * @return {Object}
          */
-        getCartModalData: function (cart, amount = 1) {
+        getCartModalData(cart, amount = 1) {
             let suffix = '_' + cart.id.toUpperCase();
             let titleURN = ((amount > 0) ? 'ADDED_TO' : 'DELETED_FROM');
             let result = {
@@ -151,7 +151,7 @@ export default {
         /**
          * Добавляет товар в корзину
          */
-        addToCart: function () {
+        addToCart() {
             this.inCart++;
             window.app.cart.add(this.actualItem, this.amount);
             $(document).one('raas.shop.cart-updated', () => {
@@ -164,7 +164,7 @@ export default {
         /**
          * Устанавливает количество товара в корзине
          */
-        setCart: function () {
+        setCart() {
             this.setAmount(this.amount);
             this.inCart = this.amount;
             window.app.cart.set(this.actualItem, this.amount);
@@ -174,7 +174,7 @@ export default {
         /**
          * Добавляет/убирает товара в корзине
          */
-        toggleCart: function () {
+        toggleCart() {
             let newAmount;
             if (this.inCart) {
                 newAmount = 0;
@@ -198,7 +198,7 @@ export default {
         /**
          * Добавляет/убирает товар в избранном
          */
-        toggleFavorites: function () {
+        toggleFavorites() {
             window.app.favorites.set(this.actualItem, this.inFavorites ? 0 : 1);
             this.inFavorites = !this.inFavorites;
             $(document).one('raas.shop.cart-updated', () => {
@@ -214,7 +214,7 @@ export default {
         /**
          * Добавляет/убирает товар в избранном
          */
-        toggleCompare: function () {
+        toggleCompare() {
             window.app.compare.set(this.actualItem, this.inCompare ? 0 : 1);
             this.inCompare = !this.inCompare;
             $(document).one('raas.shop.cart-updated', () => {
@@ -230,7 +230,7 @@ export default {
         /**
          * Удаление товара из корзины с подтверждением
          */
-        requestItemDeleteFromCart: function () {
+        requestItemDeleteFromCart() {
             return window.app.requestItemDelete(
                 this.actualItem, 
                 window.app.cart, 
@@ -242,7 +242,7 @@ export default {
         /**
          * Удаление товара из избранного с подтверждением
          */
-        requestItemDeleteFromFavorites: function () {
+        requestItemDeleteFromFavorites() {
             return window.app.requestItemDelete(
                 this.actualItem, 
                 window.app.favorites, 
@@ -254,7 +254,7 @@ export default {
         /**
          * Удаление товара из избранного с подтверждением
          */
-        requestItemDeleteFromCompare: function () {
+        requestItemDeleteFromCompare() {
             return window.app.requestItemDelete(
                 this.actualItem, 
                 window.app.compare, 
@@ -267,14 +267,14 @@ export default {
          * Распаковка текущего экземпляра для слота
          * @return {Object}
          */
-        self: function () { 
+        self() { 
             return { ...this };
         },
         /**
          * Мета-данные товара (строка)
          * @return {String}
          */
-        meta: function () {
+        meta() {
             if ((this.actualItem.metaJSON instanceof Object) && 
                 (Object.keys(this.actualItem.metaJSON).length > 0)
             ) {
@@ -288,7 +288,7 @@ export default {
          * Актуальный товар для покупки (с учетом meta)
          * @return {Object}
          */
-        actualItem: function () {
+        actualItem() {
             return this.item;
         },
     },

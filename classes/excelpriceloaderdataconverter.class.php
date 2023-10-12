@@ -27,9 +27,9 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
      */
     public function load($file)
     {
-        $xlsReader = $this->getReader();
+        $xlsReader = @$this->getReader();
         try {
-            $workbook = $xlsReader->load($file);
+            $workbook = @$xlsReader->load($file);
             $data = $this->getDataFromExcelWorkbook($workbook);
             return $data;
         } catch (PHPExcel_Exception $e) {

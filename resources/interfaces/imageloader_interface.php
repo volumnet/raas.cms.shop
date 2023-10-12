@@ -1,4 +1,7 @@
 <?php
+/**
+ * Интерфейс загрузчика изображений
+ */
 namespace RAAS\CMS\Shop;
 
 use \RAAS\CMS\Material;

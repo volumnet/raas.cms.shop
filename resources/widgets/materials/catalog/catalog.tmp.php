@@ -105,8 +105,20 @@ if ($Item) {
               <?php } ?>
             </div>
             <!--noindex-->
-            <div class="catalog-article__images-list catalog-article-images-list slider slider_horizontal" data-vue-role="raas-slider" data-vue-type="horizontal" data-v-bind_wrap="false" data-v-bind_autoscroll="false" data-v-slot="slider">
-              <a data-v-on_click="slider.prev()" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev slider__arrow slider__arrow_prev" data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.prevAvailable, 'slider__arrow_active': slider.prevAvailable }"></a>
+            <div
+              class="catalog-article__images-list catalog-article-images-list slider slider_horizontal"
+              data-vue-role="raas-slider"
+              data-vue-type="horizontal"
+              data-v-bind_wrap="false"
+              data-v-bind_autoscroll="false"
+              data-v-slot="slider"
+            >
+              <button
+                type="button"
+                data-v-on_click="slider.prev()"
+                class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev slider__arrow slider__arrow_prev"
+                data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.prevAvailable, 'slider__arrow_active': slider.prevAvailable }"
+              ></button>
               <div class="catalog-article-images-list__inner slider__list" data-role="slider-list">
                 <div class="catalog-article-images-list__list slider-list slider-list_horizontal">
                   <?php foreach ($photoVideo as $i => $row) {
@@ -118,7 +130,8 @@ if ($Item) {
                           $href = $row['fileURL'];
                       }
                       ?>
-                      <a class="catalog-article-images-list__item slider-list__item catalog-article-images-item<?php echo $row['ytid'] ? ' catalog-article-images-item_video' : ''?>"
+                      <a
+                        class="catalog-article-images-list__item slider-list__item catalog-article-images-item<?php echo $row['ytid'] ? ' catalog-article-images-item_video' : ''?>"
                         href="<?php echo htmlspecialchars($href)?>"
                         data-v-on_click="vm.clickThumbnail(<?php echo (int)$i?>, $event)"
                         data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__images"
@@ -129,13 +142,22 @@ if ($Item) {
                       </a>
                   <?php }
                   if (!$photoVideo) { ?>
-                      <span class="catalog-article-images-list__item slider-list__item catalog-article-images-item" data-role="slider-item" data-v-bind_class="{ 'catalog-article-images-list__item_active': true, 'slider-list__item_active': true }">
+                      <span
+                        class="catalog-article-images-list__item slider-list__item catalog-article-images-item"
+                        data-role="slider-item"
+                        data-v-bind_class="{ 'catalog-article-images-list__item_active': true, 'slider-list__item_active': true }"
+                      >
                         <img loading="lazy" src="/files/cms/common/image/design/nophoto.jpg" alt="" />
                       </span>
                   <?php } ?>
                 </div>
               </div>
-              <a data-v-on_click="slider.next()" class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next slider__arrow slider__arrow_next" data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.nextAvailable, 'slider__arrow_active': slider.nextAvailable }"></a>
+              <button
+                type="button"
+                data-v-on_click="slider.next()"
+                class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next slider__arrow slider__arrow_next"
+                data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.nextAvailable, 'slider__arrow_active': slider.nextAvailable }"
+              ></button>
             </div>
             <!--/noindex-->
           </div>

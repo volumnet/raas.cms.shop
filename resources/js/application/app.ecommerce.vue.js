@@ -11,11 +11,9 @@ export default {
         };
     },
     mounted: function () {
-        if (window.eCommerce) {
-            for (let key of ['currencyCode', 'purchaseGoalId', 'couponId']) {
-                if (window.eCommerce[key]) {
-                    this[key] = window.eCommerce[key];
-                }
+        for (let key of ['currencyCode', 'purchaseGoalId', 'couponId']) {
+            if (window.eCommerce && window.eCommerce[key]) {
+                this[key] = window.eCommerce[key];
             }
         }
         $(document).on('raas.shop.ecommerce', (e, data) => {
