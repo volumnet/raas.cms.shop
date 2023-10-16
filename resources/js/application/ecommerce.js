@@ -8,162 +8,103 @@ export default class {
      * @param {Boolean} autoTrigger Автоматически вызывать событие
      */
     constructor(cart, autoTrigger = false) {
-        this.items = cart.items;
+        this.cart = cart;
+        this.items = JSON.parse(JSON.stringify(cart.items));
+        // console.log(this.items);
         this.autoTrigger = autoTrigger;
-        if (window.eCommerce) {
+        window.setTimeout(() => {
             for (let key of ['currencyCode', 'purchaseGoalId', 'couponId']) {
-                let eCommerceVal = window.app[key] || window.eCommerce[key];
+                let eCommerceVal = (window.eCommerce && window.eCommerce[key]) || window.app[key];
                 if (eCommerceVal) {
                     this[key] = eCommerceVal;
                 }
             }
+
+        })
+    }
+
+
+    /**
+     * Обновляет данные о товарах в корзине
+     * @param {Object[]} newItems Новые товары корзины
+     * @param {Boolean} trigger Генерировать событие
+     * @return {Object[]} Набор объектов для генерации событий
+     */
+    updateCart(newItems, trigger = true)
+    {
+        if (this.cart.dataLoaded && this.autoTrigger) { // Только если обновление, при первой загрузке не вызываем
+            // Найдем товары для удаления
+            const itemsToDelete = this.items.filter(oldItem => {
+                let matchingNewItems = newItems
+                    .filter(newItem => ((newItem.id == oldItem.id) && (newItem.meta == oldItem.meta)));
+                return !matchingNewItems.length;
+            }).map(item => {
+                return { ...item, amount: 0, oldAmount: item.amount };
+            });
+            const itemsToChange = newItems.map(newItem => {
+                let matchingOldItems = this.items
+                    .filter(oldItem => ((newItem.id == oldItem.id) && (newItem.meta == oldItem.meta)));
+                return { ...newItem, oldAmount: matchingOldItems.length ? matchingOldItems[0].amount : 0 };
+            }).filter(item => item.amount != item.oldAmount);
+            const items = itemsToDelete.concat(itemsToChange);
+
+            // Уже для eCommerce
+            const itemsToAdd = itemsToChange.filter(item => item.amount > item.oldAmount).map(item => {
+                return { ...item.eCommerce, amount: item.amount - item.oldAmount };
+            }); 
+            const itemsToRemove = items.filter(item => item.amount < item.oldAmount).map(item => {
+                return { ...item.eCommerce, amount: item.oldAmount - item.amount };
+            });
+
+            const result = [];
+            if (itemsToRemove.length) {
+                result.push({ action: 'remove', products: itemsToRemove });
+            }
+            if (itemsToAdd.length) {
+                result.push({ action: 'add', products: itemsToAdd });
+            }
+
+            if (result.length) {
+                this.trigger(result);
+            }
         }
+        this.items = JSON.parse(JSON.stringify(newItems));
     }
 
 
     /**
      * Вызывает событие ECommerce
-     * @param {Object} data Данные для отображения
+     * @param {Object|Object[]} data Данные для отображения
      */
     trigger(data) {
-        let actionData = {
-            products: data.products || []
-        };
-        if ((data.action == 'purchase') && data.orderId) {
-            actionData.actionField = {
-                id: data.orderId,
-            };
-            if (this.couponId) {
-                actionData.actionField.coupon = this.couponId;
-            }
-            if (this.purchaseGoalId) {
-                actionData.actionField.goal_id = this.purchaseGoalId;
-            }
+        if (!(data instanceof Array) && data) {
+            data = [data];
         }
-        let eCommerceData = {
-            ecommerce: {
-                currencyCode: this.currencyCode
+        if ((this.cart.id != 'cart') || !data || !data.length || !window.app.ecommerceEnabled) {
+            return null;
+        }
+        const eCommerceData = { ecommerce: { currencyCode: this.currencyCode } };
+        for (const event of data) {
+            let actionData;
+            if (event.action == 'impressions') {
+                actionData = event.products;
+            } else {
+                actionData = { products: event.products || [] };
             }
-        };
-        eCommerceData.ecommerce[data.action] = actionData;
+            if ((event.action == 'purchase') && event.orderId) {
+                actionData.actionField = { id: event.orderId };
+                if (this.couponId) {
+                    actionData.actionField.coupon = this.couponId;
+                }
+                if (this.purchaseGoalId) {
+                    actionData.actionField.goal_id = this.purchaseGoalId;
+                }
+            }
+            eCommerceData.ecommerce[event.action] = actionData;
+        }
 
-        let dataLayer = (window.dataLayer || []);
+        const dataLayer = (window.dataLayer || []);
         dataLayer.push(eCommerceData);
         console.log(eCommerceData, window.dataLayer);
-
-    }
-
-
-    /**
-     * Устанавливает количество товара
-     * @param {Object} item Товар
-     * @param {Number} amount Количество единиц товара
-     * @return {Object} Данные для установки в eCommerce после обновления корзины
-     */
-    set(item, amount = null) {
-        let result = null;
-        if (item.eCommerce) {
-            let matchingItems = this.items
-                .filter(x => ((x.id == item.id) && (x.meta == (item.meta || ''))));
-            let oldAmount = 0;
-            if (matchingItems && matchingItems[0]) {
-                oldAmount = parseFloat(matchingItems[0].amount) || 0;
-            }
-            // console.log(oldAmount, amount);
-            let deltaAmount = amount - oldAmount;
-            if (deltaAmount != 0) {
-                result = {
-                    action: (deltaAmount < 0) ? 'remove' : 'add',
-                    products: [Object.assign(
-                        {}, 
-                        item.eCommerce, 
-                        { amount: Math.abs(deltaAmount) }
-                    )],
-                };
-                if (this.autoTrigger) {
-                    this.trigger(result);
-                }
-            }
-        }
-        return result;
-    }
-
-
-    /**
-     * Добавляет товар
-     * @param {Object} item Товар
-     * @param {Number} amount Количество единиц товара
-     * @return {Object} Данные для установки в eCommerce после обновления корзины
-     */
-    add(item, amount = null) {
-        let result = null;
-        if (item.eCommerce) {
-            if (amount != 0) {
-                result = {
-                    action: (amount < 0) ? 'remove' : 'add',
-                    products: [Object.assign(
-                        {}, 
-                        item.eCommerce, 
-                        { amount: Math.abs(amount) }
-                    )],
-                };
-                if (this.autoTrigger) {
-                    this.trigger(result);
-                }
-            }
-        }
-        return result;
-    }
-
-
-    /**
-     * Удаляет товар
-     * @param {Object} item Товар
-     * @return {Object} Данные для установки в eCommerce после обновления корзины
-     */
-    delete(item) {
-        let result = null;
-        if (item.eCommerce) {
-            let matchingItems = this.items
-                .filter(x => ((x.id == item.id) && (x.meta == (item.meta || ''))));
-            let oldAmount = 0;
-            if (matchingItems && matchingItems[0]) {
-                oldAmount = parseFloat(matchingItems[0].amount) || 0;
-            }
-            // console.log(oldAmount, amount);
-            if (oldAmount != 0) {
-                result = {
-                    action: 'remove',
-                    products: [Object.assign(
-                        {}, 
-                        item.eCommerce, 
-                        { amount: oldAmount }
-                    )],
-                };
-                if (this.autoTrigger) {
-                    this.trigger(result);
-                }
-            }
-        }
-        return result;
-    }
-
-
-    /**
-     * Очищает корзину
-     * @return {Object} Данные для установки в eCommerce после обновления корзины
-     */
-    clear() {
-        let result = null;
-        result = {
-            action: 'remove',
-            products: this.items.filter(x => !!x.eCommerce).map((x) => {
-                return Object.assign({}, x.eCommerce, { amount: x.amount });
-            }),
-        }
-        if (this.autoTrigger) {
-            this.trigger(result);
-        }
-        return result;
     }
 };

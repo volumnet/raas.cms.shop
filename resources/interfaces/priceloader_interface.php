@@ -16,7 +16,6 @@
  */
 namespace RAAS\CMS\Shop;
 
-use RAAS\Application;
 use RAAS\CMS\Page;
 
 $interface = new PriceloaderInterface($Loader);

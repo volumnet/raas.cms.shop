@@ -81,6 +81,13 @@ if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
     if ($success[(int)$Block->id]) {
         $result['success'] = true;
         $result['orderId'] = $Item->id;
+        $result['orderECommerce'] = [];
+        $catalogMaterialType = Material_Type::importByURN('catalog');
+        foreach ((array)$Item->items as $i => $item) {
+            if (in_array($item->pid, MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id))) { // Каталог продукции
+                $eCommerceData['orderECommerce'][] = ECommerce::getProduct($item, $i);
+            }
+        }
     }
     if ($localError) {
         $result['localError'] = $localError;
@@ -91,34 +98,12 @@ if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
     header('Content-Type: application/json');
     echo json_encode($result);
     exit;
-} elseif ($epayWidget && ($epayWidget instanceof Snippet)) {
+} elseif ($epayWidget && ($epayWidget instanceof Snippet) {
     eval('?' . '>' . $epayWidget->description);
-} elseif ($success[(int)$Block->id]) {
-    $eCommerceProducts = [];
-    $catalogMaterialType = Material_Type::importByURN('catalog');
-    foreach ((array)$Item->items as $item) {
-        if (in_array(
-            $item->pid,
-            MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id)
-        )) {
-            $eCommerceProducts[] = ECommerce::getProduct($item);
-        }
-    }
-    ?>
+} elseif ($success[(int)$Block->id]) { ?>
     <div class="notifications">
-      <div class="alert alert-success">
-        <?php echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id)?>
-      </div>
+      <div class="alert alert-success"><?php echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id)?></div>
     </div>
-    <script>
-    jQuery(document).ready(function($) {
-        window.eCommerce.pushToDataLayer(
-            'purchase',
-            <?php echo json_encode($eCommerceProducts)?>,
-            <?php echo (int)$Item->id?>
-        );
-    });
-    </script>
 <?php } else {
     $formArrayFormatter = new FormArrayFormatter($Form);
     $formArr = $formArrayFormatter->format(

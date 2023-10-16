@@ -168,7 +168,7 @@
               <div role="tabpanel" class="tab-pane cms-shop-log-container" id="tab_data"></div>
             </div>
           </div>
-      <?php } elseif ($raw_data) { ?>
+      <?php } elseif ($raw_data ?? null) { ?>
           <div id="tab_data" class="cms-shop-log-container"></div>
       <?php } elseif ($log) { ?>
           <div id="tab_log" class="cms-shop-log-container"></div>

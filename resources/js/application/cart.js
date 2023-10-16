@@ -77,6 +77,12 @@ export default class {
          * @type {mixed|null}
          */
         this.additional = null;
+
+        /**
+         * Экземпляр ECommerce
+         * @type {ECommerce}
+         */
+        this.eCommerce = new ECommerce(this);
     }
 
 
@@ -134,19 +140,10 @@ export default class {
             url += query;
         }
         if (url) {
-            // let ajaxSettings = {
-            //     url: url,
-            //     method: 'GET',
-            //     dataType: 'json',
-            // };
-            // if (postData) {
-            //     ajaxSettings.method = 'POST';
-            //     ajaxSettings.data = postData;
-            // }
             this.loading = true;
             const remoteData = await window.app.api(url, postData || null, this.blockId);
-            console.log(remoteData);
             this.updateData(remoteData);
+            this.loading = false;
         }
     }
 
@@ -157,6 +154,7 @@ export default class {
      */
     updateData(remoteData) 
     {
+        const eCommerce = this.getECommerce();
         for (let key of [
             'items', 
             'sum', 
@@ -170,9 +168,8 @@ export default class {
                 this[key] = null;
             }
         }
+        eCommerce.updateCart(this.items, !remoteData.success); // Именно здесь, поскольку до установки dataLoaded, eCommerce не генерирует событий
         this.dataLoaded = true;
-        this.loading = false;
-        // console.log('aaa')
         $(document).trigger('raas.shop.cart-updated',  [{id: this.id, remote: true, data: remoteData}]);
     }
 
@@ -184,13 +181,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     async set(items, amount = null, postData = null) {
-        const eCommerce = this.getECommerce();
         await this.update('action=set' + this.getItemQuery(items, parseInt(amount)), postData);
-        if (items instanceof Array) {
-            items.forEach(item => eCommerce.set(item, item.amount));
-        } else {
-            eCommerce.set(items, amount);
-        }
     }
 
 
@@ -200,7 +191,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     async setAll(items, postData = null) {
-        const eCommerce = this.getECommerce();
+        // console.log(items)
         let itemsToDelete = JSON.parse(JSON.stringify(this.items)).filter(oldItem => {
             let matchingNewItems = items.filter(newItem => ((newItem.id == oldItem.id) && (newItem.meta == oldItem.meta)));
             return matchingNewItems.length == 0;
@@ -210,9 +201,6 @@ export default class {
         });
 
         await this.update('action=set&clear=1' + this.getItemQuery(items), postData);
-        
-        itemsToDelete.forEach(item => eCommerce.set(item, 0));
-        items.forEach(item => eCommerce.set(item, item.amount));
     }
 
 
@@ -223,13 +211,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     async add(items, amount = null, postData = null) {
-        const eCommerce = this.getECommerce();
         await this.update('action=add' + this.getItemQuery(items, parseInt(amount) || 1), postData);
-        if (items instanceof Array) {
-            items.forEach(item => eCommerce.add(item, item.amount));
-        } else {
-            eCommerce.add(items, amount);
-        }
     }
 
 
@@ -239,13 +221,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     async delete(items, postData) {
-        const eCommerce = this.getECommerce();
         await this.update('action=delete' + this.getItemQuery(items), postData);
-        if (items instanceof Array) {
-            items.forEach(item => eCommerce.delete(item));
-        } else {
-            eCommerce.delete(items);
-        }
     }
 
 
@@ -254,9 +230,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     async clear(postData) {
-        const eCommerce = this.getECommerce();
         await this.update('action=clear', postData);
-        eCommerce.clear()
     }
 
 
@@ -286,6 +260,8 @@ export default class {
      * @return {ECommerce}
      */
     getECommerce(autoTrigger = true) {
-        return new ECommerce(this, autoTrigger);
+        this.eCommerce.autoTrigger = autoTrigger;
+        return this.eCommerce;
+        // return new ECommerce(this, autoTrigger);
     }
 }

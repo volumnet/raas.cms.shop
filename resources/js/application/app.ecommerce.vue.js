@@ -5,6 +5,7 @@
 export default {
     data: function () {
         return {
+            ecommerceEnabled: true,
             currencyCode: 'RUB', // Валюта сайта
             purchaseGoalId: null, // ID# цели покупки
             couponId: null, // ID# скидочного купона

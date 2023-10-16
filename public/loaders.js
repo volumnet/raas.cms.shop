@@ -150,7 +150,7 @@ jQuery(document).ready(function($) {
             var hint;
             for (var i = 0; i < log.length; i++) {
                 text += '<p><span class="muted">' + log[i].time + ':</span> ' + log[i].text;
-                if (log[i].realrow !== null) {
+                if (log[i].realrow != null) {
                     text += ' <span class="muted">:' + (log[i].realrow + 1) + '</span>';
                 }
                 text += '</p>';

@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\SOME;
+use RAAS\CMS\ImportByURNTrait;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Page;
@@ -21,6 +22,8 @@ use RAAS\CMS\Snippet;
  */
 class PriceLoader extends SOME
 {
+    use ImportByURNTrait;
+
     /**
      * Не удалять неиспользуемые материалы и страницы
      */
@@ -149,8 +152,16 @@ class PriceLoader extends SOME
         if ($cols === null) {
             $cols = $Loader->cols;
         }
-        $OUT = eval('?' . '>' . $this->Interface->description);
-        return $OUT;
+        $out = $this->Interface->process([
+            'Loader' => $this,
+            'file' => $file,
+            'Page' => $Page,
+            'test' => $test,
+            'clear' => $clear,
+            'rows' => $rows,
+            'cols' => $cols,
+        ]);
+        return $out;
     }
 
 
@@ -162,13 +173,8 @@ class PriceLoader extends SOME
      * @param string $type Тип выгружаемого файла
      * @param string $encoding Кодировка
      */
-    public function download(
-        Page $Page,
-        $rows = 0,
-        $cols = 0,
-        $type = null,
-        $encoding = null
-    ) {
+    public function download(Page $Page, $rows = 0, $cols = 0, $type = null, $encoding = null)
+    {
         $Loader = $this;
         if ($Page === null) {
             $Page = $Loader->Page;
@@ -179,23 +185,14 @@ class PriceLoader extends SOME
         if ($cols === null) {
             $cols = $Loader->cols;
         }
-        $OUT = eval('?' . '>' . $this->Interface->description);
-        return $OUT;
+        $out = $this->Interface->process([
+            'Loader' => $this,
+            'Page' => $Page,
+            'rows' => $rows,
+            'cols' => $cols,
+            'type' => $type,
+            'encoding' => $encoding,
+        ]);
+        return $out;
     }
-
-
-    /**
-     * Импорт по URN
-     * @param string $urn URN для импорта
-     * @return self|null
-     */
-    public static function importByURN($urn = '')
-    {
-        $sqlQuery = "SELECT * FROM " . self::_tablename() . " WHERE urn = ?";
-        if ($sqlResult = self::$SQL->getline([$sqlQuery, $urn])) {
-            return new self($sqlResult);
-        }
-        return null;
-    }
-
 }

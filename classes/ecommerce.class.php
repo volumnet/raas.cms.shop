@@ -61,13 +61,16 @@ class ECommerce
                 $result['position'] = $position;
             }
             if ($propsCache && $propsCache[static::$priceField]['values'][0]) {
-                $price = $propsCache[static::$priceField]['values'][0];
+                $price = (float)$propsCache[static::$priceField]['values'][0];
             }
             if (!$price) {
-                $price = $item->realprice ?: $item->{static::$priceField};
+                $price = (float)$item->realprice ?: $item->{static::$priceField};
             }
             if ($price) {
-                $result['price'] = (float)$price;
+                $result['price'] = $price;
+            }
+            if ((float)$item->price_old && ((float)$item->price_old > $price)) {
+                $result['discount'] = (int)(((float)$item->price_old - $price) / (float)$item->price_old);
             }
             if ($amount = $item->amount) {
                 $result['quantity'] = $amount;

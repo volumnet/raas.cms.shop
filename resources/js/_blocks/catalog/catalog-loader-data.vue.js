@@ -79,6 +79,19 @@ export default {
             }
             if (remote.items) {
                 this.items = this.items.concat(remote.items);
+                window.setTimeout(() => {
+                    if (this.$root.ecommerceEnabled) {
+                        const products = remote.items.map(item => {
+                            if (item.eCommerce) {
+                                return { ...item.eCommerce, list: 'main' };
+                            }
+                            return null;
+                        }).filter(x => !!x);
+                        if (products.length) {
+                            this.$root.cart.getECommerce().trigger({ action: 'impressions', products });
+                        }
+                    }
+                }); // Чтобы отработало прикрепление $root
             }
             this.$root.lightBoxInit();
         },

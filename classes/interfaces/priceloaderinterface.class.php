@@ -380,7 +380,7 @@ class PriceloaderInterface extends AbstractInterface
      * Поиск товара по уникальному полю
      * @param PriceLoader $loader Загрузчик
      * @param string $text Значение поля
-     * @return array<Material> Массив найденных товаров
+     * @return Material[] Массив найденных товаров
      */
     public function getItemsByUniqueField(PriceLoader $loader, $text)
     {
@@ -585,28 +585,11 @@ class PriceloaderInterface extends AbstractInterface
                 }
 
                 $addedAttachments = [];
-                $dataArr = $this->convertMediaData($dataArr, $addedAttachments);
-
-                if ($preprocessor->id) {
-                    $preprocessor->process([
-                        't' => $field,
-                        'postProcess' => false,
-                        'Field' => $raasField,
-                    ]);
-                }
+                $dataArr = $this->convertMediaData($dataArr, $addedAttachments, $preprocessor, $postprocessor);
                 foreach ($dataArr as $val) {
                     $field->addValue($val);
                     $affectsField = true;
                 }
-                if ($postprocessor->id) {
-                    $postprocessor->process([
-                        't' => $field,
-                        'postProcess' => true,
-                        'Field' => $raasField,
-                        'addedAttachments' => $addedAttachments
-                    ]);
-                }
-                $_FILES = [];
             } else {
                 if ($dataArr != $oldVal) {
                     $field->deleteValues();
@@ -631,40 +614,48 @@ class PriceloaderInterface extends AbstractInterface
      * Конвертирует данные для медиа-поля
      * @param array $data Данные для поля
      * @param array $addedAttachments Добавленные вложения
+     * @param Snippet|null $preprocessor Препроцессор поля
+     * @param Snippet|null $postprocessor Постпроцессор поля
      */
-    public function convertMediaData(array $data, array &$addedAttachments)
-    {
+    public function convertMediaData(
+        array $data,
+        array &$addedAttachments,
+        Snippet $preprocessor = null,
+        Snippet $postprocessor = null
+    ) {
         $newDataArr = [];
         $addedAttachments = [];
         foreach ($data as $val) {
             if (!is_string($val) || !$val) {
                 continue;
             }
-            $basename = $filename = null;
+            $tempname = sys_get_temp_dir() . '/' . $basename;
+            $basename = basename($val);
             if (stristr($val, '://')) {
                 $text = file_get_contents($val);
                 if (!$text) {
                     continue;
                 }
-                $basename = basename($val);
-                $filename = sys_get_temp_dir() . '/' . $basename;
-                file_put_contents($filename, $text);
+                file_put_contents($tempname, $text);
             } elseif (is_file(Application::i()->baseDir . $val)) {
-                $basename = basename($val);
-                $filename = Application::i()->baseDir . $val;
+                copy(Application::i()->baseDir . $val, $tempname);
             }
-            if ($filename) {
-                $mime = mime_content_type($filename);
-                $_FILES[$field->urn]['name'][] = $basename;
-                $_FILES[$field->urn]['tmp_name'][] = $filename;
-                $_FILES[$field->urn]['type'][] = $mime;
+            if (is_file($tempname)) {
+                if ($preprocessor && $preprocessor->id) {
+                    $preprocessor->process(['files' => [$tempname]]);
+                }
+                $mime = mime_content_type($tempname);
                 $att = Attachment::createFromFile(
-                    $filename,
+                    $tempname,
                     $field,
                     (int)Package::i()->registryGet('maxsize'),
                     (int)Package::i()->context->registryGet('tn'),
                     $mime
                 );
+                if ($postprocessor && $postprocessor->id) {
+                    $postprocessor->process(['files' => [$att->file]]);
+                }
+                unlink($tempname);
                 $addedAttachments[] = $att;
                 $val = json_encode([
                     'vis' => 1,
@@ -822,8 +813,8 @@ class PriceloaderInterface extends AbstractInterface
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
      *        ]> $log Лог выполнения
-     * @param array<int> $fieldsToClearIds Массив ID# полей для удаления
-     * @param array<int> $attachmentsToClearIds Массив ID# вложений для удаления
+     * @param int[] $fieldsToClearIds Массив ID# полей для удаления
+     * @param int[] $attachmentsToClearIds Массив ID# вложений для удаления
      * @param float $st UNIX-timestamp времени начала выполнения загрузки
      */
     public function logDeleteFieldsAndAttachments(
@@ -900,9 +891,9 @@ class PriceloaderInterface extends AbstractInterface
      * Получает массив совпадающих материалов либо по уникальному полю,
      * либо по всей строке данных
      * @param PriceLoader $loader Загрузчик прайсов
-     * @param array<mixed> $dataRow Входная строка данных
+     * @param array $dataRow Входная строка данных
      * @param int|null $uniqueIndex Индекс (начиная с 0) уникальной колонки, null если нет
-     * @return array<Material> Массив найденных товаров
+     * @return Material[] Массив найденных товаров
      */
     public function getItems(PriceLoader $loader, array $dataRow, $uniqueIndex = null)
     {
@@ -1022,7 +1013,7 @@ class PriceloaderInterface extends AbstractInterface
      * @param array<mixed> $dataRow Входная строка данных
      * @param Page $root Корень загрузки прайса
      * @param Page $context Текущая категория загрузки прайса
-     * @param array<int> $affectedMaterialsIds Массив ID# "затронутых" материалов
+     * @param int[] $affectedMaterialsIds Массив ID# "затронутых" материалов
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
@@ -1090,7 +1081,7 @@ class PriceloaderInterface extends AbstractInterface
      *                          устанавливается уровень не найденной категории
      *                          (чтобы игнорировать дочерние)
      * @param array<int[] Смещение => Page категория> $backtrace Текущая навигация
-     * @param array<int> $affectedPagesIds Массив ID# "затронутых" страниц
+     * @param int[] $affectedPagesIds Массив ID# "затронутых" страниц
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
@@ -1164,8 +1155,8 @@ class PriceloaderInterface extends AbstractInterface
      *                                  (игнорирование заголовочных строк и столбцов, но без callback-преобразований)
      * @param Page $page Страница, в которую загружаем
      * @param bool $test Тестовый режим
-     * @param array<int> $affectedMaterialsIds Массив ID# "затронутых" материалов
-     * @param array<int> $affectedPagesIds Массив ID# "затронутых" страниц
+     * @param int[] $affectedMaterialsIds Массив ID# "затронутых" материалов
+     * @param int[] $affectedPagesIds Массив ID# "затронутых" страниц
      * @param array<[
      *            'time' => float Время, прошедшее с начала загрузки
      *            'text' => string Текст записи,
@@ -1258,7 +1249,7 @@ class PriceloaderInterface extends AbstractInterface
      *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
      *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *        ]> $log Лог выполнения
-     * @param array<int> $affectedMaterialsIds Массив ID# "затронутых" материалов
+     * @param int[] $affectedMaterialsIds Массив ID# "затронутых" материалов
      * @param bool $test Тестовый режим
      * @param float $st UNIX-timestamp времени начала выполнения загрузки
      */
@@ -1306,7 +1297,7 @@ class PriceloaderInterface extends AbstractInterface
      *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
      *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
      *        ]> $log Лог выполнения
-     * @param array<int> $affectedPagesIds Массив ID# "затронутых" страниц
+     * @param int[] $affectedPagesIds Массив ID# "затронутых" страниц
      * @param bool $test Тестовый режим
      * @param float $st UNIX-timestamp времени начала выполнения загрузки
      */
@@ -1348,14 +1339,14 @@ class PriceloaderInterface extends AbstractInterface
      * Очищает незатронутые материалы и категории
      * @param PriceLoader $loader Загрузчик прайсов
      * @param Page $page Страница, в которую загружали прайс
-     * @param array<[
-     *            'time' => float Время, прошедшее с начала загрузки
-     *            'text' => string Текст записи,
-     *            'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
-     *            'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
-     *        ]> $log Лог выполнения
-     * @param array<int> $affectedMaterialsIds Массив ID# "затронутых" материалов
-     * @param array<int> $affectedPagesIds Массив ID# "затронутых" страниц
+     * @param array $log <pre><code>array<[
+     *     'time' => float Время, прошедшее с начала загрузки
+     *     'text' => string Текст записи,
+     *     'row' ?=> int К какой строке относится запись (относительно смещений, начиная с 0),
+     *     'realrow' ?=> int К какой строке относится запись (абсолютно, без учета смещений, начиная с 0),
+     * ]></code></pre> Лог выполнения
+     * @param int[] $affectedMaterialsIds Массив ID# "затронутых" материалов
+     * @param int[] $affectedPagesIds Массив ID# "затронутых" страниц
      * @param int $clear Очищать предыдущие материалы и/или страницы (варианты:
      *                       PriceLoader::DELETE_PREVIOUS_MATERIALS_NONE - не очищать
      *                       PriceLoader::DELETE_PREVIOUS_MATERIALS_MATERIALS_ONLY - очищать только материалы
