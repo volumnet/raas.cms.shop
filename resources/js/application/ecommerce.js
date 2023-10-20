@@ -32,7 +32,7 @@ export default class {
      */
     updateCart(newItems, trigger = true)
     {
-        if (this.cart.dataLoaded && this.autoTrigger) { // Только если обновление, при первой загрузке не вызываем
+        if (this.cart.dataLoaded && trigger && this.autoTrigger) { // Только если обновление, при первой загрузке не вызываем
             // Найдем товары для удаления
             const itemsToDelete = this.items.filter(oldItem => {
                 let matchingNewItems = newItems

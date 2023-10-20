@@ -122,7 +122,7 @@ export default {
             this.proceed = true;
             $('.body__title').text(this.translations.CHECKOUT_TITLE);
             document.title = this.translations.CHECKOUT_TITLE;
-            $.scrollTo(0);
+            this.$root.scrollTo(0);
         },
         /**
          * Переходит к оформлению быстрого заказа
@@ -172,7 +172,7 @@ export default {
             let margin = 0;
             let $pane = $(this.$refs.rightPane);
             let $float = $(this.$refs.rightPaneFloat);
-            if (this.$root.windowWidth > this.$root.mediaTypes.lg) {
+            if ((this.$root.windowWidth > this.$root.mediaTypes.lg) && $pane.length && $float.length) {
                 let scroll = $(window).scrollTop();
                 let paneHeight = $pane.height();
                 let floatInnerHeight = $float.outerHeight();

@@ -82,7 +82,7 @@ export default class {
          * Экземпляр ECommerce
          * @type {ECommerce}
          */
-        this.eCommerce = new ECommerce(this);
+        this.eCommerce = (this.id == 'cart') ? (new ECommerce(this)) : null;
     }
 
 
@@ -168,7 +168,10 @@ export default class {
                 this[key] = null;
             }
         }
-        eCommerce.updateCart(this.items, !remoteData.success); // Именно здесь, поскольку до установки dataLoaded, eCommerce не генерирует событий
+        if (eCommerce) {
+            // console.log(remoteData);
+            eCommerce.updateCart(this.items, !remoteData.success); // Именно здесь, поскольку до установки dataLoaded, eCommerce не генерирует событий
+        }
         this.dataLoaded = true;
         $(document).trigger('raas.shop.cart-updated',  [{id: this.id, remote: true, data: remoteData}]);
     }
@@ -260,7 +263,9 @@ export default class {
      * @return {ECommerce}
      */
     getECommerce(autoTrigger = true) {
-        this.eCommerce.autoTrigger = autoTrigger;
+        if (this.eCommerce) {
+            this.eCommerce.autoTrigger = autoTrigger;
+        }
         return this.eCommerce;
         // return new ECommerce(this, autoTrigger);
     }
