@@ -4,6 +4,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use Exception;
 use SOME\Text;
 use SOME\ZipArchive;
 use RAAS\Application;
@@ -15,6 +16,11 @@ use RAAS\Command;
 class UpdatePickupPointsCommand extends Command
 {
     /**
+     * Обозначать URN города через ФИАС (новый режим), если false - то через бьютифицированное название города
+     */
+    public $cityURNByFias = false;
+
+    /**
      * Количество метров в градусе широты
      */
     const M_IN_LAT_DEG = 111133;
@@ -25,11 +31,18 @@ class UpdatePickupPointsCommand extends Command
     const M_IN_LON_DEG = 111319;
 
     /**
+     * Кэш названий регионов по их URN
+     * @var array <pre><code>array<string[] URN региона => string Название региона></code></pre>
+     */
+    public $regionNamesByURNs = [];
+
+    /**
      * Выполнение команды
      */
     public function process()
     {
         $pointsByServices = [];
+        $this->cityURNByFias = (bool)array_intersect(['fias', 'withfias', 'newurn'], (array)$GLOBALS['argv']);
         if (in_array('cdek', (array)$GLOBALS['argv'])) {
             $pointsByServices['cdek'] = $this->processCDEK();
             $this->controller->doLog('Обработаны точки выдачи СДЭК');
@@ -81,6 +94,7 @@ class UpdatePickupPointsCommand extends Command
         rename($tmpName, $citiesFilename);
 
         $brief = array_map(function ($x) {
+            $x['counter'] = count($x['points']);
             unset($x['points']);
             return $x;
         }, $result);
@@ -101,17 +115,102 @@ class UpdatePickupPointsCommand extends Command
 
 
     /**
+     * Нормализует название города
+     * @param string $cityName Название города
+     * @return string
+     */
+    public function normalizeCityName(string $cityName): string
+    {
+        $rx = '/^((г(ор(од)?)?)|(д(ер(евня)?)?)|(с(ело)?)|(п(ос(елок)?)?)|пгт)\.? /umis';
+        $cityName = preg_replace($rx, '', $cityName);
+        return trim($cityName);
+    }
+
+
+    /**
+     * Нормализует название региона
+     * @param string $regionName Название региона
+     * @param bool $strict Строгая нормализация + бьютификация
+     * @return string
+     */
+    public function normalizeRegionName(string $regionName, bool $strict = false): string
+    {
+        if (stristr($regionName, 'Алтай')) {
+            $regionName = 'Алтайский край';
+        }
+        if (stristr($regionName, 'Кабардино-Балкар')) {
+            $regionName = 'Кабардино-Балкария';
+        }
+        if (stristr($regionName, 'Карачаево-Черкес')) {
+            $regionName = 'Карачаево-Черкесия';
+        }
+        if (stristr($regionName, 'Якутия')) {
+            $regionName = 'Саха (Якутия)';
+        }
+        if (stristr($regionName, 'Удмурт')) {
+            $regionName = 'Удмуртия';
+        }
+        if (stristr($regionName, 'Чуваш')) {
+            $regionName = 'Чувашия';
+        }
+        $regionName = trim($regionName);
+        if ($strict) {
+            $rx = '((г(ор(од)?)?)|((а(вт(ономная)?)?)? ?(о(бл(асть)?)?))|(кр(ай)?)|(р(есп(ублика)?)?))\.?';
+            $regionName = trim(preg_replace('/^' . $rx . ' /umis', '', $regionName));
+            $regionName = trim(preg_replace('/ ' . $rx . '$/umis', '', $regionName));
+            $regionName = Text::beautify($regionName);
+        } else {
+            $rx = '/^г(ор(од)?)?\.?/umis';
+            $regionName = trim(preg_replace($rx, '', $regionName));
+
+            $rx = '/^а(вт(ономная)?)? ?о(бл(асть)?)?\.? (.*?ая)$/umis';
+            $regionName = trim(preg_replace($rx, '$5 автономная область', $regionName));
+
+            $rx = '/^а(вт(ономная)?)? ?о(бл(асть)?)?\.? (.*?й)$/umis';
+            $regionName = trim(preg_replace($rx, '$5 автономный округ', $regionName));
+
+            $rx = '/^о(бл(асть)?)?\.? (.*?ая)$/umis';
+            $regionName = trim(preg_replace($rx, '$3 область', $regionName));
+
+            $rx = '/^р(есп(ублика)?)?\.? (.*?ая)$/umis';
+            $regionName = trim(preg_replace($rx, '$3 республика', $regionName));
+
+            $rx = '/^р(есп(ублика)?)?\.? /umis';
+            $regionName = trim(preg_replace($rx, '', $regionName));
+
+            $rx = '/^кр(ай)?\.? (.*?ий)$/umis';
+            $regionName = trim(preg_replace($rx, '$2 край', $regionName));
+        }
+        return trim($regionName);
+    }
+
+
+    /**
      * Получает список точек СДЭК по городам
      * @return array
      */
     public function processCDEK(): array
     {
-        $cdekJSON = $this->getRawCDEKPoints();
+        $token = null;
+        for ($i = 0; ($i < 3) && !$token; $i++) {
+            try {
+                $token = $this->getCDEKAccessToken();
+            } catch (Exception $e) {
+            }
+        }
+        if (!$token) {
+            $token = $this->getCDEKAccessToken();
+        }
+        $cdekJSON = $this->getRawCDEKPoints($token);
         $this->controller->doLog('Получены точки выдачи СДЭК');
         $result = [];
         foreach ($cdekJSON as $item) {
             $cityData = $this->formatCDEKCity($item);
-            $cityData['urn'] = Text::beautify($cityData['name']);
+            if ($this->cityURNByFias) {
+                $cityData['urn'] = $cityData['fias'] ?: Text::beautify($cityData['name']);
+            } else {
+                $cityData['urn'] = Text::beautify($cityData['name']);
+            }
             if (!$cityData['urn']) {
                 continue;
             }
@@ -126,19 +225,62 @@ class UpdatePickupPointsCommand extends Command
 
 
     /**
-     * Получает список исходных точек выдачи СДЭК
-     * @return array
+     * Получает токен доступа СДЭК
+     * @return string
+     * @throws Exception В случае, если не удалось получить токен
      */
-    public function getRawCDEKPoints(): array
+    public function getCDEKAccessToken(): string
     {
-        $url = 'https://integration.cdek.ru/pvzlist/v1/json';
+        $login = ($GLOBALS['cdek']['login'] ?? null);
+        $password = ($GLOBALS['cdek']['password'] ?? null);
+        $url = 'https://api.cdek.ru/v2/oauth/token';
         $ch = curl_init($url);
+        $postData = [
+            'grant_type' => 'client_credentials',
+            'client_id' => $login,
+            'client_secret' => $password,
+        ];
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
         $response = curl_exec($ch);
         $cdekJSON = json_decode($response, true);
-        $cdekJSON = (array)($cdekJSON['pvz'] ?? []);
+        $result = $cdekJSON['access_token'] ?? null;
+        if (!$result) {
+            $errMsg = 'Cannot get CDEK access token';
+            if ($cdekJSON['error'] ?? null) {
+                $errMsg .= ': ' . $cdekJSON['error'];
+                if ($cdekJSON['error_description'] ?? null) {
+                    $errMsg .= '; ' . $cdekJSON['error_description'];
+                }
+            }
+            throw new Exception($errMsg);
+        }
+        return $result;
+    }
+
+
+    /**
+     * Получает список исходных точек выдачи СДЭК
+     * @param string $token Токен доступа
+     * @return array
+     */
+    public function getRawCDEKPoints($token): array
+    {
+        $headers = [
+            'Authorization: Bearer ' . $token,
+        ];
+        $url = 'https://api.cdek.ru/v2/deliverypoints';
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $response = curl_exec($ch);
+
+        $cdekJSON = (array)json_decode($response, true);
         return $cdekJSON;
     }
 
@@ -150,11 +292,22 @@ class UpdatePickupPointsCommand extends Command
      */
     public function formatCDEKCity(array $item): array
     {
+        $localRegionName = $item['location']['region'] ?? '';
+        $regionURN = $this->normalizeRegionName($localRegionName, true);
+        if (!isset($this->regionNamesByURNs[$regionURN])) {
+            $this->regionNamesByURNs[$regionURN] = $this->normalizeRegionName($localRegionName);
+        }
+        $regionName = $this->regionNamesByURNs[$regionURN];
+        $cityName = $this->normalizeCityName($item['location']['city'] ?? '');
+
         $result = [
-            'value' => trim($item['city']),
-            'name' => trim($item['city']),
-            'region' => trim($item['regionName']),
-            'cdekCityId' => $item['cityCode'],
+            'value' => $cityName,
+            'name' => $cityName,
+            'fias' => trim($item['location']['fias_guid']),
+            'region' => $regionName,
+            // 'regionURN' => $regionURN,
+            'country' => trim($item['location']['country_code']),
+            'cdekCityId' => $item['location']['city_code'],
         ];
         return $result;
     }
@@ -170,45 +323,63 @@ class UpdatePickupPointsCommand extends Command
         $resultItem = [
             'id' => trim($item['code']),
             'name' => trim($item['name']),
-            'address' => trim($item['address']),
-            'postalCode' => trim($item['postalCode']),
-            'description' => trim($item['addressComment']),
-            'lat' => (float)$item['coordY'],
-            'lon' => (float)$item['coordX'],
+            'address' => trim($item['location']['address']),
+            'postalCode' => trim($item['location']['postal_code']),
+            'canPay' => ($item['have_cash'] || $item['have_cashless']) && ($item['type'] != 'POSTAMAT'),
+            'description' => trim($item['address_comment']),
+            'lat' => (float)$item['location']['latitude'],
+            'lon' => (float)$item['location']['longitude'],
             'serviceURN' => 'cdek',
             'weight' => null,
             'sizes' => [],
         ];
-        if ($item['workTime']) {
-            $resultItem['schedule'] = $item['workTime'];
+        if ($item['work_time']) {
+            $resultItem['schedule'] = $item['work_time'];
         }
-        if ($item['phoneDetailList']) {
+        if ($item['phones']) {
             $resultItem['phones'] = array_map(function ($x) {
                 return Text::beautifyPhone($x['number'], 10);
-            }, $item['phoneDetailList']);
+            }, $item['phones']);
         }
-        if ($item['officeImageList']) {
+        if ($item['office_image_list']) {
             $resultItem['images'] = array_map(function ($x) {
                 return $x['url'];
-            }, $item['officeImageList']);
+            }, $item['office_image_list']);
         }
         $pvzSizes = array_values($item['dimensions'] ?? []);
-        if ($pvzSizes && count($pvzSizes) >= 3) {
+        usort($pvzSizes, function ($a, $b) {
+            $aPerimeter = array_sum(array_values($a));
+            $bPerimeter = array_sum(array_values($b));
+            return $bPerimeter - $aPerimeter;
+        });
+        $pvzSizes = $pvzSizes[0] ?? [];
+        if ($pvzSizes) {
             sort($pvzSizes);
             $resultItem['sizes'] = $pvzSizes;
+        }
+        if ($item['weight_max'] ?? null) {
+            $resultItem['weight'] = $item['weight_max'];
         }
         return $resultItem;
     }
 
 
-    public function processRussianPost()
+    /**
+     * Обрабатывает точки Почты России
+     * @return array
+     */
+    public function processRussianPost(): array
     {
         $pochtaJSON = $this->getRawRussianPostPoints();
         $this->controller->doLog('Получены точки выдачи Почты России');
         $result = [];
         foreach ($pochtaJSON as $item) {
             $cityData = $this->formatRussianPostCity($item);
-            $cityData['urn'] = Text::beautify($cityData['name']);
+            if ($this->cityURNByFias) {
+                $cityData['urn'] = $cityData['fias'] ?: Text::beautify($cityData['name']);
+            } else {
+                $cityData['urn'] = Text::beautify($cityData['name']);
+            }
             if (!$cityData['urn']) {
                 continue;
             }
@@ -219,6 +390,7 @@ class UpdatePickupPointsCommand extends Command
         }
         return $result;
     }
+
 
     /**
      * Получает список исходных точек выдачи Почты России
@@ -232,15 +404,13 @@ class UpdatePickupPointsCommand extends Command
         if (!$login || !$password || !$token) {
             return [];
         }
-        $jsonTmpFilename = tempnam(sys_get_temp_dir(), 'raas_');
-        $jsonFilename = Application::i()->baseDir . '/pochta.ops.json';
 
         $headers = [
             'Accept: application/octet-stream',
             'Authorization: AccessToken ' . $token,
             'X-User-Authorization: Basic ' . base64_encode($login . ':' . $password)
         ];
-        $url = 'https://otpravka-api.pochta.ru//1.0/unloading-passport/zip?type=ALL';
+        $url = 'https://otpravka-api.pochta.ru/1.0/unloading-passport/zip?type=ALL';
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -255,6 +425,7 @@ class UpdatePickupPointsCommand extends Command
         $zip = new ZipArchive;
         $zip->open($zipTmpFilename);
         $jsonText = $zip->getFromIndex(0);
+        // file_put_contents('poctha.json', $jsonText);
         $json = json_decode($jsonText, true);
         $pochtaJSON = (array)($json['passportElements'] ?? []);
         return $pochtaJSON;
@@ -268,23 +439,20 @@ class UpdatePickupPointsCommand extends Command
      */
     public function formatRussianPostCity(array $item): array
     {
-        $regionName = $item['address']['region'] ?? '';
-        $regionName = preg_replace('/^обл (.*?)$/umis', '$1 обл.', $regionName);
-        $regionName = preg_replace('/^край (.*?)$/umis', '$1 край', $regionName);
-        $regionName = preg_replace('/^респ (.*?)$/umis', 'респ. $1', $regionName);
-        $regionName = preg_replace('/^АО (.*?)$/umis', '$1', $regionName);
-
-        $cityName = $item['address']['place'] ?? '';
-        $cityName = preg_replace('/^г (.*?)$/umis', '$1', $cityName);
-        $cityName = preg_replace('/^д (.*?)$/umis', '$1', $cityName);
-        $cityName = preg_replace('/^дер (.*?)$/umis', '$1', $cityName);
-        $cityName = preg_replace('/^с (.*?)$/umis', '$1', $cityName);
-        $cityName = preg_replace('/^п (.*?)$/umis', '$1', $cityName);
+        $localRegionName = $item['address']['region'] ?? '';
+        $regionURN = $this->normalizeRegionName($localRegionName, true);
+        if (!isset($this->regionNamesByURNs[$regionURN])) {
+            $this->regionNamesByURNs[$regionURN] = $this->normalizeRegionName($localRegionName);
+        }
+        $regionName = $this->regionNamesByURNs[$regionURN];
+        $cityName = $this->normalizeCityName($item['address']['place'] ?? '');
 
         $result = [
             'value' => trim($cityName),
             'name' => trim($cityName),
-            'region' => trim($regionName)
+            'fias' => trim($item['addressFias']['locationGarCode']),
+            'region' => trim($regionName),
+            // 'regionURN' => $regionURN,
         ];
         return $result;
     }
@@ -307,7 +475,8 @@ class UpdatePickupPointsCommand extends Command
                 if (is_numeric($item['address']['building'])) {
                     $addressChunk .= '/' . $item['address']['building'];
                 } else {
-                    $addressChunk .= ((mb_strlen($item['address']['building']) > 1) ? ' ' : '') . $item['address']['building'];
+                    $addressChunk .= ((mb_strlen($item['address']['building']) > 1) ? ' ' : '')
+                        . $item['address']['building'];
                 }
             }
             $addressArr[] = $addressChunk;
@@ -322,6 +491,9 @@ class UpdatePickupPointsCommand extends Command
             // 'name' => trim($item['name']),
             'address' => trim(implode(', ', $addressArr)),
             'postalCode' => trim($item['address']['index'] ?? ''),
+            // 2023-11-21, AVS: $item['ecomOptions']['cardPayment'] и $item['ecomOptions']['cashPayment']
+            // почти всегда false, поэтому пока расчитываем как тип - "...ОПС"
+            'canPay' => stristr($item['type'], 'ОПС'),
             'lat' => (float)$item['latitude'],
             'lon' => (float)$item['longitude'],
             'serviceURN' => 'russianpost',

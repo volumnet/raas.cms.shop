@@ -556,8 +556,6 @@ class CatalogInterface extends MaterialInterface
                     $ids = $catalogFilter->getIds($urn, $order);
                     return $ids;
                 }
-                $ids = $catalogFilter->getIds();
-                return $ids;
             }
         }
         // Ни с чем не совпадает, но есть сортировка по умолчанию
@@ -575,9 +573,9 @@ class CatalogInterface extends MaterialInterface
                 $ids = $catalogFilter->getIds($urn, $order);
                 return $ids;
             }
-            $ids = $catalogFilter->getIds();
-            return $ids;
         }
+        $ids = $catalogFilter->getIds();
+        return $ids;
     }
 
 

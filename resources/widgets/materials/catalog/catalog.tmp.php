@@ -616,6 +616,6 @@ if ($Item) {
       <?php } ?>
     </div>
     <?php
-    AssetManager::requestCSS(['/css/catalog-list.css']);
-    AssetManager::requestJS(['/js/catalog-list.js']);
+    AssetManager::requestCSS(['/css/catalog-list.css', '/css/catalog-item.css', '/css/pagination.css']);
+    AssetManager::requestJS(['/js/catalog-list.js', '/js/catalog-item.js', '/js/pagination.js']);
 }

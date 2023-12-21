@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
+use RAAS\CMS\Field;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Material_Type;
@@ -44,6 +45,17 @@ class Cart
     protected $items = [];
 
     /**
+     * Данные по товарам корзины в объектном виде
+     * @var CartItem[]
+     */
+    protected $itemsSet = [];
+
+    /**
+     * Контрольная сумма сохраненных данных по товарам корзины в объектном виде
+     */
+    protected $itemsSetCRC = '';
+
+    /**
      * Пользователь сайта
      * @param User
      */
@@ -58,22 +70,30 @@ class Cart
             case 'rawItems':
                 return $this->items;
                 break;
+            case 'currentItemsCRC':
+                return crc32(serialize($this->items));
+                break;
             case 'items':
-                $result = [];
-                foreach ($this->items as $itemId => $metas) {
-                    foreach ($metas as $meta => $c) {
+            case 'itemsSet':
+                if (!$this->itemsSet || !$this->itemsSetCRC || ($this->itemsSetCRC != $this->currentItemsCRC)) {
+                    $result = [];
+                    foreach ($this->items as $itemId => $metas) {
                         $material = new Material((int)$itemId);
-                        $row = new CartItem([
-                            'id' => $material->id,
-                            'name' => $material->name,
-                            'meta' => $meta,
-                            'realprice' => (float)$this->getPrice($material, (float)$c),
-                            'amount' => (float)$c,
-                        ]);
-                        $result[] = $row;
+                        foreach ($metas as $meta => $c) {
+                            $row = new CartItem([
+                                'id' => $material->id,
+                                'name' => $material->name,
+                                'meta' => $meta,
+                                'realprice' => (float)$this->getPrice($material, (float)$c),
+                                'amount' => (float)$c,
+                            ]);
+                            $result[] = $row;
+                        }
                     }
+                    $this->itemsSet = $result;
+                    $this->itemsSetCRC = $this->currentItemsCRC;
                 }
-                return $result;
+                return $this->itemsSet;
                 break;
             case 'count':
                 $result = 0;
@@ -93,19 +113,15 @@ class Cart
                 break;
             case 'weight':
             case 'sizes':
-                $items = [];
-                foreach ($this->items as $itemId => $metas) {
-                    foreach ($metas as $meta => $c) {
-                        $material = new Material((int)$itemId);
-                        $material->meta = $meta;
-                        $material->amount = (int)$c;
-                        $items[] = $material;
-                    }
+                $materials = [];
+                $cartItems = $this->__get('items');
+                foreach ($cartItems as $cartItem) {
+                    $materials[] = $cartItem->material;
                 }
                 if ($var == 'weight') {
-                    $result = $this->cartType->getWeight($items);
+                    $result = $this->cartType->getWeight($materials);
                 } elseif ($var == 'sizes') {
-                    $result = $this->cartType->getSizes($items);
+                    $result = $this->cartType->getSizes($materials);
                 }
                 return $result;
                 break;
@@ -253,14 +269,26 @@ class Cart
         $cookieItems = (array)$this->items;
         $result = [];
         $checkAmount = (bool)(int)$this->cartType->check_amount;
+        $itemsIds = array_keys($cookieItems);
+        $st = microtime(1);
+        Field::prefetch($itemsIds);
         foreach ((array)$cookieItems as $materialId => $metaItems) {
             $material = new Material((int)$materialId);
             if (!$material->id) {
                 continue;
             }
-            $materialAvailable = (int)$material->available;
-            if ($checkAmount && !($material->vis && $material->price && $materialAvailable)) {
-                continue;
+            if ($checkAmount) { // Для ускорения
+                if (!$material->vis) {
+                    continue;
+                }
+                if (!$material->fields['available']) {
+                    continue;
+                }
+                if (!$material->fields['price']) {
+                    continue;
+                }
+                $materialPrice = (float)$material->fields['price']->getValue();
+                $materialAvailable = (int)$material->fields['available']->getValue();
             }
             foreach ((array)$metaItems as $meta => $amount) {
                 if ($amount > 0) {

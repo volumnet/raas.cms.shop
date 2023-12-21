@@ -23,7 +23,7 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
                 <td>
                   <select name="price_id[<?php echo (int)$mtype->id?>]" class="span2" data-role="price_id">
                     <?php foreach ($CONTENT['fields'][(int)$mtype->id] as $row) { ?>
-                        <option value="<?php echo htmlspecialchars($row->id)?>" <?php echo $DATA['price_id'][$mtype->id] == $row->id ? 'selected="selected"' : ''?>>
+                        <option value="<?php echo htmlspecialchars($row->id)?>" <?php echo ($DATA['price_id'][$mtype->id] ?? null) == $row->id ? 'selected="selected"' : ''?>>
                           <?php echo htmlspecialchars($row->name)?>
                         </option>
                     <?php } ?>

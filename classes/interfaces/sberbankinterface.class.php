@@ -407,50 +407,51 @@ class SberbankInterface extends EPayInterface
         }
         $discount = $discountSum / (float)$sumWithoutDiscount;
         $totalSumKop = 0; // Ввели сумму в копейках, чтобы не было расхождений при погрешности округления
-        $c = count($order->items);
-        foreach ($order->items as $i => $item) {
-            if ($item->realprice > 0) {
-                if ($i < $c - 1) { // До последнего товара
-                    $itemPrice = (float)$item->realprice;
-                    $itemPrice = round($itemPrice * (1 - $discount) * 100);
-                } else { // $i == $c - 1  - последний товар
-                    $itemPrice = floor(($order->sum * 100 - $totalSumKop) / $item->amount); // floor - чтобы пользователь не переплатил финальную сумму
-                }
-                $itemData = [
-                    'positionId' => ($i + 1),
-                    'name' => $item->name,
-                    'quantity' => [
-                        'value' => (int)$item->amount,
-                        'measure' => 'шт.'
-                    ],
-                    'itemPrice' => $itemPrice,
-                    'itemAmount' => $itemPrice * $item->amount,
-                    'itemCode' => (int)$item->id,
-                    'tax' => [
-                        'taxType' => (trim($order->$taxTypeField) !== '')
-                                  ?  $order->$taxTypeField
-                                  :  static::TAX_TYPE_NO_VAT
-                    ],
-                    'itemAttributes' => [
-                        'attributes' => [
-                            [
-                                'name' => 'paymentMethod',
-                                'value' => (trim($order->paymentMethodField) !== '')
-                                        ?  $order->paymentMethodField
-                                        :  static::PAYMENT_METHOD_PREPAY,
-                            ],
-                            [
-                                'name' => 'paymentObject',
-                                'value' => (trim($order->paymentObjectField) !== '')
-                                        ?  $order->paymentObjectField
-                                        :  static::PAYMENT_OBJECT_PRODUCT,
-                            ],
+        $positiveOrderItems = array_values(array_filter($order->items, function ($x) {
+            return $x->realprice > 0;
+        }));
+        $c = count($positiveOrderItems);
+        foreach ($positiveOrderItems as $i => $item) {
+            if ($i < $c - 1) { // До последнего товара
+                $itemPrice = (float)$item->realprice;
+                $itemPrice = round($itemPrice * (1 - $discount) * 100);
+            } else { // $i == $c - 1  - последний товар
+                $itemPrice = floor(($order->sum * 100 - $totalSumKop) / $item->amount); // floor - чтобы пользователь не переплатил финальную сумму
+            }
+            $itemData = [
+                'positionId' => ($i + 1),
+                'name' => $item->name,
+                'quantity' => [
+                    'value' => (int)$item->amount,
+                    'measure' => 'шт.'
+                ],
+                'itemPrice' => $itemPrice,
+                'itemAmount' => $itemPrice * $item->amount,
+                'itemCode' => (int)$item->id,
+                'tax' => [
+                    'taxType' => (trim($order->$taxTypeField) !== '')
+                              ?  $order->$taxTypeField
+                              :  static::TAX_TYPE_NO_VAT
+                ],
+                'itemAttributes' => [
+                    'attributes' => [
+                        [
+                            'name' => 'paymentMethod',
+                            'value' => (trim($order->paymentMethodField) !== '')
+                                    ?  $order->paymentMethodField
+                                    :  static::PAYMENT_METHOD_PREPAY,
+                        ],
+                        [
+                            'name' => 'paymentObject',
+                            'value' => (trim($order->paymentObjectField) !== '')
+                                    ?  $order->paymentObjectField
+                                    :  static::PAYMENT_OBJECT_PRODUCT,
                         ],
                     ],
-                ];
-                $orderBundle['cartItems']['items'][] = $itemData;
-                $totalSumKop += $itemPrice * $item->amount;
-            }
+                ],
+            ];
+            $orderBundle['cartItems']['items'][] = $itemData;
+            $totalSumKop += $itemPrice * $item->amount;
         }
         $requestData = [
             'userName' => $block->epay_login,

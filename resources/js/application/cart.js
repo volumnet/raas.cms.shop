@@ -83,6 +83,12 @@ export default class {
          * @type {ECommerce}
          */
         this.eCommerce = (this.id == 'cart') ? (new ECommerce(this)) : null;
+
+        /**
+         * Контроллеры прерываний по типам запросов
+         * @type {Object} <pre><code>{String[] Тип запроса: AbortController}</code></pre>
+         */
+        this.abortControllersByTypes = {};
     }
 
 
@@ -98,6 +104,9 @@ export default class {
         if (items instanceof Array) {
             if (items.length == 1) {
                 item = items[0];
+                if (amount === null) {
+                    amount = item.amount;
+                }
             } else if (!items.length) {
                 return '';
             }
@@ -131,8 +140,9 @@ export default class {
      * Производит обновление корзины в общем виде
      * @param  {String} query GET-параметры запроса
      * @param  {Object} postData POST-параметры запроса
+     * @param {String} requestType Тип запроса для контроллера прерываний (null - без контроллера прерываний)
      */
-    async update(query, postData) {
+    async update(query, postData, requestType) {
         let self = this;
         let url = this.updateUrl;
         if (query) {
@@ -141,8 +151,31 @@ export default class {
         }
         if (url) {
             this.loading = true;
-            const remoteData = await window.app.api(url, postData || null, this.blockId);
-            this.updateData(remoteData);
+            let abortController = null;
+            if (requestType) {
+                if (this.abortControllersByTypes[requestType]) {
+                    this.abortControllersByTypes[requestType].abort();
+                }
+                abortController = new AbortController();
+                this.abortControllersByTypes[requestType] = abortController;
+            }
+            try {
+                const remoteData = await window.app.api(
+                    url, 
+                    postData || null, 
+                    this.blockId,
+                    undefined,
+                    undefined,
+                    undefined,
+                    abortController
+                );
+                if (requestType && this.abortControllersByTypes[requestType]) {
+                    this.abortControllersByTypes[requestType] = null;
+                }
+                this.updateData(remoteData);
+            } catch (e) {
+                // Перехват прерывания
+            }
             this.loading = false;
         }
     }
@@ -183,8 +216,8 @@ export default class {
      * @param {Number} amount Количество единиц товара
      * @param {Object} postData Дополнительные POST-данные
      */
-    async set(items, amount = null, postData = null) {
-        await this.update('action=set' + this.getItemQuery(items, parseInt(amount)), postData);
+    set(items, amount = null, postData = null) {
+        return this.update('action=set' + this.getItemQuery(items, parseInt(amount)), postData, 'modify');
     }
 
 
@@ -193,7 +226,7 @@ export default class {
      * @param {Object[]} items Набор товаров
      * @param {Object} postData Дополнительные POST-данные
      */
-    async setAll(items, postData = null) {
+    setAll(items, postData = null) {
         // console.log(items)
         let itemsToDelete = JSON.parse(JSON.stringify(this.items)).filter(oldItem => {
             let matchingNewItems = items.filter(newItem => ((newItem.id == oldItem.id) && (newItem.meta == oldItem.meta)));
@@ -203,7 +236,7 @@ export default class {
             return oldItem;
         });
 
-        await this.update('action=set&clear=1' + this.getItemQuery(items), postData);
+        return this.update('action=set&clear=1' + this.getItemQuery(items), postData, 'modify');
     }
 
 
@@ -233,7 +266,7 @@ export default class {
      * @param {Object} postData Дополнительные POST-данные
      */
     async clear(postData) {
-        await this.update('action=clear', postData);
+        await this.update('action=clear', postData, 'modify');
     }
 
 

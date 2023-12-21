@@ -47,7 +47,7 @@ $cities = include Application::i()->baseDir . '/cities.brief.php';
 
 /**
  * Получает тарифы на доставку СДЭК
- * @param string $city Наименование города
+ * @param string $cityURN URN города
  * @param float $weight Вес, кг
  * @param int[] $sizes Размеры (ДxШxВ) в см
  * @return array|null <pre><code>array<
@@ -62,11 +62,10 @@ $cities = include Application::i()->baseDir . '/cities.brief.php';
  *     >
  * ></code></pre>, либо null, если не найдено
  */
-$getCDEKTariffs = function ($city, $weight, array $sizes) use ($Block, $cities) {
-    $sessionVar = implode('x', array_merge([trim($city)], $sizes, [$weight]));
+$getCDEKTariffs = function ($cityURN, $weight, array $sizes) use ($Block, $cities) {
+    $sessionVar = implode('x', array_merge([trim($cityURN)], $sizes, [$weight]));
     $sessionTime = (int)$_SESSION['cdekTariffs'][$sessionVar]['timestamp'];
     if (Application::i()->debug || ($sessionTime < time() - 600)) {
-        $cityURN = Text::beautify($city);
         $result = [];
         $params = $Block->additionalParams['cdek'];
 
@@ -426,8 +425,8 @@ $getAdditionals = function (
         }
     }
 
-    if ($post['city']) {
-        $cityURN = Text::beautify($_POST['city']);
+    if ($post['cityURN'] && $post['city']) {
+        $cityURN = $post['cityURN'];
         if (!Application::i()->debug && isset($_SESSION['citiesData@' . $cityURN])) {
             $cityData = $_SESSION['citiesData@' . $cityURN];
         } else {
@@ -492,7 +491,7 @@ $getAdditionals = function (
             $points = array_merge($points, $getSelfPoints($post['city']));
         }
         if ($affectedServicesURNs['cdek']) {
-            $tariffs['cdek'] = $getCDEKTariffs($post['city'], $weight, $sizes);
+            $tariffs['cdek'] = $getCDEKTariffs($post['cityURN'], $weight, $sizes);
         }
         if ($affectedServicesURNs['russianpost']) {
             $postalCode = trim($post['post_code']) ?: $cityData['postalCode'];

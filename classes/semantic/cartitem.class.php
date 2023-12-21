@@ -60,7 +60,9 @@ class CartItem
     {
         switch ($var) {
             case 'material':
-                return new Material($this->id);
+                $result = new Material($this->id);
+                $result->amount = $this->amount;
+                return $result;
                 break;
             case 'metaJSON':
                 return (array)json_decode($this->meta);

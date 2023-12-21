@@ -65,6 +65,7 @@ export default {
             DEFAULT_ADDITIONAL_TIMEOUT: 3000, // Таймаут получения доп. данных по умолчанию, мс
             instantUpdateFields: [
                 'city', 
+                'cityURN', 
                 'delivery', 
                 'payment', 
                 'promo'
@@ -91,16 +92,16 @@ export default {
          * Получает дополнительные данные
          * @param {Number} delay Получить данные через столько миллисекунд
          */
-        getAdditional(delay) {
+        getAdditional(delay = null) {
             if (this.getAdditionalTimeout) {
                 window.clearTimeout(this.getAdditionalTimeout);
             }
-            if (delay) {
+            if (delay !== null) {
                 this.getAdditionalTimeout = window.setTimeout(() => {
-                    this.cart.update('action=refresh', this.getAdditionalData());
+                    this.cart.update('action=refresh', this.getAdditionalData(), 'getAdditionalWithDelay');
                 }, delay);
             } else {
-                this.cart.update('action=refresh', this.getAdditionalData());
+                this.cart.update('action=refresh', this.getAdditionalData(), 'getAdditional');
             }
         },
         /**
@@ -122,7 +123,7 @@ export default {
             this.proceed = true;
             $('.body__title').text(this.translations.CHECKOUT_TITLE);
             document.title = this.translations.CHECKOUT_TITLE;
-            this.$root.scrollTo(0);
+            this.$root.scrollTo(0, true);
         },
         /**
          * Переходит к оформлению быстрого заказа
@@ -222,7 +223,7 @@ export default {
             handler() {
                 for (let key of this.instantUpdateFields) {
                     if (this.formData[key] != this.oldFormData[key]) {
-                        this.getAdditional();
+                        this.getAdditional(0);
                     }
                 }
                 for (let key of this.delayUpdateFields) {
