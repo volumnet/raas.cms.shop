@@ -81,13 +81,13 @@ class CartInterface extends FormInterface
      * @param bool $debug Режим отладки
      * @return mixed
      */
-    public function process($debug = false)
+    public function process(bool $debug = false)
     {
         $result = [];
         $cartType = new Cart_Type((int)$this->block->cart_type);
         $user = RAASControllerFrontend::i()->user;
         $cart = new Cart($cartType, $user);
-        $action = isset($this->get['action']) ? $this->get['action'] : '';
+        $action = $this->get['action'] ?? '';
 
         switch ($action) {
             case 'set':

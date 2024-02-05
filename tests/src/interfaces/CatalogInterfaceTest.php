@@ -18,7 +18,7 @@ class CatalogInterfaceTest extends BaseDBTest
     /**
      * Очистка после выполнения теста
      */
-    public static function tearDownAfterClass()
+    public static function tearDownAfterClass(): void
     {
         $filename = CatalogFilter::getDefaultFilename(4);
         @unlink($filename);

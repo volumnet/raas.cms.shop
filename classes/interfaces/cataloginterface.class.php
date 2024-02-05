@@ -237,19 +237,19 @@ class CatalogInterface extends MaterialInterface
 
 
     public function getList(Block_Material $block, Page $page, array $get = [], Pages $pages = null) {
-        $st = microtime(1);
+        $st = microtime(true);
         $this->filterIds = $this->getFilterIds($block, $get, $page->catalogFilter);
         $sqlParts = $this->getSQLParts($block, $page, $get, $pages);
         $sqlQuery = $this->getSQLQuery($sqlParts['from'], $sqlParts['where'], $sqlParts['sort'], $sqlParts['order']);
 
-        // var_dump(microtime(1) - $st, $sqlQuery, $sqlParts['bind']); exit;
-        $st = microtime(1);
+        // var_dump(microtime(true) - $st, $sqlQuery, $sqlParts['bind']); exit;
+        $st = microtime(true);
         if ($this->useFilterIds) {
             $set = Material::getSQLSet([$sqlQuery, $sqlParts['bind']]);
-            // var_dump('aaa', microtime(1) - $st);
+            // var_dump('aaa', microtime(true) - $st);
         } else {
             $set = Material::getSQLSet([$sqlQuery, $sqlParts['bind']], $pages);
-            // var_dump('bbb', microtime(1) - $st);
+            // var_dump('bbb', microtime(true) - $st);
         }
         // print_r($sqlQuery);
         // var_dump($sqlParts);
@@ -298,7 +298,7 @@ class CatalogInterface extends MaterialInterface
         array $get = [],
         Pages $pages = null
     ) {
-        $st = microtime(1);
+        $st = microtime(true);
 
         $sqlFromAccess = $sqlFromBindAccess = $sqlWhereAccess = [];
         $sqlFromMaterials =  $sqlWhereMaterials = $sqlWhereBindMaterials = [];

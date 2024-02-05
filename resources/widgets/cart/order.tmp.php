@@ -1,6 +1,6 @@
 <?php
 /**
- * Виджет просмотра заказа
+ * Просмотр заказа
  * @param Order $order Заказ
  * @param bool $orderDataFirst Отображать сначала данные полей
  * @param bool $showPaymentStatus Отображать статус оплаты

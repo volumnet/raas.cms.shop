@@ -2,6 +2,8 @@
 /**
  * Команда внутреннего кэширования свойств материалов
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
@@ -160,7 +162,7 @@ class UpdatePropsCacheCommand extends Command
         $sqlResult = Material::_SQL()->get([$sqlQuery, (int)$fieldset->id]);
         foreach ($sqlResult as $sqlRow) {
             if ($sqlRow['value']) {
-                $props[trim($sqlRow['pid'])][] = (int)$sqlRow['value'];
+                $props[trim((string)$sqlRow['pid'])][] = (int)$sqlRow['value'];
             }
         }
 
@@ -228,7 +230,7 @@ class UpdatePropsCacheCommand extends Command
                 foreach ($fieldsIds as $fieldId) {
                     if (!isset($result[$fieldId])) {
                         $field = new Material_Field($fieldId);
-                        $result[trim($fieldId)] = $this->getFieldData($field);
+                        $result[trim((string)$fieldId)] = $this->getFieldData($field);
                     }
                 }
             }
@@ -236,7 +238,7 @@ class UpdatePropsCacheCommand extends Command
         foreach ($additionalFields as $field) {
             $fieldId = $field->id;
             if (!isset($result[$fieldId])) {
-                $result[trim($fieldId)] = $this->getFieldData($field);
+                $result[trim((string)$fieldId)] = $this->getFieldData($field);
             }
         }
         return $result;
@@ -264,7 +266,7 @@ class UpdatePropsCacheCommand extends Command
         $sqlQuery .= " ORDER BY pid, fid, fii";
         $sqlResult = Material::_SQL()->query($sqlQuery);
         foreach ($sqlResult as $sqlRow) {
-            $result[trim($sqlRow['pid'])][trim($sqlRow['fid'])][trim($sqlRow['fii'])] = $sqlRow['value'];
+            $result[trim((string)$sqlRow['pid'])][trim((string)$sqlRow['fid'])][trim((string)$sqlRow['fii'])] = $sqlRow['value'];
         }
         return $result;
     }
@@ -289,7 +291,7 @@ class UpdatePropsCacheCommand extends Command
                       WHERE tM.pid IN (" . implode(", ", $mTypesIds) . ")";
         $sqlResult = Material::_SQL()->get($sqlQuery);
         foreach ($sqlResult as $sqlRow) {
-            $result[trim($sqlRow['id'])][trim($sqlRow['pid'])] = (int)$sqlRow['pid'];
+            $result[trim((string)$sqlRow['id'])][trim((string)$sqlRow['pid'])] = (int)$sqlRow['pid'];
         }
         return $result;
     }
@@ -371,7 +373,7 @@ class UpdatePropsCacheCommand extends Command
                                     continue;
                                 }
                                 $value = $this->formatMaterialValue($material);
-                                $cachedMaterials[trim($val)] = $value;
+                                $cachedMaterials[trim((string)$val)] = $value;
                             }
                             $values[] = $value;
                         }
@@ -396,7 +398,7 @@ class UpdatePropsCacheCommand extends Command
                                     continue;
                                 }
                                 $value = $this->formatAttachmentValue($attachment);
-                                $cachedAttachments[trim($val['attachment'])] = $value;
+                                $cachedAttachments[trim((string)$val['attachment'])] = $value;
                             }
                             $values[] = $value;
                         }
@@ -465,9 +467,9 @@ class UpdatePropsCacheCommand extends Command
             foreach ($materialsPagesAssoc as $materialId => $pagesIds) {
                 foreach ($pagesIds as $pageId) {
                     $result[$materialId][$fieldSetURN][$pageId] = [];
-                    if ($fieldsIds = $fieldsetMapping[$pageId]) {
+                    if ($fieldsIds = ($fieldsetMapping[$pageId] ?? [])) {
                         foreach ($fieldsIds as $fieldId) {
-                            if ($materialFieldData = $materialsData[$materialId][$fieldId]) {
+                            if ($materialFieldData = ($materialsData[$materialId][$fieldId] ?? [])) {
                                 if ($materialFieldData['values']) {
                                     $result[$materialId][$fieldSetURN][$pageId][] = $materialFieldData;
                                 }
@@ -483,7 +485,7 @@ class UpdatePropsCacheCommand extends Command
             if ($affectedField = $affectedFields[$fieldId]) {
                 $fieldURN = $field->urn;
                 foreach ($materialsData as $materialId => $materialData) {
-                    if ($materialFieldData = $materialData[$fieldId]) {
+                    if ($materialFieldData = ($materialData[$fieldId] ?? null)) {
                         $result[$materialId][$fieldURN] = $materialFieldData;
                     }
                 }

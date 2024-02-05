@@ -273,7 +273,7 @@ return $y;'
         'ISBN' => [],
         'language' => [],
         'manufacturer_warranty' => [
-            'callback' => 'if (trim($x) && !in_array(
+            'callback' => 'if (trim((string)$x) && !in_array(
     trim(mb_strtolower($x)),
     ["0", "no", "none", "false", "нет"]
 )) {
@@ -458,9 +458,9 @@ return "false";'
         $arr = [
             'id' => $this->id,
             'mtype' => (int)$MType->id,
-            'type' => trim($type),
+            'type' => trim((string)$type),
             'param_exceptions' => (int)$param_exceptions,
-            'params_callback' => trim($params_callback)
+            'params_callback' => trim((string)$params_callback)
         ];
         static::$SQL->add(
             static::$dbprefix . "cms_shop_blocks_yml_material_types_assoc",
@@ -480,7 +480,7 @@ return "false";'
                 'field_static_value'
             ] as $k) {
                 if (isset($row[$k])) {
-                    $row2[$k] = trim($row[$k]);
+                    $row2[$k] = trim((string)($row[$k] ?? ''));
                 }
             }
             $arr[] = $row2;
@@ -504,7 +504,7 @@ return "false";'
                 'param_unit'
             ] as $k) {
                 if (isset($row[$k])) {
-                    $row2[$k] = trim($row[$k]);
+                    $row2[$k] = trim((string)($row[$k] ?? ''));
                 }
             }
             $arr[] = $row2;
@@ -520,7 +520,7 @@ return "false";'
                 $row2 = [
                     'id' => $this->id,
                     'mtype' => (int)$MType->id,
-                    'field_id' => trim($val)
+                    'field_id' => trim((string)$val)
                 ];
                 $arr[] = $row2;
             }
@@ -566,8 +566,8 @@ return "false";'
             'email' => (string)$this->email,
             'cpa' => (int)(bool)$this->cpa,
             'default_currency' => (string)$this->default_currency,
-            'delivery_options' => trim($this->delivery_options),
-            'pickup_options' => trim($this->pickup_options),
+            'delivery_options' => trim((string)$this->delivery_options),
+            'pickup_options' => trim((string)$this->pickup_options),
         ];
     }
 
@@ -618,14 +618,14 @@ return "false";'
                         if ($f && $f->id) {
                             $mfarr['field'] = $f;
                         } else {
-                            $mfarr['field_id'] = trim($row2['field_id']);
+                            $mfarr['field_id'] = trim((string)($row2['field_id'] ?? ''));
                         }
                     }
                     if ($row2['field_static_value']) {
-                        $mfarr['value'] = trim($row2['field_static_value']);
+                        $mfarr['value'] = trim((string)($row2['field_static_value'] ?? ''));
                     }
                     if ($row2['field_callback']) {
-                        $mfarr['callback'] = trim($row2['field_callback']);
+                        $mfarr['callback'] = trim((string)($row2['field_callback'] ?? ''));
                     }
                     $mtarr['fields'][$row2['field_name']] = $mfarr;
                 }
@@ -637,7 +637,7 @@ return "false";'
                           . "   AND mtype = " . (int)$mtype->id;
                 $sqlResult2 = (array)static::$SQL->get($sqlQuery);
                 foreach ($sqlResult2 as $row2) {
-                    $mfarr = ['name' => trim($row2['param_name'])];
+                    $mfarr = ['name' => trim((string)($row2['param_name'] ?? ''))];
                     if ($row2['field_id']) {
                         $f = null;
                         if (is_numeric($row2['field_id'])) {
@@ -646,17 +646,17 @@ return "false";'
                         if ($f && $f->id) {
                             $mfarr['field'] = $f;
                         } else {
-                            $mfarr['field_id'] = trim($row2['field_id']);
+                            $mfarr['field_id'] = trim((string)($row2['field_id'] ?? ''));
                         }
                     }
                     if ($row2['param_static_value']) {
-                        $mfarr['value'] = trim($row2['param_static_value']);
+                        $mfarr['value'] = trim((string)($row2['param_static_value'] ?? ''));
                     }
                     if ($row2['field_callback']) {
-                        $mfarr['callback'] = trim($row2['field_callback']);
+                        $mfarr['callback'] = trim((string)($row2['field_callback'] ?? ''));
                     }
                     if ($row2['param_unit']) {
-                        $mfarr['unit'] = trim($row2['param_unit']);
+                        $mfarr['unit'] = trim((string)($row2['param_unit'] ?? ''));
                     }
                     $mtarr['params'][] = $mfarr;
                 }
@@ -675,7 +675,7 @@ return "false";'
                     if ($f && $f->id) {
                         $mtarr['ignored'][] = $f;
                     } else {
-                        $mtarr['ignored'][] = trim($row2['field_id']);
+                        $mtarr['ignored'][] = trim((string)($row2['field_id'] ?? ''));
                     }
                 }
                 $mtype->settings = $mtarr;

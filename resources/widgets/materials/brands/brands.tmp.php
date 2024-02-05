@@ -1,6 +1,6 @@
 <?php
 /**
- * Виджет брендов
+ * Бренды
  * @param Block_Material $Block Текущий блок <pre><code>Block([
  *     'additionalParams' => [
  *         'pageLevel' => int Категории какого уровня выводить (абсолютный уровень, 0-based)

@@ -1,6 +1,6 @@
 <?php
 /**
- * Виджет блока сравнения
+ * Сравнение
  * @param Page $Page Текущая страница
  * @param Block_Cart $Block Текущий блок
  * @param Cart $Cart Текущая корзина

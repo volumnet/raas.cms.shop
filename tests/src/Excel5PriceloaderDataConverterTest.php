@@ -13,14 +13,6 @@ use PHPExcel_Writer_Excel5;
 class Excel5PriceloaderDataConverterTest extends BaseTest
 {
     /**
-     * Перестройка перед тестом
-     */
-    public static function setUpBeforeClass()
-    {
-    }
-
-
-    /**
      * Тест получения reader'а для заданного типа Excel
      */
     public function testGetReader()

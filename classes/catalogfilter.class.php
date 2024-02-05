@@ -52,8 +52,8 @@ use RAAS\CMS\Page;
  *     string[] ID# товара => int ID# товара
  * ></code></pre> ID# товаров, доступные на текущей странице без учета фильтров
  * @property-read array $filter <pre><code>array<
- *                    string[] ID# свойства => mixed|array<mixed> значение или набор значений
- *                ></code></pre> Значения фильтра
+ *     string[] ID# свойства => mixed|array<mixed> значение или набор значений
+ * ></code></pre> Значения фильтра
  * @property-read bool $filterHasCheckedOptions Есть ли у фильтра отмеченные опции
  * @property-read array $availableProperties <pre><code>array<string[] ID# свойства => array<
  *     mixed[] значение => [
@@ -308,7 +308,7 @@ class CatalogFilter
      */
     public function build()
     {
-        $st = microtime(1);
+        $st = microtime(true);
         $this->materialTypesIds = $this->materialType->selfAndChildrenIds;
         $properties = $this->getAllProperties(
             $this->materialTypesIds,

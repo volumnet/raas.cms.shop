@@ -1,6 +1,6 @@
 <?php
 /**
- * Виджет каталога
+ * Каталог продукции
  * @param Page $Page Текущая страница
  * @param Block_Material $Block Текущий блок
  * @param array<Material>|null $Set Набор материалов для отображения

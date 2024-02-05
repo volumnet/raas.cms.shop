@@ -1,4 +1,9 @@
 <?php
+/**
+ * Менеджер обновлений
+ */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\SOME;
@@ -11,10 +16,8 @@ class Updater extends \RAAS\Updater
 {
     public function preInstall()
     {
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.2.28'
-        ) < 0) {
+        $v = (string)($this->Context->registryGet('baseVersion') ?? '');
+        if (version_compare($v, '4.2.28') < 0) {
             $this->update20150511();
             $this->update20151129();
             $this->update20160119();
@@ -22,60 +25,33 @@ class Updater extends \RAAS\Updater
             $this->update20190304();
             $this->update20200316();
         }
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.2.32'
-        ) < 0) {
+        if (version_compare($v, '4.2.32') < 0) {
             $this->update20200503();
         }
 
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.2.41'
-        ) < 0) {
+        if (version_compare($v, '4.2.41') < 0) {
             $this->update20200702();
         }
 
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.2.66'
-        ) < 0) {
+        if (version_compare($v, '4.2.66') < 0) {
             $this->update20201209();
         }
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.2.75'
-        ) < 0) {
+        if (version_compare($v, '4.2.75') < 0) {
             $this->update20210224();
         }
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.2.80'
-        ) < 0) {
+        if (version_compare($v, '4.2.80') < 0) {
             $this->update20210401();
         }
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.3.7'
-        ) < 0) {
+        if (version_compare($v, '4.3.7') < 0) {
             $this->update20211026();
         }
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.3.20'
-        ) < 0) {
+        if (version_compare($v, '4.3.20') < 0) {
             $this->update20220112();
         }
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.3.44'
-        ) < 0) {
+        if (version_compare($v, '4.3.44') < 0) {
             $this->update20230516();
         }
-        if (version_compare(
-            $this->Context->registryGet('baseVersion'),
-            '4.3.49'
-        ) < 0) {
+        if (version_compare($v, '4.3.49') < 0) {
             $this->update20230814();
         }
     }

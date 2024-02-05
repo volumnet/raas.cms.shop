@@ -34,11 +34,11 @@ class Block_Cart extends Block
             'id' => (int)$this->id,
             'cart_type' => (int)$this->cart_type,
             'epay_interface_id' => (int)$this->epay_interface_id,
-            'epay_login' => trim($this->epay_login),
-            'epay_pass1' => trim($this->epay_pass1),
-            'epay_pass2' => trim($this->epay_pass2),
+            'epay_login' => trim((string)$this->epay_login),
+            'epay_pass1' => trim((string)$this->epay_pass1),
+            'epay_pass2' => trim((string)$this->epay_pass2),
             'epay_test' => (int)$this->epay_test,
-            'epay_currency' => trim($this->epay_currency),
+            'epay_currency' => trim((string)$this->epay_currency),
         );
     }
 }

@@ -2,18 +2,40 @@
 
 <phpunit colors="true" bootstrap="./bootstrap.php">
   <testsuites>
-    <testsuite>
+    <testsuite name="BatchDeleteTrait">
       <file>src/BatchDeleteTraitTest.php</file>
+    </testsuite>
+    <testsuite name="BatchFindTrait">
       <file>src/BatchFindTraitTest.php</file>
+    </testsuite>
+    <testsuite name="CSVPriceloaderDataConverter">
       <file>src/CSVPriceloaderDataConverterTest.php</file> 
+    </testsuite>
+    <testsuite name="Excel2007PriceloaderDataConverter">
       <file>src/Excel2007PriceloaderDataConverterTest.php</file> 
+    </testsuite>
+    <testsuite name="Excel5PriceloaderDataConverter">
       <file>src/Excel5PriceloaderDataConverterTest.php</file> 
+    </testsuite>
+    <testsuite name="ExcelPriceloaderDataConverter">
       <file>src/ExcelPriceloaderDataConverterTest.php</file> 
+    </testsuite>
+    <testsuite name="PriceloaderDataConverter">
       <file>src/PriceloaderDataConverterTest.php</file> 
+    </testsuite>
+    <testsuite name="XmlDataConverter">
       <file>src/XmlDataConverterTest.php</file>
+    </testsuite>
+    <testsuite name="InheritPageTrait">
       <file>src/InheritPageTraitTest.php</file>
+    </testsuite>
+    <testsuite name="CatalogFilter">
       <file>src/CatalogFilterTest.php</file>
+    </testsuite>
+    <testsuite name="Sync1CInterface">
       <file>src/interfaces/Sync1CInterfaceTest.php</file>
+    </testsuite>
+    <testsuite name="PriceloaderInterface">
       <file>src/interfaces/PriceloaderInterfaceTest.php</file>
     </testsuite>
   </testsuites>

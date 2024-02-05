@@ -340,10 +340,10 @@ class SDEKInterface extends AbstractInterface
         $result = [];
         foreach ($this->pvzJSON as $pvz) {
             $cityCode = trim($pvz['cityCode']);
-            if ($result[$cityCode]) {
+            if ($result[$cityCode] ?? false) {
                 continue;
             }
-            $st = microtime(1);
+            $st = microtime(true);
             foreach ([
                 'cityCode' => 'cityCode',
                 'cityName' => 'city',
@@ -363,9 +363,9 @@ class SDEKInterface extends AbstractInterface
                 'cityName' => trim($pvz['city']),
                 'cityCode' => $cityCode,
                 'country' => trim($pvz['countryName']),
-                'countryCode' => $countryCode,
+                'countryCode' => $pvz['countryCode'],
                 'region' => trim($pvz['regionName']),
-                'regionCode' => $regionCode,
+                'regionCode' => $pvz['regionCode'],
             ];
             $result[trim($pvz['city'] . '@' . mb_strtolower($pvz['regionName']))] = $resultArr;
         }

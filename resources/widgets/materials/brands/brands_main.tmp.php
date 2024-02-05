@@ -1,6 +1,6 @@
 <?php
 /**
- * Виджет брендов на главной
+ * Бренды на главной
  * @param Block_Material $Block Текущий блок
  * @param Page $Page Текущая страница
  * @param Material[]|null $Set Набор материалов для отображения

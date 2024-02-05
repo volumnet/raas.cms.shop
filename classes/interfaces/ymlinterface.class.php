@@ -2,6 +2,8 @@
 /**
  * Файл класса интерфейса Яндекс-Маркета
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\AbstractInterface;
@@ -218,8 +220,8 @@ class YMLInterface extends AbstractInterface
      */
     public function getShopCurrenciesBlock(Block_YML $block)
     {
-        $text .= '<currencies>'
-              .    '<currency id="' . htmlspecialchars($block->config['default_currency']) . '" rate="1" />';
+        $text = '<currencies>'
+              .   '<currency id="' . htmlspecialchars($block->config['default_currency']) . '" rate="1" />';
         foreach ((array)$block->currencies as $key => $row) {
             $text .= $this->getShopCurrencyBlock(
                 $key,
@@ -290,7 +292,7 @@ class YMLInterface extends AbstractInterface
         }
         $temp = [];
         foreach ($attrs as $key => $val) {
-            $temp[] = $key . '="' . htmlspecialchars($val) . '"';
+            $temp[] = $key . '="' . htmlspecialchars((string)$val) . '"';
         }
         $text = '<category ' . implode(' ', $temp) . '>'
               .    htmlspecialchars(trim($page->name))
@@ -415,7 +417,11 @@ class YMLInterface extends AbstractInterface
     {
         $ignoredFields = [];
         foreach ($mtype->settings['fields'] as $fieldArr) {
-            $ignoredFields[] = $fieldArr['field']->id ?: $fieldArr['field_id'];
+            if (($fieldArr['field'] ?? null) && $fieldArr['field']->id) {
+                $ignoredFields[] = $fieldArr['field']->id;
+            } elseif ($fieldArr['field_id'] ?? null) {
+                $ignoredFields[] = $fieldArr['field_id'];
+            }
         }
         if ($mtype->settings['params'] ||
             $mtype->settings['param_exceptions']
@@ -557,7 +563,7 @@ class YMLInterface extends AbstractInterface
             $offerAttrs .= $this->getOfferCustomFieldBlock(
                 $key,
                 $material,
-                (array)$mtype->settings['fields'][$key],
+                (array)($mtype->settings['fields'][$key] ?? []),
                 false,
                 true
             );
@@ -606,7 +612,7 @@ class YMLInterface extends AbstractInterface
                     $offerTxt .= $this->getOfferCustomFieldBlock(
                         $key,
                         $material,
-                        (array)$mtype->settings['fields'][$key],
+                        (array)($mtype->settings['fields'][$key] ?? []),
                         ($key == 'description'),
                         false
                     );
@@ -694,18 +700,16 @@ class YMLInterface extends AbstractInterface
      *        ] $settings Настройки поля
      * @return string
      */
-    public function getOfferOldPriceBlock(
-        Material $material,
-        array $settings = []
-    ) {
+    public function getOfferOldPriceBlock(Material $material, array $settings = []): string
+    {
         if (!$settings) {
             return '';
         }
-        $v = (float)$this->getValue($material, $key, $settings);
+        $v = (float)$this->getValue($material, '', $settings);
         if (!$v) {
             return '';
         }
-        $text = '<oldprice>' . htmlspecialchars((float)$v) . '</oldprice>';
+        $text = '<oldprice>' . htmlspecialchars((string)(float)$v) . '</oldprice>';
         return $text;
     }
 
@@ -762,7 +766,7 @@ class YMLInterface extends AbstractInterface
             }
             $key = str_replace('_', '-', $key);
         } else {
-            $v = trim($v);
+            $v = trim((string)$v);
             if ($v === '') {
                 return '';
             }
@@ -895,7 +899,7 @@ class YMLInterface extends AbstractInterface
                         .      htmlspecialchars($settings['field_id'])
                         .  '"';
         }
-        if ($settings['unit']) {
+        if ($settings['unit'] ?? false) {
             $paramAttrs .= ' unit="'
                         .      htmlspecialchars($settings['unit'])
                         .  '"';
@@ -929,7 +933,7 @@ class YMLInterface extends AbstractInterface
         $x = $this->getRawValue($item, $settings);
         $f = $this->getCallbackCode($key, $settings);
         if ($f) {
-            $Field = $settings['field'];
+            $Field = $settings['field'] ?? null;
             $x = eval($f);
         }
         if ($f && is_string($x)) {
@@ -959,22 +963,22 @@ class YMLInterface extends AbstractInterface
     public function getRawValue(Material $item, array $settings = [])
     {
         $x = null;
-        if ($settings['field']->id) {
+        if (($settings['field'] ?? null) && $settings['field']->id) {
             if ($settings['field']->datatype == 'image') {
                 $att = $item->{$settings['field']->urn};
-                if ($settings['field']->multiple) {
+                if ($settings['field']->multiple && ($att[0] ?? null)) {
                     $att = $att[0];
                 }
-                if ($att->id) {
+                if ($att && $att->id) {
                     $x = $this->getCurrentHostURL() . '/' . $att->fileURL;
                 }
             } else {
                 $x = $item->fields[$settings['field']->urn]->doRich();
             }
-        } elseif ($settings['field_id']) {
+        } elseif ($settings['field_id'] ?? false) {
             $x = $item->{$settings['field_id']};
         }
-        if (($x === null) && $settings['value']) {
+        if (($x === null) && ($settings['value'] ?? null)) {
             $x = $settings['value'];
         }
         return $x;
@@ -1016,12 +1020,12 @@ class YMLInterface extends AbstractInterface
 
     /**
      * Заменяет в дробных числах запятую на точку и триммирует их
-     * @param string $number Число для обработки
+     * @param string|float $number Число для обработки
      * @return string
      */
     public static function canonizeFloat($number)
     {
-        $text = trim(str_replace(',', '.', $number));
+        $text = trim(str_replace(',', '.', (string)$number));
         return $text;
     }
 }

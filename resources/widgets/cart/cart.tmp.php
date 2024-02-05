@@ -1,6 +1,6 @@
 <?php
 /**
- * Виджет блока корзины
+ * Корзина
  * @param Page $Page Текущая страница
  * @param Block_Cart $Block Текущий блок
  * @param Snippet|null $epayWidget Виджет оплаты

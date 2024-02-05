@@ -24,7 +24,7 @@ $_RAASForm_Control = function (RAASField $field) {
         </tr>
       </thead>
       <tbody data-role="raas-repo-container">
-        <?php foreach ((array)$DATA[$field->name] as $i => $temp) { ?>
+        <?php foreach ((array)($DATA[$field->name] ?? []) as $i => $temp) { ?>
             <tr data-role="raas-repo-element">
               <td>
                 <input type="number" class="span2" name="<?php echo htmlspecialchars($field->name)?>@cost[]" value="<?php echo htmlspecialchars($DATA[$field->name][$i]['cost'])?>" />

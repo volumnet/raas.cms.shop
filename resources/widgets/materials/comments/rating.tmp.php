@@ -1,6 +1,6 @@
 <?php
 /**
- * Виджет рейтинга (звезды)
+ * Рейтинг (звезды)
  * @param float $rating Рейтинг (1-5)
  */
 namespace RAAS\CMS\Shop;

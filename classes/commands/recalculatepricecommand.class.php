@@ -2,6 +2,8 @@
 /**
  * Пересчет цен
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Command;
@@ -183,7 +185,7 @@ class RecalculatePriceCommand extends Command
         $prices = [];
         foreach ((array)$pagesIds as $pageId) {
             $price = $basePrice;
-            if ($discount = (float)$this->priceRatioMap[$pageId]) {
+            if ($discount = (float)($this->priceRatioMap[$pageId] ?? 0)) {
                 $price *= (100. - (float)$discount) / 100.;
                 $price = max(0, ceil($price));
                 $prices[] = $price;
@@ -215,7 +217,7 @@ class RecalculatePriceCommand extends Command
             $lastModifiedPageTimestamp
         );
 
-        $cacheUpdated = strtotime(Module::i()->registryGet('prices_recalculated'));
+        $cacheUpdated = strtotime(Module::i()->registryGet('prices_recalculated') ?: '');
         return $lastModified > $cacheUpdated;
     }
 }

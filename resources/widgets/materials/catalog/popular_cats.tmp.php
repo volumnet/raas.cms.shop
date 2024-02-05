@@ -1,6 +1,6 @@
 <?php
 /**
- * Виджет модуля "Популярные категории"
+ * Популярные категории
  * @param Block_Menu $Block Текущий блок
  * @param Page $Page Текущая страница
  * @param array|null $menuArr Данные кэша меню

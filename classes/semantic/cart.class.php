@@ -270,7 +270,7 @@ class Cart
         $result = [];
         $checkAmount = (bool)(int)$this->cartType->check_amount;
         $itemsIds = array_keys($cookieItems);
-        $st = microtime(1);
+        $st = microtime(true);
         Field::prefetch($itemsIds);
         foreach ((array)$cookieItems as $materialId => $metaItems) {
             $material = new Material((int)$materialId);

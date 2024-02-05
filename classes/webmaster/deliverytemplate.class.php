@@ -78,7 +78,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
             'pid' => $this->materialType->id,
             'vis' => 1,
             'name' => View_Web::i()->_('CITIES'),
-            'urn' => 'service_urn',
+            'urn' => 'cities',
             'datatype' => 'text',
         ]);
         $citiesField->commit();

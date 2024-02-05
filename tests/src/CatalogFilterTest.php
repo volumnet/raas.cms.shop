@@ -19,7 +19,7 @@ use RAAS\CMS\Page;
  */
 class CatalogFilterTest extends BaseDBTest
 {
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
         $material = new Material(10);
