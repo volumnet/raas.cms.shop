@@ -4,8 +4,8 @@
  */
 namespace RAAS\CMS\Shop;
 
-use Twig_Environment;
-use Twig_Loader_String;
+use Twig\Environment;
+use Twig\Loader\ArrayLoader;
 use SOME\Pages;
 use SOME\SOME;
 use RAAS\Attachment;
@@ -155,7 +155,6 @@ class CatalogInterface extends MaterialInterface
         }
         if ($blockParams['metaTemplates']) {
             $metaTemplates = $metaData = [];
-            $twig = new Twig_Environment(new Twig_Loader_String());
             foreach ([
                 'name',
                 'meta_title',
@@ -172,7 +171,8 @@ class CatalogInterface extends MaterialInterface
                     if (!isset($metaTemplates[$key])) {
                         $metaTemplates[$key] = $this->getMetaTemplate($page, $key . '_' . $blockParams['metaTemplates']);
                     }
-                    $page->$key = $twig->render($metaTemplates[$key], $metaData);
+                    $twig = new Environment(new ArrayLoader(['description' => $metaTemplates[$key]]));
+                    $page->$key = $twig->render('description', $metaData);
                 }
             }
         }
@@ -193,7 +193,6 @@ class CatalogInterface extends MaterialInterface
         if ($blockParams['listMetaTemplates']) {
             $metaData = $this->getPageMetadata($page);
             $metaTemplates = [];
-            $twig = new Twig_Environment(new Twig_Loader_String());
             foreach ([
                 'name',
                 'meta_title',
@@ -209,7 +208,8 @@ class CatalogInterface extends MaterialInterface
             }
             foreach ($metaTemplates as $key => $val) {
                 if (!$page->$key && $val) {
-                    $page->$key = $twig->render($metaTemplates[$key], $metaData);
+                    $twig = new Environment(new ArrayLoader(['description' => $metaTemplates[$key]]));
+                    $page->$key = $twig->render('description', $metaData);
                 }
             }
         }
@@ -236,7 +236,8 @@ class CatalogInterface extends MaterialInterface
     }
 
 
-    public function getList(Block_Material $block, Page $page, array $get = [], Pages $pages = null) {
+    public function getList(Block_Material $block, Page $page, array $get = [], Pages $pages = null)
+    {
         $st = microtime(true);
         $this->filterIds = $this->getFilterIds($block, $get, $page->catalogFilter);
         $sqlParts = $this->getSQLParts($block, $page, $get, $pages);

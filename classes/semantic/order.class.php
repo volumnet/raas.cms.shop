@@ -4,8 +4,8 @@
  */
 namespace RAAS\CMS\Shop;
 
-use Twig_Environment;
-use Twig_Loader_String;
+use Twig\Environment;
+use Twig\Loader\ArrayLoader;
 use SOME\SOME;
 use Pelago\Emogrifier\CssInliner;
 use RAAS\Application;
@@ -251,15 +251,16 @@ class Order extends Feedback
                 }
             }
         }
-        $twig = new Twig_Environment(new Twig_Loader_String());
         if ($emails) {
             $subjectTemplate = $this->status->notification_title;
             $subjectTemplate = strtr($subjectTemplate, ['&#39;' => "'"]);
-            $subject = $twig->render($subjectTemplate, $dataArr);
+            $twig = new Environment(new ArrayLoader(['subject' => $subjectTemplate]));
+            $subject = $twig->render('subject', $dataArr);
 
             $messageTemplate = $this->status->notification;
             $messageTemplate = strtr($messageTemplate, ['&#39;' => "'"]);
-            $message = $twig->render($messageTemplate, $dataArr);
+            $twig = new Environment(new ArrayLoader(['message' => $subjectTemplate]));
+            $message = $twig->render('message', $dataArr);
 
             $formInterface = new FormInterface();
             $processEmbedded = $formInterface->processEmbedded($message);
