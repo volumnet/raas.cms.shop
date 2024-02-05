@@ -1,13 +1,13 @@
 {
     "name": "volumnet/raas.cms.shop",
     "description": "RAAS.CMS.Shop",
-    "version": "4.3.59",
+    "version": "4.3.60",
     "license": "GPL-3.0-or-later",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
         "mustache/mustache": ">=2.5",
-        "twig/twig": "1.x",
+        "twig/twig": "*",
         "phpoffice/phpexcel": ">=1.8",
         "volumnet/some4": ">=4.6.5",
         "volumnet/raas.kernel": ">=4.3.14",
