@@ -151,7 +151,7 @@ class XmlDataConverterTest extends BaseTest
      */
     public function testParseXML()
     {
-        $sxe = new SimpleXMLElement($this->getResourcesDir() . '/1cresult.xml', null, true);
+        $sxe = new SimpleXMLElement($this->getResourcesDir() . '/1cresult.xml', 0, true);
         $xdc = new XmlDataConverter();
 
         $result = $xdc->parseXML($sxe);
@@ -197,7 +197,7 @@ class XmlDataConverterTest extends BaseTest
                 ]
             ],
         ];
-        $sxe = new SimpleXMLElement($this->getResourcesDir() . '/1cresultoffers.xml', null, true);
+        $sxe = new SimpleXMLElement($this->getResourcesDir() . '/1cresultoffers.xml', 0, true);
         $xdc = new XmlDataConverter();
 
         $result = $xdc->parseXML($sxe, $data);

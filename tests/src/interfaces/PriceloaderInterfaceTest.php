@@ -307,7 +307,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
         }
         $result = $interface->getItemsByUniqueField($loader, $valueToFind);
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
 
         $result = array_map(function ($x) {
             return $x->name;
@@ -327,7 +327,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
 
         $result = $interface->getItemsByUniqueField($loader, '');
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertEmpty($result);
     }
 
@@ -343,7 +343,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
 
         $result = $interface->getItemsByEntireRow($loader, $row);
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertCount(1, $result);
         $this->assertEquals('Товар 1', $result[0]->name);
     }
@@ -360,7 +360,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
 
         $result = $interface->getItemsByEntireRow($loader, $row);
 
-        $this->assertInternalType('array', $result);
+        $this->assertIsArray($result);
         $this->assertEmpty($result);
     }
 
@@ -612,7 +612,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $this->assertEquals('files', $result);
         $this->assertEmpty($att1->id);
         $this->assertEmpty($att2->id);
-        $this->assertInternalType('array', $sqlResult);
+        $this->assertIsArray($sqlResult);
         $this->assertCount(1, $sqlResult);
         $this->assertEquals('{"vis":1,"name":"","description":"","attachment":999}', $sqlResult[0]);
     }
@@ -836,12 +836,12 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $interface->logDeleteFieldsAndAttachments($log, [27, 29], [30, 31]);
 
         $this->assertCount(4, $log);
-        $this->assertContains('Изображение', $log[0]['text']);
-        $this->assertInternalType('float', $log[0]['time']);
-        $this->assertContains('Файлы', $log[1]['text']);
-        $this->assertInternalType('float', $log[1]['time']);
-        $this->assertContains('0', $log[2]['text']);
-        $this->assertContains('0', $log[3]['text']);
+        $this->assertStringContainsString('Изображение', $log[0]['text'] ?? '');
+        $this->assertIsFloat($log[0]['time']);
+        $this->assertStringContainsString('Файлы', $log[1]['text']);
+        $this->assertIsFloat($log[1]['time']);
+        $this->assertStringContainsString('0', $log[2]['text']);
+        $this->assertStringContainsString('0', $log[3]['text']);
     }
 
 
@@ -1080,7 +1080,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $this->assertEquals(1, $item->available);
         $this->assertEquals(11111, $item->price);
         $this->assertCount(1, $log);
-        $this->assertContains('Товар 1', $log[0]['text']);
+        $this->assertStringContainsString('Товар 1', $log[0]['text'] ?? '');
         $this->assertEquals(2, $log[0]['row']);
         $this->assertEquals(3, $log[0]['realrow']);
         $this->assertCount(1, $affectedMaterialsIds);
@@ -1127,7 +1127,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
             return $x->id;
         }, $backtrace));
         $this->assertCount(1, $log);
-        $this->assertContains('Категория 11', $log[0]['text']);
+        $this->assertStringContainsString('Категория 11', $log[0]['text'] ?? '');
         $this->assertEquals(0, $virtualLevel);
         $this->assertEquals(17, $context->id);
     }
@@ -1164,7 +1164,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
             return $x->id;
         }, $backtrace));
         $this->assertCount(1, $log);
-        $this->assertContains('Категория 1', $log[0]['text']);
+        $this->assertStringContainsString('Категория 1', $log[0]['text'] ?? '');
         $this->assertEquals(0, $virtualLevel);
         $this->assertEquals(16, $context->id);
     }
@@ -1301,9 +1301,9 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $this->assertEquals('Категория 1', $rawData[0][0]);
         $this->assertEquals(0, $rawData[3][4]);
         $this->assertEquals(1, $rawData[4][4]);
-        $this->assertContains('Категория 1', $log[0]['text']);
+        $this->assertStringContainsString('Категория 1', $log[0]['text'] ?? '');
         $this->assertEquals(0, $log[0]['row']);
-        $this->assertContains('Товар 2', $log[4]['text']);
+        $this->assertStringContainsString('Товар 2', $log[4]['text']);
         $this->assertEquals(4, $log[4]['row']);
     }
 
@@ -1323,7 +1323,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $item = new Material(15);
         $attachment = new Attachment(46);
 
-        $this->assertContains('Товар 6', $log[0]['text']);
+        $this->assertStringContainsString('Товар 6', $log[0]['text'] ?? '');
         $this->assertEquals(15, $item->id);
         $this->assertEquals(46, $attachment->id);
     }
@@ -1363,7 +1363,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $page = new Page(24);
 
         $this->assertEquals(24, $page->id);
-        $this->assertContains('Категория 3', $log[0]['text']);
+        $this->assertStringContainsString('Категория 3', $log[0]['text'] ?? '');
     }
 
 
@@ -1403,7 +1403,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $this->assertEquals(22, $page->id);
         $this->assertEquals(17, $item->id);
         $this->assertCount(1, $log);
-        $this->assertContains('удалены', $log[0]['text']);
+        $this->assertStringContainsString('удалены', $log[0]['text'] ?? '');
     }
 
 
@@ -1433,7 +1433,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
 
         $this->assertEquals(22, $page->id);
         $this->assertEquals(17, $item->id);
-        $this->assertContains('Товар 8', $log[0]['text']);
+        $this->assertStringContainsString('Товар 8', $log[0]['text'] ?? '');
     }
 
 
@@ -1463,13 +1463,13 @@ class PriceloaderInterfaceTest extends BaseDBTest
 
         $this->assertEquals(22, $page->id);
         $this->assertEquals(17, $item->id);
-        $this->assertContains('Товар 8', $log[0]['text']);
-        $this->assertContains('Поля для удаления: Изображение', $log[1]['text']);
-        $this->assertContains('Поля для удаления: Файлы', $log[2]['text']);
-        $this->assertContains('test_14.doc', $log[3]['text']);
-        $this->assertContains('test_15.pdf', $log[4]['text']);
-        $this->assertContains('/common/0', $log[5]['text']);
-        $this->assertContains('Категория 13', $log[6]['text']);
+        $this->assertStringContainsString('Товар 8', $log[0]['text'] ?? '');
+        $this->assertStringContainsString('Поля для удаления: Изображение', $log[1]['text']);
+        $this->assertStringContainsString('Поля для удаления: Файлы', $log[2]['text']);
+        $this->assertStringContainsString('test_14.doc', $log[3]['text']);
+        $this->assertStringContainsString('test_15.pdf', $log[4]['text']);
+        $this->assertStringContainsString('/common/0', $log[5]['text']);
+        $this->assertStringContainsString('Категория 13', $log[6]['text']);
     }
 
 
@@ -1580,7 +1580,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
         $this->assertNotEmpty($item->id);
         $this->assertNotEquals(22, $page->id);
         $this->assertNotEquals(17, $item->id);
-        $this->assertContains('Категория 1', $result['log'][0]['text']);
+        $this->assertStringContainsString('Категория 1', $result['log'][0]['text'] ?? '');
         $this->assertEquals(0, $result['log'][0]['row']);
         $this->assertEquals('Категория 1', $result['raw_data'][0][0]);
         $this->assertTrue($result['ok']);
@@ -1798,7 +1798,7 @@ class PriceloaderInterfaceTest extends BaseDBTest
 
         $this->assertEquals('Артикул', $result[0][0]);
         $this->assertEquals('Название', $result[0][1]);
-        $this->assertEmpty($result[0][7]);
+        $this->assertEmpty($result[0][7] ?? null);
         $this->assertEquals('Видимость', $result[0][8]);
         $this->assertEquals('URN', $result[0][9]);
         $this->assertEquals('Категория 1', $result[1][0]);

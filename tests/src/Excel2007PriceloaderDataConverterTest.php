@@ -4,8 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
-use PHPExcel_Reader_Excel2007;
-use PHPExcel_Writer_Excel2007;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx as ReaderXlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx as WriterXlsx;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
  * Класс теста конвертера Excel 2007 для загрузчика прайсов
@@ -21,7 +22,7 @@ class Excel2007PriceloaderDataConverterTest extends BaseTest
 
         $reader = $converter->getReader();
 
-        $this->assertInstanceOf(PHPExcel_Reader_Excel2007::class, $reader);
+        $this->assertInstanceOf(ReaderXlsx::class, $reader);
     }
 
 
@@ -31,10 +32,11 @@ class Excel2007PriceloaderDataConverterTest extends BaseTest
     public function testGetWriter()
     {
         $converter = new Excel2007PriceloaderDataConverter();
+        $workbook = new Spreadsheet();
 
-        $writer = $converter->getWriter();
+        $writer = $converter->getWriter($workbook);
 
-        $this->assertInstanceOf(PHPExcel_Writer_Excel2007::class, $writer);
+        $this->assertInstanceOf(WriterXlsx::class, $writer);
     }
 
 

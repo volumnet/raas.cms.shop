@@ -370,7 +370,7 @@ class Updater extends \RAAS\Updater
         $sqlResult = (int)$this->SQL->getvalue([$sqlQuery, $sqlBind]);
         if ($sqlResult) {
             $sqlQuery = "ALTER TABLE `cms_shop_orders_goods` DROP PRIMARY KEY";
-            $this->SQL->query([$sqlQuery, $sqlBind]);
+            $this->SQL->query([$sqlQuery]);
         }
     }
 

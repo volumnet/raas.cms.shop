@@ -52,7 +52,7 @@ class BatchDeleteTraitTest extends BaseDBTest
         $item = new Attachment(58);
 
         $this->assertEmpty($item->id);
-        $this->assertFileNotExists($file);
+        $this->assertFileDoesNotExist($file);
     }
 
 

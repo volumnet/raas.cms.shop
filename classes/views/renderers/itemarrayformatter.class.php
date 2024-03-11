@@ -49,6 +49,7 @@ class ItemArrayFormatter
             'id' => (int)$this->item->id,
             'name' => trim($this->item->name),
             'url' => trim($this->item->cache_url),
+            'vis' => (bool)$this->item->vis,
         ];
 
         if ($this->usePropsCache) {

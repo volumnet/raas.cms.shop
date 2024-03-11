@@ -107,7 +107,7 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertEquals(16, $result[21]);
         $this->assertEquals(3, $result[6]);
         $this->assertEquals(0, $result[1]);
-        $this->assertEmpty($result[0]);
+        $this->assertEmpty($result[0] ?? null);
     }
 
 
@@ -865,7 +865,7 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertFalse($result['30']['1']['checked']);
         $this->assertEquals('Запись 1', $result['47']['value1']['doRich']);
         $this->assertEquals('Минимальное количество', $result['32']['1']['prop']);
-        $this->assertEmpty($result['32']['1']['doRich']);
+        $this->assertEmpty($result['32']['1']['doRich'] ?? null);
     }
 
 
@@ -886,8 +886,8 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertEquals(['article', 33], $filter->ignoredFields);
         $this->assertEquals('Стоимость', $filter->properties[26]->name);
         $this->assertEquals('Стоимость', $filter->propertiesByURNs['price']->name);
-        $this->assertNull($filter->properties[25]);
-        $this->assertNull($filter->propertiesByURNs['article']);
+        $this->assertNull($filter->properties[25] ?? null);
+        $this->assertNull($filter->propertiesByURNs['article'] ?? null);
         $this->assertTrue($filter->withChildrenGoods);
         $this->assertEquals(
             [
@@ -998,10 +998,11 @@ class CatalogFilterTest extends BaseDBTest
 
     /**
      * Тест составления фильтра по переменным окружения - случай, когда фильтр не инициализирован
-     * @expectedException Exception
      */
     public function testGetFilterWithNoInit()
     {
+        $this->expectException(Exception::class);
+
         $filter = new CatalogFilter(new Material_Type(4));
         $filterData = [
             'price_from' => 10000,
@@ -1201,10 +1202,11 @@ class CatalogFilterTest extends BaseDBTest
 
     /**
      * Тест получения канонического URL из фильтра - случай, когда фильтр не инициализирован
-     * @expectedException Exception
      */
     public function testGetCanonicalURLFromFilterWithNoInit()
     {
+        $this->expectException(Exception::class);
+
         $filter = new CatalogFilter(new Material_Type(4), true);
         $filterData = [
             '26' => ['from' => 10000, 'to' => 60000],
@@ -1261,10 +1263,11 @@ class CatalogFilterTest extends BaseDBTest
 
     /**
      * Тест получения ID# товаров с сортировкой - случай когда фильтр не инициализирован
-     * @expectedException Exception
      */
     public function testGetIdsWithFilterNotApplied()
     {
+        $this->expectException(Exception::class);
+
         $filter = new CatalogFilter(new Material_Type(4), true);
 
         $result = $filter->getIds('article');
@@ -1368,8 +1371,8 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertEquals([4, 5], $result['materialTypesIds']);
         $this->assertEquals(['article', 33], $result['ignoredFields']);
         $this->assertEquals('Стоимость', $result['properties'][26]['name']);
-        $this->assertNull($result['properties'][25]);
-        $this->assertNull($result['propertiesByURNs']['article']);
+        $this->assertNull($result['properties'][25] ?? null);
+        $this->assertNull($result['propertiesByURNs']['article'] ?? null);
         $this->assertTrue($result['withChildrenGoods']);
         $this->assertEquals(
             [
@@ -1487,8 +1490,8 @@ class CatalogFilterTest extends BaseDBTest
         $this->assertEquals(['article', 33], $result->ignoredFields);
         $this->assertEquals('Стоимость', $result->properties[26]->name);
         $this->assertEquals('Стоимость', $result->propertiesByURNs['price']->name);
-        $this->assertNull($result->properties[25]);
-        $this->assertNull($result->propertiesByURNs['article']);
+        $this->assertNull($result->properties[25] ?? null);
+        $this->assertNull($result->propertiesByURNs['article'] ?? null);
         $this->assertTrue($result->withChildrenGoods);
         $this->assertEquals(
             [
@@ -1535,10 +1538,11 @@ class CatalogFilterTest extends BaseDBTest
 
     /**
      * Тест импорта - случай с некорректными данными
-     * @expectedException Exception
      */
     public function testImportWithInvalidData()
     {
+        $this->expectException(Exception::class);
+
         $filterData = ['aaa', 'bbb', 'ccc'];
 
         $result = CatalogFilter::import($filterData);
@@ -1617,10 +1621,11 @@ class CatalogFilterTest extends BaseDBTest
 
     /**
      * Тест сохранения файла - случай с некорректным именем файла
-     * @expectedException Exception
      */
     public function testSaveWithInvalidFilepath()
     {
+        $this->expectException(Exception::class);
+
         $filter = new CatalogFilter(new Material_Type(4), true);
         $filename = __DIR__ . '/../coverage';
 
@@ -1673,14 +1678,15 @@ class CatalogFilterTest extends BaseDBTest
 
     /**
      * Тест загрузки - случай с несуществующим файлом
-     * @expectedException Exception
      */
     public function testLoadWithInvalidFilepath()
     {
+        $this->expectException(Exception::class);
+
         $result = CatalogFilter::load(
             new Material_Type(4),
             false,
-            $this->getResourcesDir . '/aaa.php'
+            $this->getResourcesDir() . '/aaa.php'
         );
     }
 
@@ -1693,7 +1699,7 @@ class CatalogFilterTest extends BaseDBTest
         $filename = Package::i()->cacheDir . '/system/catalogfilter4.wch.php';
         @unlink($filename);
 
-        $this->assertFileNotExists($filename);
+        $this->assertFileDoesNotExist($filename);
 
         $result = CatalogFilter::loadOrBuild(new Material_Type(4), true);
 

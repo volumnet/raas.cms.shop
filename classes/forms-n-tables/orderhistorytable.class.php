@@ -50,7 +50,7 @@ class OrderHistoryTable extends \RAAS\Table
         $columns['uid'] = array(
             'caption' => $this->view->_('AUTHOR'),
             'callback' => function ($row) use ($view) {
-                return htmlspecialchars($row->user->full_name ?: $row->user->login);
+                return htmlspecialchars((string)($row->user->full_name ?: $row->user->login));
             }
         );
         $defaultParams = array(

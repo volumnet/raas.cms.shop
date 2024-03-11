@@ -4,8 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
-use PHPExcel_Reader_Excel5;
-use PHPExcel_Writer_Excel5;
+use PhpOffice\PhpSpreadsheet\Reader\Xls as ReaderXls;
+use PhpOffice\PhpSpreadsheet\Writer\Xls as WriterXls;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
  * Класс теста конвертера Excel 5 для загрузчика прайсов
@@ -21,7 +22,7 @@ class Excel5PriceloaderDataConverterTest extends BaseTest
 
         $reader = $converter->getReader();
 
-        $this->assertInstanceOf(PHPExcel_Reader_Excel5::class, $reader);
+        $this->assertInstanceOf(ReaderXls::class, $reader);
     }
 
 
@@ -31,10 +32,11 @@ class Excel5PriceloaderDataConverterTest extends BaseTest
     public function testGetWriter()
     {
         $converter = new Excel5PriceloaderDataConverter();
+        $workbook = new Spreadsheet();
 
-        $writer = $converter->getWriter();
+        $writer = $converter->getWriter($workbook);
 
-        $this->assertInstanceOf(PHPExcel_Writer_Excel5::class, $writer);
+        $this->assertInstanceOf(WriterXls::class, $writer);
     }
 
 

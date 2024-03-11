@@ -266,7 +266,7 @@ class Sync1CInterface extends AbstractInterface
     public function findEntityById($classname, array $data, $fieldName, array $mapping)
     {
         if ($this->isSpecialField($data, $fieldName, 'map', true)) {
-            if (isset($mapping[$classname][$data[$fieldName]])) {
+            if (isset($data[$fieldName]) && isset($mapping[$classname][$data[$fieldName]])) {
                 $id = $mapping[$classname][$data[$fieldName]];
                 $entity = new $classname($id);
                 if ($entity->id) {
@@ -332,7 +332,7 @@ class Sync1CInterface extends AbstractInterface
                 }
             }
         }
-        if (!$entity->id) {
+        if (!($entity && $entity->id)) {
             $entity = new $classname();
         }
         return $entity;
@@ -393,7 +393,7 @@ class Sync1CInterface extends AbstractInterface
         if ($entity->material_type->global_type) {
             return false;
         }
-        $pagesIds = array_values(array_filter((array)$data['pages_ids']));
+        $pagesIds = array_values(array_filter((array)($data['pages_ids'] ?? [])));
         $deleteOldPages = $this->isSpecialField($data, 'pages_ids', 'update', false);
         $addPagesToExisting = $this->isSpecialField($data, 'pages_ids', 'create', true);
 
@@ -444,8 +444,8 @@ class Sync1CInterface extends AbstractInterface
                     $att = Attachment::createFromFile(
                         $filename,
                         $field,
-                        Package::i()->registryGet('max_size'),
-                        Package::i()->registryGet('tn_size')
+                        Package::i()->registryGet('max_size') ?? 0,
+                        Package::i()->registryGet('tn_size') ?? 0
                     );
 
                     $json = json_encode(
@@ -606,7 +606,7 @@ class Sync1CInterface extends AbstractInterface
     {
         $entity = $this->findEntityById(Material::class, $data, 'id', $mapping);
         if (!$entity) {
-            if (isset($articlesMapping[$data['fields']['article']])) {
+            if (isset($data['fields']['article'], $articlesMapping[$data['fields']['article']])) {
                 $id = $articlesMapping[$data['fields']['article']];
                 $entity = new Material($id);
             }
@@ -625,7 +625,7 @@ class Sync1CInterface extends AbstractInterface
                 }
             }
         }
-        if (!$entity->id) {
+        if (!($entity && $entity->id)) {
             $context['vis'] = 1;
             $entity = new Material($context);
         }
@@ -645,7 +645,7 @@ class Sync1CInterface extends AbstractInterface
     public function processMaterialType(array $data, array &$mapping, Material_Type $defaultParent)
     {
         $entity = $this->findOrCreateMaterialType($data, $mapping, $defaultParent);
-        if ($data['@delete']) {
+        if ($data['@delete'] ?? null) {
             $entityToDelete = $entity;
             Material_Type::delete($entityToDelete);
             $entity->deleted = true;
@@ -676,7 +676,7 @@ class Sync1CInterface extends AbstractInterface
     public function processField(array $data, array &$mapping, Material_Type $defaultParent)
     {
         $entity = $this->findOrCreateField($data, $mapping, $defaultParent);
-        if ($data['@delete']) {
+        if ($data['@delete'] ?? null) {
             $entityToDelete = $entity;
             Material_Field::delete($entityToDelete);
             $entity->deleted = true;
@@ -691,7 +691,7 @@ class Sync1CInterface extends AbstractInterface
         if ($new) {
             $mapping[Material_Field::class][$data['id']] = $entity->id;
         }
-        if ($data['@values']) {
+        if ($data['@values'] ?? null) {
             $mapping['source'][$entity->id] = $data['@values'];
         }
         return $entity;
@@ -712,7 +712,7 @@ class Sync1CInterface extends AbstractInterface
     public function processPage(array $data, array &$mapping, Page $defaultParent, $dir)
     {
         $entity = $this->findOrCreatePage($data, $mapping, $defaultParent);
-        if ($data['@delete']) {
+        if ($data['@delete'] ?? null) {
             $entityToDelete = $entity;
             Page::delete($entityToDelete);
             $entity->deleted = true;
@@ -759,7 +759,7 @@ class Sync1CInterface extends AbstractInterface
         Page $page
     ) {
         $entity = $this->findOrCreateMaterial($data, $articlesMapping, $mapping, $defaultParent);
-        if ($data['@delete']) {
+        if ($data['@delete'] ?? null) {
             $entityToDelete = $entity;
             Material::delete($entityToDelete);
             $entity->deleted = true;

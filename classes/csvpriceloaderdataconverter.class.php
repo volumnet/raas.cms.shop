@@ -12,11 +12,11 @@ use RAAS\CMS\Page;
  */
 class CSVPriceloaderDataConverter extends PriceloaderDataConverter
 {
-    public function import($text)
+    public function import($text): array
     {
         $encoding = mb_detect_encoding($text, 'UTF-8, Windows-1251');
         if ($encoding != 'UTF-8') {
-            $text = iconv($encoding, 'UTF-8', $text);
+            $text = @(iconv($encoding, 'UTF-8', $text) ?? '');
         }
         $csv = new CSV(trim($text));
         $data = $csv->data;
@@ -24,7 +24,7 @@ class CSVPriceloaderDataConverter extends PriceloaderDataConverter
     }
 
 
-    public function export(array $data, Page $page, $rows = 0, $cols = 0, $encoding = 'UTF-8')
+    public function export(array $data, Page $page, $rows = 0, $cols = 0, $encoding = 'UTF-8'): string
     {
         $csv = new CSV($data);
         unset($data);
@@ -37,13 +37,13 @@ class CSVPriceloaderDataConverter extends PriceloaderDataConverter
     }
 
 
-    public function getMime()
+    public function getMime(): string
     {
         return 'text/csv';
     }
 
 
-    public function getExtension()
+    public function getExtension(): string
     {
         return 'csv';
     }

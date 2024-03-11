@@ -197,7 +197,7 @@ class Sync1CInterfaceTest extends BaseDBTest
 
         $result = $interface->findEntityByField($classname, $fieldName, $value, $context);
 
-        $this->assertEquals($expectedId, $result->id);
+        $this->assertEquals($expectedId, $result->id ?? null);
     }
 
 
@@ -367,9 +367,9 @@ class Sync1CInterfaceTest extends BaseDBTest
     {
         $interface = new Sync1CInterface();
 
-        $result = $interface->findEntityById($classname, $data, $fieldName, $mapping, $context);
+        $result = $interface->findEntityById($classname, $data, $fieldName, $mapping);
 
-        $this->assertEquals($expectedId, $result->id);
+        $this->assertEquals($expectedId, $result->id ?? null);
     }
 
 
@@ -1048,11 +1048,11 @@ class Sync1CInterfaceTest extends BaseDBTest
      * Тест обновления кастомных полей для сущности с учетом их настроек
      * по созданию/обновлению - случай, когда сущность не имеет полей
      */
-    public function testUpdateCustomFieldsWithEntityWithNoField(SOME $entity, $new, array $data, array $mapping, $dir, array $expectedTest)
+    public function testUpdateCustomFieldsWithEntityWithNoField()
     {
         $interface = new Sync1CInterface();
 
-        $result = $interface->updateCustomFields($entity, $new, ['price' => 'aaa'], [], $this->getResourcesDir());
+        $result = $interface->updateCustomFields(new Material(12), false, ['price' => 'aaa'], [], $this->getResourcesDir());
 
         $this->assertFalse($result);
     }
@@ -1139,7 +1139,7 @@ class Sync1CInterfaceTest extends BaseDBTest
             $this->assertEquals($val, $result->$key);
         }
         foreach ($mappingTest as $key => $val) {
-            $this->assertEquals($val, $mapping[Material_Type::class][$key]);
+            $this->assertEquals($val, $mapping[Material_Type::class][$key] ?? null);
         }
     }
 
@@ -1227,7 +1227,7 @@ class Sync1CInterfaceTest extends BaseDBTest
             $this->assertEquals($val, $result->$key);
         }
         foreach ($mappingTest as $key => $val) {
-            $this->assertEquals($val, $mapping[Material_Field::class][$key]);
+            $this->assertEquals($val, $mapping[Material_Field::class][$key] ?? null);
         }
     }
 
@@ -1308,7 +1308,7 @@ class Sync1CInterfaceTest extends BaseDBTest
             $this->assertEquals($val, $result->$key);
         }
         foreach ($mappingTest as $key => $val) {
-            $this->assertEquals($val, $mapping[Page::class][$key]);
+            $this->assertEquals($val, $mapping[Page::class][$key] ?? null);
         }
     }
 
@@ -1402,7 +1402,7 @@ class Sync1CInterfaceTest extends BaseDBTest
             $this->assertEquals($val, $result->$key);
         }
         foreach ($mappingTest as $key => $val) {
-            $this->assertEquals($val, $mapping[Material::class][$key]);
+            $this->assertEquals($val, $mapping[Material::class][$key] ?? null);
         }
     }
 
@@ -1899,7 +1899,7 @@ class Sync1CInterfaceTest extends BaseDBTest
         $this->assertEmpty($result->id);
         $this->assertEquals('Orphan page', $result->name);
         $this->assertEquals('orphan-page', $result->urn);
-        $this->assertEmpty($mapping[Page::class]['orphan']);
+        $this->assertEmpty($mapping[Page::class]['orphan'] ?? null);
     }
 
 
@@ -1915,7 +1915,8 @@ class Sync1CInterfaceTest extends BaseDBTest
         $result = $interface->processPage(
             ['id' => 32, '@delete' => true, '@config' => ['map' => ['id' => false]]],
             $mapping,
-            new Material_Type()
+            new Page(),
+            $this->getResourcesDir() . '/'
         );
 
         $this->assertInstanceOf(Page::class, $result);
@@ -2444,8 +2445,8 @@ class Sync1CInterfaceTest extends BaseDBTest
 
         $this->assertEmpty($item->id);
         $this->assertEmpty($attachment->id);
-        $this->assertContains('Start clearing old materials', $log[0]);
-        $this->assertContains('Deleted Material #15 (Товар 6) - 1/1', $log[1]);
+        $this->assertStringContainsString('Start clearing old materials', $log[0] ?? '');
+        $this->assertStringContainsString('Deleted Material #15 (Товар 6) - 1/1', $log[1] ?? '');
     }
 
 
@@ -2470,9 +2471,9 @@ class Sync1CInterfaceTest extends BaseDBTest
 
         $page = new Page(24);
 
-        $this->assertEmpty($page->id);
-        $this->assertContains('Start clearing old pages', $log[0]);
-        $this->assertContains('Deleted Page #24 (Категория 3) - 1/1', $log[1]);
+        $this->assertEmpty($page->id ?? null);
+        $this->assertStringContainsString('Start clearing old pages', $log[0] ?? '');
+        $this->assertStringContainsString('Deleted Page #24 (Категория 3) - 1/1', $log[1] ?? '');
     }
 
 

@@ -10,7 +10,7 @@ use SOME\CSV;
 /**
  * Класс теста конвертера данных для загрузчика прайсов
  */
-class PriceloaderDataConverterTest extends BaseDBTest
+class PriceloaderDataConverterTest extends BaseTest
 {
     /**
      * Тест фабрики конвертеров по расширению файла
@@ -35,7 +35,7 @@ class PriceloaderDataConverterTest extends BaseDBTest
     {
         $converter = PriceloaderDataConverter::spawn('csv');
         $data = $converter->load(__DIR__ . '/../resources/testutf8.csv');
-        $this->assertInternalType('array', $data);
+        $this->assertIsArray($data);
         $this->assertEquals(array_values(array_keys($data)), array_keys($data));
         $this->assertEquals('Категория 1', $data[0][0]);
     }

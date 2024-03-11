@@ -94,7 +94,7 @@ export default {
          * }</code></pre>, либо null если не найден
          */
         selectedReceivingMethod: function () {
-            let result = this.deliveryMethods.filter((method) => {
+            let result = (this.deliveryMethods || []).filter((method) => {
                 return method.id == this.formData.delivery;
             });
             return result[0] || null;
@@ -109,7 +109,7 @@ export default {
          * }</code></pre>, либо null если не найден
          */
         selectedPaymentMethod: function () {
-            let result = this.paymentMethods.filter((method) => {
+            let result = (this.paymentMethods || []).filter((method) => {
                 return method.id == this.formData.payment;
             });
             return result[0] || null;

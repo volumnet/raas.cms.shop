@@ -4,26 +4,26 @@
  */
 namespace RAAS\CMS\Shop;
 
-use PHPExcel_IOFactory;
 use SOME\CSV;
+use SOME\EventProcessor;
 use SOME\SOME;
 use SOME\Text;
-use SOME\EventProcessor;
-use RAAS\Exception;
-use RAAS\Attachment;
 use RAAS\Application;
+use RAAS\Attachment;
+use RAAS\Exception;
 use RAAS\CMS\AbstractInterface;
 use RAAS\CMS\Block;
-use RAAS\CMS\Page;
+use RAAS\CMS\Field;
 use RAAS\CMS\Material;
-use RAAS\CMS\Sub_Main as Package_Sub_Main;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\MaterialTypeRecursiveCache;
 use RAAS\CMS\Package;
-use RAAS\CMS\PageRecursiveCache;
+use RAAS\CMS\Page;
 use RAAS\CMS\Page_Field;
-use RAAS\CMS\Field;
+use RAAS\CMS\PageRecursiveCache;
+use RAAS\CMS\Snippet;
+use RAAS\CMS\Sub_Main as Package_Sub_Main;
 
 /**
  * Класс интерфейса обработчика прайсов
@@ -222,7 +222,7 @@ class PriceloaderInterface extends AbstractInterface
     public function download(Page $page = null, $rows = 0, $cols = 0, $type = 'xls', $encoding = 'UTF-8', $debug = false)
     {
         ini_set('max_execution_time', 900);
-        if (!$page->id) {
+        if (!($page->id ?? null)) {
             $page = $this->loader->Page;
         }
         $converter = PriceloaderDataConverter::spawn($type);
@@ -382,7 +382,7 @@ class PriceloaderInterface extends AbstractInterface
      * @param string $text Значение поля
      * @return Material[] Массив найденных товаров
      */
-    public function getItemsByUniqueField(PriceLoader $loader, $text)
+    public function getItemsByUniqueField(PriceLoader $loader, string $text): array
     {
         if ($ufid = $loader->ufid) {
             // Получим ассоциации
@@ -539,14 +539,13 @@ class PriceloaderInterface extends AbstractInterface
      * @return string|null URN затрагиваемого поля (если изменено),
      *                         либо null, если ничего не затронуто
      */
-    public function applyCustomField(PriceLoader_Column $col, Material $item, $data, $new, $isUnique)
+    public function applyCustomField(PriceLoader_Column $col, Material $item, $data, bool $new, bool $isUnique)
     {
         if (!$col->Field->id) {
             return null;
         }
         $preprocessor = $col->Field->Preprocessor;
         $postprocessor = $col->Field->Postprocessor;
-        $raasField = $col->Field->Field;
         $field = $col->Field->deepClone();
         $field->Owner = $item;
         if (!$field->id) {
@@ -698,7 +697,8 @@ class PriceloaderInterface extends AbstractInterface
     public function parseCategoryRow(PriceLoader $loader, array $row)
     {
         $filteredCells = array_filter($row, 'trim');
-        $step = array_shift(array_keys($filteredCells));
+        $filteredCellsKeys = array_keys($filteredCells);
+        $step = array_shift($filteredCellsKeys);
         $name = $filteredCells[$step];
         if ($loader->catalog_offset) {
             $step = 0;

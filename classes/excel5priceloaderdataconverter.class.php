@@ -4,10 +4,10 @@
  */
 namespace RAAS\CMS\Shop;
 
-use PHPExcel;
-use PHPExcel_IOFactory;
-use PHPExcel_Reader_IReader;
-use PHPExcel_Reader_IWriter;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\IReader;
+use PhpOffice\PhpSpreadsheet\Writer\IWriter;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 
 /**
  * Класс конвертера Excel 5 для загрузчика прайсов
@@ -16,34 +16,34 @@ class Excel5PriceloaderDataConverter extends ExcelPriceloaderDataConverter
 {
     /**
      * Получает reader для Excel 5
-     * @return PHPExcel_Reader_Excel5
+     * @return Spreadsheet_Reader_Excel5
      */
-    public function getReader()
+    public function getReader(): IReader
     {
-        $xlsReader = PHPExcel_IOFactory::createReader('Excel5');
+        $xlsReader = IOFactory::createReader('Xls');
         return $xlsReader;
     }
 
 
     /**
      * Получает writer для Excel 5
-     * @param PHPExcel $workbook Книга Excel
-     * @return PHPExcel_Writer_Excel5
+     * @param Spreadsheet $workbook Книга Excel
+     * @return IWriter
      */
-    public function getWriter(PHPExcel $workbook)
+    public function getWriter(Spreadsheet $workbook): IWriter
     {
-        $xlsWriter = PHPExcel_IOFactory::createWriter($workbook, 'Excel5');
+        $xlsWriter = IOFactory::createWriter($workbook, 'Xls');
         return $xlsWriter;
     }
 
 
-    public function getMime()
+    public function getMime(): string
     {
         return 'application/excel';
     }
 
 
-    public function getExtension()
+    public function getExtension(): string
     {
         return 'xls';
     }

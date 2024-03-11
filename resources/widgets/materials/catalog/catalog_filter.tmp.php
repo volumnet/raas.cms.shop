@@ -129,7 +129,8 @@ foreach ($availableProperties as $propId => $availableProperty) {
                 // }
             }
         }
-        usort($result['properties'][trim($propId)]['values'], function ($a, $b) use ($propId) {
+        // 2024-02-26, AVS: заменил usort на uasort чтобы не терялись значения числовых полей (типа цены)
+        uasort($result['properties'][trim($propId)]['values'], function ($a, $b) use ($propId) {
             $aNum = $bNum = null;
             if (preg_match('/^(\\d|,|\\.)+/umis', $a['doRich'], $regs)) {
                 $aNum = (float)$regs[0];
@@ -146,7 +147,9 @@ foreach ($availableProperties as $propId => $availableProperty) {
             if ($bNum) {
                 return 1;
             }
-            return strnatcasecmp($a, $b);
+            if (is_scalar($a) && is_scalar($b)) {
+                return strnatcasecmp((string)$a, (string)$b);
+            }
         });
     }
 }

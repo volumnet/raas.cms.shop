@@ -42,7 +42,7 @@ class XmlDataConverter
      * @param array $data Данные с предыдущих этапов
      * @return array
      */
-    public function process($data = array())
+    public function process($data = [])
     {
         if ($this->xmlFile) {
             $sxe = $this->loadXML($this->xmlFile, $this->xslFile);
@@ -96,18 +96,18 @@ class XmlDataConverter
      * @param array $data Данные с предыдущих этапов
      * @return array Измененные данные
      */
-    public function parseXML(SimpleXMLElement $importXML, array $data)
+    public function parseXML(SimpleXMLElement $importXML, array $data = [])
     {
         if ($importXML) {
             // $this->registerXMLPrefix($importXML, 'xmlns');
-            foreach (array(
+            foreach ([
                 'pages' => 'Page',
                 'materials' => 'Material',
                 'materialTypes' => 'Material_Type',
                 'fields' => 'Field'
-            ) as $groupTag => $itemTag) {
+            ] as $groupTag => $itemTag) {
                 if (!isset($data[$groupTag])) {
-                    $data[$groupTag] = array();
+                    $data[$groupTag] = [];
                 }
                 $nodes = $importXML->xpath($groupTag . '/' . $itemTag);
                 $data[$groupTag] = $this->parseXMLNodes($nodes, $data[$groupTag]);
@@ -123,7 +123,7 @@ class XmlDataConverter
      * @param array $data Данные для обновления
      * @return array Обновленные данные
      */
-    public function parseXMLNode(SimpleXMLElement $sxe, array $data = array())
+    public function parseXMLNode(SimpleXMLElement $sxe, array $data = [])
     {
         if ($sxe['delete']) {
             $data['@delete'] = true;
@@ -144,9 +144,9 @@ class XmlDataConverter
                 case 'fields':
                     foreach ($childSxe->children() as $fieldSxe) {
                         $fieldKey = null;
-                        if ($fieldURN = trim($fieldSxe['urn'])) {
+                        if ($fieldURN = trim($fieldSxe['urn'] ?? '')) {
                             $fieldKey = $fieldURN;
-                        } elseif ($fieldId = trim($fieldSxe['id'])) {
+                        } elseif ($fieldId = trim($fieldSxe['id'] ?? '')) {
                             $fieldKey = 'id:' . $fieldId;
                         }
 
@@ -160,11 +160,11 @@ class XmlDataConverter
                                 $data['fields'][$fieldKey] = trim($fieldSxe);
                             }
 
-                            foreach (array('create', 'update') as $configKey) {
-                                if ($configVal = trim($fieldSxe[$configKey])) {
+                            foreach (['create', 'update'] as $configKey) {
+                                if ($configVal = trim($fieldSxe[$configKey] ?? '')) {
                                     $data['@config'][$configKey][$fieldKey] = !in_array(
                                         $configVal,
-                                        array('0', 'false', '-1', 'no')
+                                        ['0', 'false', '-1', 'no']
                                     );
                                 }
                             }
@@ -175,11 +175,11 @@ class XmlDataConverter
                     $data[$key] = trim($childSxe);
                     break;
             }
-            foreach (array('create', 'update', 'map') as $configKey) {
-                if ($configVal = trim($childSxe[$configKey])) {
+            foreach (['create', 'update', 'map'] as $configKey) {
+                if ($configVal = trim((string)$childSxe[$configKey])) {
                     $data['@config'][$configKey][$key] = !in_array(
                         $configVal,
-                        array('0', 'false', '-1', 'no')
+                        ['0', 'false', '-1', 'no']
                     );
                 }
             }
@@ -198,12 +198,12 @@ class XmlDataConverter
      *            string[] => mixed
      *        >> Обновленные данные
      */
-    public function parseXMLNodes(array $sxeArr = array(), $data = array())
+    public function parseXMLNodes(array $sxeArr = [], $data = [])
     {
         $newData = $data;
         foreach ($sxeArr as $sxe) {
             $id = trim($sxe->id);
-            $entry = isset($data[$id]) ? $data[$id] : array();
+            $entry = isset($data[$id]) ? $data[$id] : [];
             $arr = $this->parseXMLNode($sxe, $entry);
             $newData[$arr['id']] = $arr;
         }

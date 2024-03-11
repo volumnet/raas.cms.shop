@@ -4,13 +4,13 @@
  */
 namespace RAAS\CMS\Shop;
 
-use PHPExcel;
-use PHPExcel_Cell;
-use PHPExcel_Cell_DataType;
-use PHPExcel_Exception;
-use PHPExcel_Reader_IReader;
-use PHPExcel_Reader_IWriter;
-use PHPExcel_Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\Cell;
+use PhpOffice\PhpSpreadsheet\Cell\Datatype;
+use PhpOffice\PhpSpreadsheet\Exception as PhpSpreadsheetException;
+use PhpOffice\PhpSpreadsheet\Reader\IReader;
+use PhpOffice\PhpSpreadsheet\Writer\IWriter;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use RAAS\Exception;
 use RAAS\CMS\Page;
 
@@ -22,23 +22,23 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
     /**
      * Загружает данные из файла
      * @param string $file Файл для разбора
-     * @return array<array<string>> Таблица данных
+     * @return array Таблица данных <pre><code>array<array<string>></code></pre>
      * @throws Exception Выбрасывает исключение, если файл не удалось прочитать
      */
-    public function load($file)
+    public function load($file): array
     {
         $xlsReader = @$this->getReader();
         try {
             $workbook = @$xlsReader->load($file);
             $data = $this->getDataFromExcelWorkbook($workbook);
             return $data;
-        } catch (PHPExcel_Exception $e) {
+        } catch (PhpSpreadsheetException $e) {
             throw new Exception(Module::i()->view->_('ERR_CANNOT_READ_FILE'));
         }
     }
 
 
-    public function import($text)
+    public function import($text): array
     {
         $tmpFile = tempnam(sys_get_temp_dir(), '');
         file_put_contents($tmpFile, $text);
@@ -48,7 +48,7 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
     }
 
 
-    public function export(array $data, Page $page, $rows = 0, $cols = 0, $encoding = 'UTF-8')
+    public function export(array $data, Page $page, $rows = 0, $cols = 0, $encoding = 'UTF-8'): string
     {
         $tmpFile = tempnam(sys_get_temp_dir(), '');
         $this->save($tmpFile, $data, $page, $rows, $cols, $encoding);
@@ -60,7 +60,7 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
 
     public function save($file, array $data, Page $page, $rows = 0, $cols = 0, $encoding = 'UTF-8')
     {
-        $workbook = new PHPExcel();
+        $workbook = new Spreadsheet();
         $this->putDataToExcelWorkbook($workbook, $data, $page, $rows, $cols);
         $objWriter = $this->getWriter($workbook);
         $objWriter->save($file);
@@ -69,25 +69,25 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
 
     /**
      * Получает reader для заданного типа Excel
-     * @return PHPExcel_Reader_IReader
+     * @return IReader
      */
-    abstract public function getReader();
+    abstract public function getReader(): IReader;
 
 
     /**
      * Получает writer для заданного типа Excel
-     * @param PHPExcel $workbook Книга Excel
-     * @return PHPExcel_Reader_IWriter
+     * @param Spreadsheet $workbook Книга Excel
+     * @return IWriter
      */
-    abstract public function getWriter(PHPExcel $workbook);
+    abstract public function getWriter(Spreadsheet $workbook): IWriter;
 
 
     /**
      * Получает данные из книги Excel
-     * @param PHPExcel $workbook Книга Excel
-     * @return array<array<string>> Таблица данных
+     * @param Spreadsheet $workbook Книга Excel
+     * @return array Таблица данных <pre><code>array<array<string>></code></pre>
      */
-    public function getDataFromExcelWorkbook(PHPExcel $workbook)
+    public function getDataFromExcelWorkbook(Spreadsheet $workbook): array
     {
         // 2020-03-05, AVS: исключили листы кроме первого
         // т.к. в них редко бывает продолжение прайса,
@@ -100,13 +100,13 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
 
     /**
      * Сохраняет данные в книгу Excel
-     * @param PHPExcel $workbook Книга Excel
+     * @param Spreadsheet $workbook Книга Excel
      * @param array<array<mixed>> $data Данные для сохранения
      * @param Page $page Исходная страница для выгрузки (для заголовка)
      * @param int $rows Сколько строк пропускать
      * @param int $cols Сколько столбцов пропускать
      */
-    public function putDataToExcelWorkbook(PHPExcel $workbook, array $data, Page $page, $rows = 0, $cols = 0)
+    public function putDataToExcelWorkbook(Spreadsheet $workbook, array $data, Page $page, $rows = 0, $cols = 0)
     {
         $sheet = $workbook->setActiveSheetIndex(0);
         $this->putDataToExcelSheet($sheet, $data, $page, $rows, $cols);
@@ -115,10 +115,10 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
 
     /**
      * Получает данные из листа Excel
-     * @param PHPExcel_Worksheet $sheet Лист Excel
-     * @return array<array<string>> Таблица данных
+     * @param Worksheet $sheet Лист Excel
+     * @return array Таблица данных <pre><code>array<array<string>></code></pre>
      */
-    public function getDataFromExcelSheet(PHPExcel_Worksheet $sheet)
+    public function getDataFromExcelSheet(Worksheet $sheet): array
     {
         $data = $sheet->toArray();
         $data = array_map(function ($x) {
@@ -130,13 +130,13 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
 
     /**
      * Сохраняет данные на лист Excel
-     * @param PHPExcel_Worksheet $sheet Лист Excel
+     * @param Worksheet $sheet Лист Excel
      * @param array<array<mixed>> $data Данные для сохранения
      * @param Page $page Исходная страница для выгрузки (для заголовка)
      * @param int $rows Сколько строк пропускать
      * @param int $cols Сколько столбцов пропускать
      */
-    public function putDataToExcelSheet(PHPExcel_Worksheet $sheet, array $data, Page $page, $rows = 0, $cols = 0)
+    public function putDataToExcelSheet(Worksheet $sheet, array $data, Page $page, $rows = 0, $cols = 0)
     {
         $sheet->setTitle(mb_substr($page->name, 0, 30));
         $maxcol = 0;
@@ -144,7 +144,7 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
         for ($i = 0; $i < count($data); $i++) {
             $maxcol = max($maxcol, count($data[$i]) - 1);
             $isPage = (count(array_filter($data[$i], function ($x) {
-                return trim($x) === '';
+                return trim($x) !== '';
             })) == 1);
             if ($isPage) {
                 $pageRows[] = $i;
@@ -152,23 +152,21 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
             for ($j = 0; $j < count($data[$i]); $j++) {
                 $val = $data[$i][$j];
                 if (is_float($val) || is_int($val)) {
-                    $type = PHPExcel_Cell_DataType::TYPE_NUMERIC;
+                    $type = DataType::TYPE_NUMERIC;
                 } else {
-                    $type = PHPExcel_Cell_DataType::TYPE_STRING;
+                    $type = DataType::TYPE_STRING;
                 }
-                $cell = $sheet->getCellByColumnAndRow($j, $i + 1);
+                $cell = $sheet->getCellByColumnAndRow($j + 1, $i + 1);
                 $cell->setValueExplicit($val, $type);
             }
         }
         if ($rows) {
-            $range = PHPExcel_Cell::stringFromColumnIndex((int)$cols) . (int)$rows . ':'
-                   . PHPExcel_Cell::stringFromColumnIndex($maxcol) . (int)$rows;
+            $range = [(int)$cols + 1, $rows, $maxcol + 1, $rows];
             $sheet->getStyle($range)->getFont()->setBold(true);
         }
         if ($pageRows) {
             foreach ($pageRows as $i) {
-                $range = PHPExcel_Cell::stringFromColumnIndex(0) . ($i + 1) . ':'
-                       . PHPExcel_Cell::stringFromColumnIndex($maxcol) . ($i + 1);
+                $range = [1, $i + 1, $maxcol + 1, $i + 1];
                 $sheet->getStyle($range)->getFont()->setItalic(true);
             }
         }

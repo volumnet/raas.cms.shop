@@ -1,5 +1,5 @@
 <?php
-namespace \RAAS\CMS\Shop;
+namespace RAAS\CMS\Shop;
 
 class Session_Cart extends Cart
 {

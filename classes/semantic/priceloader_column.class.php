@@ -41,7 +41,7 @@ class PriceLoader_Column extends SOME
     public function _Callback()
     {
         $t = $column = $this;
-        if (trim($this->callback)) {
+        if (trim((string)$this->callback)) {
             $f = $this->callback;
             return function ($x) use ($column, $f) {
                 $data = $val = $x;
@@ -58,7 +58,7 @@ class PriceLoader_Column extends SOME
     public function _CallbackDownload()
     {
         $t = $column = $this;
-        if (trim($this->callback_download)) {
+        if (trim($this->callback_download ?? '')) {
             $f = $this->callback_download;
             return function ($x, $row) use ($f, $column) {
                 $data = $val = $x;

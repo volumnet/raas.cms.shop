@@ -435,7 +435,7 @@ class CatalogFilter
             $this->filter
         );
         // Получим список товаров в данной категории (без учета фильтра)
-        $this->categoryGoodsIds = (array)$this->propsMapping['pages_ids'][$catalog->id];
+        $this->categoryGoodsIds = (array)($this->propsMapping['pages_ids'][$catalog->id] ?? []);
 
         // Отфильтруем $this->propsMapping, оставив только те товары, которые есть
         // в данной категории ($this->categoryGoodsIds), попутно уберем из него
@@ -771,7 +771,7 @@ class CatalogFilter
         $filteredMapping = $propsMapping;
         unset($filteredMapping['pages_ids']);
         if ($catalogId) {
-            $catalogGoodsIds = (array)$propsMapping['pages_ids'][$catalogId];
+            $catalogGoodsIds = (array)($propsMapping['pages_ids'][$catalogId] ?? []);
             // $catalogGoodsIdsFlipped = array_flip($catalogGoodsIds);
             foreach ($filteredMapping as $propVar => $propValues) {
                 $filteredMapping[$propVar] = array_map(
@@ -967,7 +967,7 @@ class CatalogFilter
         $additionalValue = null,
         $exclusive = false
     ) {
-        if (!$this->catalog->id) {
+        if (!($this->catalog->id ?? null)) {
             throw new Exception('Catalog is not set');
         }
         $params = $this->getURLParamsFromFilter($filter);
@@ -999,8 +999,8 @@ class CatalogFilter
         if (!count($params)) {
             return $this->catalog->url;
         }
-        $urlArray = parse_url($_SERVER['REQUEST_URI']);
-        parse_str($urlArray['query'], $urlArray);
+        $urlArray = parse_url($_SERVER['REQUEST_URI'] ?? '');
+        parse_str(($urlArray['query'] ?? ''), $urlArray);
         unset($urlArray['page']);
         unset($urlArray['id']);
         $urlArray = array_filter(array_merge($urlArray, $params), function ($x) {
@@ -1060,8 +1060,8 @@ class CatalogFilter
     ) {
         $filteredPropsMapping = [];
         foreach ($propsMapping as $propId => $propValues) {
-            $prop = $this->properties ? $this->properties[$propId] : new Material_Field($propId);
-            $crossFilterGoodsIds = $crossFilterMapping[$propId] ?: $crossFilterMapping[''];
+            $prop = $this->properties ? ($this->properties[$propId] ?? null) : new Material_Field($propId);
+            $crossFilterGoodsIds = ($crossFilterMapping[$propId] ?? null) ?: ($crossFilterMapping[''] ?? null);
             $filterPropValuesFlipped = [];
             if (isset($filter[$propId]) && !isset($numericFieldsIds[$propId])) {
                 $filterPropValuesFlipped = array_flip(array_map('trim', (array)$filter[$propId]));
@@ -1072,7 +1072,7 @@ class CatalogFilter
                     'enabled' => (bool)array_intersect_key($goodsIds, $crossFilterGoodsIds)
                 ];
                 if (!isset($numericFieldsIds[$propId])) {
-                    if (($prop->datatype == 'checkbox') && !$prop->multiple && ($propValue === '')) {
+                    if ($prop && ($prop->datatype == 'checkbox') && !$prop->multiple && ($propValue === '')) {
                         $propValue = 0;
                     }
                     $valueData['value'] = $propValue;
@@ -1152,7 +1152,7 @@ class CatalogFilter
                 $regroupFunction = (bool)$currentSort[2];
             } else {
                 $currentSort = trim($currentSort);
-                if ($currentSort[0] == '!') {
+                if (($currentSort[0] ?? '') == '!') {
                     $sortProp = mb_substr($currentSort, 1);
                     $order = -1;
                 } else {
@@ -1160,7 +1160,7 @@ class CatalogFilter
                     $order = 1;
                 }
             }
-            $referencedPropMapping = (array)$this->propsMapping[$sortProp];
+            $referencedPropMapping = (array)($this->propsMapping[$sortProp] ?? []);
             $referencedPropMapping = array_map(
                 function ($x) use ($goodsIds) {
                     $y = array_intersect_key($goodsIds, $x);
@@ -1179,7 +1179,7 @@ class CatalogFilter
                 []
             );
             $restGoodsIds = array_diff_key($goodsIds, $refGoodsIds);
-            $referencedPropMapping[''] = (array)$referencedPropMapping[''] + $restGoodsIds;
+            $referencedPropMapping[''] = (array)($referencedPropMapping[''] ?? []) + $restGoodsIds;
             if ($order == -1) {
                 krsort($referencedPropMapping, SORT_NATURAL);
                 // $referencedPropMapping = array_reverse($referencedPropMapping, true);
@@ -1239,7 +1239,7 @@ class CatalogFilter
         if ($this->useAvailabilityOrder) {
             $availabilityProp = $this->propertiesByURNs[$this->useAvailabilityOrder];
         }
-        if ($availabilityPropId = (int)$availabilityProp->id) {
+        if ($availabilityPropId = (int)($availabilityProp->id ?? 0)) {
             $ids = $this->multisort([
                 'priority',
                 ('!' . $availabilityPropId),
@@ -1268,6 +1268,7 @@ class CatalogFilter
         if (!$ids) {
             return [];
         }
+        $i = 0;
         if ($pages) {
             do {
                 $pageIds = array_slice(
@@ -1467,7 +1468,7 @@ class CatalogFilter
         if (is_file($filename)) {
             unlink($filename);
         }
-        rename($tmpFilename, $filename);
+        @rename($tmpFilename, $filename);
         if (!is_file($filename)) {
             throw new Exception('Cannot save filter cache data');
         }

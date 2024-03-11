@@ -17,7 +17,7 @@ abstract class PriceloaderDataConverter
      * @param 'csv'|'xls'|'xlsx' $type Расширение файла
      * @return static
      */
-    public static function spawn($type)
+    public static function spawn($type): self
     {
         switch ($type) {
             case 'xls':
@@ -36,9 +36,9 @@ abstract class PriceloaderDataConverter
     /**
      * Загружает данные из файла
      * @param string $file Файл для разбора
-     * @return array<array<string>> Таблица данных
+     * @return array Таблица данных <pre><code>array<array<string>></code></pre>
      */
-    public function load($file)
+    public function load($file): array
     {
         $text = file_get_contents($file);
         $data = $this->import($text);
@@ -49,14 +49,14 @@ abstract class PriceloaderDataConverter
     /**
      * Загружает данные из строки
      * @param string $text Строка с данными
-     * @return array<array<string>> Таблица данных
+     * @return array Таблица данных <pre><code>array<array<string>></code></pre>
      */
-    abstract public function import($text);
+    abstract public function import($text): array;
 
 
     /**
      * Сохраняет данные в строку
-     * @param array<array<string>> $data Таблица данных
+     * @param array $data Таблица данных <pre><code>array<array<string>></code></pre>
      * @param Page $page Страница, из которой выгружаем
      * @param int $rows Сколько строк пропускать
      * @param int $cols Сколько столбцов пропускать
@@ -64,7 +64,7 @@ abstract class PriceloaderDataConverter
      *                         (в настоящее время затрагивает только CSV, в остальных - для совместимости)
      * @return string $text Строка с данными
      */
-    abstract public function export(array $data, Page $page, $rows = 0, $cols = 0, $encoding = 'UTF-8');
+    abstract public function export(array $data, Page $page, $rows = 0, $cols = 0, $encoding = 'UTF-8'): string;
 
 
     /**
@@ -88,12 +88,12 @@ abstract class PriceloaderDataConverter
      * Получает MIME-тип для заданного формата
      * @return string
      */
-    abstract public function getMime();
+    abstract public function getMime(): string;
 
 
     /**
      * Получает расширение файла для заданного формата
      * @return string
      */
-    abstract public function getExtension();
+    abstract public function getExtension(): string;
 }

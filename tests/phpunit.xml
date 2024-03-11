@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<phpunit colors="true" bootstrap="./bootstrap.php">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" colors="true" bootstrap="./bootstrap.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage>
+    <include>
+      <directory suffix=".php">../classes</directory>
+    </include>
+    <report>
+      <html outputDirectory="coverage"/>
+    </report>
+  </coverage>
   <testsuites>
     <testsuite name="BatchDeleteTrait">
       <file>src/BatchDeleteTraitTest.php</file>
@@ -9,19 +16,19 @@
       <file>src/BatchFindTraitTest.php</file>
     </testsuite>
     <testsuite name="CSVPriceloaderDataConverter">
-      <file>src/CSVPriceloaderDataConverterTest.php</file> 
+      <file>src/CSVPriceloaderDataConverterTest.php</file>
     </testsuite>
     <testsuite name="Excel2007PriceloaderDataConverter">
-      <file>src/Excel2007PriceloaderDataConverterTest.php</file> 
+      <file>src/Excel2007PriceloaderDataConverterTest.php</file>
     </testsuite>
     <testsuite name="Excel5PriceloaderDataConverter">
-      <file>src/Excel5PriceloaderDataConverterTest.php</file> 
+      <file>src/Excel5PriceloaderDataConverterTest.php</file>
     </testsuite>
     <testsuite name="ExcelPriceloaderDataConverter">
-      <file>src/ExcelPriceloaderDataConverterTest.php</file> 
+      <file>src/ExcelPriceloaderDataConverterTest.php</file>
     </testsuite>
     <testsuite name="PriceloaderDataConverter">
-      <file>src/PriceloaderDataConverterTest.php</file> 
+      <file>src/PriceloaderDataConverterTest.php</file>
     </testsuite>
     <testsuite name="XmlDataConverter">
       <file>src/XmlDataConverterTest.php</file>
@@ -39,12 +46,5 @@
       <file>src/interfaces/PriceloaderInterfaceTest.php</file>
     </testsuite>
   </testsuites>
-  <filter>
-    <whitelist>
-      <directory suffix=".php">../classes</directory>
-    </whitelist>
-  </filter>
-  <logging>
-    <log type="coverage-html" target="coverage" />
-  </logging>
+  <logging/>
 </phpunit>
