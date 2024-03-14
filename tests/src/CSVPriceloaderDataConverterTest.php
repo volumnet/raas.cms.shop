@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Page;
+use SOME\BaseTest;
 use SOME\CSV;
 
 /**
@@ -12,6 +13,10 @@ use SOME\CSV;
  */
 class CSVPriceloaderDataConverterTest extends BaseTest
 {
+    public static $tables = [
+        'cms_pages',
+    ];
+
     /**
      * Тест загрузки данных из строки
      */

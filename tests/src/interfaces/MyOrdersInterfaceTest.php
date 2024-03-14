@@ -4,6 +4,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use SOME\BaseTest;
 use RAAS\Controller_Frontend;
 use RAAS\CMS\Block_PHP;
 use RAAS\CMS\Page;
@@ -12,7 +13,7 @@ use RAAS\CMS\User;
 /**
  * Класс теста интерфейса сервиса "Мои заказы"
  */
-class MyOrdersInterfaceTest extends BaseDBTest
+class MyOrdersInterfaceTest extends BaseTest
 {
     /**
      * Тест получения пользователя

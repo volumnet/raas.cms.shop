@@ -5,7 +5,9 @@
 namespace RAAS\CMS\Shop;
 
 use SimpleXMLElement;
+use SOME\BaseTest;
 use SOME\SOME;
+use RAAS\Application;
 use RAAS\Attachment;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Material;
@@ -16,14 +18,84 @@ use RAAS\CMS\Field;
 /**
  * Класс теста интерфейса синхронизации с 1С
  */
-class Sync1CInterfaceTest extends BaseDBTest
+class Sync1CInterfaceTest extends BaseTest
 {
+    public static $tables = [
+        'attachments',
+        'cms_access',
+        'cms_access_blocks_cache',
+        'cms_access_materials_cache',
+        'cms_access_pages_cache',
+        'cms_blocks',
+        'cms_blocks_form',
+        'cms_blocks_html',
+        'cms_blocks_material',
+        'cms_blocks_material_filter',
+        'cms_blocks_material_sort',
+        'cms_blocks_menu',
+        'cms_blocks_pages_assoc',
+        'cms_blocks_search_material_types_assoc',
+        'cms_blocks_search_pages_assoc',
+        'cms_data',
+        'cms_fields',
+        'cms_fields_form_vis',
+        'cms_material_types',
+        'cms_material_types_affected_pages_for_materials_cache',
+        'cms_material_types_affected_pages_for_self_cache',
+        'cms_materials',
+        'cms_materials_affected_pages_cache',
+        'cms_materials_pages_assoc',
+        'cms_menus',
+        'cms_pages',
+        'cms_shop_blocks_yml_pages_assoc',
+        'cms_users',
+        'cms_users_blocks_login',
+        'registry',
+        'cms_shop_priceloaders_columns',
+        'cms_shop_priceloaders'
+    ];
+
+
+    /**
+     * Последний ID# типов материалов по базе на момент установки
+     * @var int
+     */
+    public static $materialTypesLastId = 0;
+
+    /**
+     * Последний ID# материалов по базе на момент установки
+     * @var int
+     */
+    public static $materialsLastId = 0;
+
+    /**
+     * Последний ID# полей по базе на момент установки
+     * @var int
+     */
+    public static $fieldsLastId = 0;
+
+
+    public static function installTables()
+    {
+        parent::installTables();
+
+        if (!static::$materialTypesLastId && !static::$materialsLastId && !static::$fieldsLastId) {
+            $sqlQuery = "SELECT AUTO_INCREMENT FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?";
+            $dbname = Application::i()->dbname;
+
+            static::$materialTypesLastId = (int)Application::i()->SQL->getvalue([$sqlQuery, [$dbname, 'cms_material_types']]);
+            static::$materialsLastId = (int)Application::i()->SQL->getvalue([$sqlQuery, [$dbname, 'cms_materials']]);
+            static::$fieldsLastId = (int)Application::i()->SQL->getvalue([$sqlQuery, [$dbname, 'cms_fields']]);
+        }
+    }
+
     /**
      * Перестройка перед тестом
      */
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
+
         Page::_SQL()->update(Page::_tablename(), "id = 3", [
             'cache' => 1,
             'inherit_cache' => 1,
@@ -161,6 +233,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function findEntityByFieldDataProvider()
     {
+        static::installTables();
         return [
             [Material_Type::class, 'name', 'Особые товары', [], 5],
             [Material_Type::class, 'name', 'Особые товары', ['pid' => 4], 5],
@@ -321,6 +394,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function findEntityByIdDataProvider()
     {
+        static::installTables();
         return [
             [
                 Material_Type::class,
@@ -393,6 +467,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function findOrCreateEntityDataProvider()
     {
+        static::installTables();
         return [
             [
                 Material_Type::class,
@@ -541,6 +616,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function updateEntityDataProvider()
     {
+        static::installTables();
         return [
             [
                 new Material(10),
@@ -697,6 +773,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function updatePagesDataProvider()
     {
+        static::installTables();
         return [
             [
                 new Material(10),
@@ -806,6 +883,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function updateCustomFieldDataProvider()
     {
+        static::installTables();
         $material = new Material(10);
         $dir = $this->getResourcesDir() . '';
         return [
@@ -905,6 +983,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function updateCustomFieldsDataProvider()
     {
+        static::installTables();
         $dir = $this->getResourcesDir() . '';
         return [
             [
@@ -1072,6 +1151,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function findOrCreateMaterialTypeDataProvider()
     {
+        static::installTables();
         $materialType = new Material_Type(3);
         return [
             [
@@ -1158,6 +1238,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function findOrCreateFieldDataProvider()
     {
+        static::installTables();
         $materialType = new Material_Type(3);
         return [
             [
@@ -1246,6 +1327,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function findOrCreatePageDataProvider()
     {
+        static::installTables();
         $page = new Page(1);
         return [
             [
@@ -1328,6 +1410,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function findOrCreateMaterialDataProvider()
     {
+        static::installTables();
         $materialType = new Material_Type(5);
         $articlesMapping = ['f4dbdf21' => 10, '83dcefb7' => 11];
         return [
@@ -1421,6 +1504,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function processMaterialTypeDataProvider()
     {
+        static::installTables();
         $materialType = new Material_Type();
         return [
             [
@@ -1488,8 +1572,10 @@ class Sync1CInterfaceTest extends BaseDBTest
                 ],
                 [Material_Type::class => ['sdklfjweiorjoisdmnfl' => 3, 'asdsdiofusf' => 1]],
                 $materialType,
-                ['id' => 6, 'pid' => 0, 'name' => 'Name1', 'urn' => 'name1', 'new' => true],
-                ['bbb' => 6],
+                // 2024-03-13, AVS: поменял на динамическую переменную, т.к. в базе добавились два типа материалов
+                // ("Вопрос-ответ к товарам" и "Отзывы к товарам")
+                ['id' => static::$materialTypesLastId, 'pid' => 0, 'name' => 'Name1', 'urn' => 'name1', 'new' => true],
+                ['bbb' => static::$materialTypesLastId],
             ],
         ];
     }
@@ -1568,6 +1654,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function processFieldDataProvider()
     {
+        static::installTables();
         $materialType = new Material_Type();
         return [
             [
@@ -1641,8 +1728,9 @@ class Sync1CInterfaceTest extends BaseDBTest
                 ],
                 [Material_Type::class => ['sdklfjweiorjoisdmnfl' => 3, 'asdsdiofusf' => 1]],
                 $materialType,
-                ['id' => 49, 'pid' => 0, 'name' => 'Name1', 'urn' => 'name1', 'new' => true],
-                ['bbb' => 49],
+                // 2024-03-13, AVS: поменял на динамическую переменную, т.к. количество полей увеличилось
+                ['id' => static::$fieldsLastId, 'pid' => 0, 'name' => 'Name1', 'urn' => 'name1', 'new' => true],
+                ['bbb' => static::$fieldsLastId],
             ],
         ];
     }
@@ -1750,6 +1838,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function processPageDataProvider()
     {
+        static::installTables();
         $page = new Page(1);
         $dir = $this->getResourcesDir() . '/';
         return [
@@ -1944,6 +2033,7 @@ class Sync1CInterfaceTest extends BaseDBTest
      */
     public function processMaterialDataProvider()
     {
+        static::installTables();
         $materialType = new Material_Type(4);
         $articlesMapping = ['6dd28e9b' => 13, 'f3b61b38' => 14];
         $dir = $this->getResourcesDir() . '/';
@@ -2048,8 +2138,9 @@ class Sync1CInterfaceTest extends BaseDBTest
                 $materialType,
                 $dir,
                 $page,
+                // 2024-03-13, AVS: поменял на динамическую переменную, т.к. количество материалов увеличилось
                 [
-                    'id' => 20,
+                    'id' => static::$materialsLastId,
                     'pid' => 5,
                     'vis' => 1,
                     'name' => 'Новый товар',
@@ -2081,8 +2172,9 @@ class Sync1CInterfaceTest extends BaseDBTest
                 $materialType,
                 $dir,
                 $page,
+                // 2024-03-13, AVS: поменял на динамическую переменную, т.к. количество материалов увеличилось
                 [
-                    'id' => 21,
+                    'id' => static::$materialsLastId + 1,
                     'pid' => 5,
                     'vis' => 0,
                     'name' => 'Новый товар 2',
@@ -2333,14 +2425,7 @@ class Sync1CInterfaceTest extends BaseDBTest
         $log = [];
         $materialType = new Material_Type(4);
         $page = new Page(15);
-        $interface = $this->getMockBuilder(Sync1CInterface::class)
-            ->setMethods([
-                'processMaterialType',
-                'processField',
-                'processPage',
-                'processMaterial',
-                'saveMapping'
-            ])->getMock();
+        $interface = $this->getMockBuilder(Sync1CInterface::class)->onlyMethods(['saveMapping'])->getMock();
 
         $interface->expects($this->exactly(4))->method('saveMapping');
 
@@ -2392,14 +2477,7 @@ class Sync1CInterfaceTest extends BaseDBTest
         $log = [];
         $materialType = new Material_Type(4);
         $page = new Page(15);
-        $interface = $this->getMockBuilder(Sync1CInterface::class)
-            ->setMethods([
-                'processMaterialType',
-                'processField',
-                'processPage',
-                'processMaterial',
-                'saveMapping'
-            ])->getMock();
+        $interface = $this->getMockBuilder(Sync1CInterface::class)->onlyMethods(['saveMapping'])->getMock();
 
         $interface->expects($this->never())->method('saveMapping');
 

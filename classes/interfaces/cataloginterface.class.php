@@ -4,10 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
-use Twig\Environment;
-use Twig\Loader\ArrayLoader;
 use SOME\Pages;
 use SOME\SOME;
+use SOME\Text;
 use RAAS\Attachment;
 use RAAS\CMS\Block;
 use RAAS\CMS\Block_Form;
@@ -171,8 +170,7 @@ class CatalogInterface extends MaterialInterface
                     if (!isset($metaTemplates[$key])) {
                         $metaTemplates[$key] = $this->getMetaTemplate($page, $key . '_' . $blockParams['metaTemplates']);
                     }
-                    $twig = new Environment(new ArrayLoader(['description' => $metaTemplates[$key]]));
-                    $page->$key = $twig->render('description', $metaData);
+                    $page->$key = Text::renderTemplate($metaTemplates[$key], $metaData);
                 }
             }
         }
@@ -208,8 +206,7 @@ class CatalogInterface extends MaterialInterface
             }
             foreach ($metaTemplates as $key => $val) {
                 if (!$page->$key && $val) {
-                    $twig = new Environment(new ArrayLoader(['description' => $metaTemplates[$key]]));
-                    $page->$key = $twig->render('description', $metaData);
+                    $page->$key = Text::renderTemplate($metaTemplates[$key], $metaData);
                 }
             }
         }

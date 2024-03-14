@@ -4,14 +4,19 @@
  */
 namespace RAAS\CMS\Shop;
 
-use RAAS\CMS\Page;
+use SOME\BaseTest;
 use SOME\CSV;
+use RAAS\CMS\Page;
 
 /**
  * Класс теста конвертера данных для загрузчика прайсов
  */
 class PriceloaderDataConverterTest extends BaseTest
 {
+    public static $tables = [
+        'cms_pages',
+    ];
+
     /**
      * Тест фабрики конвертеров по расширению файла
      */

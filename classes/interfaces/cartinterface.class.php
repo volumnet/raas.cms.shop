@@ -4,8 +4,6 @@
  */
 namespace RAAS\CMS\Shop;
 
-use Mustache_Engine;
-use Pelago\Emogrifier\CssInliner;
 use SOME\HTTP;
 use SOME\Text;
 use RAAS\Application;
@@ -176,7 +174,7 @@ class CartInterface extends FormInterface
                     if ($this->isFormProceed(
                         $this->block,
                         $form,
-                        $this->server['REQUEST_METHOD'],
+                        $this->server['REQUEST_METHOD'] ?? '',
                         $this->post
                     )) {
                         // 2019-10-02, AVS: добавили для совместимости с виджетом, где даже
@@ -202,19 +200,19 @@ class CartInterface extends FormInterface
                                 $this->server,
                                 $this->files
                             ));
-                            if ($this->post['epay'] != 1) {
+                            if (($this->post['epay'] ?? null) != 1) {
                                 $cart->clear();
                                 $result['success'][(int)$this->block->id] = true;
                             }
                             // 2022-07-12, AVS: сделал проверку, чтобы по AJAX'у не редиректил
                             if (!(
-                                $this->post['AJAX'] ||
+                                ($this->post['AJAX'] ?? null) ||
                                 ($this->page->mime == 'application/json')
                             )) {
                                 new Redirector(
                                     '?action=success&id=' . (int)$result['Item']->id .
                                     '&crc=' . Application::i()->md5It($result['Item']->id) .
-                                    ($this->post['epay'] ? ('&epay=' . $this->post['epay']) : '')
+                                    (($this->post['epay'] ?? null) ? ('&epay=' . $this->post['epay']) : '')
                                 );
                             }
                         }
@@ -248,10 +246,10 @@ class CartInterface extends FormInterface
         if ((isset($this->get['back']) && $this->get['back']) ||
             (
                 in_array($action, ['set', 'add', 'reduce', 'delete', 'clear']) &&
-                !$this->get['AJAX'] // 2020-12-25, AVS: добавлено, чтобы не редиректило в AJAX'е
+                !($this->get['AJAX'] ?? false) // 2020-12-25, AVS: добавлено, чтобы не редиректило в AJAX'е
             )
         ) {
-            if ($this->get['back']) {
+            if ($this->get['back'] ?? false) {
                 $url = 'history:back';
             } else {
                 $url = HTTP::queryString('action=&id=&meta=&amount=&clear=') ?: '?';
@@ -368,17 +366,15 @@ class CartInterface extends FormInterface
         // Для AJAX'а
         $this->processFeedbackReferer($order, $page, $server);
         $user = RAASControllerFrontend::i()->user;
-        if (!$user->id && $this->block->additionalParams['bindUserBy']) {
-            $user = $this->findUser($post, (array)$this->block->additionalParams['bindUserBy']);
-            if (!$user->id && $this->block->additionalParams['createUserBlockId']) {
-                $registerBlock = Block::spawn($this->block->additionalParams['createUserBlockId']);
-                $user = $this->createUser(
-                    $registerBlock,
-                    $page,
-                    $post,
-                    $server,
-                    $files
-                );
+        $additionalParams = [];
+        if ($this->block && $this->block->additionalParams) {
+            $additionalParams = (array)$this->block->additionalParams;
+        }
+        if (!$user->id && ($additionalParams['bindUserBy'] ?? null)) {
+            $user = $this->findUser($post, (array)($additionalParams['bindUserBy'] ?? null));
+            if (!$user->id && ($additionalParams['createUserBlockId'] ?? null)) {
+                $registerBlock = Block::spawn($additionalParams['createUserBlockId'] ?? null);
+                $user = $this->createUser($registerBlock, $page, $post, $server, $files);
             }
         }
         $order->uid = ($user instanceof User) ? (int)$user->id : 0;
@@ -395,7 +391,7 @@ class CartInterface extends FormInterface
 
         $additional = $this->getAdditionals($cart, $post, $user);
         $additionalItems = [];
-        if ($additional['items']) {
+        if ($additional['items'] ?? null) {
             $additionalItems = (array)$additional['items'];
         }
         $this->processOrderItems($order, $cart, $additionalItems);
@@ -662,14 +658,10 @@ class CartInterface extends FormInterface
         $attachments = $this->getAttachments($order, $material, $forAdmin);
 
         $processEmbedded = $this->processEmbedded($message);
-        $message = $processEmbedded['message'];
+        $message = Text::inlineCSS($processEmbedded['message']);
         $embedded = (array)$processEmbedded['embedded'];
 
-        if (class_exists('Pelago\Emogrifier\CssInliner')) {
-            $message = CssInliner::fromHtml($message)->inlineCss()->render();
-        }
-
-        if ($emails = $addresses['emails']) {
+        if ($emails = ($addresses['emails'] ?? null)) {
             if ($debug) {
                 $debugMessages['emails'] = [
                     'emails' => $emails,
@@ -694,7 +686,7 @@ class CartInterface extends FormInterface
             }
         }
 
-        if ($smsEmails = $addresses['smsEmails']) {
+        if ($smsEmails = ($addresses['smsEmails'] ?? null)) {
             if ($debug) {
                 $debugMessages['smsEmails'] = [
                     'emails' => $smsEmails,
@@ -715,15 +707,14 @@ class CartInterface extends FormInterface
             }
         }
 
-        if (Application::i()->prod && ($smsPhones = $addresses['smsPhones'])) {
+        if ($smsPhones = ($addresses['smsPhones'] ?? null)) {
             $urlTemplate = Package::i()->registryGet('sms_gate');
-            $m = new Mustache_Engine();
             foreach ($smsPhones as $phone) {
-                $url = $m->render($urlTemplate, [
+                $url = Text::renderTemplate($urlTemplate, [
                     'PHONE' => urlencode($phone),
                     'TEXT' => urlencode($smsMessage)
                 ]);
-                if ($debug) {
+                if ($debug || !Application::i()->prod) {
                     $debugMessages['smsPhones'][] = $url;
                 } else {
                     $result = file_get_contents($url);
@@ -746,7 +737,7 @@ class CartInterface extends FormInterface
      */
     public function getEmailOrderSubject(Order $order, $forAdmin = false)
     {
-        $host = $this->server['HTTP_HOST'];
+        $host = $this->getCurrentHostName();
         if (function_exists('idn_to_utf8')) {
             $host = idn_to_utf8($host);
         }

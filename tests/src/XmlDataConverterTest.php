@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use SimpleXMLElement;
+use SOME\BaseTest;
 
 /**
  * Класс теста конвертера данных XML

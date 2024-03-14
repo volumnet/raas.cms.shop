@@ -334,11 +334,23 @@ class CatalogFilter
             (array)$this->propsMapping['pages_ids'],
             $parents
         );
-        $this->selfCounter = array_map('count', $this->propsMapping['pages_ids']);
-        $this->counter = array_map('count', $bubbledUpPagesMapping);
+        $selfCounter = array_map('count', $this->propsMapping['pages_ids']);
+        $counter = array_map('count', $bubbledUpPagesMapping);
+        // 2024-03-13, AVS: Добавим счетчики для незадействованных страниц
+        foreach ($parents as $pageId => $pagePid) {
+            if (!isset($selfCounter[$pageId])) {
+                $selfCounter[$pageId] = 0;
+            }
+            if (!isset($counter[$pageId])) {
+                $counter[$pageId] = 0;
+            }
+        }
         if ($this->withChildrenGoods) {
             $this->propsMapping['pages_ids'] = $bubbledUpPagesMapping;
         }
+        $this->selfCounter = $selfCounter;
+        $this->counter = $counter;
+
         $this->richValues = $this->getRichValues(
             $this->propsMapping,
             $this->properties

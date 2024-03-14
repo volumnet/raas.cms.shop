@@ -9,29 +9,19 @@
     </report>
   </coverage>
   <testsuites>
+    <testsuite name="nodb">
+      <file>src/CSVPriceloaderDataConverterTest.php</file>
+      <file>src/Excel2007PriceloaderDataConverterTest.php</file>
+      <file>src/Excel5PriceloaderDataConverterTest.php</file>
+      <file>src/ExcelPriceloaderDataConverterTest.php</file>
+      <file>src/PriceloaderDataConverterTest.php</file>
+      <file>src/XmlDataConverterTest.php</file>
+    </testsuite>
     <testsuite name="BatchDeleteTrait">
       <file>src/BatchDeleteTraitTest.php</file>
     </testsuite>
     <testsuite name="BatchFindTrait">
       <file>src/BatchFindTraitTest.php</file>
-    </testsuite>
-    <testsuite name="CSVPriceloaderDataConverter">
-      <file>src/CSVPriceloaderDataConverterTest.php</file>
-    </testsuite>
-    <testsuite name="Excel2007PriceloaderDataConverter">
-      <file>src/Excel2007PriceloaderDataConverterTest.php</file>
-    </testsuite>
-    <testsuite name="Excel5PriceloaderDataConverter">
-      <file>src/Excel5PriceloaderDataConverterTest.php</file>
-    </testsuite>
-    <testsuite name="ExcelPriceloaderDataConverter">
-      <file>src/ExcelPriceloaderDataConverterTest.php</file>
-    </testsuite>
-    <testsuite name="PriceloaderDataConverter">
-      <file>src/PriceloaderDataConverterTest.php</file>
-    </testsuite>
-    <testsuite name="XmlDataConverter">
-      <file>src/XmlDataConverterTest.php</file>
     </testsuite>
     <testsuite name="InheritPageTrait">
       <file>src/InheritPageTraitTest.php</file>
@@ -41,6 +31,9 @@
     </testsuite>
     <testsuite name="Sync1CInterface">
       <file>src/interfaces/Sync1CInterfaceTest.php</file>
+    </testsuite>
+    <testsuite name="CartInterface">
+      <file>src/interfaces/CartInterfaceTest.php</file>
     </testsuite>
     <testsuite name="PriceloaderInterface">
       <file>src/interfaces/PriceloaderInterfaceTest.php</file>

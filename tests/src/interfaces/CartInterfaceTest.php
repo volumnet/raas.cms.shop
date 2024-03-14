@@ -4,7 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use SOME\BaseTest;
 use RAAS\Application;
+use RAAS\Controller_Frontend as ControllerFrontend;
 use RAAS\CMS\Form;
 use RAAS\CMS\Material;
 use RAAS\CMS\Package;
@@ -14,8 +16,35 @@ use RAAS\CMS\Snippet;
 /**
  * Класс теста стандартного интерфейса корзины
  */
-class CartInterfaceTest extends BaseDBTest
+class CartInterfaceTest extends BaseTest
 {
+    public static $tables = [
+        'cms_access',
+        'cms_access_materials_cache',
+        'cms_blocks',
+        'cms_blocks_material',
+        'cms_blocks_pages_assoc',
+        'cms_data',
+        'cms_fields',
+        'cms_forms',
+        'cms_material_types',
+        'cms_material_types_affected_pages_for_materials_cache',
+        'cms_material_types_affected_pages_for_self_cache',
+        'cms_materials',
+        'cms_materials_affected_pages_cache',
+        'cms_materials_pages_assoc',
+        'cms_pages',
+        'cms_shop_blocks_cart',
+        'cms_shop_cart_types',
+        'cms_shop_cart_types_material_types_assoc',
+        'cms_shop_orders',
+        'cms_shop_orders_goods',
+        'cms_shop_orders_history',
+        'cms_snippets',
+        'cms_users',
+        'registry',
+    ];
+
     /**
      * Проверка конвертации мета-данных для сохранения в заказ
      */
@@ -92,8 +121,8 @@ class CartInterfaceTest extends BaseDBTest
 
         $result = $interface->getEmailOrderSubject($order, true);
 
-        $this->assertContains(date('d.m.Y H:i'), $result);
-        $this->assertContains('Новый заказ корзины «Корзина» на странице «Корзина»', $result);
+        $this->assertStringContainsString(date('d.m.Y H:i'), $result);
+        $this->assertStringContainsString('Новый заказ корзины «Корзина» на странице «Корзина»', $result);
     }
 
 
@@ -116,8 +145,8 @@ class CartInterfaceTest extends BaseDBTest
 
         $result = $interface->getEmailOrderSubject($order, false);
 
-        $this->assertContains(date('d.m.Y H:i'), $result);
-        $this->assertContains('Новый заказ #1 на сайте ДОМЕН.РФ', $result);
+        $this->assertStringContainsString(date('d.m.Y H:i'), $result);
+        $this->assertStringContainsString('Новый заказ #1 на сайте ДОМЕН.РФ', $result);
     }
 
 
@@ -130,6 +159,7 @@ class CartInterfaceTest extends BaseDBTest
         $form = new Form(3);
         $form->email = 'test@test.org, [79990000000@sms.test.org], [+79990000000]';
         $form->commit();
+        $page = new Page(25);
         $order = new Order([
             'id' => 1,
             'uid' => 1,
@@ -172,56 +202,43 @@ class CartInterfaceTest extends BaseDBTest
         $order->fields['agree']->addValue('1');
         $material = new Material(7);
 
-
         $interface = new CartInterface();
         Package::i()->registrySet(
             'sms_gate',
             'http://smsgate/{{PHONE}}/{{TEXT}}/'
         );
-        Controller_Frontend::i()->exportLang(Application::i(), $page->lang);
-        Controller_Frontend::i()->exportLang(Package::i(), $page->lang);
-        Controller_Frontend::i()->exportLang(Module::i(), $page->lang);
+        ControllerFrontend::i()->exportLang(Application::i(), $page->lang);
+        ControllerFrontend::i()->exportLang(Package::i(), $page->lang);
+        ControllerFrontend::i()->exportLang(Module::i(), $page->lang);
 
         $result = $interface->notifyOrder($order, $material, true, true);
 
         $this->assertEquals(['test@test.org'], $result['emails']['emails']);
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Новый заказ корзины «Корзина» на странице «Корзина»',
             $result['emails']['subject']
         );
-        $this->assertContains('<div>', $result['emails']['message']);
-        $this->assertContains(
-            'Телефон: +7 999 000-00-00',
-            $result['emails']['message']
-        );
-        $this->assertContains('/admin/', $result['emails']['message']);
-        $this->assertContains('<table', $result['emails']['message']);
-        $this->assertContains('edit_material', $result['emails']['message']);
-        $this->assertContains('Администрация сайта', $result['emails']['from']);
-        $this->assertContains('info@', $result['emails']['fromEmail']);
+        $this->assertStringContainsString('<div>', $result['emails']['message']);
+        $this->assertStringContainsString('Телефон: +7 999 000-00-00', $result['emails']['message']);
+        $this->assertStringContainsString('/admin/', $result['emails']['message']);
+        $this->assertStringContainsString('<table', $result['emails']['message']);
+        $this->assertStringContainsString('edit_material', $result['emails']['message']);
+        $this->assertStringContainsString('Администрация сайта', $result['emails']['from']);
+        $this->assertStringContainsString('info@', $result['emails']['fromEmail']);
         $this->assertEquals(
             ['79990000000@sms.test.org'],
             $result['smsEmails']['emails']
         );
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Новый заказ корзины «Корзина» на странице «Корзина»',
             $result['smsEmails']['subject']
         );
-        $this->assertNotContains('<div>', $result['smsEmails']['message']);
-        $this->assertContains(
-            'Администрация сайта',
-            $result['smsEmails']['from']
-        );
-        $this->assertContains('info@', $result['smsEmails']['fromEmail']);
-        $this->assertContains(
-            'Телефон: +7 999 000-00-00',
-            $result['smsEmails']['message']
-        );
-        $this->assertContains(
-            'smsgate/%2B79990000000/',
-            $result['smsPhones'][0]
-        );
-        $this->assertContains(
+        $this->assertStringNotContainsString('<div>', $result['smsEmails']['message']);
+        $this->assertStringContainsString('Администрация сайта', $result['smsEmails']['from']);
+        $this->assertStringContainsString('info@', $result['smsEmails']['fromEmail']);
+        $this->assertStringContainsString('Телефон: +7 999 000-00-00', $result['smsEmails']['message']);
+        $this->assertStringContainsString('smsgate/%2B79990000000/', $result['smsPhones'][0]);
+        $this->assertStringContainsString(
             urlencode('Телефон: +7 999 000-00-00'),
             $result['smsPhones'][0]
         );
@@ -239,6 +256,7 @@ class CartInterfaceTest extends BaseDBTest
      */
     public function testNotifyOrderWithForUser()
     {
+        $page = new Page(25);
         $order = new Order([
             'id' => 1,
             'uid' => 1,
@@ -281,44 +299,29 @@ class CartInterfaceTest extends BaseDBTest
         $order->fields['agree']->addValue('1');
         $material = new Material(7);
 
-
-        $interface = new CartInterface(
-            null,
-            null,
-            [],
-            [],
-            [],
-            [],
-            ['HTTP_HOST' => 'xn--d1acufc.xn--p1ai']
-        );
-        Package::i()->registrySet(
-            'sms_gate',
-            'http://smsgate/{{PHONE}}/{{TEXT}}/'
-        );
-        Controller_Frontend::i()->exportLang(Application::i(), $page->lang);
-        Controller_Frontend::i()->exportLang(Package::i(), $page->lang);
-        Controller_Frontend::i()->exportLang(Module::i(), $page->lang);
+        $interface = new CartInterface(null, null, [], [], [], [], ['HTTP_HOST' => 'xn--d1acufc.xn--p1ai']);
+        Package::i()->registrySet('sms_gate', 'http://smsgate/{{PHONE}}/{{TEXT}}/');
+        ControllerFrontend::i()->exportLang(Application::i(), $page->lang);
+        ControllerFrontend::i()->exportLang(Package::i(), $page->lang);
+        ControllerFrontend::i()->exportLang(Module::i(), $page->lang);
 
         $result = $interface->notifyOrder($order, $material, false, true);
 
         $this->assertEquals(['user@test.org'], $result['emails']['emails']);
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Новый заказ #1 на сайте ДОМЕН.РФ',
             $result['emails']['subject']
         );
-        $this->assertContains('<div>', $result['emails']['message']);
-        $this->assertContains(
-            'Телефон: +7 999 000-00-00',
-            $result['emails']['message']
-        );
-        $this->assertNotContains('/admin/', $result['emails']['message']);
-        $this->assertContains('/catalog/', $result['emails']['message']);
-        $this->assertContains('<table', $result['emails']['message']);
-        $this->assertNotContains('edit_material', $result['emails']['message']);
-        $this->assertContains('Администрация сайта', $result['emails']['from']);
-        $this->assertContains('info@', $result['emails']['fromEmail']);
-        $this->assertEmpty($result['smsEmails']);
-        $this->assertEmpty($result['smsPhones']); // Пока по SMS ничего не отправляем пользователю
+        $this->assertStringContainsString('<div>', $result['emails']['message']);
+        $this->assertStringContainsString('Телефон: +7 999 000-00-00', $result['emails']['message']);
+        $this->assertStringNotContainsString('/admin/', $result['emails']['message']);
+        $this->assertStringContainsString('/catalog/', $result['emails']['message']);
+        $this->assertStringContainsString('<table', $result['emails']['message']);
+        $this->assertStringNotContainsString('edit_material', $result['emails']['message']);
+        $this->assertStringContainsString('Администрация сайта', $result['emails']['from']);
+        $this->assertStringContainsString('info@', $result['emails']['fromEmail']);
+        $this->assertEmpty($result['smsEmails'] ?? null);
+        $this->assertEmpty($result['smsPhones'] ?? null); // Пока по SMS ничего не отправляем пользователю
 
         Package::i()->registrySet('sms_gate', '');
         Order::delete($order);
@@ -410,7 +413,7 @@ class CartInterfaceTest extends BaseDBTest
 
         $result = $interface->processOrderForm($cart, $page, $post);
 
-        $this->assertEmpty($result['Material']);
+        $this->assertEmpty($result['Material'] ?? null);
         $this->assertInstanceOf(Order::class, $result['Item']);
         $this->assertEquals(1, $result['Item']->pid);
         $this->assertEquals('Test User', $result['Item']->full_name);
@@ -458,7 +461,7 @@ class CartInterfaceTest extends BaseDBTest
 
         $result = $interface->processOrderForm($cart, $page, $post);
 
-        $this->assertEmpty($result['Item']);
+        $this->assertEmpty($result['Item'] ?? null);
         $this->assertInstanceOf(Material::class, $result['Material']);
         $this->assertEquals(7, $result['Material']->pid);
 
@@ -595,7 +598,7 @@ class CartInterfaceTest extends BaseDBTest
         $cartData = json_decode($_COOKIE['cart_1'], true);
 
         $this->assertEquals(1, $cartData[10]['']);
-        $this->assertEmpty($cartData[11]);
+        $this->assertEmpty($cartData[11] ?? null);
     }
 
 
@@ -662,7 +665,8 @@ class CartInterfaceTest extends BaseDBTest
                     '11_aaa' => 20,
                     '12_' => 30
                 ],
-                'form_signature' => md5('form338')
+                'form_signature' => md5('form338'),
+                'AJAX' => 1, // Для предотвращения редиректа
             ]
         );
 
@@ -675,7 +679,7 @@ class CartInterfaceTest extends BaseDBTest
         // Комментируем ошибки из-за setcookie после вывода текста
         $result = @$interface->process(true);
 
-        $this->assertEmpty($result['Material']);
+        $this->assertEmpty($result['Material'] ?? null);
         $this->assertInstanceOf(Order::class, $result['Item']);
         $this->assertEquals(1, $result['Item']->pid);
         $this->assertEquals('Test User', $result['Item']->full_name);
@@ -734,8 +738,8 @@ class CartInterfaceTest extends BaseDBTest
         // Комментируем ошибки из-за setcookie после вывода текста
         $result = @$interface->process(true);
 
-        $this->assertEmpty($result['Material']);
-        $this->assertEmpty($result['Item']);
+        $this->assertEmpty($result['Material'] ?? null);
+        $this->assertEmpty($result['Item'] ?? null);
         $this->assertEquals(['full_name' => 'Test User'], $result['DATA']);
         $this->assertEquals([], $result['localError']);
         $this->assertEquals(3, $result['Form']->id);

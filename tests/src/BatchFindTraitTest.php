@@ -4,13 +4,22 @@
  */
 namespace RAAS\CMS\Shop;
 
+use SOME\BaseTest;
 use RAAS\CMS\Page;
 
 /**
  * Класс теста массового поиска сущностей
  */
-class BatchFindTraitTest extends BaseDBTest
+class BatchFindTraitTest extends BaseTest
 {
+    public static $tables = [
+        'cms_pages',
+        'cms_materials',
+        'cms_data',
+        'cms_fields',
+        'cms_materials_pages_assoc',
+    ];
+
     /**
      * Провайдер данных для функции testGetMaterialsIdsByTypeAndPage
      * @return array<array<

@@ -4,8 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
-use RAAS\CMS\Page;
+use SOME\BaseTest;
 use RAAS\Attachment;
+use RAAS\CMS\Page;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Material_Field;
@@ -14,8 +15,18 @@ use RAAS\CMS\Field;
 /**
  * Класс теста массового удаления сущностей
  */
-class BatchDeleteTraitTest extends BaseDBTest
+class BatchDeleteTraitTest extends BaseTest
 {
+    public static $tables = [
+        'cms_pages',
+        'cms_materials',
+        'attachments',
+        'cms_data',
+        'cms_fields',
+        'cms_material_types',
+        'cms_materials_pages_assoc',
+    ];
+
     /**
      * Тест удаления страниц по ID#
      */

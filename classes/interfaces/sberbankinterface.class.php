@@ -4,9 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use Exception;
 use SOME\Text;
 use RAAS\Application;
-use RAAS\Exception;
 use RAAS\Redirector;
 use RAAS\CMS\Material;
 use RAAS\CMS\Page;
@@ -78,6 +78,9 @@ class SberbankInterface extends EPayInterface
                         );
                     }
                 }
+                if (!($order && $order->id)) {
+                    throw new Exception('Не указаны данные заказа для проверки');
+                }
                 switch ($addURN) {
                     case 'result':
                         $out = $this->result($order, $this->block, $this->page);
@@ -132,7 +135,7 @@ class SberbankInterface extends EPayInterface
         if ($order->id) {
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    Application::i()->baseDir . '/logs/sberbank.log',
                     date('Y-m-d H:i:s ') . 'result: ' .
                     $order->id . ' / ' .
                     $order->payment_id . "\n\n",
@@ -198,7 +201,7 @@ class SberbankInterface extends EPayInterface
             } else {
                 $logMessage .= "order " . $get['orderId'] . " not found\n\n";
             }
-            file_put_contents('sberbank.log', $logMessage, FILE_APPEND);
+            file_put_contents(Application::i()->baseDir . '/logs/sberbank.log', $logMessage, FILE_APPEND);
             if ($order->id) {
                 $this->getOrderIsPaid($order, $block, $page);
             }
@@ -238,7 +241,7 @@ class SberbankInterface extends EPayInterface
         if ($localError) {
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    Application::i()->baseDir . '/logs/sberbank.log',
                     date('Y-m-d H:i:s ') . 'init: ' .
                     var_export($localError, true) . "\n\n",
                     FILE_APPEND
@@ -264,7 +267,7 @@ class SberbankInterface extends EPayInterface
             $history->commit();
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    Application::i()->baseDir . '/logs/sberbank.log',
                     date('Y-m-d H:i:s ') . 'init: ' . (int)$order->id . ' / ' .
                     $response['orderId'] . "\n\n",
                     FILE_APPEND
@@ -294,7 +297,14 @@ class SberbankInterface extends EPayInterface
     {
         $url = $this->getURL($isTest)
              . $method . '.do?' . http_build_query($requestData);
-        $result = file_get_contents($url);
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        $result = curl_exec($ch);
         $json = json_decode($result, true);
         return $json;
     }
@@ -485,7 +495,7 @@ class SberbankInterface extends EPayInterface
         $response = $this->exec('register', $requestData, $block->epay_test);
         if ($block->epay_test) {
             file_put_contents(
-                'sberbank.log',
+                Application::i()->baseDir . '/logs/sberbank.log',
                 date('Y-m-d H:i:s ') . 'registerOrder: ' .
                 var_export($requestData, true) . "\n" .
                 var_export($response, true) . "\n\n",
@@ -520,14 +530,14 @@ class SberbankInterface extends EPayInterface
      * @return bool Статус оплаты заказа
      * @throws Exception Ошибка при выполнении
      */
-    public function getOrderIsPaid(Order $order, Block_Cart $block, Page $page)
+    public function getOrderIsPaid(Order $order, Block_Cart $block, Page $page): bool
     {
         $requestData = array(
             'userName' => $block->epay_login,
             'password' => $block->epay_pass1,
             'orderId' => $order->payment_id,
         );
-        $json = $this->exec('getOrderStatus', $requestData, $block->epay_test);
+        $json = $this->exec('getOrderStatusExtended', $requestData, $block->epay_test);
 
         if (!$json) {
             $errorText = 'Не удалось получить результат запроса состояния заказа';
@@ -535,14 +545,14 @@ class SberbankInterface extends EPayInterface
         } elseif ($json['errorCode']) {
             $errorText = 'В процессе оплаты заказа'
                        . (
-                            $json['OrderNumber'] ?
-                            ' #' . (int)$json['OrderNumber'] :
+                            $json['orderNumber'] ?
+                            ' #' . (int)$json['orderNumber'] :
                             ''
                         )
                        . ' возникла ошибка: (' . $json['errorCode'] . ') '
                        . $json['errorMessage'];
-            if ($json['OrderNumber']) {
-                $order = new Order((int)$json['OrderNumber']);
+            if ($json['orderNumber']) {
+                $order = new Order((int)$json['orderNumber']);
                 $history = new Order_History([
                     'uid' => (int)Application::i()->user->id,
                     'order_id' => (int)$order->id,
@@ -555,7 +565,7 @@ class SberbankInterface extends EPayInterface
             }
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    Application::i()->baseDir . '/logs/sberbank.log',
                     date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
                     var_export($requestData, true) . "\n" .
                     var_export($json, true) . "\n" .
@@ -564,10 +574,10 @@ class SberbankInterface extends EPayInterface
                 );
             }
             throw new Exception($errorText);
-        } elseif (!$json['OrderNumber'] || !$json['OrderStatus']) {
+        } elseif (!$json['orderNumber'] || !$json['orderStatus']) {
             if ($block->epay_test) {
                 file_put_contents(
-                    'sberbank.log',
+                    Application::i()->baseDir . '/logs/sberbank.log',
                     date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
                     var_export($requestData, true) . "\n" .
                     var_export($json, true) . "\n" .
@@ -580,14 +590,15 @@ class SberbankInterface extends EPayInterface
 
         if ($block->epay_test) {
             file_put_contents(
-                'sberbank.log',
+                Application::i()->baseDir . '/logs/sberbank.log',
                 date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
-                var_export($requestData, true) . "\n\n",
+                var_export($requestData, true) . "\n" .
+                var_export($json, true) . "\n\n",
                 FILE_APPEND
             );
         }
 
-        return $this->isSuccessfulStatus($json['OrderStatus']);
+        return $this->isSuccessfulStatus($json['orderStatus']);
     }
 
 

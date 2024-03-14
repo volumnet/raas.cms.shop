@@ -628,8 +628,8 @@ class PriceloaderInterface extends AbstractInterface
             if (!is_string($val) || !$val) {
                 continue;
             }
-            $tempname = sys_get_temp_dir() . '/' . $basename;
             $basename = basename($val);
+            $tempname = sys_get_temp_dir() . '/' . $basename;
             if (stristr($val, '://')) {
                 $text = file_get_contents($val);
                 if (!$text) {

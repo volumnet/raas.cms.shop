@@ -4,10 +4,11 @@
  */
 namespace RAAS\CMS\Shop;
 
+use SOME\BaseTest;
 use SOME\Pages;
 use SOME\Singleton;
+use RAAS\Application;
 use RAAS\Exception;
-use RAAS\Timer;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Material_Type;
@@ -17,11 +18,27 @@ use RAAS\CMS\Page;
 /**
  * Класс теста фильтра каталога
  */
-class CatalogFilterTest extends BaseDBTest
+class CatalogFilterTest extends BaseTest
 {
+    public static $tables = [
+        'cms_data',
+        'cms_dictionaries',
+        'cms_fields',
+        'cms_material_types',
+        'cms_materials',
+        'cms_materials_pages_assoc',
+        'cms_pages',
+    ];
+
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
+
+        // 2024-03-13, AVS: почистим приоритет у товаров (он в базе установлен), чтобы нормально выполнялась сортировка
+        // в testGetIds и testGetIdsWithReverse
+        $sqlQuery = "UPDATE cms_materials SET priority = 0 WHERE pid = 4";
+        Application::i()->SQL->query($sqlQuery);
+
         $material = new Material(10);
         $material->fields['testfield']->deleteValues();
         $material->fields['testfield']->addValue('value1');
@@ -703,6 +720,9 @@ class CatalogFilterTest extends BaseDBTest
 
         $result = $filter->getSortMapping($propsMapping, $goodsIds);
 
+        // 2024-03-13, AVS: добавил недостающие товары без значения свойства (согласно 2022-12-08, чтобы не было
+        // дополнительной фильтрации при сортировке. По идее такого быть не должно, т.к. все товары должны обладать
+        // свойствами)
         $this->assertEquals([
             '0' => [
                 '10' => 10,
@@ -713,7 +733,10 @@ class CatalogFilterTest extends BaseDBTest
                 '3' => 3,
                 '9' => 9,
                 '12' => 12,
-                '11' => 11
+                '11' => 11,
+                '1' => 1,
+                '5' => 5,
+                '7' => 7,
             ],
             '' => [
                 '1' => 1,
@@ -916,27 +939,32 @@ class CatalogFilterTest extends BaseDBTest
             ],
             $filter->propsMapping['31'][1]
         );
+        // 2024-03-13, AVS: добавил richValues для материалов (оно есть по именам)
         $this->assertEquals([
             '47' => [
                 'value1' => 'Запись 1',
             ],
+            '35' => [
+                '18' => 'Товар 9',
+                '19' => 'Товар 10',
+                '10' => 'Товар 1',
+                '11' => 'Товар 2',
+                '16' => 'Товар 7',
+                '15' => 'Товар 6',
+                '12' => 'Товар 3',
+                '17' => 'Товар 8',
+                '13' => 'Товар 4',
+                '14' => 'Товар 5',
+            ]
         ], $filter->richValues);
         $this->assertEquals(
             ['26' => 26, '32' => 32, '34' => 34],
             $filter->numericFieldsIds
         );
-        $this->assertEquals([
-          5609,
-          25712,
-          30450,
-          49651,
-          54096,
-          61245,
-          67175,
-          71013,
-          83620,
-          85812,
-        ], array_keys($filter->propsMapping[26]));
+        $this->assertEquals(
+            [5609, 25712, 30450, 49651, 54096, 61245, 67175, 71013, 83620, 85812],
+            array_keys($filter->propsMapping[26])
+        );
         $this->assertEquals(10, $filter->counter[16]);
         $this->assertEquals(10, $filter->counter[24]);
         $this->assertEquals(0, $filter->selfCounter[16]);
@@ -1401,9 +1429,22 @@ class CatalogFilterTest extends BaseDBTest
             ],
             $result['propsMapping']['31'][1]
         );
+        // 2024-03-13, AVS: добавил richValues для материалов (оно есть по именам)
         $this->assertEquals([
             '47' => [
                 'value1' => 'Запись 1',
+            ],
+            '35' => [
+                '18' => 'Товар 9',
+                '19' => 'Товар 10',
+                '10' => 'Товар 1',
+                '11' => 'Товар 2',
+                '16' => 'Товар 7',
+                '15' => 'Товар 6',
+                '12' => 'Товар 3',
+                '17' => 'Товар 8',
+                '13' => 'Товар 4',
+                '14' => 'Товар 5',
             ],
         ], $result['richValues']);
         $this->assertEquals(

@@ -4,10 +4,8 @@
  */
 namespace RAAS\CMS\Shop;
 
-use Twig\Environment;
-use Twig\Loader\ArrayLoader;
 use SOME\SOME;
-use Pelago\Emogrifier\CssInliner;
+use SOME\Text;
 use RAAS\Application;
 use RAAS\User as RAASUser;
 use RAAS\CMS\Controller_Frontend;
@@ -121,7 +119,7 @@ class Order extends Feedback
     public function commit()
     {
         if ((($this->updates['status_id'] ?? null) !== null) &&
-            ($this->properties['status_id'] != $this->updates['status_id']) &&
+            (($this->properties['status_id'] ?? null) != ($this->updates['status_id'] ?? null)) &&
             $this->status->do_notify
         ) {
             $this->notifyStatus();
@@ -254,20 +252,16 @@ class Order extends Feedback
         if ($emails) {
             $subjectTemplate = $this->status->notification_title;
             $subjectTemplate = strtr($subjectTemplate, ['&#39;' => "'"]);
-            $twig = new Environment(new ArrayLoader(['subject' => $subjectTemplate]));
-            $subject = $twig->render('subject', $dataArr);
+            $subject = Text::renderTemplate($subjectTemplate, $dataArr);
 
             $messageTemplate = $this->status->notification;
             $messageTemplate = strtr($messageTemplate, ['&#39;' => "'"]);
-            $twig = new Environment(new ArrayLoader(['message' => $subjectTemplate]));
-            $message = $twig->render('message', $dataArr);
+            $message = Text::renderTemplate($messageTemplate, $dataArr);
 
             $formInterface = new FormInterface();
             $processEmbedded = $formInterface->processEmbedded($message);
-            $message = $processEmbedded['message'];
+            $message = Text::inlineCSS($processEmbedded['message']);
             $embedded = (array)$processEmbedded['embedded'];
-
-            $message = CssInliner::fromHtml($message)->inlineCss()->render();
 
             Application::i()->sendmail(
                 $emails,

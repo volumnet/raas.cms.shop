@@ -7,6 +7,7 @@ namespace RAAS\CMS\Shop;
 use PhpOffice\PhpSpreadsheet\Reader\Xls as ReaderXls;
 use PhpOffice\PhpSpreadsheet\Writer\Xls as WriterXls;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use SOME\BaseTest;
 
 /**
  * Класс теста конвертера Excel 5 для загрузчика прайсов

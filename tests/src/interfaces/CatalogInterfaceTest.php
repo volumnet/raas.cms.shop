@@ -4,6 +4,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use SOME\BaseTest;
 use RAAS\CMS\Block;
 use RAAS\CMS\Form;
 use RAAS\CMS\Material;
@@ -13,7 +14,7 @@ use RAAS\CMS\Page;
 /**
  * Класс теста интерфейса каталога
  */
-class CatalogInterfaceTest extends BaseDBTest
+class CatalogInterfaceTest extends BaseTest
 {
     /**
      * Очистка после выполнения теста

@@ -6,6 +6,7 @@ namespace RAAS\CMS\Shop;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use SOME\BaseTest;
 use RAAS\Exception;
 use RAAS\CMS\Page;
 
@@ -14,6 +15,10 @@ use RAAS\CMS\Page;
  */
 class ExcelPriceloaderDataConverterTest extends BaseTest
 {
+    public static $tables = [
+        'cms_pages',
+    ];
+
     /**
      * Тест загрузки данных из файла
      */

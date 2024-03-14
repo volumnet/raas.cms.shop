@@ -7,15 +7,15 @@ namespace RAAS\CMS\Shop;
 use DOMDocument;
 use SimpleXMLElement;
 use XSLTProcessor;
+use SOME\Namespaces;
+use SOME\SOME;
 use RAAS\Application;
 use RAAS\Attachment;
 use RAAS\Exception;
-use SOME\SOME;
-use SOME\Namespaces;
 use RAAS\CMS\AbstractInterface;
+use RAAS\CMS\Field;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Field;
-use RAAS\CMS\Field;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
@@ -325,7 +325,9 @@ class Sync1CInterface extends AbstractInterface
                     }
                 }
             }
-            $entity = $this->findEntityByField($classname, $searchField, $data[$searchField], $context);
+            if (isset($data[$searchField])) {
+                $entity = $this->findEntityByField($classname, $searchField, $data[$searchField], $context);
+            }
             if ($entity) {
                 if ($this->isSpecialField($data, $idN, 'map', true)) {
                     $mapping[$classname][$data[$idN]] = (int)$entity->$idN;
@@ -783,7 +785,9 @@ class Sync1CInterface extends AbstractInterface
     /**
      * Обрабатывает полученные данные
      * @param array $data Данные по всем сущностям
-     * @param array<string[] Артикул => int ID# товара> $articlesMapping маппинг по артикулам
+     * @param array $articlesMapping <pre><code>array<
+     *     string[] Артикул => int ID# товара
+     * ></code></pre> маппинг по артикулам
      * @param string $dir Путь к папке с файлами для медиа-полей
      * @param callable(string Текст для вывода) $logger Логгер
      * @param string|null $mappingFile Файл маппинга
@@ -795,11 +799,11 @@ class Sync1CInterface extends AbstractInterface
         Material_Type $materialType,
         array $data,
         array $articlesMapping,
-        $dir,
+        string $dir,
         callable $logger = null,
-        $mappingFile = null,
-        $saveMappingAfterIterations = 100
-    ) {
+        string $mappingFile = null,
+        int $saveMappingAfterIterations = 100
+    ): array {
         $mapping = $this->loadMapping($mappingFile);
         $affected = [];
         foreach ([

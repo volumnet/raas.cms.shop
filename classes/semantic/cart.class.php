@@ -230,7 +230,7 @@ class Cart
     protected function load()
     {
         $var = 'cart_' . (int)$this->cartType->id;
-        $items1 = @(array)json_decode($_COOKIE[$var], true);
+        $items1 = @(array)json_decode($_COOKIE[$var] ?? '{}', true);
         if ($this->_user && (int)$this->_user->id) {
             $items2 = [];
             $sqlQuery = "SELECT *

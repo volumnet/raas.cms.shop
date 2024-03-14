@@ -4,6 +4,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use SOME\BaseTest;
 use SOME\CSV;
 use RAAS\Attachment;
 use RAAS\Exception;
@@ -13,8 +14,38 @@ use RAAS\CMS\Page;
 /**
  * Класс теста интерфейса загрузчика прайсов
  */
-class PriceloaderInterfaceTest extends BaseDBTest
+class PriceloaderInterfaceTest extends BaseTest
 {
+    public static $tables = [
+        'cms_shop_priceloaders',
+        'cms_shop_priceloaders_columns',
+        'cms_fields',
+        'cms_data',
+        'cms_materials',
+        'cms_material_types',
+        'cms_pages',
+        'cms_materials_pages_assoc',
+        'cms_material_types_affected_pages_for_materials_cache',
+        'cms_materials_affected_pages_cache',
+        'cms_material_types_affected_pages_for_self_cache',
+        'cms_blocks_pages_assoc',
+        'cms_blocks',
+        'cms_blocks_material',
+        'cms_access',
+        'cms_access_materials_cache',
+        'attachments',
+        'cms_blocks_search_pages_assoc',
+        'cms_shop_blocks_yml_pages_assoc',
+        'cms_blocks_html',
+        'cms_blocks_form',
+        'cms_blocks_menu',
+        'cms_blocks_material_filter',
+        'cms_blocks_material_sort',
+        'cms_menus',
+        'cms_access_pages_cache',
+        'cms_users',
+    ];
+
     /**
      * Получает интерфейс загрузчика прайсов
      * @return PriceLoader
@@ -590,13 +621,15 @@ class PriceloaderInterfaceTest extends BaseDBTest
 
 
     /**
-     * Тест применения произвольного поля (без учета callback-преобразований) - случай с непустым файловым полем
+     * Тест применения произвольного поля (без учета callback-преобразований) - случай с непустым файловым полем и удалением старых файлов
      */
-    public function testApplyCustomFieldWithFileField()
+    public function testApplyCustomFieldWithFileFieldAndReplaceMode()
     {
         $interface = $this->getInterface();
         $material = new Material(16);
         $col = new PriceLoader_Column(['pid' => 1, 'fid' => 29]);
+        $col->Parent->media_action = PriceLoader::MEDIA_FIELDS_REPLACE;
+        $col->Parent->commit(); // Сохраним значение замены, иначе старые файлы не удалятся, а новые не сохранятся
         $att1 = new Attachment(49);
         $att2 = new Attachment(50);
 
