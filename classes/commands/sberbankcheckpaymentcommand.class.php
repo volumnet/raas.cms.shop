@@ -31,7 +31,6 @@ class SberbankCheckPaymentCommand extends Command
         $sqlBind = [(int)$expiration];
         $sqlResult = Order::getSQLSet([$sqlQuery, $sqlBind]);
 
-
         foreach ($sqlResult as $order) {
             // Найдем блок корзины
             $sqlQuery = "SELECT id FROM " . Block_Cart::_tablename2() . " WHERE epay_interface_id = ? AND cart_type = ?";
