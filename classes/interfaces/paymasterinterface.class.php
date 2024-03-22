@@ -415,6 +415,14 @@ class PayMasterInterface extends EPayInterface
         if ($currency == 'RUR') {
             $currency = 'RUB';
         }
+        $ip = '0.0.0.0';
+        if (isset($this->server['HTTP_X_FORWARDED_FOR']) && $this->server['HTTP_X_FORWARDED_FOR']) {
+            $forwardedFor = explode(',', (string)$this->server['HTTP_X_FORWARDED_FOR']);
+            $forwardedFor = array_map('trim', $forwardedFor);
+            $ip = $forwardedFor[0];
+        } elseif (isset($this->server['REMOTE_ADDR'])) {
+            $ip = $this->server['REMOTE_ADDR'];
+        }
         $requestData = [
             'invoice' => [
                 'description' => $this->getOrderDescription($order),
@@ -429,7 +437,7 @@ class PayMasterInterface extends EPayInterface
                 'callbackUrl' => $this->getCurrentHostURL() . $page->url . $page->additionalURL . 'result/?orderid=' . (int)$order->id,
             ],
             'customer' => [
-                'ip' => $this->server['REMOTE_ADDR'],
+                'ip' => $ip,
             ],
             'receipt' => [
                 'client' => [],

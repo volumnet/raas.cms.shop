@@ -97,11 +97,19 @@ class GoodsCommentsInterface extends MaterialInterface
         if (!$vote) {
             return [];
         }
+        $ip = '0.0.0.0';
+        if (isset($this->server['HTTP_X_FORWARDED_FOR']) && $this->server['HTTP_X_FORWARDED_FOR']) {
+            $forwardedFor = explode(',', (string)$this->server['HTTP_X_FORWARDED_FOR']);
+            $forwardedFor = array_map('trim', $forwardedFor);
+            $ip = $forwardedFor[0];
+        } elseif (isset($this->server['REMOTE_ADDR'])) {
+            $ip = $this->server['REMOTE_ADDR'];
+        }
         $sqlQuery = "SELECT IFNULL(vote, 0)
                        FROM cms_materials_votes
                       WHERE material_id = ?
                         AND ip = ?";
-        $sqlBind = [(int)$comment->id, $this->server['REMOTE_ADDR']];
+        $sqlBind = [(int)$comment->id, $ip];
         $oldVote = (int)Material::_SQL()->getValue([$sqlQuery, $sqlBind]);
         // var_dump($oldVote, $_POST['vote']); exit;
 
@@ -158,7 +166,7 @@ class GoodsCommentsInterface extends MaterialInterface
                         AND tM.id IN (" . implode(", ", $ids) . ")
                    GROUP BY id";
         $sqlBind = [
-            'ip' => $this->server['REMOTE_ADDR'],
+            'ip' => $ip,
         ];
         $sqlResult = Material::_SQL()->get([$sqlQuery, $sqlBind]);
         // echo $sqlQuery; var_dump($sqlBind); exit;
