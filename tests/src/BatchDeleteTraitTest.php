@@ -14,6 +14,7 @@ use RAAS\CMS\Field;
 
 /**
  * Класс теста массового удаления сущностей
+ * @covers RAAS\CMS\Shop\BatchDeleteTrait
  */
 class BatchDeleteTraitTest extends BaseTest
 {

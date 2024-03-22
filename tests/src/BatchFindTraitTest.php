@@ -9,6 +9,7 @@ use RAAS\CMS\Page;
 
 /**
  * Класс теста массового поиска сущностей
+ * @covers RAAS\CMS\Shop\BatchFindTrait
  */
 class BatchFindTraitTest extends BaseTest
 {

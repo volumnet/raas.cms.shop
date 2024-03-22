@@ -9,6 +9,7 @@ use RAAS\CMS\Page;
 
 /**
  * Класс теста трейта наследования полей страницы
+ * @covers RAAS\CMS\Shop\InheritPageTrait
  */
 class InheritPageTraitTest extends BaseTest
 {

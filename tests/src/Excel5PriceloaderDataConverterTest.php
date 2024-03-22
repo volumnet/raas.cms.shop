@@ -11,6 +11,7 @@ use SOME\BaseTest;
 
 /**
  * Класс теста конвертера Excel 5 для загрузчика прайсов
+ * @covers RAAS\CMS\Shop\Excel5PriceloaderDataConverter
  */
 class Excel5PriceloaderDataConverterTest extends BaseTest
 {

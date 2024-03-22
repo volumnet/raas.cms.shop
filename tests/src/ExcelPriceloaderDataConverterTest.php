@@ -12,6 +12,7 @@ use RAAS\CMS\Page;
 
 /**
  * Класс теста конвертера Excel для загрузчика прайсов
+ * @covers RAAS\CMS\Shop\ExcelPriceloaderDataConverter
  */
 class ExcelPriceloaderDataConverterTest extends BaseTest
 {

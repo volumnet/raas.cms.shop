@@ -13,6 +13,7 @@ use RAAS\CMS\Page;
 
 /**
  * Класс теста интерфейса каталога
+ * @covers RAAS\CMS\Shop\CatalogInterface
  */
 class CatalogInterfaceTest extends BaseTest
 {

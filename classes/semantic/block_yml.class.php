@@ -63,6 +63,14 @@ class Block_YML extends Block
             'expiry',
             'weight',
             'dimensions',
+            'period-of-validity-days',
+            'comment-validity-days',
+            'service-life-days',
+            'comment-life-days',
+            'warranty-days',
+            'comment-warranty',
+            'certificate',
+            'tn-ved-code',
             'param',
         ],
     ];
@@ -193,6 +201,10 @@ return 18;',
             'type' => 'number',
             'min' => 0
         ],
+        'certificate' => [],
+        'comment-life-days' => [],
+        'comment-validity-days' => [],
+        'comment-warranty' => [],
         'country' => [],
         'country_of_origin' => [],
         'cpa' => [
@@ -304,6 +316,7 @@ return "false";'
         ],
         'performance_type' => [],
         'performed_by' => [],
+        'period-of-validity-days' => [],
         'pickup' => [
             'type' => 'checkbox',
             'callback' => 'return (int)$x ? "true" : "false";'
@@ -361,6 +374,7 @@ return "false";'
 // return false;'
 //         ],
         'series' => [],
+        'service-life-days' => [],
         'starring' => [],
         'storage' => [],
         'store' => [
@@ -377,6 +391,7 @@ return "false";'
         'transport' => [
             'required' => true
         ],
+        'tn-ved-code' => [],
         'typePrefix' => [],
         'vendor' => [],
         'vendorCode' => [],
@@ -384,6 +399,7 @@ return "false";'
             'type' => 'number',
             'min' => 0
         ],
+        'warranty-days' => [],
         'weight' => [
             'type' => 'number',
             'min' => 0,

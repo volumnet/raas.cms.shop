@@ -73,7 +73,7 @@ class YMLInterface extends AbstractInterface
     ) {
 
         if ($maxExecutionTime) {
-            ini_set('max_execution_time', (int)$maxExecutionTime);
+            ini_set('max_execution_time', (string)(int)$maxExecutionTime);
         }
         if ($appendHeader) {
             header('Content-Type: application/xml');
@@ -660,11 +660,14 @@ class YMLInterface extends AbstractInterface
     ) {
         if ($isGlobal) {
             $cats = array_intersect($material->parents_ids, $catalogCatsIds);
-            $cats = array_values($cats);
-            $cats = array_slice($cats, 0, 1);
+        } elseif (in_array($material->cache_url_parent_id, $catalogCatsIds)) {
+            $cats = [(int)$material->cache_url_parent_id];
         } else {
             $cats = array_intersect($material->pages_ids, $catalogCatsIds);
         }
+        // 2024-03-2024, AVS: корректировка - categoryId должен быть один
+        $cats = array_values($cats);
+        $cats = array_slice($cats, 0, 1);
         $text = '';
         foreach ($cats as $val) {
             $text .= $this->getOfferCategoryBlock($val);
@@ -794,9 +797,9 @@ class YMLInterface extends AbstractInterface
     {
         $result = '';
         foreach ($options as $option) {
-            $result .= '<option cost="' . (int)$option['cost'] . '" days="'
-                . htmlspecialchars(trim($option['days']) ?: 0) . '"';
-            if ($orderBefore = trim($option['order_before'])) {
+            $result .= '<option cost="' . (int)($option['cost'] ?? 0) . '" days="'
+                . htmlspecialchars(trim((string)($option['days'] ?? 0)) ?: 0) . '"';
+            if ($orderBefore = trim((string)($option['order_before'] ?? $option['order-before'] ?? ''))) {
                 $result .= ' order-before="'
                     . htmlspecialchars($orderBefore) . '"';
             }
@@ -877,7 +880,7 @@ class YMLInterface extends AbstractInterface
             return '';
         }
         $v = $this->getValue($material, $key, $settings);
-        $v = trim($v);
+        $v = trim((string)$v);
         if ($v === '') {
             return '';
         }

@@ -106,7 +106,7 @@ class EditBlockYMLForm extends EditBlockForm
         //     'step' => 0.01,
         // ]);
         $deliveryOptionsImport = function ($field) {
-            return (array)json_decode($field->Form->Item->{$field->name}, true);
+            return (array)json_decode((string)$field->Form->Item->{$field->name}, true);
         };
         $deliveryOptionsExport = function ($field) {
             $result = [];
@@ -268,7 +268,7 @@ class EditBlockYMLForm extends EditBlockForm
                     'Table' => new EditBlockYMLMaterialTypesTable([
                         'Item' => $this->Item
                     ]),
-                    'Page' => new Page((int)$_GET['pid'])
+                    'Page' => new Page((int)($_GET['pid'] ?? 0))
                 ],
                 'children' => [
                     'types_select' => new RAASField([

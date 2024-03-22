@@ -17,6 +17,7 @@ use RAAS\CMS\Field;
 
 /**
  * Класс теста интерфейса синхронизации с 1С
+ * @covers RAAS\CMS\Shop\Sync1CInterface
  */
 class Sync1CInterfaceTest extends BaseTest
 {
@@ -48,7 +49,7 @@ class Sync1CInterfaceTest extends BaseTest
         'cms_menus',
         'cms_pages',
         'cms_shop_blocks_yml_pages_assoc',
-        'cms_users',
+        'cms_users', // Только для одиночного теста
         'cms_users_blocks_login',
         'registry',
         'cms_shop_priceloaders_columns',

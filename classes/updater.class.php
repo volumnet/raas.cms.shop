@@ -54,6 +54,9 @@ class Updater extends \RAAS\Updater
         if (version_compare($v, '4.3.49') < 0) {
             $this->update20230814();
         }
+        if (version_compare($v, '4.3.65') < 0) {
+            $this->update20240320();
+        }
     }
 
 
@@ -385,6 +388,23 @@ class Updater extends \RAAS\Updater
         ) {
             $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_cart_types
                            ADD check_amount TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Check amount' AFTER no_amount";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     * Обновляет типы полей для callback'ов блока Яндекс-Маркета
+     */
+    public function update20240320()
+    {
+        foreach ([
+            ['table' => 'cms_shop_blocks_yml_fields', 'field' => 'field_callback', 'comment' => 'Field callback'],
+            ['table' => 'cms_shop_blocks_yml_params', 'field' => 'field_callback', 'comment' => 'Field callback'],
+            ['table' => 'cms_shop_blocks_yml_material_types_assoc', 'field' => 'params_callback', 'comment' => 'Params callback'],
+        ] as $fieldData) {
+            $sqlQuery = "ALTER TABLE `" . SOME::_dbprefix() . $fieldData['table'] . "`
+                        CHANGE `" . $fieldData['field'] . "` `" . $fieldData['field'] . "` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '" . $fieldData['comment'] . "'";
             $this->SQL->query($sqlQuery);
         }
     }

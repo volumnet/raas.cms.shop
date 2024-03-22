@@ -15,6 +15,7 @@ use RAAS\CMS\Snippet;
 
 /**
  * Класс теста стандартного интерфейса корзины
+ * @covers RAAS\CMS\Shop\CartInterface
  */
 class CartInterfaceTest extends BaseTest
 {
@@ -40,8 +41,9 @@ class CartInterfaceTest extends BaseTest
         'cms_shop_orders',
         'cms_shop_orders_goods',
         'cms_shop_orders_history',
+        'cms_shop_priceloaders',
         'cms_snippets',
-        'cms_users',
+        'cms_users', // Только для одиночного теста
         'registry',
     ];
 

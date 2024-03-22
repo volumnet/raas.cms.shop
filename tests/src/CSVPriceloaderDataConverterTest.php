@@ -10,6 +10,7 @@ use SOME\CSV;
 
 /**
  * Класс теста конвертера CSV для загрузчика прайсов
+ * @covers RAAS\CMS\Shop\CSVPriceloaderDataConverter
  */
 class CSVPriceloaderDataConverterTest extends BaseTest
 {

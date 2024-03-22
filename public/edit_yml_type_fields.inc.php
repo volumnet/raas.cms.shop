@@ -3,7 +3,6 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
     $Form = $FieldSet->Form;
     $DATA = $Form->DATA;
     $MType = $Form->meta['MType'];
-    $fields = $Form->filterFieldsByType($MType);
     ?>
     <table class="table table-striped table-condensed" data-role="yml-fields-table">
       <thead>

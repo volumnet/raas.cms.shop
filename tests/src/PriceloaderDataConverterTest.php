@@ -10,6 +10,7 @@ use RAAS\CMS\Page;
 
 /**
  * Класс теста конвертера данных для загрузчика прайсов
+ * @covers RAAS\CMS\Shop\PriceloaderDataConverter
  */
 class PriceloaderDataConverterTest extends BaseTest
 {

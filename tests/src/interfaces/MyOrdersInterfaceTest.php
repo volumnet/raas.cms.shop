@@ -12,6 +12,7 @@ use RAAS\CMS\User;
 
 /**
  * Класс теста интерфейса сервиса "Мои заказы"
+ * @covers RAAS\CMS\Shop\MyOrdersInterface
  */
 class MyOrdersInterfaceTest extends BaseTest
 {

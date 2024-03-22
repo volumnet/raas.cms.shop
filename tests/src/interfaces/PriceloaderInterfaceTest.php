@@ -13,37 +13,38 @@ use RAAS\CMS\Page;
 
 /**
  * Класс теста интерфейса загрузчика прайсов
+ * @covers RAAS\CMS\Shop\PriceloaderInterface
  */
 class PriceloaderInterfaceTest extends BaseTest
 {
     public static $tables = [
-        'cms_shop_priceloaders',
-        'cms_shop_priceloaders_columns',
-        'cms_fields',
-        'cms_data',
-        'cms_materials',
-        'cms_material_types',
-        'cms_pages',
-        'cms_materials_pages_assoc',
-        'cms_material_types_affected_pages_for_materials_cache',
-        'cms_materials_affected_pages_cache',
-        'cms_material_types_affected_pages_for_self_cache',
-        'cms_blocks_pages_assoc',
-        'cms_blocks',
-        'cms_blocks_material',
+        'attachments',
         'cms_access',
         'cms_access_materials_cache',
-        'attachments',
-        'cms_blocks_search_pages_assoc',
-        'cms_shop_blocks_yml_pages_assoc',
-        'cms_blocks_html',
+        'cms_access_pages_cache',
+        'cms_blocks',
         'cms_blocks_form',
-        'cms_blocks_menu',
+        'cms_blocks_html',
+        'cms_blocks_material',
         'cms_blocks_material_filter',
         'cms_blocks_material_sort',
+        'cms_blocks_menu',
+        'cms_blocks_pages_assoc',
+        'cms_blocks_search_pages_assoc',
+        'cms_data',
+        'cms_fields',
+        'cms_material_types',
+        'cms_material_types_affected_pages_for_materials_cache',
+        'cms_material_types_affected_pages_for_self_cache',
+        'cms_materials',
+        'cms_materials_affected_pages_cache',
+        'cms_materials_pages_assoc',
         'cms_menus',
-        'cms_access_pages_cache',
-        'cms_users',
+        'cms_pages',
+        'cms_shop_blocks_yml_pages_assoc',
+        'cms_shop_priceloaders',
+        'cms_shop_priceloaders_columns',
+        'cms_users', // Только для одиночного теста
     ];
 
     /**
@@ -1263,11 +1264,11 @@ class PriceloaderInterfaceTest extends BaseTest
             $backtrace,
             $affectedPagesIds,
             $log,
-            true
+            false
         );
 
         $this->assertNotEquals(16, $context->id);
-        $this->assertContains($context->id, $affectedPagesIds);
+        $this->assertContains((int)$context->id, $affectedPagesIds);
         $this->assertEquals([0 => 16, 1 => $context->id], array_map(function ($x) {
             return $x->id;
         }, $backtrace));

@@ -9,6 +9,7 @@ use SOME\BaseTest;
 
 /**
  * Класс теста конвертера данных XML
+ * @covers RAAS\CMS\Shop\XmlDataConverter
  */
 class XmlDataConverterTest extends BaseTest
 {

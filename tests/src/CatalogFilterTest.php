@@ -17,6 +17,7 @@ use RAAS\CMS\Page;
 
 /**
  * Класс теста фильтра каталога
+ * @covers RAAS\CMS\Shop\CatalogFilter
  */
 class CatalogFilterTest extends BaseTest
 {

@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
   type VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'YM type',
   param_exceptions TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Params from all fields except...',
-  params_callback VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Params callback',
+  params_callback TEXT NULL DEFAULT NULL COMMENT 'Params callback',
 
   PRIMARY KEY (id, mtype),
   KEY (id),
@@ -230,7 +230,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
   field_name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field name',
   field_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field ID#',
-  field_callback VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field callback',
+  field_callback TEXT NULL DEFAULT NULL COMMENT 'Field callback',
   field_static_value VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field static value',
 
   PRIMARY KEY (id, mtype, field_name),
@@ -246,7 +246,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   mtype INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Material type ID#',
   param_name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Param name',
   field_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field ID#',
-  field_callback VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Field callback',
+  field_callback TEXT NULL DEFAULT NULL COMMENT 'Field callback',
   param_unit VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Param unit',
   param_static_value VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Param static value',
 
