@@ -35,11 +35,6 @@ class CatalogFilterTest extends BaseTest
     {
         parent::setUpBeforeClass();
 
-        // 2024-03-13, AVS: почистим приоритет у товаров (он в базе установлен), чтобы нормально выполнялась сортировка
-        // в testGetIds и testGetIdsWithReverse
-        $sqlQuery = "UPDATE cms_materials SET priority = 0 WHERE pid = 4";
-        Application::i()->SQL->query($sqlQuery);
-
         $material = new Material(10);
         $material->fields['testfield']->deleteValues();
         $material->fields['testfield']->addValue('value1');

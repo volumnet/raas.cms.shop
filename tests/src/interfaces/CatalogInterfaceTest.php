@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\BaseTest;
+use RAAS\Application;
 use RAAS\CMS\Block;
 use RAAS\CMS\Form;
 use RAAS\CMS\Material;
@@ -17,13 +18,33 @@ use RAAS\CMS\Page;
  */
 class CatalogInterfaceTest extends BaseTest
 {
+    public static $tables = [
+        'cms_blocks',
+        'cms_blocks_material',
+        'cms_blocks_material_filter',
+        'cms_blocks_material_sort',
+        'cms_material_types',
+        'cms_pages',
+        'cms_fields',
+        'cms_materials',
+        'cms_data',
+        'cms_materials_pages_assoc',
+    ];
+
     /**
      * Очистка после выполнения теста
      */
     public static function tearDownAfterClass(): void
     {
-        $filename = CatalogFilter::getDefaultFilename(4);
-        @unlink($filename);
+        $filename = CatalogFilter::getDefaultFilename(4, false);
+        if (is_file($filename)) {
+            @unlink($filename);
+        }
+        $filename = CatalogFilter::getDefaultFilename(4, true);
+        if (is_file($filename)) {
+            @unlink($filename);
+        }
+        parent::tearDownAfterClass();
     }
 
     /**
@@ -202,8 +223,9 @@ class CatalogInterfaceTest extends BaseTest
         $page->catalogFilter = $catalogFilter;
         $interface = new CatalogInterface();
         $sqlFrom = $sqlWhere = $sqlWhereBind = [];
+        $filterIds = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 
-        $result = $interface->getMaterialsSQL($block, $page, $sqlFrom, $sqlWhere, $sqlWhereBind);
+        $result = $interface->getMaterialsSQL($block, $page, $sqlFrom, $sqlWhere, $sqlWhereBind, $filterIds);
 
         $this->assertEquals([], $sqlFrom);
         $this->assertEquals(["tM.id IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"], $sqlWhere);
@@ -234,86 +256,6 @@ class CatalogInterfaceTest extends BaseTest
 
 
     /**
-     * Тест получения SQL-инструкции по полнотекстовому поиску
-     * @todo
-     */
-    public function testGetFullTextFilteringSQL()
-    {
-        $sqlFrom = $sqlFromBind = $sqlWhere = $sqlWhereBind = [];
-        $filter = [
-            ['var' => 'search_string', 'relation' => 'FULLTEXT', 'field' => 25],
-        ];
-        $get = [
-            'search_string' => 'Товар',
-        ];
-        $interface = new CatalogInterface();
-
-        $interface->getFullTextFilteringSQL($sqlFrom, $sqlFromBind, $sqlWhere, $sqlWhereBind, $filter, $get);
-        $sqlFrom = array_map(function ($x) {
-            return trim(preg_replace('/\\s+/umis', ' ', $x));
-        }, $sqlFrom);
-        $sqlFromBind = array_map(function ($x) {
-            return (int)$x;
-        }, $sqlFromBind);
-        $sqlWhere = array_map(function ($x) {
-            return trim(preg_replace('/\\s+/umis', ' ', $x));
-        }, $sqlWhere);
-
-        $this->assertEquals([
-            't25' => "LEFT JOIN cms_data AS `t25` ON `t25`.pid = tM.id AND `t25`.fid = ?",
-        ], $sqlFrom);
-        $this->assertEquals([25], $sqlFromBind);
-        $this->assertEquals([
-            'search_string' => "(((tM.name LIKE ?) OR (t25.value LIKE ?)))",
-        ], $sqlWhere);
-        $this->assertEquals(['%Товар%', '%Товар%'], $sqlWhereBind);
-    }
-
-
-    /**
-     * Тест получения SQL-инструкций по фильтрации для одной записи фильтрации
-     */
-    public function testGetFilteringSQL()
-    {
-        $sqlFrom = $sqlFromBind = $sqlWhere = $sqlWhereBind = [];
-        $filter = [
-            ['var' => 'name', 'relation' => 'LIKE', 'field' => 'name'],
-            ['var' => 'article', 'relation' => 'LIKE', 'field' => 25],
-            ['var' => 'search_string', 'relation' => 'FULLTEXT', 'field' => 25],
-            ['var' => 'price_from', 'relation' => '>=', 'field' => 26]
-        ];
-        $get = [
-            'name' => 'Товар',
-            'search_string' => 'Товар',
-            'article' => 'AAA',
-            'price_from' => '1000'
-        ];
-        $interface = new CatalogInterface();
-
-        $interface->getFilteringSQL($sqlFrom, $sqlFromBind, $sqlWhere, $sqlWhereBind, $filter, $get);
-        $sqlFrom = array_map(function ($x) {
-            return trim(preg_replace('/\\s+/umis', ' ', $x));
-        }, $sqlFrom);
-        $sqlFromBind = array_map(function ($x) {
-            return (int)$x;
-        }, $sqlFromBind);
-        $sqlWhere = array_map(function ($x) {
-            return trim(preg_replace('/\\s+/umis', ' ', $x));
-        }, $sqlWhere);
-
-        $this->assertEquals([
-            't25' => "LEFT JOIN cms_data AS `t25` ON `t25`.pid = tM.id AND `t25`.fid = ?",
-        ], $sqlFrom);
-        $this->assertEquals([25], $sqlFromBind);
-        $this->assertEquals([
-            'name' => "((tM.name LIKE ?))",
-            'search_string' => "(((tM.name LIKE ?) OR (t25.value LIKE ?)))",
-        ], $sqlWhere);
-        $this->assertEquals(['%Товар%', '%Товар%', '%Товар%'], $sqlWhereBind);
-    }
-
-
-    /**
      * Тест получения SQL-инструкций по сортировке - кастомное поле по GET
      */
     public function testGetOrderSQL()
@@ -328,11 +270,10 @@ class CatalogInterfaceTest extends BaseTest
         $get = ['sort' => 'byprice', 'order' => 'asc'];
         $sqlFrom = $sqlFromBind = [];
         $sqlSort = $sqlOrder = '';
+        $filterIds = [18, 14, 13, 16, 15, 17, 11, 12, 10, 19];
         $interface = new CatalogInterface();
-        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
-        $catalogFilter->apply(new Page(15), []);
 
-        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $catalogFilter);
+        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $filterIds);
         $sqlFrom = array_map(function ($x) {
             return trim(preg_replace('/\\s+/umis', ' ', $x));
         }, $sqlFrom);
@@ -363,10 +304,8 @@ class CatalogInterfaceTest extends BaseTest
         $sqlFrom = $sqlFromBind = [];
         $sqlSort = $sqlOrder = '';
         $interface = new CatalogInterface();
-        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
-        $catalogFilter->apply(new Page(15), ['article' => 'aaa']);
 
-        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $catalogFilter);
+        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder);
         $sqlFrom = array_map(function ($x) {
             return trim(preg_replace('/\\s+/umis', ' ', $x));
         }, $sqlFrom);
@@ -397,10 +336,16 @@ class CatalogInterfaceTest extends BaseTest
         $sqlFrom = $sqlFromBind = [];
         $sqlSort = $sqlOrder = '';
         $interface = new CatalogInterface();
-        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
-        $catalogFilter->apply(new Page(15), []);
 
-        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $catalogFilter);
+        $result = $interface->getOrderSQL(
+            $block,
+            $get,
+            $sqlFrom,
+            $sqlFromBind,
+            $sqlSort,
+            $sqlOrder,
+            [19, 10, 12, 11, 17, 15, 16, 13, 14, 18]
+        );
         $sqlFrom = array_map(function ($x) {
             return trim(preg_replace('/\\s+/umis', ' ', $x));
         }, $sqlFrom);
@@ -431,10 +376,8 @@ class CatalogInterfaceTest extends BaseTest
         $sqlFrom = $sqlFromBind = [];
         $sqlSort = $sqlOrder = '';
         $interface = new CatalogInterface();
-        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
-        $catalogFilter->apply(new Page(15), []);
 
-        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $catalogFilter);
+        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder);
         $sqlFrom = array_map(function ($x) {
             return trim(preg_replace('/\\s+/umis', ' ', $x));
         }, $sqlFrom);
@@ -463,11 +406,10 @@ class CatalogInterfaceTest extends BaseTest
         $get = ['sort' => 'bydate'];
         $sqlFrom = $sqlFromBind = [];
         $sqlSort = $sqlOrder = '';
+        $filterIds = [18, 14, 13, 16, 15, 17, 11, 12, 10, 19];
         $interface = new CatalogInterface();
-        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
-        $catalogFilter->apply(new Page(15), []);
 
-        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $catalogFilter);
+        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $filterIds);
         $sqlFrom = array_map(function ($x) {
             return trim(preg_replace('/\\s+/umis', ' ', $x));
         }, $sqlFrom);
@@ -497,10 +439,8 @@ class CatalogInterfaceTest extends BaseTest
         $sqlFrom = $sqlFromBind = [];
         $sqlSort = $sqlOrder = '';
         $interface = new CatalogInterface();
-        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
-        $catalogFilter->apply(new Page(15), ['article' => 'aaa']);
 
-        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $catalogFilter);
+        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder);
         $sqlFrom = array_map(function ($x) {
             return trim(preg_replace('/\\s+/umis', ' ', $x));
         }, $sqlFrom);
@@ -521,15 +461,13 @@ class CatalogInterfaceTest extends BaseTest
     public function testGetOrderSQLWithDefaultNativeSorting()
     {
         $block = Block::spawn(34);
-        $block->sort_var_name = 'sort';
+        $block->sort_field_default = 'name';
         $get = [];
         $sqlFrom = $sqlFromBind = [];
         $sqlSort = $sqlOrder = '';
         $interface = new CatalogInterface();
-        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
-        $catalogFilter->apply(new Page(15), []);
 
-        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder, $catalogFilter);
+        $result = $interface->getOrderSQL($block, $get, $sqlFrom, $sqlFromBind, $sqlSort, $sqlOrder);
         $sqlFrom = array_map(function ($x) {
             return trim(preg_replace('/\\s+/umis', ' ', $x));
         }, $sqlFrom);
@@ -557,6 +495,7 @@ class CatalogInterfaceTest extends BaseTest
         $catalogFilter->apply($page, []);
         $page->catalogFilter = $catalogFilter;
 
+        $ids = $interface->getIdsList($block, $page, []); // Для получения filterIds
         $result = $interface->getSQLParts($block, $page, []);
         foreach (['from', 'where'] as $key) {
             $result[$key] = array_map(function ($x) {
@@ -579,7 +518,41 @@ class CatalogInterfaceTest extends BaseTest
         ], $result['where']);
         $this->assertEquals("FIELD(tM.id, 18, 14, 13, 16, 15, 17, 11, 12, 10, 19)", $result['sort']);
         $this->assertEquals("", $result['order']);
-        $this->assertEquals([0, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result['bind']);
+        $this->assertEqualsCanonicalizing([0, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result['bind']);
+    }
+
+
+    /**
+     * Провайдер данных для метода testCommentsFilterFunction
+     * @return array <pre><code>array<[
+     *     Material Комментарий
+     *     Material Товар, по которому фильтруем
+     *     bool Ожидаемое значение
+     * ]></code></pre>
+     */
+    public function commentsFilterFunctionDataProvider(): array
+    {
+        return [
+            [new Material(23), new Material(12), true],
+            [new Material(24), new Material(10), false],
+        ];
+    }
+
+
+    /**
+     * Проверка метода commentsFilterFunction
+     * @param Material $comment Комментарий
+     * @param Material $item Товар, по которому фильтруем
+     * @param bool $expected Ожидаемое значение
+     * @dataProvider commentsFilterFunctionDataProvider
+     */
+    public function testCommentsFilterFunction(Material $comment, Material $item, bool $expected)
+    {
+        $interface = new CatalogInterface();
+
+        $result = $interface->commentsFilterFunction($comment, $item);
+
+        $this->assertEquals($expected, $result);
     }
 
 
@@ -588,20 +561,18 @@ class CatalogInterfaceTest extends BaseTest
      */
     public function testProcessComments()
     {
-        $form = new Form(2);
-        $form->material_type = 1;
-        $form->commit();
-        $block = Block::spawn(34);
-        $block->params = 'commentFormBlock=7&commentsListBlock=13';
+        $block = Block::spawn(34); // Каталог продукции
+        $page = new Page(18); // Категория 111
+        $material = new Material(12); // Товар 3 - к нему есть отзывы
         $interface = new CatalogInterface();
 
-        $result = $interface->processComments($block);
+        $result = $interface->processComments($block, $page, $material);
 
-        $this->assertEquals(7, $result['commentFormBlock']->id);
-        $this->assertEquals(13, $result['commentsListBlock']->id);
+        $this->assertEquals(52, $result['commentFormBlock']->id);
+        $this->assertEquals(51, $result['commentsListBlock']->id);
         $this->assertCount(3, $result['comments']);
-        $this->assertEquals('Клиент-ориентированный подход', $result['comments'][0]->name);
-        $this->assertContains('class="features-main-item', $result['commentsListText']);
+        $this->assertEquals('Отзыв 1', $result['comments'][0]->name);
+        $this->assertStringContainsString('class="goods-reviews-item', $result['commentsListText']);
     }
 
 
@@ -740,19 +711,19 @@ class CatalogInterfaceTest extends BaseTest
         $this->assertTrue($item->proceed);
         $this->assertEquals($item, $result['Item']);
         $this->assertEquals(11, $result['prev']->id);
-        $this->assertEquals(13, $result['next']->id);
+        $this->assertEquals(10, $result['next']->id);
 
         $this->assertEquals(52, $result['commentFormBlock']->id);
         $this->assertEquals(51, $result['commentsListBlock']->id);
         $this->assertCount(3, $result['comments']);
         $this->assertEquals('Отзыв 1', $result['comments'][0]->name);
-        $this->assertContains('class="goods-reviews', $result['commentsListText']);
+        $this->assertStringContainsString('class="goods-reviews', $result['commentsListText']);
         $this->assertEquals(2, $result['rating']);
         $this->assertEquals(53, $result['faqFormBlock']->id);
         $this->assertEquals(50, $result['faqListBlock']->id);
         $this->assertCount(3, $result['faq']);
         $this->assertEquals('Вопрос 1', $result['faq'][0]->name);
-        $this->assertContains('class="goods-faq', $result['faqListText']);
+        $this->assertStringContainsString('class="goods-faq', $result['faqListText']);
 
         $this->assertEquals('Купить Товар 3', $page->meta_title);
         $this->assertEquals(['visited' => [12]], $interface->session);
@@ -790,15 +761,18 @@ class CatalogInterfaceTest extends BaseTest
         $interface = new CatalogInterface();
 
         $result = $interface->processList($block, $page, ['page' => 1]);
+        // var_dump(array_map(function ($x) {
+        //     return $x->id;
+        // }, $result['Set'])); exit;
 
         $this->assertCount(3, $result['Set']);
-        $this->assertEquals(10, $result['Set'][0]->id);
-        $this->assertEquals(11, $result['Set'][1]->id);
-        $this->assertEquals(12, $result['Set'][2]->id);
+        $this->assertEquals(18, $result['Set'][0]->id);
+        $this->assertEquals(14, $result['Set'][1]->id);
+        $this->assertEquals(13, $result['Set'][2]->id);
         $this->assertEquals(1, $result['Pages']->page);
         $this->assertEquals(3, $result['Pages']->rows_per_page);
         $this->assertEquals(10, $result['Pages']->count);
-        $this->assertEquals('name', $result['sort']);
+        $this->assertEquals('price', $result['sort']);
         $this->assertEquals('asc', $result['order']);
         $this->assertEquals(4, $result['MType']->id);
         $this->assertCount(3, $result['subcats']);
@@ -820,13 +794,13 @@ class CatalogInterfaceTest extends BaseTest
         $result = $interface->process();
 
         $this->assertCount(10, $result['Set']);
-        $this->assertEquals(10, $result['Set'][0]->id);
-        $this->assertEquals(11, $result['Set'][1]->id);
-        $this->assertEquals(12, $result['Set'][2]->id);
+        $this->assertEquals(18, $result['Set'][0]->id);
+        $this->assertEquals(14, $result['Set'][1]->id);
+        $this->assertEquals(13, $result['Set'][2]->id);
         $this->assertEquals(1, $result['Pages']->page);
         $this->assertEquals(20, $result['Pages']->rows_per_page);
         $this->assertEquals(10, $result['Pages']->count);
-        $this->assertEquals('name', $result['sort']);
+        $this->assertEquals('price', $result['sort']);
         $this->assertEquals('asc', $result['order']);
         $this->assertEquals(4, $result['MType']->id);
         $this->assertCount(0, $result['subcats']);
@@ -857,7 +831,7 @@ class CatalogInterfaceTest extends BaseTest
         $this->assertTrue($page->Material->proceed);
         $this->assertEquals($page->Material, $result['Item']);
         $this->assertEquals(11, $result['prev']->id);
-        $this->assertEquals(13, $result['next']->id);
+        $this->assertEquals(10, $result['next']->id);
         $this->assertEquals('Купить Товар 3', $page->meta_title);
         $this->assertEquals(['visited' => [12]], $interface->session);
     }

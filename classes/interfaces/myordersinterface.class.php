@@ -64,22 +64,23 @@ class MyOrdersInterface extends AbstractInterface
         );
         $result = [];
 
-        $isAJAX = (
-            $this->post['AJAX'] ||
-            ($this->get['AJAX'] != $this->block->id)
-        );
+        $isAJAX = false;
+        $ajaxValue = ($this->post['AJAX'] ?? $this->get['AJAX'] ?? null);
+        if ($ajaxValue && $this->block->id && ($ajaxValue == $this->block->id)) {
+            $isAJAX = true;
+        }
         if ($order) {
-            switch ($this->get['action']) {
+            switch ($this->get['action'] ?? null) {
                 case 'delete':
                     $redirectURL = '';
                     if (!$isAJAX) {
-                        if ($this->get['back']) {
+                        if ($this->get['back'] ?? null) {
                             $redirectURL = 'history:back';
                         } else {
                             $redirectURL = HTTP::queryString(
                                 'id=&action=',
                                 true,
-                                $this->server['REQUEST_URI']
+                                ($this->server['REQUEST_URI'] ?? '')
                             );
                         }
                     }

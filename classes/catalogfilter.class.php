@@ -686,7 +686,7 @@ class CatalogFilter
     {
         $newPagesMapping = $pagesMapping;
         foreach ($pagesMapping as $pageId => $goodsIds) {
-            while ($pageId = $parents[$pageId]) {
+            while ($pageId = ($parents[$pageId] ?? null)) {
                 if (!isset($newPagesMapping[$pageId])) {
                     $newPagesMapping[$pageId] = [];
                 }
@@ -726,7 +726,7 @@ class CatalogFilter
                 } elseif (in_array($limitName, ['like']) && trim($val)) {
                     $filter[$prop->id][$limitName] = trim($val);
                 }
-            } elseif ($prop = $this->propertiesByURNs[$key]) {
+            } elseif ($prop = ($this->propertiesByURNs[$key] ?? null)) {
                 if ($val = array_values(
                     array_unique(array_filter((array)$val, function ($x) {
                         return trim($x) !== '';
@@ -1470,7 +1470,9 @@ class CatalogFilter
             $filename = static::getDefaultFilename($this->materialType->id, $this->withChildrenGoods);
         }
         $dir = dirname($filename);
-        @mkdir($dir, 0777, true);
+        if (!file_exists($dir)) {
+            @mkdir($dir, 0777, true);
+        }
         $tmpFilename = tempnam(sys_get_temp_dir(), 'raas_');
         $data = $this->export();
         $cacheId = 'RAASCACHE' . date('YmdHis') . md5(rand());

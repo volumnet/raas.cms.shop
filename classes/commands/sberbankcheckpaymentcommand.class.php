@@ -4,6 +4,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use Exception;
 use RAAS\Application;
 use RAAS\Command;
 use RAAS\CMS\Block;
@@ -54,7 +55,12 @@ class SberbankCheckPaymentCommand extends Command
             }
             $page = new Page(PageRecursiveCache::i()->cache[(string)$order->page_id]);
 
-            $orderIsPaid = $sber->getOrderIsPaid($order, $block, $page);
+            try {
+                $orderIsPaid = $sber->getOrderIsPaid($order, $block, $page);
+            } catch (Exception $e) {
+                $this->controller->doLog($e->getMessage() . ' для заказа #' . $order->id);
+                continue;
+            }
 
             if ($orderIsPaid) {
                 $history = new Order_History([

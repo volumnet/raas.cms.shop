@@ -2,6 +2,8 @@
 /**
  * Файл стандартного интерфейса каталога
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\Pages;
@@ -188,7 +190,7 @@ class CatalogInterface extends MaterialInterface
         if ($block) {
             $blockParams = $block->additionalParams;
         }
-        if ($blockParams['listMetaTemplates']) {
+        if ($blockParams['listMetaTemplates'] ?? null) {
             $metaData = $this->getPageMetadata($page);
             $metaTemplates = [];
             foreach ([
@@ -565,7 +567,7 @@ class CatalogInterface extends MaterialInterface
             } elseif (is_numeric($sortDefField) &&
                 isset($catalogFilter->properties[$sortDefField])
             ) {
-                $order = $this->getOrder($orderVar, $orderRelation, $get);
+                $order = $this->getOrder($orderVar, $orderRelDefault, $get);
                 $order = ($order == 'desc' ? -1 : 1);
                 $urn = $catalogFilter->properties[$sortDefField]->urn;
                 $ids = $catalogFilter->getIds($urn, $order);
@@ -712,7 +714,7 @@ class CatalogInterface extends MaterialInterface
                 // (предполагается, что используется интерфейс комментариев),
                 // то там уже есть своя фильтрация, и дополнительно фильтровать
                 // не нужно
-                if (!$commentsListBlock->additionalParams['materialFieldURN']) {
+                if (!($commentsListBlock->additionalParams['materialFieldURN'] ?? null)) {
                     $commentsListData['Set'] = array_values(
                         array_filter(
                             (array)$commentsListData['Set'],
@@ -742,6 +744,9 @@ class CatalogInterface extends MaterialInterface
      */
     public function commentsFilterFunction(Material $comment, Material $item)
     {
+        if (!$comment->material || !$comment->material->id || !$item->id) {
+            return false;
+        }
         return $comment->material->id == $item->id;
     }
 
@@ -841,7 +846,7 @@ class CatalogInterface extends MaterialInterface
      */
     public function processVisited(Material $item, array &$session)
     {
-        $session['visited'] = (array)$session['visited'];
+        $session['visited'] = (array)($session['visited'] ?? []);
         array_unshift($session['visited'], (int)$item->id);
         $session['visited'] = array_values(array_filter(array_unique(
             $session['visited']
@@ -931,7 +936,8 @@ class CatalogInterface extends MaterialInterface
     {
         if (!$page->catalogFilter) {
             $t = new DiagTimer();
-            $withChildrenGoods = (bool)$block->additionalParams['withChildrenGoods'];
+            $additionalParams = $block->additionalParams ?: [];
+            $withChildrenGoods = (bool)($additionalParams['withChildrenGoods'] ?? false);
             $classname = static::FILTER_CLASS;
             $catalogFilter = $classname::loadOrBuild(
                 $block->Material_Type,
@@ -939,7 +945,7 @@ class CatalogInterface extends MaterialInterface
                 [],
                 null,
                 true,
-                $block->additionalParams['useAvailabilityOrder'] ?: null
+                $additionalParams['useAvailabilityOrder'] ?? null
             );
             // // 2023-04-05, AVS: Актуально только при загрузке, т.к. build выполняется до этого
             // if ($useAvailabilityOrder = $block->additionalParams['useAvailabilityOrder']) {

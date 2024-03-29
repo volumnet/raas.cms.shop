@@ -16,6 +16,18 @@ use RAAS\CMS\User;
  */
 class MyOrdersInterfaceTest extends BaseTest
 {
+    public static $tables = [
+        'cms_data',
+        'cms_fields',
+        'cms_forms',
+        'cms_pages',
+        'cms_shop_cart_types',
+        'cms_shop_orders',
+        'cms_shop_orders_goods',
+        'cms_shop_orders_history',
+        'cms_users',
+    ];
+
     /**
      * Тест получения пользователя
      */
@@ -133,7 +145,7 @@ class MyOrdersInterfaceTest extends BaseTest
 
         $this->assertEquals('Главная', $page->oldName);
         $this->assertEquals($order, $page->Item);
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Заказ #' . $id . ' от ' . date('d.m.Y H:i'),
             $page->name
         );
@@ -259,7 +271,7 @@ class MyOrdersInterfaceTest extends BaseTest
             ->setConstructorArgs([
                 new Block_PHP(),
                 new Page(1),
-                ['action' => 'delete', 'id' => $id, 'back' => 1]
+                ['action' => 'delete', 'id' => '1', 'back' => 1]
             ])
             ->getMock();
 
@@ -294,7 +306,7 @@ class MyOrdersInterfaceTest extends BaseTest
             ->setConstructorArgs([
                 new Block_PHP(),
                 new Page(1),
-                ['action' => 'delete', 'id' => $id],
+                ['action' => 'delete', 'id' => '1'],
                 [],
                 [],
                 [],
@@ -304,7 +316,7 @@ class MyOrdersInterfaceTest extends BaseTest
 
         $interface->method('getOrder')->willReturn($order);
         $interface->expects($this->once())->method('deleteOrder')->withConsecutive(
-            [$order, '/my_orders/?']
+            [$order, '/my_orders/']
         );
         $result = $interface->process();
 
@@ -342,7 +354,7 @@ class MyOrdersInterfaceTest extends BaseTest
         $this->assertEquals($id, $result['Item']->id);
         $this->assertEquals('Главная', $page->oldName);
         $this->assertEquals($order, $page->Item);
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Заказ #' . $id . ' от ' . date('d.m.Y H:i'),
             $page->name
         );
