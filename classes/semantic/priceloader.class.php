@@ -110,7 +110,7 @@ class PriceLoader extends SOME
 
     public function commit()
     {
-        if (!trim($this->name) && trim($this->Material_Type->name)) {
+        if (!trim((string)$this->name) && trim((string)$this->Material_Type->name)) {
             $this->name = $this->Material_Type->name;
         }
         if (!$this->urn && $this->name) {

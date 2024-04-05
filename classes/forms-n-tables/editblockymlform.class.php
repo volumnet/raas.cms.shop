@@ -110,7 +110,7 @@ class EditBlockYMLForm extends EditBlockForm
         };
         $deliveryOptionsExport = function ($field) {
             $result = [];
-            foreach ($_POST[$field->name . '@cost'] as $i => $val) {
+            foreach ((array)($_POST[$field->name . '@cost'] ?? []) as $i => $val) {
                 $resultRow = [
                     'cost' => (int)$_POST[$field->name . '@cost'][$i],
                     'days' => trim($_POST[$field->name . '@days'][$i]),

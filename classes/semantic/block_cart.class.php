@@ -1,6 +1,12 @@
 <?php
+/**
+ * Блок корзины
+ */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
-use \RAAS\CMS\Block;
+
+use RAAS\CMS\Block;
 
 class Block_Cart extends Block
 {
@@ -28,7 +34,7 @@ class Block_Cart extends Block
     }
 
 
-    public function getAddData()
+    public function getAddData(): array
     {
         return array(
             'id' => (int)$this->id,

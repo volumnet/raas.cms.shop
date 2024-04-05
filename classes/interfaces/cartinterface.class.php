@@ -140,10 +140,7 @@ class CartInterface extends FormInterface
                 $cart->clear();
                 break;
             case 'success':
-                $result = array_merge(
-                    $result,
-                    $this->success($this->block, $this->get)
-                );
+                $result = array_merge($result, $this->success($this->block, $this->get));
                 break;
             case 'refresh':
                 break;
@@ -205,15 +202,20 @@ class CartInterface extends FormInterface
                                 $result['success'][(int)$this->block->id] = true;
                             }
                             // 2022-07-12, AVS: сделал проверку, чтобы по AJAX'у не редиректил
-                            if (!(
-                                ($this->post['AJAX'] ?? null) ||
-                                ($this->page->mime == 'application/json')
-                            )) {
-                                new Redirector(
-                                    '?action=success&id=' . (int)$result['Item']->id .
-                                    '&crc=' . Application::i()->md5It($result['Item']->id) .
-                                    (($this->post['epay'] ?? null) ? ('&epay=' . $this->post['epay']) : '')
-                                );
+                            if (!(($this->post['AJAX'] ?? null) || ($this->page->mime == 'application/json'))) {
+                                $url = '?action=success&id=' . (int)$result['Item']->id
+                                    . '&crc=' . Application::i()->md5It($result['Item']->id);
+                                if ($this->post['epay'] ?? null) {
+                                    $url .= '&epay=' . $this->post['epay'];
+                                }
+                                if ($debug) {
+                                    return $url;
+                                // @codeCoverageIgnoreStart
+                                // Не можем проверить редирект
+                                } else {
+                                    new Redirector($url);
+                                }
+                                // @codeCoverageIgnoreEnd
                             }
                         }
                         $result['DATA'] = $this->post;
@@ -225,14 +227,14 @@ class CartInterface extends FormInterface
                             // if ($orderToRepeat && trim($orderVal = $orderToRepeat->{$fieldURN})) {
                             //     $result['DATA'][$fieldURN] = $orderVal;
                             // } else {
-                                $userVal = $user->{$fieldURN};
-                                if ((is_scalar($userVal) && (trim($userVal) !== '')) ||
-                                    (!is_scalar($userVal) && $userVal)
-                                ) {
-                                    $result['DATA'][$fieldURN] = $userVal;
-                                } elseif ($row->defval) {
-                                    $result['DATA'][$fieldURN] = $row->defval;
-                                }
+                            $userVal = $user->{$fieldURN};
+                            if ((is_scalar($userVal) && (trim($userVal) !== '')) ||
+                                (!is_scalar($userVal) && $userVal)
+                            ) {
+                                $result['DATA'][$fieldURN] = $userVal;
+                            } elseif ($row->defval) {
+                                $result['DATA'][$fieldURN] = $row->defval;
+                            }
                             // }
                             // 2022-10-13, AVS: поменял порядок следования (чтобы заполнялось),
                             // также сделал строгую проверку на непустую строку
@@ -256,9 +258,12 @@ class CartInterface extends FormInterface
             }
             if ($debug) {
                 return $url;
+            // @codeCoverageIgnoreStart
+            // Не можем проверить редирект
             } else {
                 new Redirector($url);
             }
+            // @codeCoverageIgnoreEnd
         }
 
         $result['Cart'] = $cart;
@@ -277,8 +282,15 @@ class CartInterface extends FormInterface
                 ],
                 $result
             ));
-            if ($epayResult['success'][$this->block->id]) {
-                $cart->clear();
+            if ($epayResult['success'][$this->block->id] ?? null) {
+                if ($debug) {
+                    $result['@debug.action'] = '$cart->clear();';
+                // @codeCoverageIgnoreStart
+                // Не можем проверить установку корзины - Cannot modify header information - headers already sent
+                } else {
+                    $cart->clear();
+                }
+                // @codeCoverageIgnoreEnd
             }
             $result = array_merge($result, $epayResult);
         }
@@ -296,11 +308,8 @@ class CartInterface extends FormInterface
      *     string[] => mixed Дополнительные данные
      * ]</pre>
      */
-    public function getAdditionals(
-        Cart $cart,
-        array $post = [],
-        User $user = null
-    ) {
+    public function getAdditionals(Cart $cart, array $post = [], User $user = null): array
+    {
         if ($additionalsCallback = $this->additionalsCallback) {
             $result = $additionalsCallback($cart, $this->post, $user);
             return $result;
@@ -314,14 +323,15 @@ class CartInterface extends FormInterface
      * (для предотвращения повторной отправки)
      * @param Block_Cart $block Текущий блок
      * @param array $get Данные $_GET-полей
+     * @return array
      */
-    public function success(Block_Cart $block, array $get)
+    public function success(Block_Cart $block, array $get): array
     {
         $result = [];
         $localError = [];
-        if (!$get['id']) {
+        if (!($get['id'] ?? null)) {
             $localError['id'] = View_Web::i()->_('ORDER_NOT_FOUND');
-        } elseif ($get['crc'] != Application::i()->md5It($get['id'])) {
+        } elseif (($get['crc'] ?? null) != Application::i()->md5It($get['id'])) {
             $localError['id'] = View_Web::i()->_('ORDER_CRC_IS_INVALID');
         } else {
             $order = new Order($get['id']);
@@ -333,7 +343,7 @@ class CartInterface extends FormInterface
             $result['localError'] = $localError;
         } else {
             $result['Item'] = $order;
-            if ($get['epay']) {
+            if ($get['epay'] ?? null) {
                 $_POST['epay'] = $this->post['epay'] = $get['epay'];
             } else {
                 $result['success'][(int)$block->id] = true;
@@ -350,10 +360,10 @@ class CartInterface extends FormInterface
      * @param array $post Данные $_POST-полей
      * @param array $server Данные $_SERVER-полей
      * @param array $files Данные $_FILES-полей
-     * @return [
-     *             'Item' =>? Order Заказ
-     *             'Material' =>? Material Созданный материал
-     *         ]
+     * @return array <pre><code>[
+     *     'Item' =>? Order Заказ
+     *     'Material' =>? Material Созданный материал
+     * ]</code></pre>
      */
     public function processOrderForm(
         Cart $cart,
@@ -361,7 +371,7 @@ class CartInterface extends FormInterface
         array $post = [],
         array $server = [],
         array $files = []
-    ) {
+    ): array {
         $order = $this->getRawOrder($cart);
         // Для AJAX'а
         $this->processFeedbackReferer($order, $page, $server);
@@ -371,9 +381,9 @@ class CartInterface extends FormInterface
             $additionalParams = (array)$this->block->additionalParams;
         }
         if (!$user->id && ($additionalParams['bindUserBy'] ?? null)) {
-            $user = $this->findUser($post, (array)($additionalParams['bindUserBy'] ?? null));
-            if (!$user->id && ($additionalParams['createUserBlockId'] ?? null)) {
-                $registerBlock = Block::spawn($additionalParams['createUserBlockId'] ?? null);
+            $user = $this->findUser($post, (array)$additionalParams['bindUserBy']);
+            if (!($user && $user->id) && ($additionalParams['createUserBlockId'] ?? null)) {
+                $registerBlock = Block::spawn($additionalParams['createUserBlockId']);
                 $user = $this->createUser($registerBlock, $page, $post, $server, $files);
             }
         }
@@ -508,22 +518,16 @@ class CartInterface extends FormInterface
         array $files = []
     ) {
         $classname = 'RAAS\\CMS\\Users\\RegisterInterface';
+        // @codeCoverageIgnoreStart
+        // Не сможем в рамках тестового окружения проверить отсутствие
         if (!class_exists($classname)) {
             return null;
         }
-        if (!$post['email']) {
+        // @codeCoverageIgnoreEnd
+        if (!($post['email'] ?? null)) {
             return null; // Не можем создать пользователя если нет e-mail
         }
-        $registerInterface = new $classname(
-            $registerBlock,
-            $page,
-            [],
-            $post,
-            [],
-            [],
-            $server,
-            $files
-        );
+        $registerInterface = new $classname($registerBlock, $page, [], $post, [], [], $server, $files);
         $result = new User();
         $result = $registerInterface->processRegisterForm(
             new User(),
@@ -537,10 +541,8 @@ class CartInterface extends FormInterface
         );
         $user = $result['User'];
         $user->new = true;
-        if ($user->id) {
-            return $user;
-        }
-        return null;
+        // 2024-04-04, AVS: убрал if ($user->id) и return null, т.к. в processRegisterForm пользователь коммитится явно
+        return $user;
     }
 
 
@@ -549,7 +551,7 @@ class CartInterface extends FormInterface
      * @param Cart $cart Корзина
      * @return Order
      */
-    public function getRawOrder(Cart $cart)
+    public function getRawOrder(Cart $cart): Order
     {
         return new Order(['pid' => (int)$cart->cartType->id]);
     }
@@ -616,8 +618,8 @@ class CartInterface extends FormInterface
     public function notifyOrder(
         Order $order,
         Material $material = null,
-        $forAdmin = false,
-        $debug = false
+        bool $forAdmin = false,
+        bool $debug = false
     ) {
         $form = $order->parent->Form;
         if (!$form->Interface->id) {
@@ -672,6 +674,8 @@ class CartInterface extends FormInterface
                     'attachments' => $attachments,
                     'embedded' => $embedded,
                 ];
+            // @codeCoverageIgnoreStart
+            // Не можем проверить отправку
             } else {
                 Application::i()->sendmail(
                     $emails,
@@ -684,6 +688,7 @@ class CartInterface extends FormInterface
                     $embedded
                 );
             }
+            // @codeCoverageIgnoreEnd
         }
 
         if ($smsEmails = ($addresses['smsEmails'] ?? null)) {
@@ -695,6 +700,8 @@ class CartInterface extends FormInterface
                     'from' => $fromName,
                     'fromEmail' => $fromEmail,
                 ];
+            // @codeCoverageIgnoreStart
+            // Не можем проверить отправку письма
             } else {
                 Application::i()->sendmail(
                     $smsEmails,
@@ -705,6 +712,7 @@ class CartInterface extends FormInterface
                     false
                 );
             }
+            // @codeCoverageIgnoreEnd
         }
 
         if ($smsPhones = ($addresses['smsPhones'] ?? null)) {
@@ -716,9 +724,12 @@ class CartInterface extends FormInterface
                 ]);
                 if ($debug || !Application::i()->prod) {
                     $debugMessages['smsPhones'][] = $url;
+                // Не можем проверить отправку SMS
+                // @codeCoverageIgnoreStart
                 } else {
                     $result = file_get_contents($url);
                 }
+                // @codeCoverageIgnoreEnd
             }
         }
 
@@ -731,11 +742,10 @@ class CartInterface extends FormInterface
     /**
      * Получает заголовок e-mail сообщения
      * @param Order $order Заказ
-     * @param bool $forAdmin Уведомление для администратора
-     *                       (если нет, то для пользователя)
+     * @param bool $forAdmin Уведомление для администратора (если нет, то для пользователя)
      * @return string
      */
-    public function getEmailOrderSubject(Order $order, $forAdmin = false)
+    public function getEmailOrderSubject(Order $order, $forAdmin = false): string
     {
         $host = $this->getCurrentHostName();
         if (function_exists('idn_to_utf8')) {
@@ -764,6 +774,7 @@ class CartInterface extends FormInterface
     /**
      * Конвертирует мета-данные для сохранения в заказ
      * @param mixed $meta Мета-данные для конвертации
+     * @return mixed
      */
     public function convertMeta($meta)
     {

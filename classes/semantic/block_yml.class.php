@@ -1,4 +1,9 @@
 <?php
+/**
+ * Блок Яндекс.Маркета
+ */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Block;
@@ -572,7 +577,7 @@ return "false";'
     }
 
 
-    public function getAddData()
+    public function getAddData(): array
     {
         return [
             'id' => (int)$this->id,

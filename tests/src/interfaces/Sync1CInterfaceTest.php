@@ -49,11 +49,12 @@ class Sync1CInterfaceTest extends BaseTest
         'cms_menus',
         'cms_pages',
         'cms_shop_blocks_yml_pages_assoc',
+        'cms_shop_cart_types_material_types_assoc',
+        'cms_shop_priceloaders',
+        'cms_shop_priceloaders_columns',
         'cms_users', // Только для одиночного теста
         'cms_users_blocks_login',
         'registry',
-        'cms_shop_priceloaders_columns',
-        'cms_shop_priceloaders'
     ];
 
 
