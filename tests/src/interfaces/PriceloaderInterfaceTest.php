@@ -8,8 +8,11 @@ use SOME\BaseTest;
 use SOME\CSV;
 use RAAS\Attachment;
 use RAAS\Exception;
+use RAAS\CMS\Field;
 use RAAS\CMS\Material;
+use RAAS\CMS\Material_Field;
 use RAAS\CMS\Page;
+use RAAS\CMS\Snippet;
 
 /**
  * Класс теста интерфейса загрузчика прайсов
@@ -33,6 +36,7 @@ class PriceloaderInterfaceTest extends BaseTest
         'cms_blocks_search_pages_assoc',
         'cms_data',
         'cms_fields',
+        'cms_forms',
         'cms_material_types',
         'cms_material_types_affected_pages_for_materials_cache',
         'cms_material_types_affected_pages_for_self_cache',
@@ -42,9 +46,14 @@ class PriceloaderInterfaceTest extends BaseTest
         'cms_menus',
         'cms_pages',
         'cms_shop_blocks_yml_pages_assoc',
+        'cms_shop_imageloaders',
+        'cms_shop_orders',
         'cms_shop_priceloaders',
         'cms_shop_priceloaders_columns',
+        'cms_snippets',
+        'cms_templates',
         'cms_users', // Только для одиночного теста
+        'registry',
     ];
 
     /**
@@ -246,6 +255,21 @@ class PriceloaderInterfaceTest extends BaseTest
 
 
     /**
+     * Тест проверки, относится ли строка к товару (случай строки с одним значением и без использования категорий)
+     */
+    public function testIsItemDataRowWithOneValueRowAndNoCatsUsage()
+    {
+        $loader = new PriceLoader(1);
+        $loader->cats_usage = PriceLoader::CATS_USAGE_DONT_USE;
+        $interface = new PriceloaderInterface($loader);
+
+        $result = $interface->isItemDataRow(['', '', '', 'bbb', '']);
+
+        $this->assertTrue($result);
+    }
+
+
+    /**
      * Провайдер данных для метода testConvertCell
      * @return array<[
      *             PriceLoader_Column Колонка загрузчика прайсов
@@ -263,7 +287,7 @@ class PriceloaderInterfaceTest extends BaseTest
             [new PriceLoader_Column(5), 'в наличии', 1],
             [new PriceLoader_Column(5), 'под заказ', 0],
             [new PriceLoader_Column(4), 'f4dbdf21, 83dcefb7, 1ad5be0d', [10, 11, 12]],
-            [$customMaterialCol, '', [10, 11, 12]]
+            [$customMaterialCol, '', [10, 11, 12]],
         ];
     }
 
@@ -296,6 +320,26 @@ class PriceloaderInterfaceTest extends BaseTest
         $result = $interface->convertCell($col, '20aaa');
 
         $this->assertEquals(20, $result);
+    }
+
+
+    /**
+     * Тест применения к ячейке данных callback-преобразования - случай с множественным полем и пустыми значениями
+     */
+    public function testConvertCellWithMultipleFieldWithEmptyValues()
+    {
+        $field = new Field(25); // Артикул
+        $field->multiple = true;
+        $field->commit();
+        $col = new PriceLoader_Column(['pid' => 1, 'fid' => 25]);
+        $interface = $this->getInterface();
+
+        $result = $interface->convertCell($col, ['', 'aaa', '', 'bbb']);
+
+        $this->assertEquals(['', 'aaa', '', 'bbb'], $result);
+
+        $field->multiple = false;
+        $field->commit();
     }
 
 
@@ -649,6 +693,98 @@ class PriceloaderInterfaceTest extends BaseTest
         $this->assertIsArray($sqlResult);
         $this->assertCount(1, $sqlResult);
         $this->assertEquals('{"vis":1,"name":"","description":"","attachment":999}', $sqlResult[0]);
+
+        $col->Parent->media_action = PriceLoader::MEDIA_FIELDS_APPEND_IF_EMPTY;
+        $col->Parent->commit();
+        PriceLoader_Column::delete($col);
+    }
+
+
+    /**
+     * Тест применения произвольного поля (без учета callback-преобразований) - случай с непустым файловым полем
+     * и применением только к новым
+     */
+    public function testApplyCustomFieldWithFileFieldAndAppendToNewMode()
+    {
+        $interface = $this->getInterface();
+        $material = new Material(17);
+        $col = new PriceLoader_Column(['pid' => 1, 'fid' => 29]);
+        $col->Parent->media_action = PriceLoader::MEDIA_FIELDS_APPEND_TO_NEW_ONLY;
+        $col->Parent->commit(); // Сохраним значение замены, иначе старые файлы не удалятся, а новые не сохранятся
+        $att = new Attachment(52);
+
+        $this->assertEquals(52, $att->id);
+
+        $result = $interface->applyCustomField($col, $material, '{"vis":1,"name":"","description":"","attachment":999}', false, false);
+        $att = new Attachment(52);
+        $sqlQuery = "SELECT value FROM cms_data WHERE pid = ? AND fid = ?";
+        $sqlResult = Material::_SQL()->getcol([$sqlQuery, [17, 29]]);
+
+        $this->assertNull($result);
+        $this->assertEquals(52, $att->id);
+        $this->assertIsArray($sqlResult);
+        $this->assertCount(2, $sqlResult);
+        $this->assertEquals('{"vis":1,"name":"","description":"","attachment":52}', $sqlResult[0]);
+
+        $col->Parent->media_action = PriceLoader::MEDIA_FIELDS_APPEND_IF_EMPTY;
+        $col->Parent->commit();
+        PriceLoader_Column::delete($col);
+    }
+
+
+    /**
+     * Тест метода convertMediaData
+     */
+    public function testConvertMediaData()
+    {
+        $preprocessor = new Snippet(['urn' => 'testpreprocessor', 'description' => '<' . '?php' . ' $GLOBALS["preprocessorData"][] = $files; ']);
+        $preprocessor->commit();
+        $postprocessor = new Snippet(['urn' => 'testpostprocessor', 'description' => '<' . '?php' . ' $GLOBALS["postprocessorData"][] = $files; ']);
+        $postprocessor->commit();
+        $field = new Material_Field(29); // Файлы
+
+        $interface = $this->getInterface();
+        $data = [
+            '',
+            'http://test/files/cms/common/image/nophoto.jpg',
+            'http://test123/notexisting.jpg',
+            '/vendor/volumnet/raas.cms.shop/tests/resources/test.xls',
+        ];
+        $addedAttachments = [];
+
+        $result = $interface->convertMediaData($data, $field, $addedAttachments, $preprocessor, $postprocessor);
+
+        $this->assertCount(2, $addedAttachments);
+        $this->assertInstanceOf(Attachment::class, $addedAttachments[0]);
+        $this->assertInstanceOf(Attachment::class, $addedAttachments[1]);
+        $this->assertNotEmpty($addedAttachments[0]->id);
+        $this->assertEquals($addedAttachments[0]->id + 1, $addedAttachments[1]->id);
+        $this->assertEquals('nophoto.jpg', $addedAttachments[0]->filename);
+        $this->assertEquals('test.xls', $addedAttachments[1]->filename);
+        $this->assertCount(2, $result);
+        $this->assertIsString($result[0]);
+        $this->assertIsString($result[1]);
+        $json1 = json_decode($result[0], true);
+        $json2 = json_decode($result[1], true);
+        $this->assertEquals($addedAttachments[0]->id, $json1['attachment']);
+        $this->assertEquals(1, $json1['vis']);
+        $this->assertEquals($addedAttachments[1]->id, $json2['attachment']);
+        $this->assertEquals(1, $json2['vis']);
+        $this->assertEquals([
+            [sys_get_temp_dir() . '/nophoto.jpg'],
+            [sys_get_temp_dir() . '/test.xls'],
+        ], $GLOBALS['preprocessorData']);
+        $this->assertEquals([
+            [$addedAttachments[0]->file],
+            [$addedAttachments[1]->file],
+        ], $GLOBALS['postprocessorData']);
+
+        Snippet::delete($preprocessor);
+        Snippet::delete($postprocessor);
+        foreach ($addedAttachments as $att) {
+            Attachment::delete($att);
+        }
+        unset($GLOBALS['preprocessorData'], $GLOBALS['postprocessorData']);
     }
 
 
@@ -673,6 +809,21 @@ class PriceloaderInterfaceTest extends BaseTest
         $interface = $this->getInterface();
 
         $result = $interface->isPageDataRow(['', 'aaa', '', 'bbb', 'ccc']);
+
+        $this->assertFalse($result);
+    }
+
+
+    /**
+     * Тест проверки, относится ли строка к странице (случай без использования категорий)
+     */
+    public function testIsPageDataRowWithNoCatsUsage()
+    {
+        $loader = new PriceLoader(1);
+        $loader->cats_usage = PriceLoader::CATS_USAGE_DONT_USE;
+        $interface = new PriceloaderInterface($loader);
+
+        $result = $interface->isPageDataRow(['', '', '', 'bbb', '']);
 
         $this->assertFalse($result);
     }
@@ -1127,6 +1278,34 @@ class PriceloaderInterfaceTest extends BaseTest
         $item->fields['available']->addValue(0);
         $item->fields['price']->deleteValues();
         $item->fields['price']->addValue(83620);
+    }
+
+
+    /**
+     * Тест обработки строки данных товара (без обновления товаров)
+     */
+    public function testProcessItemRowWithoutUpdateMaterials()
+    {
+        $loader = new PriceLoader(1);
+        $loader->update_materials = false;
+        $interface = new PriceloaderInterface($loader);
+        $root = new Page(15);
+        $context = new Page(16);
+        $affectedMaterialsIds = [];
+        $log = [];
+        $row = ['f4dbdf21', 'Товар 111', 'Описание товара 111', [], 1, 0, '11111'];
+
+        $interface->processItemRow($loader, $row, $root, $context, $affectedMaterialsIds, $log, 0, false, 1, 0, 2);
+
+        $item = new Material(10);
+
+        $this->assertEquals('Товар 1', $item->name);
+        $this->assertEquals('f4dbdf21', $item->article);
+        $this->assertEquals('', $item->description);
+        $this->assertEquals(0, $item->available);
+        $this->assertEquals(83620, $item->price);
+        $this->assertCount(0, $log);
+        $this->assertCount(0, $affectedMaterialsIds);
     }
 
 
@@ -1753,6 +1932,32 @@ class PriceloaderInterfaceTest extends BaseTest
 
 
     /**
+     * Тест выгрузки ячейки материала с множественным числовым кастомным полем
+     */
+    public function testExportMaterialColumnWithMultipleNumericField()
+    {
+        $item = new Material(10);
+        $field = $item->fields['price'];
+        $field->multiple = true;
+        $field->commit();
+        $field->deleteValues();
+        $field->addValue('123aaa');
+        $field->addValue('456bbb');
+        $column = new PriceLoader_Column(7);
+        $interface = $this->getInterface();
+
+        $result = $interface->exportMaterialColumn($column, $item);
+
+        $this->assertEquals('123, 456', $result);
+
+        $field->multiple = false;
+        $field->commit();
+        $field->deleteValues();
+        $field->addValue('83620');
+    }
+
+
+    /**
      * Тест выгрузки ячейки материала с множественным кастомным полем
      */
     public function testExportMaterialColumnWithMultipleCustomField()
@@ -1823,22 +2028,139 @@ class PriceloaderInterfaceTest extends BaseTest
      */
     public function testExportData()
     {
+        $this->installTables(); // Для восстановления изначального состояния (чтобы легче было проверять)
+        $col1 = new PriceLoader_Column(3); // Описание
+        $col1->pid = 0;
+        $col1->commit();
+        $col2 = new PriceLoader_Column(4); // Связанные товары - убираем, т.к. некорректная функция выгрузки
+        $col2->pid = 0;
+        $col2->commit();
         $interface = $this->getInterface();
         $loader = $interface->loader;
 
-        $sqlQuery = "DELETE FROM cms_materials_pages_assoc WHERE id = ? AND pid = ?";
-        Material::_SQL()->query([$sqlQuery, [10, 16]]);
         $result = $interface->exportData($loader, null, 1);
 
-        $this->assertEquals('Артикул', $result[0][0]);
-        $this->assertEquals('Название', $result[0][1]);
-        $this->assertEmpty($result[0][7] ?? null);
-        $this->assertEquals('Видимость', $result[0][8]);
-        $this->assertEquals('URN', $result[0][9]);
-        $this->assertEquals('Категория 1', $result[1][0]);
-        $this->assertEquals('Категория 11', $result[2][1]);
-        $this->assertEquals('Товар 1', $result[4][1]);
-        $this->assertEquals('под заказ', $result[4][4]);
+        $csv = new CSV($result);
+        $goodsBlock = 'f4dbdf21;"Товар 1";"под заказ";0;83620' . "\n"
+                    . '83dcefb7;"Товар 2";"в наличии";75907;67175' . "\n"
+                    . '1ad5be0d;"Товар 3";"в наличии";86635;71013' . "\n"
+                    . '6dd28e9b;"Товар 4";"в наличии";0;30450' . "\n"
+                    . 'f3b61b38;"Товар 5";"под заказ";0;25712' . "\n"
+                    . '84b12bae;"Товар 6";"в наличии";0;54096' . "\n"
+                    . '1db87a14;"Товар 7";"в наличии";58091;49651' . "\n"
+                    . '6abf4a82;"Товар 8";"в наличии";73494;61245' . "\n"
+                    . 'fa005713;"Товар 9";"под заказ";6506;5609' . "\n"
+                    . '8d076785;"Товар 10";"в наличии";0;85812';
+        $expected = 'Артикул;Название;"В наличии";"Старая цена";Стоимость' . "\n"
+                  . '"Категория 1"' . "\n"
+                  . ';"Категория 11"' . "\n"
+                  . ';;"Категория 111"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';;"Категория 112"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';;"Категория 113"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';"Категория 12"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';"Категория 13"' . "\n"
+                  . $goodsBlock . "\n"
+                  . '"Категория 2"' . "\n"
+                  . $goodsBlock . "\n"
+                  . '"Категория 3"' . "\n"
+                  . $goodsBlock;
+        $this->assertEquals($expected, $csv->csv);
+
+        $col1->pid = 1;
+        $col1->commit();
+        $col2->pid = 1;
+        $col2->commit();
+    }
+
+
+    /**
+     * Тест выгрузки данных - случай без повтора товаров
+     */
+    public function testExportDataWithNoRepeat()
+    {
+        $this->installTables(); // Для восстановления изначального состояния (чтобы легче было проверять)
+        $col1 = new PriceLoader_Column(3); // Описание
+        $col1->pid = 0;
+        $col1->commit();
+        $col2 = new PriceLoader_Column(4); // Связанные товары - убираем, т.к. некорректная функция выгрузки
+        $col2->pid = 0;
+        $col2->commit();
+        $loader = new PriceLoader(1);
+        $loader->cats_usage = PriceLoader::CATS_USAGE_DONT_REPEAT;
+        $interface = $this->getInterface($loader);
+
+        $result = $interface->exportData($loader, null, 1);
+
+        $csv = new CSV($result);
+        $expected = 'Артикул;Название;"В наличии";"Старая цена";Стоимость' . "\n"
+                  . '"Категория 1"' . "\n"
+                  . ';"Категория 11"' . "\n"
+                  . ';;"Категория 111"' . "\n"
+                  . 'f4dbdf21;"Товар 1";"под заказ";0;83620' . "\n"
+                  . '83dcefb7;"Товар 2";"в наличии";75907;67175' . "\n"
+                  . '1ad5be0d;"Товар 3";"в наличии";86635;71013' . "\n"
+                  . '6dd28e9b;"Товар 4";"в наличии";0;30450' . "\n"
+                  . 'f3b61b38;"Товар 5";"под заказ";0;25712' . "\n"
+                  . '84b12bae;"Товар 6";"в наличии";0;54096' . "\n"
+                  . '1db87a14;"Товар 7";"в наличии";58091;49651' . "\n"
+                  . '6abf4a82;"Товар 8";"в наличии";73494;61245' . "\n"
+                  . 'fa005713;"Товар 9";"под заказ";6506;5609' . "\n"
+                  . '8d076785;"Товар 10";"в наличии";0;85812' . "\n"
+                  . ';;"Категория 112"' . "\n"
+                  . ';;"Категория 113"' . "\n"
+                  . ';"Категория 12"' . "\n"
+                  . ';"Категория 13"' . "\n"
+                  . '"Категория 2"' . "\n"
+                  . '"Категория 3"';
+        $this->assertEquals($expected, $csv->csv);
+
+        $col1->pid = 1;
+        $col1->commit();
+        $col2->pid = 1;
+        $col2->commit();
+    }
+
+
+    /**
+     * Тест выгрузки данных - случай без категорий
+     */
+    public function testExportDataWithNoCats()
+    {
+        $this->installTables(); // Для восстановления изначального состояния (чтобы легче было проверять)
+        $col1 = new PriceLoader_Column(3); // Описание
+        $col1->pid = 0;
+        $col1->commit();
+        $col2 = new PriceLoader_Column(4); // Связанные товары - убираем, т.к. некорректная функция выгрузки
+        $col2->pid = 0;
+        $col2->commit();
+        $loader = new PriceLoader(1);
+        $loader->cats_usage = PriceLoader::CATS_USAGE_DONT_USE;
+        $interface = $this->getInterface($loader);
+
+        $result = $interface->exportData($loader, null, 1);
+
+        $csv = new CSV($result);
+        $expected = 'Артикул;Название;"В наличии";"Старая цена";Стоимость' . "\n"
+                  . 'f4dbdf21;"Товар 1";"под заказ";0;83620' . "\n"
+                  . '83dcefb7;"Товар 2";"в наличии";75907;67175' . "\n"
+                  . '1ad5be0d;"Товар 3";"в наличии";86635;71013' . "\n"
+                  . '6dd28e9b;"Товар 4";"в наличии";0;30450' . "\n"
+                  . 'f3b61b38;"Товар 5";"под заказ";0;25712' . "\n"
+                  . '84b12bae;"Товар 6";"в наличии";0;54096' . "\n"
+                  . '1db87a14;"Товар 7";"в наличии";58091;49651' . "\n"
+                  . '6abf4a82;"Товар 8";"в наличии";73494;61245' . "\n"
+                  . 'fa005713;"Товар 9";"под заказ";6506;5609' . "\n"
+                  . '8d076785;"Товар 10";"в наличии";0;85812';
+        $this->assertEquals($expected, $csv->csv);
+
+        $col1->pid = 1;
+        $col1->commit();
+        $col2->pid = 1;
+        $col2->commit();
     }
 
 
@@ -1847,25 +2169,66 @@ class PriceloaderInterfaceTest extends BaseTest
      */
     public function testDownload()
     {
+        $this->installTables(); // Для восстановления изначального состояния (чтобы легче было проверять)
+        $col1 = new PriceLoader_Column(3); // Описание
+        $col1->pid = 0;
+        $col1->commit();
+        $col2 = new PriceLoader_Column(4); // Связанные товары - убираем, т.к. некорректная функция выгрузки
+        $col2->pid = 0;
+        $col2->commit();
         $interface = $this->getInterface();
         $loader = $interface->loader;
-        $item = new Material(10);
 
         $result = $interface->download(null, 1, 1, 'csv', 'UTF-8', true);
-        $csv = new CSV($result);
-        $result = $csv->data;
 
-        $this->assertEquals('Артикул', $result[0][1]);
-        $this->assertEquals('Название', $result[0][2]);
-        $this->assertEmpty($result[0][8]);
-        $this->assertEquals('Видимость', $result[0][9]);
-        $this->assertEquals('URN', $result[0][10]);
-        $this->assertEquals('Категория 1', $result[1][1]);
-        $this->assertEquals('Категория 11', $result[2][2]);
-        $this->assertEquals('Товар 1', $result[4][2]);
-        $this->assertEquals('под заказ', $result[4][5]);
-        $this->assertEmpty($result[4][8]);
-        $this->assertEquals(1, $result[4][9]);
-        $this->assertEquals('tovar_1', $result[4][10]);
+        $goodsBlock = ';f4dbdf21;"Товар 1";"под заказ";0;83620' . "\n"
+                    . ';83dcefb7;"Товар 2";"в наличии";75907;67175' . "\n"
+                    . ';1ad5be0d;"Товар 3";"в наличии";86635;71013' . "\n"
+                    . ';6dd28e9b;"Товар 4";"в наличии";0;30450' . "\n"
+                    . ';f3b61b38;"Товар 5";"под заказ";0;25712' . "\n"
+                    . ';84b12bae;"Товар 6";"в наличии";0;54096' . "\n"
+                    . ';1db87a14;"Товар 7";"в наличии";58091;49651' . "\n"
+                    . ';6abf4a82;"Товар 8";"в наличии";73494;61245' . "\n"
+                    . ';fa005713;"Товар 9";"под заказ";6506;5609' . "\n"
+                    . ';8d076785;"Товар 10";"в наличии";0;85812';
+        $expected = ';Артикул;Название;"В наличии";"Старая цена";Стоимость' . "\n"
+                  . ';"Категория 1"' . "\n"
+                  . ';;"Категория 11"' . "\n"
+                  . ';;;"Категория 111"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';;;"Категория 112"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';;;"Категория 113"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';;"Категория 12"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';;"Категория 13"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';"Категория 2"' . "\n"
+                  . $goodsBlock . "\n"
+                  . ';"Категория 3"' . "\n"
+                  . $goodsBlock;
+        $this->assertEquals($expected, $result);
+
+        // $csv = new CSV($result);
+        // $result = $csv->data;
+
+        // $this->assertEquals('Артикул', $result[0][1]);
+        // $this->assertEquals('Название', $result[0][2]);
+        // $this->assertEmpty($result[0][8]);
+        // $this->assertEquals('Видимость', $result[0][9]);
+        // $this->assertEquals('URN', $result[0][10]);
+        // $this->assertEquals('Категория 1', $result[1][1]);
+        // $this->assertEquals('Категория 11', $result[2][2]);
+        // $this->assertEquals('Товар 1', $result[4][2]);
+        // $this->assertEquals('под заказ', $result[4][5]);
+        // $this->assertEmpty($result[4][8]);
+        // $this->assertEquals(1, $result[4][9]);
+        // $this->assertEquals('tovar_1', $result[4][10]);
+
+        $col1->pid = 1;
+        $col1->commit();
+        $col2->pid = 1;
+        $col2->commit();
     }
 }

@@ -2,6 +2,8 @@
 /**
  * Файл класса интерфейса синхронизации с 1С
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use DOMDocument;

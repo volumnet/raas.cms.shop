@@ -30,6 +30,8 @@ class InheritPageTraitTest extends BaseTest
         'cms_materials_pages_assoc',
         'cms_pages',
         'cms_shop_blocks_yml_pages_assoc',
+        'cms_shop_orders',
+        'cms_shop_priceloaders',
         'cms_users',
     ];
 

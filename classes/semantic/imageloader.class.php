@@ -2,6 +2,8 @@
 /**
  * Загрузчик изображений
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\SOME;

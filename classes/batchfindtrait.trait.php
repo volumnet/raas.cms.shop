@@ -4,6 +4,8 @@
  *
  * Впоследствии предлагается реализовать в SOME
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Page;

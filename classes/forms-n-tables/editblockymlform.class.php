@@ -60,7 +60,7 @@ class EditBlockYMLForm extends EditBlockForm
     }
 
 
-    protected function getInterfaceField()
+    protected function getInterfaceField(): RAASField
     {
         $field = parent::getInterfaceField();
         $snippet = Snippet::importByURN('__raas_shop_yml_interface');
@@ -69,7 +69,7 @@ class EditBlockYMLForm extends EditBlockForm
     }
 
 
-    protected function getCommonTab()
+    protected function getCommonTab(): FormTab
     {
         $tab = parent::getCommonTab();
         $t = $this;
@@ -284,7 +284,7 @@ class EditBlockYMLForm extends EditBlockForm
     }
 
 
-    protected function getServiceTab()
+    protected function getServiceTab(): FormTab
     {
         $tab = parent::getServiceTab();
         $tab->children[] = $this->getInterfaceField();
@@ -296,7 +296,7 @@ class EditBlockYMLForm extends EditBlockForm
      * Получает вкладку категорий каталога для выгрузки
      * @return FormTab
      */
-    protected function getCatsTab()
+    protected function getCatsTab(): FormTab
     {
         $tab = new FormTab([
             'name' => 'meta_cats',

@@ -55,7 +55,7 @@ class OrderHistoryTable extends \RAAS\Table
         );
         $defaultParams = array(
             'columns' => $columns,
-            'Set' => $params['Item']->history,
+            'Set' => $params['Item'] ? $params['Item']->history : [],
         );
         $arr = $defaultParams;
         parent::__construct($arr);

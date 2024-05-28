@@ -2,6 +2,8 @@
 /**
  * Файл конвертера Excel 2007 для загрузчика прайсов
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use PhpOffice\PhpSpreadsheet\IOFactory;

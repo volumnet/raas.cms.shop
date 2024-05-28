@@ -18,6 +18,9 @@
     <testsuite name="CatalogFilter">
       <file>src/CatalogFilterTest.php</file>
     </testsuite>
+    <testsuite name="SberbankCheckPaymentCommand">
+      <file>src/commands/SberbankCheckPaymentCommandTest.php</file>
+    </testsuite>
     <testsuite name="CSVPriceloaderDataConverter">
       <file>src/CSVPriceloaderDataConverterTest.php</file>
     </testsuite>
@@ -30,6 +33,18 @@
     <testsuite name="ExcelPriceloaderDataConverter">
       <file>src/ExcelPriceloaderDataConverterTest.php</file>
     </testsuite>
+    <testsuite name="EditBlockCartForm">
+      <file>src/forms-n-tables/EditBlockCartFormTest.php</file>
+    </testsuite>
+    <testsuite name="EditImageLoaderForm">
+      <file>src/forms-n-tables/EditImageLoaderFormTest.php</file>
+    </testsuite>
+    <testsuite name="EditPriceLoaderForm">
+      <file>src/forms-n-tables/EditPriceLoaderFormTest.php</file>
+    </testsuite>
+    <testsuite name="ViewOrderForm">
+      <file>src/forms-n-tables/ViewOrderFormTest.php</file>
+    </testsuite>
     <testsuite name="InheritPageTrait">
       <file>src/InheritPageTraitTest.php</file>
     </testsuite>
@@ -39,17 +54,47 @@
     <testsuite name="CatalogInterface">
       <file>src/interfaces/CatalogInterfaceTest.php</file>
     </testsuite>
+    <testsuite name="EPayInterface">
+      <file>src/interfaces/EPayInterfaceTest.php</file>
+    </testsuite>
     <testsuite name="MyOrdersInterface">
       <file>src/interfaces/MyOrdersInterfaceTest.php</file>
+    </testsuite>
+    <testsuite name="PayKeeperInterface">
+      <file>src/interfaces/PayKeeperInterfaceTest.php</file>
+    </testsuite>
+    <testsuite name="PayMasterInterface">
+      <file>src/interfaces/PayMasterInterfaceTest.php</file>
     </testsuite>
     <testsuite name="PriceloaderInterface">
       <file>src/interfaces/PriceloaderInterfaceTest.php</file>
     </testsuite>
+    <testsuite name="SberbankInterface">
+      <file>src/interfaces/SberbankInterfaceTest.php</file>
+    </testsuite>
     <testsuite name="Sync1CInterface">
       <file>src/interfaces/Sync1CInterfaceTest.php</file>
     </testsuite>
+    <testsuite name="UBRRInterface">
+      <file>src/interfaces/UBRRInterfaceTest.php</file>
+    </testsuite>
+    <testsuite name="YooKassaInterface">
+      <file>src/interfaces/YooKassaInterfaceTest.php</file>
+    </testsuite>
     <testsuite name="PriceloaderDataConverter">
       <file>src/PriceloaderDataConverterTest.php</file>
+    </testsuite>
+    <testsuite name="Block_Cart">
+      <file>src/semantic/BlockCartTest.php</file>
+    </testsuite>
+    <testsuite name="ImageLoader">
+      <file>src/semantic/ImageLoaderTest.php</file>
+    </testsuite>
+    <testsuite name="Order">
+      <file>src/semantic/OrderTest.php</file>
+    </testsuite>
+    <testsuite name="PriceLoader">
+      <file>src/semantic/PriceLoaderTest.php</file>
     </testsuite>
     <testsuite name="XmlDataConverter">
       <file>src/XmlDataConverterTest.php</file>

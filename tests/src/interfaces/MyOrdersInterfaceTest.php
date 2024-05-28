@@ -17,6 +17,10 @@ use RAAS\CMS\User;
 class MyOrdersInterfaceTest extends BaseTest
 {
     public static $tables = [
+        'cms_access',
+        'cms_access_blocks_cache',
+        'cms_blocks',
+        'cms_blocks_pages_assoc',
         'cms_data',
         'cms_fields',
         'cms_forms',
@@ -42,6 +46,19 @@ class MyOrdersInterfaceTest extends BaseTest
         $this->assertEquals(1, $result->id);
 
         Controller_Frontend::i()->user = new User();
+    }
+
+    /**
+     * Тест получения пользователя - случай с анонимным пользователем
+     */
+    public function testGetUserWithoutUser()
+    {
+        Controller_Frontend::i()->user = new User();
+        $interface = new MyOrdersInterface();
+
+        $result = $interface->getUser(true);
+
+        $this->assertNull($result);
     }
 
 
@@ -230,23 +247,27 @@ class MyOrdersInterfaceTest extends BaseTest
             'post_date' => date('Y-m-d H:i:s'),
         ]);
         $order->commit();
+        $block = new Block_PHP(['cats' => 1]);
+        $block->commit();
         $id = (int)$order->id;
         $interface = new MyOrdersInterface(
-            new Block_PHP(),
+            $block,
             new Page(1),
             ['action' => 'delete', 'id' => $id],
-            ['AJAX' => 1]
+            ['AJAX' => $block->id]
         );
 
         $this->assertEquals($id, $order->id);
 
         $result = $interface->process();
 
-        $this->assertEquals(['success' => true], $result);
+        $this->assertEquals(['success' => true, 'Set' => []], $result);
 
         $order = new Order($id);
         $this->assertEmpty($order->id);
+
         Controller_Frontend::i()->user = new User();
+        Block_PHP::delete($block);
     }
 
 

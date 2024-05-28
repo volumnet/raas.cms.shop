@@ -2,6 +2,8 @@
 /**
  * Загрузчик прайс-листов
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\SOME;
@@ -128,7 +130,7 @@ class PriceLoader extends SOME
      *     'tmp_name' => string Путь к загруженному временному файлу,
      *     'type' => string MIME-тип
      * ]</pre>
-     * @param Page|null $Page Корневая страница для загрузки
+     * @param Page|null $page Корневая страница для загрузки
      * @param bool $test Тестовый режим
      * @param int|bool $clear Режим очистки неиспользуемых товаров/страниц
      * @param int|null $rows Отступ строк
@@ -136,26 +138,26 @@ class PriceLoader extends SOME
      */
     public function upload(
         array $file = null,
-        Page $Page = null,
+        Page $page = null,
         $test = false,
         $clear = false,
         $rows = null,
         $cols = null
     ) {
         $Loader = $this;
-        if ($Page === null) {
-            $Page = $Loader->Page;
+        if ($page === null) {
+            $page = $this->Page;
         }
         if ($rows === null) {
-            $rows = $Loader->rows;
+            $rows = $this->rows;
         }
         if ($cols === null) {
-            $cols = $Loader->cols;
+            $cols = $this->cols;
         }
         $out = $this->Interface->process([
             'Loader' => $this,
             'file' => $file,
-            'Page' => $Page,
+            'Page' => $page,
             'test' => $test,
             'clear' => $clear,
             'rows' => $rows,
@@ -167,17 +169,17 @@ class PriceLoader extends SOME
 
     /**
      * Выгрузить прайс
-     * @param Page|null $Page Корневая страница для загрузки
+     * @param Page|null $page Корневая страница для загрузки
      * @param int|null $rows Отступ строк
      * @param int|null $cols Отступ колонок
      * @param string $type Тип выгружаемого файла
      * @param string $encoding Кодировка
      */
-    public function download(Page $Page, $rows = 0, $cols = 0, $type = null, $encoding = null)
+    public function download(Page $page = null, $rows = 0, $cols = 0, $type = null, $encoding = null)
     {
         $Loader = $this;
-        if ($Page === null) {
-            $Page = $Loader->Page;
+        if ($page === null) {
+            $page = $Loader->Page;
         }
         if ($rows === null) {
             $rows = $Loader->rows;
@@ -187,7 +189,7 @@ class PriceLoader extends SOME
         }
         $out = $this->Interface->process([
             'Loader' => $this,
-            'Page' => $Page,
+            'Page' => $page,
             'rows' => $rows,
             'cols' => $cols,
             'type' => $type,

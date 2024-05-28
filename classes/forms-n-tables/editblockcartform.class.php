@@ -1,4 +1,9 @@
 <?php
+/**
+ * Форма редактирования блока корзины
+ */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Field as RAASField;
@@ -7,6 +12,9 @@ use RAAS\CMS\Form as CMSForm;
 use RAAS\CMS\EditBlockForm;
 use RAAS\CMS\Snippet;
 
+/**
+ * Форма редактирования блока корзины
+ */
 class EditBlockCartForm extends EditBlockForm
 {
     protected static $currencies = ['RUR', 'USD', 'EUR', 'UAH', 'BYR', 'KZT'];
@@ -18,45 +26,48 @@ class EditBlockCartForm extends EditBlockForm
     }
 
 
-    protected function getInterfaceField()
+    protected function getInterfaceField(): RAASField
     {
         $field = parent::getInterfaceField();
         $snippet = Snippet::importByURN('__raas_shop_cart_interface');
         if ($snippet && $snippet->id) {
             $field->default = $snippet->id;
+        // @codeCoverageIgnoreStart
+        // Fallback, невозможно проверить при наличии __raas_shop_cart_interface
         } else {
             $snippet = Snippet::importByURN('cart_interface');
             if ($snippet && $snippet->id) {
                 $field->default = $snippet->id;
             }
         }
+        // @codeCoverageIgnoreEnd
         return $field;
     }
 
 
-    protected function getCommonTab()
+    protected function getCommonTab(): FormTab
     {
         $tab = parent::getCommonTab();
-        $tab->children[] = new RAASField([
+        $tab->children['cart_type'] = new RAASField([
             'type' => 'select',
             'name' => 'cart_type',
             'caption' => Module::i()->view->_('CART'),
             'children' => ['Set' => Cart_Type::getSet()],
         ]);
-        $tab->children[] = $this->getWidgetField();
+        $tab->children['widget_id'] = $this->getWidgetField();
         return $tab;
     }
 
 
-    protected function getServiceTab()
+    protected function getServiceTab(): FormTab
     {
         $tab = parent::getServiceTab();
-        $tab->children[] = $this->getInterfaceField();
+        $tab->children['interface_id'] = $this->getInterfaceField();
         return $tab;
     }
 
 
-    protected function getEPayTab()
+    protected function getEPayTab(): FormTab
     {
         $tab = new FormTab([
             'name' => 'epay',
@@ -111,7 +122,7 @@ class EditBlockCartForm extends EditBlockForm
     }
 
 
-    protected function getEPayField()
+    protected function getEPayField(): RAASField
     {
         $field = $this->getInterfaceField();
         $field->required = false;

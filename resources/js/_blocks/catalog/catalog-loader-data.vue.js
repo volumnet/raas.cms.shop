@@ -117,6 +117,7 @@ export default {
                 $.scrollTo(this.scrollToSelector || this.$el, 500);
             }
             $(document).trigger('raas.shop.catalog-ready');
+            $(document).trigger('raas.shop.catalog-loaded', result);
             this.$emit('catalogloaded', result);
             if (writeToHistory) {
                 window.history.pushState({}, document.title, url);

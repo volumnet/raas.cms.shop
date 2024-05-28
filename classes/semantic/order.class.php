@@ -2,6 +2,8 @@
 /**
  * Заказ
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\SOME;
@@ -131,15 +133,9 @@ class Order extends Feedback
             static::$SQL->query($sqlQuery);
             $arr = [];
             foreach ($this->meta_items as $i => $row) {
-                $arr[] = array_merge(
-                    ['order_id' => (int)$this->id, 'priority' => $i + 1],
-                    (array)$row
-                );
+                $arr[] = array_merge(['order_id' => (int)$this->id, 'priority' => $i + 1], (array)$row);
             }
-            static::$SQL->add(
-                static::_dbprefix() . "cms_shop_orders_goods",
-                $arr
-            );
+            static::$SQL->add(static::_dbprefix() . "cms_shop_orders_goods", $arr);
             unset($this->meta_items);
         }
     }
@@ -203,9 +199,9 @@ class Order extends Feedback
      *                'amount' => int Количество
      *            ]>
      *        > $items Список товаров
-     * @return array<string>
+     * @return string[]
      */
-    public static function getItemsTextArr(array $items = [])
+    public static function getItemsTextArr(array $items = []): array
     {
         $arr = [];
         foreach ($items as $item) {
@@ -227,8 +223,29 @@ class Order extends Feedback
 
     /**
      * Уведомить пользователя об изменении статуса
+     * @param bool $debug Режим отладки
+     * @return array|null <pre><code>array<
+     *    'emails' => [
+     *        'emails' => array<string> e-mail адреса,
+     *        'subject' => string Тема письма,
+     *        'message' => string Тело письма,
+     *        'from' => string Поле "от",
+     *        'fromEmail' => string Обратный адрес,
+     *        'attachments' => array<[
+     *            'tmp_name' => string Путь к реальному файлу,
+     *            'type' => string MIME-тип файла,
+     *            'name' => string Имя файла
+     *        ]> вложения,
+     *        'embedded' => array<[
+     *            'tmp_name' => string Путь к реальному файлу,
+     *            'type' => string MIME-тип файла,
+     *            'name' => string Имя файла
+     *        ]> встроенные файлы,
+     *    ],
+     *    'smsPhones' => array<string URL SMS-шлюза>
+     * >|null</code></pre> Набор отправляемых писем либо URL SMS-шлюза (только в режиме отладки)
      */
-    public function notifyStatus()
+    public function notifyStatus($debug = false)
     {
         $dataArr = ['ID' => (int)$this->id];
         $emails = [];
@@ -263,16 +280,33 @@ class Order extends Feedback
             $message = Text::inlineCSS($processEmbedded['message']);
             $embedded = (array)$processEmbedded['embedded'];
 
-            Application::i()->sendmail(
-                $emails,
-                $subject,
-                $message,
-                ViewSub_Orders::i()->_('ADMINISTRATION_OF_SITE') . ' ' . Controller_Frontend::i()->idnHost,
-                'info@' . $_SERVER['HTTP_HOST'],
-                true,
-                [],
-                $embedded
-            );
+            $fromName = ViewSub_Orders::i()->_('ADMINISTRATION_OF_SITE') . ' ' . Controller_Frontend::i()->idnHost;
+
+            if ($debug) {
+                $debugMessages['emails'] = [
+                    'emails' => $emails,
+                    'subject' => $subject,
+                    'message' => $message,
+                    'from' => $fromName,
+                    'fromEmail' => null,
+                    'attachments' => [],
+                    'embedded' => $embedded,
+                ];
+                return $debugMessages;
+            } else {
+                // @codeCoverageIgnoreStart
+                Application::i()->sendmail(
+                    $emails,
+                    $subject,
+                    $message,
+                    ViewSub_Orders::i()->_('ADMINISTRATION_OF_SITE') . ' ' . Controller_Frontend::i()->idnHost,
+                    null,
+                    true,
+                    [],
+                    $embedded
+                );
+                // @codeCoverageIgnoreEnd
+            }
         }
     }
 
@@ -280,22 +314,18 @@ class Order extends Feedback
     /**
      * Находит заказ по ID# оплаты и платежному интерфейсу
      * @param string $paymentId ID# оплаты
-     * @param Snippet|null $paymentInterface Интерфейс оплаты
-     *                                       (для дополнительной проверки)
-     * @return Order|null Возвращает найденный заказ,
-     *                    либо null, если ничего не найдено
+     * @param Snippet|null $paymentInterface Интерфейс оплаты (для дополнительной проверки)
+     * @return Order|null Возвращает найденный заказ, либо null, если ничего не найдено
      */
-    public static function importByPayment(
-        $paymentId,
-        Snippet $paymentInterface = null
-    ) {
+    public static function importByPayment($paymentId, Snippet $paymentInterface = null)
+    {
         if (!$paymentId) {
             return null;
         }
         $sqlQuery = "SELECT * FROM " . static::_tablename()
                   . " WHERE payment_id = ?";
         $sqlBind = [$paymentId];
-        if ($paymentInterface->id) {
+        if ($paymentInterface && $paymentInterface->id) {
             $sqlQuery .= " AND payment_interface_id = ?";
             $sqlBind[] = (int)$paymentInterface->id;
         }

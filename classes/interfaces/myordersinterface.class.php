@@ -2,6 +2,8 @@
 /**
  * Интерфейс сервиса "Мои заказы"
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\HTTP;
@@ -107,11 +109,17 @@ class MyOrdersInterface extends AbstractInterface
      * @return User|null Возвращает пользователя, либо null в режиме отладки,
      *                   если пользователь не авторизован
      */
-    public function getUser()
+    public function getUser(bool $debug = false)
     {
         $user = RAASControllerFrontend::i()->user;
         if (!$user->id) {
-            new Redirector('/');
+            if ($debug) {
+                return null;
+            // @codeCoverageIgnoreStart
+            } else {
+                new Redirector('/');
+            }
+            // @codeCoverageIgnoreEnd
         }
         return $user;
     }
@@ -150,9 +158,11 @@ class MyOrdersInterface extends AbstractInterface
             Order::delete($order);
             $ok = true;
         }
+        // @codeCoverageIgnoreStart
         if ($redirectURL) {
             new Redirector($redirectURL);
         }
+        // @codeCoverageIgnoreEnd
         return $ok;
     }
 

@@ -2,6 +2,8 @@
 /**
  * Команда проверки оплаты Сбербанка
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use Exception;
@@ -24,7 +26,7 @@ class SberbankCheckPaymentCommand extends Command
     {
         $sqlQuery = "SELECT *
                        FROM " . Order::_tablename()
-                  . " WHERE payment_id
+                  . " WHERE payment_id != ''
                         AND payment_interface_id
                         AND payment_url LIKE '%securecardpayment%'
                         AND NOT paid
@@ -42,7 +44,7 @@ class SberbankCheckPaymentCommand extends Command
             if ($blockId) {
                 $block = Block::spawn($blockId);
                 if ($block instanceof Block_Cart) {
-                    $sber = new SberbankInterface($block);
+                    $sber = $this->getInterface($block);
                 }
             }
             if (!$sber) {
@@ -82,5 +84,14 @@ class SberbankCheckPaymentCommand extends Command
 
             $this->controller->doLog($logMessage);
         }
+    }
+
+
+    /**
+     * Получает платежный интерфейс для блока
+     */
+    public function getInterface(Block_Cart $block)
+    {
+        return new SberbankInterface($block);
     }
 }

@@ -2,6 +2,8 @@
 /**
  * Файл трейта наследования полей страницы
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Field;

@@ -49,6 +49,8 @@ export default {
             translations, // Переводы
             step: 0, // Шаг формы
             orderId: null, // ID# заказа
+            formData: (typeof this.initialFormData == 'object') ? this.initialFormData : {}, 
+            // 2024-05-20, AVS: Здесь как раз нужна привязка объекта, в отличие от AJAXForm, т.к. пробрасывается из Cart
         };
     },
     methods: {

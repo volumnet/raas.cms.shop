@@ -6,6 +6,8 @@
  * @author Alex V. Surnin <info@volumnet.ru>
  * @copyright 2018, Volume Networks
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\Pages;
@@ -364,7 +366,7 @@ class CatalogFilter
                     $bRich = isset($this->richValues[$propId][$b])
                            ? $this->richValues[$propId][$b]
                            : $b;
-                    return strnatcasecmp($aRich, $bRich);
+                    return strnatcasecmp((string)$aRich, (string)$bRich);
                 });
             }
         }
@@ -419,12 +421,12 @@ class CatalogFilter
             $sqlResult = Material::_SQL()->get($sqlQuery);
             $materialsNames = [];
             foreach ($sqlResult as $sqlRow) {
-                $materialsNames[trim($sqlRow['id'])] = $sqlRow['name'];
+                $materialsNames[trim((string)$sqlRow['id'])] = $sqlRow['name'];
             }
             foreach ($materialPropsIds as $propId) {
                 foreach ((array)$result[$propId] as $propValue) {
                     if (isset($materialsNames[$propValue])) {
-                        $result[$propId][trim($propValue)] = $materialsNames[$propValue];
+                        $result[$propId][trim((string)$propValue)] = $materialsNames[$propValue];
                     }
                 }
             }
@@ -602,10 +604,9 @@ class CatalogFilter
         array $catalogGoodsIds
     ) {
         $propsMapping = [];
+        $availabilityProp = null;
         if ($this->useAvailabilityOrder && isset($this->propertiesByURNs[$this->useAvailabilityOrder])) {
             $availabilityProp = $this->propertiesByURNs[$this->useAvailabilityOrder];
-        } else {
-            $availabilityProp = null;
         }
         if ($catalogGoodsIds && $propertiesIds) {
             $sqlQuery = "SELECT *
@@ -614,17 +615,17 @@ class CatalogFilter
                             AND fid IN (" . implode(", ", $propertiesIds) . ")";
             $sqlResult = Material::_SQL()->query($sqlQuery);
             foreach ($sqlResult as $sqlRow) {
-                $value = trim($sqlRow['value']);
+                $value = trim((string)$sqlRow['value']);
                 if ($availabilityProp && ($sqlRow['fid'] == $availabilityProp->id)) {
                     $value = $this->getAvailabilityOrderByValue($value);
                 }
-                $propsMapping[trim($sqlRow['fid'])][$value][(string)$sqlRow['pid']] = (int)$sqlRow['pid'];
+                $propsMapping[trim((string)$sqlRow['fid'])][$value][(string)$sqlRow['pid']] = (int)$sqlRow['pid'];
             }
             // 2019-02-06, AVS: Пока уберем сортировку, сортировать будем
             // в build'е сразу по свойству $this->propsMapping
             // foreach ($propsMapping as $fid => $fieldData) {
             //     uksort($propsMapping[$fid], function ($a, $b) {
-            //         return strnatcasecmp($a, $b);
+            //         return strnatcasecmp((string)$a, (string)$b);
             //     });
             //     // $propsMapping[$fid] = array_map('array_values', $propsMapping[$fid]);
             // }
@@ -661,7 +662,7 @@ class CatalogFilter
      */
     public function getAvailabilityOrderByValue($value): int
     {
-        $result = trim((int)(bool)$value);
+        $result = (int)trim((string)(int)(bool)$value);
         return $result;
     }
 
@@ -723,13 +724,13 @@ class CatalogFilter
                 $prop = $this->propertiesByURNs[$propKey];
                 if (in_array($limitName, ['from', 'to']) && (float)$val) {
                     $filter[$prop->id][$limitName] = (float)$val;
-                } elseif (in_array($limitName, ['like']) && trim($val)) {
-                    $filter[$prop->id][$limitName] = trim($val);
+                } elseif (in_array($limitName, ['like']) && trim((string)$val)) {
+                    $filter[$prop->id][$limitName] = trim((string)$val);
                 }
             } elseif ($prop = ($this->propertiesByURNs[$key] ?? null)) {
                 if ($val = array_values(
                     array_unique(array_filter((array)$val, function ($x) {
-                        return trim($x) !== '';
+                        return trim((string)$x) !== '';
                     }))
                 )) {
                     $filter[$prop->id] = $val;
@@ -961,14 +962,11 @@ class CatalogFilter
     /**
      * Получает канонический URL из фильтра
      * @param array<
-     *            string[] ID# свойства => array<mixed>|
-     *                                     ['from' => float, 'to' => float]|
-     *                                     ['like' => string] значение или набор значений
-     *        > $filter Фильтр для проверки
-     * @param string|null $additionalPropertyURN URN дополнительного свойства
-     *                                           для установки/снятия
-     * @param mixed $additionalValue Дополнительное значение
-     *                               для установки/снятия
+     *     string[] ID# свойства =>
+     *     array<mixed>|['from' => float, 'to' => float]|['like' => string] значение или набор значений
+     * > $filter Фильтр для проверки
+     * @param string|null $additionalPropertyURN URN дополнительного свойства для установки/снятия
+     * @param mixed $additionalValue Дополнительное значение для установки/снятия
      * @param bool $exclusive Использовать только дополнительное свойство
      * @return string
      * @throws Exception Выбрасывает исключение, если категория каталога не установлена
@@ -986,10 +984,7 @@ class CatalogFilter
 
         if ($additionalPropertyURN) {
             $params[$additionalPropertyURN] = (array)$params[$additionalPropertyURN];
-            $additionalKeys = array_keys(
-                (array)$params[$additionalPropertyURN],
-                $additionalValue
-            );
+            $additionalKeys = array_keys((array)$params[$additionalPropertyURN], $additionalValue);
             if ($exclusive) {
                 unset($params[$additionalPropertyURN]);
                 if (!$additionalKeys) {
@@ -1161,9 +1156,9 @@ class CatalogFilter
             if (is_array($currentSort)) {
                 $sortProp = $currentSort[0];
                 $order = $currentSort[1];
-                $regroupFunction = (bool)$currentSort[2];
+                $isRegroupFunction = (bool)($currentSort[2] ?? false);
             } else {
-                $currentSort = trim($currentSort);
+                $currentSort = trim((string)$currentSort);
                 if (($currentSort[0] ?? '') == '!') {
                     $sortProp = mb_substr($currentSort, 1);
                     $order = -1;
@@ -1192,15 +1187,12 @@ class CatalogFilter
             );
             $restGoodsIds = array_diff_key($goodsIds, $refGoodsIds);
             $referencedPropMapping[''] = (array)($referencedPropMapping[''] ?? []) + $restGoodsIds;
-            if ($order == -1) {
-                krsort($referencedPropMapping, SORT_NATURAL);
-                // $referencedPropMapping = array_reverse($referencedPropMapping, true);
-            } elseif (is_callable($order)) {
-                if ($regroupFunction) {
+            if (is_callable($order)) {
+                if ($isRegroupFunction) {
                     $regrouped = [];
                     foreach ($referencedPropMapping as $key => $refGoodsIds) {
                         $sortedKey = $order($key);
-                        $regrouped[$sortedKey] = (array)$regrouped[$sortedKey] + $refGoodsIds;
+                        $regrouped[$sortedKey] = (array)($regrouped[$sortedKey] ?? []) + $refGoodsIds;
                     }
                     $regrouped = array_map(
                         function ($x) use ($goodsIds) {
@@ -1214,6 +1206,9 @@ class CatalogFilter
                 } else {
                     uksort($referencedPropMapping, $order);
                 }
+            } elseif ($order == -1) {
+                krsort($referencedPropMapping, SORT_NATURAL);
+                // $referencedPropMapping = array_reverse($referencedPropMapping, true);
             } else {
                 ksort($referencedPropMapping, SORT_NATURAL);
             }
@@ -1475,7 +1470,7 @@ class CatalogFilter
         }
         $tmpFilename = tempnam(sys_get_temp_dir(), 'raas_');
         $data = $this->export();
-        $cacheId = 'RAASCACHE' . date('YmdHis') . md5(rand());
+        $cacheId = 'RAASCACHE' . date('YmdHis') . md5((string)rand());
         $text = '<' . '?php return unserialize(<<' . "<'" . $cacheId . "'\n" . serialize($data) . "\n" . $cacheId . "\n);\n";
         $result = file_put_contents($tmpFilename, $text);
         // 2022-07-07, AVS: сделал условие для удаления файла, убрал @ чтобы видно было ошибки
@@ -1513,7 +1508,7 @@ class CatalogFilter
             throw new Exception('Cannot load filter cache data - filename ' . $filename . ' doesn\'t exist');
         }
         $data = @include $filename;
-        if (!$data) {
+        if (!$data || !is_array($data)) {
             throw new Exception('Cannot load filter cache data - data is empty or invalid');
         }
         $filter = static::import($data);

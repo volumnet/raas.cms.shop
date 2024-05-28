@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Cell\Datatype;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use SOME\BaseTest;
 use RAAS\Exception;
@@ -19,6 +20,61 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
     public static $tables = [
         'cms_pages',
     ];
+
+    /**
+     * Проверка ошибки от 2024-05-02 19:55
+     * $sheet->toArray() иногда выдает некорректные символы UTF8
+     * Нужно их почистить
+     */
+    public function testError202405021955()
+    {
+        $converter = ExcelPriceloaderDataConverter::spawn('xls');
+        $sheet = $this->getMockBuilder(Worksheet::class)
+            ->setMethods([
+                'toArray',
+            ])
+            ->getMock();
+        $sheet->expects($this->once())
+            ->method('toArray')
+            ->willReturn([
+                ["4\xa0000"],
+            ]);
+
+        $result = $converter->getDataFromExcelSheet($sheet);
+
+        $this->assertEquals([
+            ['4 000'],
+        ], $result);
+    }
+
+    /**
+     * Проверка ошибки от 2024-05-02 19:31
+     * $sheet->toArray() иногда выдает текстовое значение #NULL!
+     * Нужно чтобы вместо него попадала пустая строка
+     */
+    public function testError202405021931()
+    {
+        $converter = ExcelPriceloaderDataConverter::spawn('xls');
+        $sheet = $this->getMockBuilder(Worksheet::class)
+            ->setMethods([
+                'toArray',
+            ])
+            ->getMock();
+        $sheet->expects($this->once())
+            ->method('toArray')
+            ->willReturn([
+                ['aaa', 1, '#NULL!', 'ccc'],
+                ['aaa', '#NULL!', 'bbb', 2],
+            ]);
+
+        $result = $converter->getDataFromExcelSheet($sheet);
+
+        $this->assertEquals([
+            ['aaa', '1', '', 'ccc'],
+            ['aaa', '', 'bbb', '2'],
+        ], $result);
+    }
+
 
     /**
      * Тест загрузки данных из файла
@@ -216,7 +272,7 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
         $data = [
             ['Данные 1'],
             ['', 'Данные 2'],
-            ['', '', 'Данные 3']
+            ['', '', 'Данные 3', 3]
         ];
         $workbook = new Spreadsheet();
         $sheet = $workbook->setActiveSheetIndex(0);
@@ -231,5 +287,9 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
         $this->assertTrue($sheet->getCellByColumnAndRow(1, 1)->getStyle()->getFont()->getBold());
         $this->assertEquals('Данные 2', $sheet->getCellByColumnAndRow(2, 2)->getValue());
         $this->assertFalse($sheet->getCellByColumnAndRow(2, 2)->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 3', $sheet->getCellByColumnAndRow(3, 3)->getValue());
+        $this->assertEquals(DataType::TYPE_STRING, $sheet->getCellByColumnAndRow(3, 3)->getDataType());
+        $this->assertEquals(3, $sheet->getCellByColumnAndRow(4, 3)->getValue());
+        $this->assertEquals(DataType::TYPE_NUMERIC, $sheet->getCellByColumnAndRow(4, 3)->getDataType());
     }
 }

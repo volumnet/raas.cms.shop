@@ -2,6 +2,8 @@
 /**
  * Форма редактирования загрузчика прайсов
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Field as RAASField;
@@ -45,7 +47,7 @@ class EditPriceLoaderForm extends RAASForm
      * Получает поле интерфейса
      * @return RAASField
      */
-    protected function getInterfaceField()
+    protected function getInterfaceField(): RAASField
     {
         $wf = function (Snippet_Folder $x) use (&$wf) {
             $temp = [];
@@ -137,7 +139,7 @@ class EditPriceLoaderForm extends RAASForm
                 'caption' => $this->view->_('BREADCRUMBS_NAME')
             ],
         ];
-        if ($item->id) {
+        if ($item && $item->id) {
             $Material_Type = $item->Material_Type;
         } elseif (isset($_POST['mtype'])) {
             $Material_Type = new Material_Type($_POST['mtype']);
@@ -159,7 +161,7 @@ class EditPriceLoaderForm extends RAASForm
         $content['pages'] = ['Set' => $p->children];
 
         $defaultParams = [
-            'caption' => $item->id ? $item->name : $view->_('EDIT_PRICELOADER'),
+            'caption' => ($item && $item->id) ? $item->name : $view->_('EDIT_PRICELOADER'),
             'parentUrl' => Sub_Dev::i()->url . '&action=priceloaders',
             'meta' => ['CONTENT' => $content],
             'children' => [
@@ -317,8 +319,8 @@ class EditPriceLoaderForm extends RAASForm
                                     $row->pid = (int)$fieldSet->Form->Item->id;
                                 }
                                 $row->fid = (string)$_POST['column_fid'][$key];
-                                $row->callback = (string)$_POST['column_callback'][$key];
-                                $row->callback_download = (string)$_POST['column_download_callback'][$key];
+                                $row->callback = (string)($_POST['column_callback'][$key] ?? '');
+                                $row->callback_download = (string)($_POST['column_download_callback'][$key] ?? '');
                                 $row->priority = ++$i;
                                 $Set[] = $row;
                             }

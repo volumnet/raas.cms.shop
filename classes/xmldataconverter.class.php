@@ -2,6 +2,8 @@
 /**
  * Файл конвертера XML-данных
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SimpleXMLElement;
@@ -132,21 +134,21 @@ class XmlDataConverter
             switch ($key) {
                 case 'pages_ids':
                     foreach ($childSxe->children() as $pageIdSxe) {
-                        $pageId = trim($pageIdSxe);
+                        $pageId = trim((string)$pageIdSxe);
                         $data[$key][$pageId] = $pageId;
                     }
                     break;
                 case 'values':
                     foreach ($childSxe->children() as $valueSxe) {
-                        $data['@values'][trim($valueSxe['id'])] = trim($valueSxe);
+                        $data['@values'][trim((string)$valueSxe['id'])] = trim((string)$valueSxe);
                     }
                     break;
                 case 'fields':
                     foreach ($childSxe->children() as $fieldSxe) {
                         $fieldKey = null;
-                        if ($fieldURN = trim($fieldSxe['urn'] ?? '')) {
+                        if ($fieldURN = trim((string)$fieldSxe['urn'] ?? '')) {
                             $fieldKey = $fieldURN;
-                        } elseif ($fieldId = trim($fieldSxe['id'] ?? '')) {
+                        } elseif ($fieldId = trim((string)$fieldSxe['id'] ?? '')) {
                             $fieldKey = 'id:' . $fieldId;
                         }
 
@@ -154,14 +156,14 @@ class XmlDataConverter
                             if ($fieldValuesSxe = $fieldSxe->value) {
                                 // var_dump('aaa'); exit;
                                 foreach ($fieldValuesSxe as $fieldValueSxe) {
-                                    $data['fields'][$fieldKey][] = trim($fieldValueSxe);
+                                    $data['fields'][$fieldKey][] = trim((string)$fieldValueSxe);
                                 }
                             } else {
-                                $data['fields'][$fieldKey] = trim($fieldSxe);
+                                $data['fields'][$fieldKey] = trim((string)$fieldSxe);
                             }
 
                             foreach (['create', 'update'] as $configKey) {
-                                if ($configVal = trim($fieldSxe[$configKey] ?? '')) {
+                                if ($configVal = trim((string)$fieldSxe[$configKey] ?? '')) {
                                     $data['@config'][$configKey][$fieldKey] = !in_array(
                                         $configVal,
                                         ['0', 'false', '-1', 'no']
@@ -172,7 +174,7 @@ class XmlDataConverter
                     }
                     break;
                 default:
-                    $data[$key] = trim($childSxe);
+                    $data[$key] = trim((string)$childSxe);
                     break;
             }
             foreach (['create', 'update', 'map'] as $configKey) {
@@ -202,7 +204,7 @@ class XmlDataConverter
     {
         $newData = $data;
         foreach ($sxeArr as $sxe) {
-            $id = trim($sxe->id);
+            $id = trim((string)$sxe->id);
             $entry = isset($data[$id]) ? $data[$id] : [];
             $arr = $this->parseXMLNode($sxe, $entry);
             $newData[$arr['id']] = $arr;

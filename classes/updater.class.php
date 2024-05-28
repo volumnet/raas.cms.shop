@@ -403,9 +403,13 @@ class Updater extends \RAAS\Updater
             ['table' => 'cms_shop_blocks_yml_params', 'field' => 'field_callback', 'comment' => 'Field callback'],
             ['table' => 'cms_shop_blocks_yml_material_types_assoc', 'field' => 'params_callback', 'comment' => 'Params callback'],
         ] as $fieldData) {
-            $sqlQuery = "ALTER TABLE `" . SOME::_dbprefix() . $fieldData['table'] . "`
-                        CHANGE `" . $fieldData['field'] . "` `" . $fieldData['field'] . "` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '" . $fieldData['comment'] . "'";
-            $this->SQL->query($sqlQuery);
+            if (in_array(SOME::_dbprefix() . $fieldData['table'], $this->tables) &&
+                in_array($fieldData['field'], $this->columns(SOME::_dbprefix() . $fieldData['table']))
+            ) {
+                $sqlQuery = "ALTER TABLE `" . SOME::_dbprefix() . $fieldData['table'] . "`
+                            CHANGE `" . $fieldData['field'] . "` `" . $fieldData['field'] . "` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '" . $fieldData['comment'] . "'";
+                $this->SQL->query($sqlQuery);
+            }
         }
     }
 }

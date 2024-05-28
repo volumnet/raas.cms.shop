@@ -2,6 +2,8 @@
 /**
  * Файл конвертера CSV для загрузчика прайсов
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\CSV;
@@ -18,7 +20,7 @@ class CSVPriceloaderDataConverter extends PriceloaderDataConverter
         if ($encoding != 'UTF-8') {
             $text = @(iconv($encoding, 'UTF-8', $text) ?? '');
         }
-        $csv = new CSV(trim($text));
+        $csv = new CSV(trim((string)$text));
         $data = $csv->data;
         return $data;
     }

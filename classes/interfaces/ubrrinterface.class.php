@@ -2,9 +2,12 @@
 /**
  * Файл класса интерфейса электронной оплаты через Уральский банк реконструкции и развития
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SimpleXMLElement;
+use SOME\Text;
 use RAAS\Application;
 use RAAS\Exception;
 use RAAS\CMS\Material;
@@ -13,9 +16,18 @@ use RAAS\CMS\Snippet;
 
 /**
  * Класс интерфейса электронной оплаты через Уральский банк реконструкции и развития
+ * @deprecated 2024-05-01, AVS: Используется API PayKeeper
  */
 class UBRRInterface extends EPayInterface
 {
+    const EPAY_URN = 'ubrr';
+
+    const BANK_NAME = 'УБРиР';
+
+    const REQUEST_STATUS_HOLD = 'APPROVED';
+
+    const REQUEST_STATUS_PAID = 'PREAUTH-APPROVED';
+
     /**
      * Значение поля Status при создании заказа: успешно
      */
@@ -55,125 +67,22 @@ class UBRRInterface extends EPayInterface
     const CURRENCY_USD = 840;
 
     /**
-     * Обработка интерфейса
-     * @param Order $order Текущий заказ, для которого осуществляем обработку
-     * @return [
-     *             'epayWidget' ?=> Snippet Виджет оплаты
-     *             'Item' ?=> Order Текущий заказ
-     *             'success' ?=> array<int[] ID# блока => сообщение об успешной операции>,
-     *             'localError' ?=> array<string[] URN поля ошибки => сообщение об ошибке>,
-     *             'paymentURL' ?=> string Платежный URL,
-     *         ]
-     */
-    public function process(Order $order = null)
-    {
-        $out = [];
-        try {
-            if (in_array($this->get['action'], ['result', 'fail']) ||
-                ($order->id && $this->post['epay'])
-            ) {
-                if (in_array($this->get['action'], ['result', 'fail'])) {
-                    if (!($order && $order->id) && $this->session['orderId']) {
-                        $order = new Order($this->session['orderId']);
-                    }
-                }
-                switch ($this->get['action']) {
-                    case 'result':
-                        $out = $this->result(
-                            $order,
-                            $this->block,
-                            $this->page,
-                            $this->session
-                        );
-                        break;
-                    case 'fail':
-                        $out = $this->fail(
-                            $order,
-                            $this->block,
-                            $this->page,
-                            $this->session
-                        );
-                        break;
-                    default:
-                        $out = $this->init($order, $this->block, $this->page);
-                        break;
-                }
-                $out['epayWidget'] = $this->getEPayWidget();
-                if ($order->id) {
-                    $out['Item'] = $order;
-                }
-            }
-        } catch (Exception $exception) {
-            $out['localError'] = [
-                'order' => $exception->getMessage()
-                        .  (
-                                $exception->getCode() ?
-                                ' #' . $exception->getCode() :
-                                ''
-                            )
-            ];
-        }
-        return $out;
-    }
-
-
-    /**
      * Проверка заказа
      * @param Order $order Заказ для проверки
      * @param Block_Cart $block Блок настроек
-     * @param Page $page Страница, относительно которой совершается проверка
-     * @param array $session Данные сессии
+     * @param Page $page Текущая страница
      * @return [
      *             'success' ?=> array<int[] ID# блока => сообщение об успешной операции>,
      *             'localError' ?=> array<string[] URN поля ошибки => сообщение об ошибке>
      *         ]
      */
-    public function result(
-        Order $order,
-        Block_Cart $block,
-        Page $page,
-        array $session = []
-    ) {
-        if ($session['ubrrOrderId'] && $session['ubrrSession'] && $order->id) {
+    public function result(Order $order, Block_Cart $block, Page $page): array
+    {
+        if ($this->session['ubrrSession'] ?? null) {
             if ($block->epay_test) {
-                file_put_contents(
-                    'ubrr.log',
-                    date('Y-m-d H:i:s ') . 'result: ' .
-                    $session['ubrrOrderId'] . ' / ' . $session['ubrrSession'] .
-                    "\n",
-                    FILE_APPEND
-                );
+                $this->doLog('UBRR Session ID: ' . $this->session['ubrrSession']);
             }
-            $orderIsPaid = $this->getOrderIsPaid(
-                $order,
-                $block,
-                $page,
-                $session
-            );
-            if ($orderIsPaid) {
-                $history = new Order_History();
-                $history->uid = Application::i()->user->id;
-                $history->order_id = (int)$order->id;
-                $history->status_id = (int)$order->status_id;
-                $history->paid = 1;
-                $history->post_date = date('Y-m-d H:i:s');
-                $history->description = 'Оплачено через интернет-эквайринг УБРиР'
-                                      . ' (ID# заказа в системе банка: '
-                                      . $session['ubrrOrderId']
-                                      . ')';
-                $history->commit();
-
-                $order->paid = 1;
-                $order->commit();
-                $out['success'][(int)$block->id] = sprintf(
-                    ORDER_SUCCESSFULLY_PAID,
-                    $order->id
-                );
-            } else {
-                $out['localError'] = [
-                    'order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)
-                ];
-            }
+            $out = parent::result($order, $block, $page);
         } else {
             $out['localError'] = ['order' => INVALID_CRC];
         }
@@ -182,141 +91,86 @@ class UBRRInterface extends EPayInterface
 
 
     /**
-     * Обработка неудачного завершения
-     * @param Order $order Заказ для проверки
-     * @param Block_Cart $block Блок настроек
-     * @param Page $page Страница, относительно которой совершается проверка
-     * @param array $session Данные сессии
-     * @return [
-     *             'localError' ?=> array<string[] URN поля ошибки => сообщение об ошибке>
-     *         ]
-     */
-    public function fail(
-        Order $order,
-        Block_Cart $block,
-        Page $page,
-        array $session = []
-    ) {
-        if ($block->epay_test) {
-            file_put_contents(
-                'ubrr.log',
-                date('Y-m-d H:i:s ') . 'fail: ' .
-                $session['ubrrOrderId'] . ' / ' . $session['ubrrSession'] .
-                "\n",
-                FILE_APPEND
-            );
-            $orderIsPaid = $this->getOrderIsPaid(
-                $order,
-                $block,
-                $page,
-                $session
-            );
-        }
-        $out = [];
-        $out['localError']['order'] = sprintf(
-            ORDER_HAS_NOT_BEEN_PAID,
-            $order->id
-        );
-        return $out;
-    }
-
-
-    /**
-     * Инициализация заказа
-     * @param Order $order Заказ для проверки
-     * @param Block_Cart $block Блок настроек
-     * @param Page $page Страница, относительно которой совершается проверка
-     * @return [
-     *             'paymentURL' ?=> string Платежный URL,
-     *         ]
-     */
-    public function init(Order $order, Block_Cart $block, Page $page)
-    {
-        $out = [];
-        $_SESSION['orderId'] = $order->id;
-        $response = $this->registerOrder($order, $block, $page);
-        $orderId = $response['Order']['OrderID'];
-        $sessionId = $response['Order']['SessionID'];
-        $out['paymentURL'] = $response['Order']['URL']
-                           . '?ORDERID=' . urlencode($orderId)
-                           . '&SESSIONID=' . urlencode($sessionId);
-        $out['requestForPayment'] = true;
-        $_SESSION['ubrrSession'] = $sessionId;
-        $_SESSION['ubrrOrderId'] = $orderId;
-        if ($block->epay_test) {
-            file_put_contents(
-                'ubrr.log',
-                date('Y-m-d H:i:s ') . 'init: ' . $orderId . ' / ' .
-                $sessionId . "\n",
-                FILE_APPEND
-            );
-        }
-        return $out;
-    }
-
-
-    /**
      * Обращается к интерфейсу банка
-     * @param string $xml XML-сообщение для отправки банку
-     * @param Block_Cart $block Блок с настройками
-     * @return string XML-сообщение ответа
+     * @param string $method Метод для обращения
+     * @param array $requestData Данные запроса
+     * @param bool $isTest Тестовый режим
+     * @param string $certPass Пароль сертификата
+     * @return array Данные ответа
+     * @codeCoverageIgnore Не смогу получить многие данные из-за отсутствия валидного сертификата для тестирования
      */
-    public function exec($xml, Block_Cart $block)
+    public function exec(string $method, array $requestData = [], bool $isTest = false, string $certPass = ''): array
     {
-        // file_put_contents(
-        //     'ubrr.log',
-        //     date('Y-m-d H:i:s ') . 'exec XML: ' .
-        //     $session['ubrrOrderId'] . ' / ' . $session['ubrrSession'] .
-        //     "\n" . $xml . "\n",
-        //     FILE_APPEND
-        // );
-        $isTest = (bool)(int)$block->epay_test;
+        $data = ['TKKPG' => ['Request' => array_merge(['Operation' => $method], $requestData)]];
+
+        $xml = $this->arrayToXML($data);
         $url = $this->getURL($isTest);
 
-        // корневой сертификат банка
-        $caFile = $this->getBankCertificate();
-        // сертификат торговца
-        $certFile = $this->getClientCertificate();
-        // ключ сертификата
-        $keyFile = $this->getClientKey();
-        // пароль ключа (если есть)
-        $privateCertPass = $block->epay_pass1;
+
+        $caFile = $this->getBankCertificate(); // корневой сертификат банка
+        $certFile = $this->getClientCertificate(); // сертификат торговца
+        $keyFile = $this->getClientKey(); // ключ сертификата
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_POST, 1);
-        if (is_file($caFile)) {
+        if ($caFile && is_file($caFile)) {
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 1);
             curl_setopt($ch, CURLOPT_CAINFO, $caFile);
         }
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
 
         curl_setopt($ch, CURLOPT_POST, 1);
-        if (is_file($certFile)) {
+        if ($certFile && is_file($certFile)) {
             curl_setopt($ch, CURLOPT_SSLCERT, $certFile);
         }
-        if (is_file($keyFile)) {
+        if ($keyFile && is_file($keyFile)) {
             curl_setopt($ch, CURLOPT_SSLKEY, $keyFile);
         }
-        if ($privateCertPass) {
-            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $privateCertPass);
+        if ($certPass) {
+            curl_setopt($ch, CURLOPT_SSLCERTPASSWD, $certPass);
         }
         curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_VERBOSE, 1);
+        // curl_setopt($ch, CURLOPT_VERBOSE, 1); // Для проверки - вывод в stdout
         // ответ TWPG
-        $result = curl_exec($ch);
+        $response = curl_exec($ch);
+        if ($isTest) {
+            $this->doLogRequest($url, $xml, (string)$response);
+        }
         // 0 - успешное выполнение запроса
         $errorCode = (int)curl_errno($ch);
-        // file_put_contents(
-        //     'ubrr.log',
-        //     date('Y-m-d H:i:s ') . 'exec RESPONSE: ' .
-        //     $result . "\n" . $errorCode . "\n",
-        //     FILE_APPEND
-        // );
         if ($errorCode) {
-            throw new Exception('cURL error: ' . curl_error($ch), $errorCode);
+            $result['errorCode'] = $errorCode;
+            $result['errorMessage'] = 'cURL error: ' . curl_error($ch);
+            return $result;
         }
 
+        $sxe = new SimpleXMLElement($response);
+        $sxeResponse = $sxe->Response;
+        $result = [];
+        if (trim((string)$sxeResponse->Status) == static::REQUEST_STATUS_SUCCESS) {
+            $result = $this->sxeToArray($sxeResponse);
+            unset($result['Status'], $result['Operation']);
+        } else {
+            $result['errorCode'] = (int)$sxeResponse->Status;
+            switch (trim((string)$sxeResponse->Status)) {
+                case static::REQUEST_STATUS_INVALID_FORMAT:
+                    $result['errorMessage'] = 'Invalid format';
+                    break;
+                case static::REQUEST_STATUS_ACCESS_DENIED:
+                    $result['errorMessage'] = 'Access denied';
+                    break;
+                case static::REQUEST_STATUS_INVALID_OPERATION:
+                    $result['errorMessage'] = 'Invalid operation';
+                    break;
+                case static::REQUEST_STATUS_SYSTEM_ERROR:
+                    $result['errorMessage'] = 'System error';
+                    break;
+                default:
+                    $result['errorMessage'] = 'Unknown error';
+                    break;
+            }
+        }
         return $result;
     }
 
@@ -327,7 +181,7 @@ class UBRRInterface extends EPayInterface
      */
     public function getBankCertificate()
     {
-        $caFile = realpath('../bank.crt');
+        $caFile = realpath(Application::i()->baseDir . '/../bank.crt');
         return $caFile;
     }
 
@@ -338,7 +192,7 @@ class UBRRInterface extends EPayInterface
      */
     public function getClientCertificate()
     {
-        $certFile = realpath('../user.crt');
+        $certFile = realpath(Application::i()->baseDir . '/../user.crt');
         return $certFile;
     }
 
@@ -349,19 +203,12 @@ class UBRRInterface extends EPayInterface
      */
     public function getClientKey()
     {
-        $keyFile = realpath('../user.key');
+        $keyFile = realpath(Application::i()->baseDir . '/../user.key');
         return $keyFile;
     }
 
 
-
-    /**
-     * Получает URL API банка
-     * @param bool $isTest Тестовый режим
-     * @return string
-     * @todo
-     */
-    public function getURL($isTest = false)
+    public function getURL(bool $isTest = false): string
     {
         if ($isTest) {
             $url = 'https://91.208.121.69:7443/Exec';
@@ -373,98 +220,113 @@ class UBRRInterface extends EPayInterface
 
 
     /**
-     * Является ли статус успешным
-     * @param string $status Внутреннее представление статуса
-     * @return bool
-     */
-    public function isSuccessfulStatus($status)
-    {
-        return in_array($status, ['APPROVED', 'PREAUTH-APPROVED']);
-    }
-
-
-    /**
      * Получение XML для регистрации заказа
      * @param Order $order Заказ для регистрации
      * @param Block_Cart $block Блок настроек
      * @param Page $page Страница, относительно которой совершается проверка
      * @param string $emailField URN поля E-mail
      * @param string $phoneField URN поля Телефон
-     * @return string
+     * @return array
      */
-    public function getRegisterOrderXML(
+    public function getRegisterOrderData(
         Order $order,
         Block_Cart $block,
         Page $page,
         $emailField = 'email',
         $phoneField = 'phone'
-    ) {
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-             . '<TKKPG>'
-             .   '<Request>'
-             .     '<Operation>CreateOrder</Operation>'
-             .     '<Language>' . mb_strtoupper($page->lang) . '</Language>'
-             .     '<Order>'
-             .       '<OrderType>Purchase</OrderType>'
-             .       '<Merchant>'
-             .         htmlspecialchars($block->epay_login)
-             .       '</Merchant>'
-             .       '<Amount>'
-             .         ceil($order->sum * 100)
-             .       '</Amount>'
-             .       '<Currency>'
-             .         $this->getCurrency($block->epay_currency)
-             .       '</Currency>'
-             .       '<Description>'
-             .         htmlspecialchars($this->getOrderDescription($order))
-             .       '</Description>'
-             .       '<ApproveURL>'
-             .         htmlspecialchars($this->getCurrentHostURL() . $page->url)
-             .         '?action=result'
-             .       '</ApproveURL>'
-             .       '<CancelURL>'
-             .         htmlspecialchars($this->getCurrentHostURL() . $page->url)
-             .         '?action=fail'
-             .       '</CancelURL>'
-             .       '<DeclineURL>'
-             .         htmlspecialchars($this->getCurrentHostURL() . $page->url)
-             .         '?action=fail'
-             .       '</DeclineURL>';
+    ): array {
+        $pageURL = htmlspecialchars($this->getCurrentHostURL() . $page->url);
+        $result = [
+            'Language' => mb_strtoupper($page->lang) ?: 'RU',
+            'Order' => [
+                'OrderType' => 'Purchase',
+                'Merchant' => $block->epay_login,
+                'Amount' => ceil($order->sum * 100),
+                'Currency' => $this->getCurrency($block->epay_currency),
+                'Description' => $this->getOrderDescription($order),
+                'ApproveURL' => $pageURL . 'result/',
+                'CancelURL' => $pageURL . 'result/',
+                'DeclineURL' => $pageURL . 'result/',
+            ],
+        ];
         $faData = [];
         if ($emailField && ($email = $order->$emailField)) {
-            $xml .=  '<email>' . htmlspecialchars($email) . '</email>';
+            $result['Order']['email'] = $email;
             $faData[] = 'Email=' . htmlspecialchars($email);
         }
         if ($phoneField && ($phone = $order->$phoneField)) {
-            $xml .=  '<phone>' . htmlspecialchars($phone) . '</phone>';
+            $phone = Text::beautifyPhone($phone, 11);
+            $result['Order']['phone'] = $phone;
             $faData[] = 'Phone=' . htmlspecialchars($phone);
         }
         if ($faData) {
-            $xml .=  '<AddParams>'
-                 .     '<FA-DATA>' . implode('; ', $faData) . '</FA-DATA>'
-                 .   '</AddParams>';
+            $result['Order']['AddParams']['FA-DATA'] = implode('; ', $faData);
         }
-        $xml .=    '</Order>'
-             .   '</Request>'
-             . '</TKKPG>';
-        return $xml;
+        return $result;
     }
 
 
-    /**
-     * Регистрирует заказ
-     * @param Order $order Заказ для регистрации
-     * @param Block_Cart $block Блок настроек
-     * @param Page $page Страница, относительно которой совершается проверка
-     * @return array Ответ сервера
-     * @throws Exception Ошибка при выполнении
-     */
-    public function registerOrder(Order $order, Block_Cart $block, Page $page)
+    public function registerOrderWithData(Order $order, Block_Cart $block, Page $page, array $data): array
     {
-        $xml = $this->getRegisterOrderXML($order, $block, $page);
-        $responseXML = $this->exec($xml, $block);
-        $response = $this->parseResponseXML($responseXML);
+        $response = $this->exec('CreateOrder', $data, (bool)$block->epay_test, (string)$block->epay_pass1);
         return $response;
+    }
+
+
+    public function parseResponseCommonErrors(array $response): array
+    {
+        $result = [];
+        if ($response['errorCode'] ?? null) {
+            $result[] = ['code' => $response['errorCode'], 'message' => ($response['errorMessage'] ?? '')];
+        }
+        return $result;
+    }
+
+
+    public function parseInitResponse(array $response): array
+    {
+        $result = ['errors' => $this->parseResponseCommonErrors($response)];
+        if (($paymentId = $response['Order']['OrderID'] ?? null) &&
+            ($sessionId = $response['Order']['SessionID'] ?? null) &&
+            ($responseURL = $response['Order']['URL'] ?? null)
+        ) {
+            $result['paymentId'] = $paymentId;
+            $result['sessionId'] = $sessionId;
+            $result['paymentURL'] = $responseURL . '?ORDERID=' . urlencode($paymentId)
+                . '&SESSIONID=' . urlencode($sessionId);
+            $_SESSION['ubrrSession'] = $this->session['ubrrSession'] = $sessionId;
+        }
+        return $result;
+    }
+
+
+    public function getOrderStatusData(Order $order, Block_Cart $block, Page $page): array
+    {
+        $result = [
+            'Language' => mb_strtoupper($page->lang) ?: 'RU',
+            'Order' => [
+                'Merchant' => $block->epay_login,
+                'OrderID' => $order->payment_id,
+            ],
+            'SessionID' => ($this->session['ubrrSession'] ?? ''),
+        ];
+        return $result;
+    }
+
+
+    public function getOrderStatusWithData(Order $order, Block_Cart $block, Page $page, array $data): array
+    {
+        return $this->exec('GetOrderStatus', $data, (bool)$block->epay_test, (string)$block->epay_pass1);
+    }
+
+
+    public function parseOrderStatusResponse(array $response): array
+    {
+        $result = ['errors' => $this->parseResponseCommonErrors($response)];
+        if ($status = $response['Order']['OrderStatus'] ?? null) {
+            $result['status'] = $status;
+        }
+        return $result;
     }
 
 
@@ -473,7 +335,7 @@ class UBRRInterface extends EPayInterface
      * @param string $currency Валюта заказа в текстовом виде
      * @return int
      */
-    public function getCurrency($currency)
+    public function getCurrency(string $currency): int
     {
         $currency = mb_strtoupper($currency);
         switch ($currency) {
@@ -483,44 +345,6 @@ class UBRRInterface extends EPayInterface
             default:
                 return static::CURRENCY_RUB;
                 break;
-        }
-    }
-
-
-    /**
-     * Получает описание заказа
-     * @param Order $order Заказ
-     * @return string
-     */
-    public function getOrderDescription(Order $order)
-    {
-        $text = sprintf(
-            ORDER_NUM,
-            (int)$order->id,
-            $this->getCurrentHostName()
-        );
-        return $text;
-    }
-
-
-    /**
-     * Разбирает произвольный ответ
-     * @param string $xml Текст XML ответа
-     * @throws Exception Ошибка при выполнении
-     */
-    public function parseResponseXML($xml)
-    {
-        $sxe = new SimpleXMLElement($xml);
-        $response = $sxe->Response;
-        if (trim($response->Status) == static::REQUEST_STATUS_SUCCESS) {
-            $data = $this->sxeToArray($response);
-            unset($data['Status'], $data['Operation']);
-            return $data;
-        } else {
-            $errorMessage = $this->getRequestStatusMessage(
-                trim($response->Status)
-            );
-            throw new Exception($errorMessage, (int)$response->Status);
         }
     }
 
@@ -536,127 +360,32 @@ class UBRRInterface extends EPayInterface
     {
         $out = [];
         foreach ((array)$sxe as $index => $node) {
-            $out[$index] = is_object($node)
-                         ? $this->sxeToArray($node)
-                         : trim($node);
+            $out[$index] = is_object($node) ? $this->sxeToArray($node) : trim((string)$node);
         }
         return $out;
     }
 
 
     /**
-     * Получает текстовое сообщение об ошибке по статусу ответа
-     * @param string $requestStatus Код статуса ответа
-     *                              в константах static::REQUEST_STATUS_
+     * Преобразует массив данных в XML
+     * @param array $data Данные для преобразования
+     * @param bool $root Корневой вызов (добавить заголовки)
      * @return string
      */
-    public function getRequestStatusMessage($requestStatus)
+    public function arrayToXML(array $data, bool $root = true): string
     {
-        switch ($requestStatus) {
-            case static::REQUEST_STATUS_INVALID_FORMAT:
-                return 'Invalid format';
-                break;
-            case static::REQUEST_STATUS_ACCESS_DENIED:
-                return 'Access denied';
-                break;
-            case static::REQUEST_STATUS_INVALID_OPERATION:
-                return 'Invalid operation';
-                break;
-            case static::REQUEST_STATUS_SYSTEM_ERROR:
-                return 'System error';
-                break;
-            default:
-                return 'Unknown error';
-                break;
+        $result = '';
+        foreach ($data as $key => $val) {
+            if (is_array($val)) {
+                $val = $this->arrayToXML($val, false);
+            } else {
+                $val = htmlspecialchars($val);
+            }
+            $result .= '<' . $key . '>' . $val . '</' . $key . '>';
         }
-    }
-
-
-    /**
-     * Получение XML для получения статуса заказа
-     * @param string $orderId ID# заказа в системе банка
-     * @param string $merchantName Идентификатор интернет-магазина в TWEC PG
-     *                             - должен совпадать с Common Name X.509
-     *                             сертификата сервера интернет-магазина,
-     *                             используемого в качестве клиентского
-     *                             сертификата при установке SSL-соединения
-     * @param 'ru'|'en' $language Язык
-     * @param string $sessionId ID# сессии
-     * @return string
-     */
-    public function getOrderStatusXML(
-        $orderId,
-        $merchantName,
-        $language,
-        $sessionId
-    )
-    {
-        $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-             . '<TKKPG>'
-             .   '<Request>'
-             .     '<Operation>GetOrderStatus</Operation>'
-             .     '<Language>'
-             .       mb_strtoupper($language)
-             .     '</Language>'
-             .     '<Order>'
-             .       '<Merchant>'
-             .         htmlspecialchars($merchantName)
-             .       '</Merchant>'
-             .       '<OrderID>'
-             .         htmlspecialchars($orderId)
-             .       '</OrderID>'
-             .     '</Order>'
-             .     '<SessionID>'
-             .       htmlspecialchars($sessionId)
-             .     '</SessionID>'
-             .   '</Request>'
-             . '</TKKPG>';
-        return $xml;
-    }
-
-
-    /**
-     * Получает статус оплаты заказа
-     * @param Order $order Заказ для проверки
-     * @param Block_Cart $block Блок настроек
-     * @param Page $page Страница, относительно которой совершается проверка
-     * @param array $session Данные сессии
-     * @return bool Заказ успешно оплачен
-     * @throws Exception Ошибка при выполнении
-     */
-    public function getOrderIsPaid(
-        Order $order,
-        Block_Cart $block,
-        Page $page,
-        array $session = []
-    ) {
-        $xml = $this->getOrderStatusXML(
-            $session['ubrrOrderId'],
-            $block->epay_login,
-            $page->lang,
-            $session['ubrrSession']
-        );
-        $responseXML = $this->exec($xml, $block);
-        $response = $this->parseResponseXML($responseXML);
-        if ($block->epay_test) {
-            file_put_contents(
-                'ubrr.log',
-                date('Y-m-d H:i:s ') . 'getOrderIsPaid: ' .
-                $session['ubrrOrderId'] . ' / ' .
-                $session['ubrrSession'] . ' = ' . $responseXML . "\n",
-                FILE_APPEND
-            );
+        if ($root) {
+            $result = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" . $result;
         }
-        return $this->isSuccessfulStatus($response['Order']['OrderStatus']);
-    }
-
-
-    /**
-     * Получает виджет электронной оплаты
-     * @return Snippet
-     */
-    public function getEPayWidget()
-    {
-        return Snippet::importByURN('ubrr');
+        return $result;
     }
 }

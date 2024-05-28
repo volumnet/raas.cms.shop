@@ -2,10 +2,12 @@
 /**
  * Файл конвертера Excel для загрузчика прайсов
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use PhpOffice\PhpSpreadsheet\Cell\Cell;
-use PhpOffice\PhpSpreadsheet\Cell\Datatype;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Exception as PhpSpreadsheetException;
 use PhpOffice\PhpSpreadsheet\Reader\IReader;
 use PhpOffice\PhpSpreadsheet\Writer\IWriter;
@@ -28,6 +30,7 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
     public function load($file): array
     {
         $xlsReader = @$this->getReader();
+        $xlsReader->setReadDataOnly(true);
         try {
             $workbook = @$xlsReader->load($file);
             $data = $this->getDataFromExcelWorkbook($workbook);
@@ -121,8 +124,17 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
     public function getDataFromExcelSheet(Worksheet $sheet): array
     {
         $data = $sheet->toArray();
-        $data = array_map(function ($x) {
-            return array_map('strval', $x);
+        $data = array_map(function ($row) {
+            return array_map(function ($col) {
+                $result = strval($col);
+                // 2024-05-02, AVS: Очищаем некорректные символы
+                $result = mb_convert_encoding($result, 'UTF-8', mb_detect_encoding($result, 'UTF-8, ISO-8859-1', true));
+                // 2024-05-02, AVS: Обрабатываем NULL-значение
+                if ($result == '#NULL!') {
+                    $result = '';
+                }
+                return $result;
+            }, $row);
         }, $data);
         return $data;
     }
@@ -144,7 +156,7 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
         for ($i = 0; $i < count($data); $i++) {
             $maxcol = max($maxcol, count($data[$i]) - 1);
             $isPage = (count(array_filter($data[$i], function ($x) {
-                return trim($x) !== '';
+                return trim((string)$x) !== '';
             })) == 1);
             if ($isPage) {
                 $pageRows[] = $i;

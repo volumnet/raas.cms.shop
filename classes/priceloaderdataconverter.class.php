@@ -2,6 +2,8 @@
 /**
  * Файл конвертера данных для загрузчика прайсов
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Exception;

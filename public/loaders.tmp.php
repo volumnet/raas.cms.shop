@@ -145,13 +145,13 @@
 
   <script type="application/javascript">
   <?php if (($Form instanceof \RAAS\CMS\Shop\ProcessPriceLoaderForm) && ($raw_data ?? null)) { ?>
-      var raw_data = <?php echo json_encode($raw_data)?>;
-      <?php
+      var raw_data = <?php echo json_encode($raw_data, JSON_UNESCAPED_UNICODE)?>;
+      <?php //echo "\n" . '// ' . json_last_error() . ' ' . json_last_error_msg() . "\n";
   }
   if ($log ?? null) {
       $log = array_map(function($x) { $y = $x; $y['time'] = number_format($y['time'], 3, '.', ' '); return $y; }, $log);
       ?>
-      var log = <?php echo json_encode($log)?>;
+      var log = <?php echo json_encode($log, JSON_UNESCAPED_UNICODE)?>;
   <?php } ?>
   var timeName = '<?php echo addslashes(CMS\Shop\TIME_SEC)?>';
   </script>

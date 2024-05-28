@@ -5,12 +5,14 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\BaseTest;
+use SOME\Pages;
 use RAAS\Application;
 use RAAS\CMS\Block;
 use RAAS\CMS\Form;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Page;
+use RAAS\CMS\Page_Field;
 
 /**
  * Класс теста интерфейса каталога
@@ -163,6 +165,38 @@ class CatalogInterfaceTest extends BaseTest
 
 
     /**
+     * Тест метода getPageMetadata()
+     */
+    public function testGetPageMetadata()
+    {
+        $field = new Page_Field(['datatype' => 'material', 'urn' => 'testmaterial']);
+        $field->commit();
+        $page = new Page(17);
+        $materialType = new Material_Type(4);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter->apply($page);
+        $page->catalogFilter = $catalogFilter;
+        $page->fields['testmaterial']->addValue(14); // Товар 5
+        $interface = new CatalogInterface();
+
+        $result = $interface->getPageMetadata($page);
+
+        $this->assertEquals(17, $result['id']);
+        $this->assertEquals('Категория 11', $result['name']);
+        $this->assertEquals('category11', $result['urn']);
+        $this->assertEquals('/catalog/category1/category11/', $result['url']);
+
+        $this->assertEquals(10, $result['counter']);
+        $this->assertEquals(0, $result['selfCounter']);
+        $this->assertEquals(5609, $result['price_from']);
+        $this->assertEquals(85812, $result['price_to']);
+        $this->assertEquals('Товар 5', $result['testmaterial']);
+
+        Page_Field::delete($field);
+    }
+
+
+    /**
      * Тест получения рекурсивного шаблона метатегов для товара из категорий
      */
     public function testGetMetaTemplate()
@@ -211,6 +245,23 @@ class CatalogInterfaceTest extends BaseTest
 
 
     /**
+     * Тест метода setListMetatage
+     */
+    public function testSetListMetatags()
+    {
+        $block = Block::spawn(34);
+        $block->params = 'listMetaTemplates=template';
+        $page = new Page(18);
+        $page->parent->meta_title_template = 'Купить - {{name}}';
+        $interface = new CatalogInterface();
+
+        $result = $interface->setListMetatags($page, $block);
+
+        $this->assertEquals('Купить - Категория 111', $page->meta_title);
+    }
+
+
+    /**
      * Тест получения SQL-инструкций по материалам
      */
     public function testGetMaterialsSQL()
@@ -230,6 +281,209 @@ class CatalogInterfaceTest extends BaseTest
         $this->assertEquals([], $sqlFrom);
         $this->assertEquals(["tM.id IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"], $sqlWhere);
         $this->assertEquals([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $sqlWhereBind);
+    }
+
+
+    /**
+     * Тест метода getFilterIds()
+     */
+    public function testGetFilterIds()
+    {
+        $block = Block::spawn(34);
+        $page = new Page(18);
+        $materialType = new Material_Type(4);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter->apply($page);
+        $interface = new CatalogInterface();
+
+        $result = $interface->getFilterIds($block, [], $catalogFilter);
+
+        $this->assertEquals([18, 14, 13, 16, 15, 17, 11, 12, 10, 19], $result);
+    }
+
+
+    /**
+     * Тест метода getFilterIds() - случай с полнотекстовым поиском
+     */
+    public function testGetFilterIdsWithFullText()
+    {
+        $block = Block::spawn(34);
+        $block->filter = [
+            ['var' => 'article', 'relation' => 'FULLTEXT', 'field' => 25], // 25 - артикул
+        ];
+        $page = new Page(18);
+        $materialType = new Material_Type(4);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter->apply($page);
+        $interface = new CatalogInterface($block);
+
+        $result = $interface->getFilterIds($block, ['article' => 'fa005713'], $catalogFilter);
+
+        $this->assertEquals([18], $result);
+    }
+
+
+    /**
+     * Тест метода getFilteringItemSQL()
+     */
+    public function testGetFilteringItemSQL()
+    {
+        $interface = new CatalogInterface();
+
+        $result = $interface->getFilteringItemSQL('tM.name', '=', 'aaa');
+
+        $this->assertEquals(["(tM.name = ?)", 'aaa'], $result);
+    }
+
+
+    /**
+     * Тест метода getFilteringItemSQL() - случай с полнотекстовым поиском
+     */
+    public function testGetFilteringItemSQLWithFullText()
+    {
+        $interface = new CatalogInterface();
+
+        $result = $interface->getFilteringItemSQL('tM.name', 'FULLTEXT', 'aaa');
+
+        $this->assertEquals([], $result);
+    }
+
+
+    /**
+     * Тест метода getFullTextIds()
+     */
+    public function testGetFullTextIds()
+    {
+        $block = Block::spawn(34);
+        $interface = new CatalogInterface($block);
+
+        $result = $interface->getFullTextIds(
+            [['var' => 'article', 'relation' => 'FULLTEXT', 'field' => 25]],
+            ['article' => 'fa005713']
+        );
+
+        $this->assertEquals([18], $result);
+    }
+
+
+    /**
+     * Тест метода getFullTextIds() - случай с пустой поисковой строкой
+     */
+    public function testGetFullTextIdsWithEmptySearchString()
+    {
+        $block = Block::spawn(34);
+        $interface = new CatalogInterface($block);
+
+        $result = $interface->getFullTextIds(
+            [['var' => 'article', 'relation' => 'FULLTEXT', 'field' => 25]],
+            ['article' => ''],
+        );
+
+        $this->assertNull($result);
+    }
+
+
+    /**
+     * Тест метода getRawFilterIds()
+     */
+    public function testGetRawFilterIds()
+    {
+        $block = Block::spawn(34);
+        $page = new Page(18);
+        $materialType = new Material_Type(4);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter->apply($page);
+        $interface = new CatalogInterface();
+
+        $result = $interface->getRawFilterIds($block, [], $catalogFilter);
+
+        $this->assertEquals([18, 14, 13, 16, 15, 17, 11, 12, 10, 19], $result);
+    }
+
+
+    /**
+     * Тест метода getRawFilterIds() - случай с произвольной сортировкой
+     */
+    public function testGetRawFilterIdsWithCustomSort()
+    {
+        $block = Block::spawn(34);
+        $block->sort_var_name = 'sort';
+        $block->order_var_name = 'order';
+        $block->sort = [
+            ['var' => 'price', 'field' => 26, 'relation' => 'asc'], // 26 - стоимость
+        ];
+        $page = new Page(18);
+        $materialType = new Material_Type(4);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter->apply($page);
+        $interface = new CatalogInterface();
+
+        $result = $interface->getRawFilterIds($block, ['sort' => 'price', 'order' => 'desc'], $catalogFilter);
+
+        $this->assertEquals([19, 10, 12, 11, 17, 15, 16, 13, 14, 18], $result);
+    }
+
+
+    /**
+     * Тест метода getRawFilterIds() - случай с произвольной случайной сортировкой
+     */
+    public function testGetRawFilterIdsWithCustomRandomSort()
+    {
+        $block = Block::spawn(34);
+        $block->sort_var_name = 'sort';
+        $block->order_var_name = 'order';
+        $block->sort = [
+            ['var' => 'randomsort', 'field' => 'random', 'relation' => 'asc!'], // 26 - стоимость
+        ];
+        $page = new Page(18);
+        $materialType = new Material_Type(4);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter->apply($page);
+        $interface = new CatalogInterface();
+
+        $result = $interface->getRawFilterIds($block, ['sort' => 'randomsort'], $catalogFilter);
+
+        $this->assertNotEquals([19, 10, 12, 11, 17, 15, 16, 13, 14, 18], $result); // Условно, теоретически может выпадать, но вероятность мала
+        $this->assertEqualsCanonicalizing([19, 10, 12, 11, 17, 15, 16, 13, 14, 18], $result);
+    }
+
+
+    /**
+     * Тест метода getRawFilterIds() - случай со стандартной случайной сортировкой
+     */
+    public function testGetRawFilterIdsWithDefaultRandomSort()
+    {
+        $block = Block::spawn(34);
+        $block->sort_field_default = 'random';
+        $page = new Page(18);
+        $materialType = new Material_Type(4);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter->apply($page);
+        $interface = new CatalogInterface();
+
+        $result = $interface->getRawFilterIds($block, [], $catalogFilter);
+
+        $this->assertNotEquals([19, 10, 12, 11, 17, 15, 16, 13, 14, 18], $result); // Условно, теоретически может выпадать, но вероятность мала
+        $this->assertEqualsCanonicalizing([19, 10, 12, 11, 17, 15, 16, 13, 14, 18], $result);
+    }
+
+
+    /**
+     * Тест метода getRawFilterIds() - случай без стандартной сортировки
+     */
+    public function testGetRawFilterIdsWithoutDefaultSort()
+    {
+        $block = Block::spawn(34);
+        $block->sort_field_default = '';
+        $page = new Page(18);
+        $materialType = new Material_Type(4);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter->apply($page);
+        $interface = new CatalogInterface();
+
+        $result = $interface->getRawFilterIds($block, [], $catalogFilter);
+
+        $this->assertEqualsCanonicalizing([10, 11, 12, 13, 14, 15, 16, 17, 18, 19], $result); // Порядок не важен
     }
 
 
@@ -523,6 +777,35 @@ class CatalogInterfaceTest extends BaseTest
 
 
     /**
+     * Тест метода getSQLParts - случай с нативными полями
+     */
+    public function testGetSQLPartsWithNativeFilter()
+    {
+        $block = Block::spawn(34);
+        $block->sort_field_default = 26;
+        $block->filter = [
+            ['var' => 'name', 'relation' => 'LIKE', 'field' => 'name'],
+        ];
+        $page = new Page(15);
+        $interface = new CatalogInterface();
+        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
+        $catalogFilter->apply($page, []);
+        $page->catalogFilter = $catalogFilter;
+
+        $ids = $interface->getIdsList($block, $page, []); // Для получения filterIds
+        $result = $interface->getSQLParts($block, $page, ['name' => 'товар 1']);
+        foreach (['from', 'where'] as $key) {
+            $result[$key] = array_map(function ($x) {
+                return trim(preg_replace('/\\s+/umis', ' ', $x));
+            }, $result[$key]);
+        }
+
+        $this->assertEquals("((tM.name LIKE ?))", $result['where']['name']);
+        $this->assertContains('%товар 1%', $result['bind']);
+    }
+
+
+    /**
      * Провайдер данных для метода testCommentsFilterFunction
      * @return array <pre><code>array<[
      *     Material Комментарий
@@ -779,6 +1062,51 @@ class CatalogInterfaceTest extends BaseTest
         $this->assertEquals(16, $result['subcats'][0]->id);
         $this->assertEquals(10, $result['subcats'][0]->counter);
         $this->assertFalse($result['doSearch']);
+    }
+
+
+    /**
+     * Тест метода getList()
+     */
+    public function testGetList()
+    {
+        $block = Block::spawn(34);
+        $pages = new Pages(1, 3);
+        $page = new Page(15);
+        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
+        $catalogFilter->apply($page, []);
+        $page->catalogFilter = $catalogFilter;
+        $interface = new CatalogInterface();
+
+        $result = $interface->getList($block, $page, [], $pages);
+
+        $this->assertCount(3, $result);
+        $this->assertEquals(18, $result[0]->id);
+        $this->assertEquals(14, $result[1]->id);
+        $this->assertEquals(13, $result[2]->id);
+    }
+
+
+    /**
+     * Тест метода getList() - случай без использования фильтра каталога
+     */
+    public function testGetListWithoutFilter()
+    {
+        $block = Block::spawn(34);
+        $pages = new Pages(1, 3);
+        $page = new Page(15);
+        $catalogFilter = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, false);
+        $catalogFilter->apply($page, []);
+        $page->catalogFilter = $catalogFilter;
+        $interface = new CatalogInterface();
+        $interface->useFilterIds = false;
+
+        $result = $interface->getList($block, $page, [], $pages);
+
+        $this->assertCount(3, $result);
+        $this->assertEquals(18, $result[0]->id);
+        $this->assertEquals(14, $result[1]->id);
+        $this->assertEquals(13, $result[2]->id);
     }
 
 

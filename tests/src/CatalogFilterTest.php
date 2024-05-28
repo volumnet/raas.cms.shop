@@ -5,6 +5,7 @@
 namespace RAAS\CMS\Shop;
 
 use SOME\BaseTest;
+use SOME\File;
 use SOME\Pages;
 use SOME\Singleton;
 use RAAS\Application;
@@ -125,15 +126,48 @@ class CatalogFilterTest extends BaseTest
 
 
     /**
+     * Провайдер данных для метода testGetAvailabilityOrderByValue
+     * @return array <pre><code>array<[mixed Исходное значение поля "Наличие", mixed Ожидаемое значение]></code></pre>
+     */
+    public function getAvailabilityOrderByValueDataProvider(): array
+    {
+        return [
+            [1, '1'],
+            [2, '1'],
+            [0, '0'],
+            ['', '0'],
+        ];
+    }
+
+
+    /**
+     * Тест метода getAvailabilityOrderByValue
+     * @param mixed $value Исходное значение поля "Наличие"
+     * @param mixed $expected Ожидаемое значение
+     * @dataProvider getAvailabilityOrderByValueDataProvider
+     */
+    public function testGetAvailabilityOrderByValue($value, $expected)
+    {
+        $filter = new CatalogFilter(new Material_Type());
+
+        $result = $filter->getAvailabilityOrderByValue($value);
+
+        $this->assertEquals($expected, $result);
+    }
+
+
+    /**
      * Тест получения исходной таблицы свойств
      */
     public function testBuildCache()
     {
-        $filter = new CatalogFilter(new Material_Type());
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $filter->useAvailabilityOrder = 'available';
         $mTypesIds = [4, 5];
         $fieldsIds = [26, 30, 31, 32];
         $materialsIds = [19, 18, 17, 16, 15, 14, 13, 12, 11, 10];
 
+        $filter->build(); // Чтобы сформировалось свойства propertiesByURNs
         $result = $filter->buildCache($mTypesIds, $fieldsIds, $materialsIds);
         $resultPriceIs83620 = array_unique($result[26][83620]);
         $resultPriceIs67175 = array_unique($result[26][67175]);
@@ -757,7 +791,8 @@ class CatalogFilterTest extends BaseTest
      */
     public function testGetAvailableProperties()
     {
-        $filter = new CatalogFilter(new Material_Type());
+        $filter = new CatalogFilter(new Material_Type(4));
+        $filter->build(); // Чтобы определились propertiesByURNs
         $propsMapping = [
             '26' => [
                 '1' => [
@@ -804,6 +839,7 @@ class CatalogFilterTest extends BaseTest
                 '5' => ['6' => 6],
             ],
             '31' => [
+                '' => ['4' => 4],
                 '1' => ['3' => 3, '6' => 6, '9' => 9],
                 '2' => ['4' => 4, '8' => 8],
                 '3' => ['5' => 5, '10' => 10],
@@ -882,6 +918,7 @@ class CatalogFilterTest extends BaseTest
         $this->assertEquals(true, $result['30']['1']['doRich']);
         $this->assertTrue($result['30']['2']['checked']);
         $this->assertFalse($result['30']['1']['checked']);
+        $this->assertEquals('В наличии', $result['31']['0']['prop']);
         $this->assertEquals('Запись 1', $result['47']['value1']['doRich']);
         $this->assertEquals('Минимальное количество', $result['32']['1']['prop']);
         $this->assertEmpty($result['32']['1']['doRich'] ?? null);
@@ -979,7 +1016,7 @@ class CatalogFilterTest extends BaseTest
             'price_old_to' => 20000,
             'article' => ['aaa', 'bbb', 'ccc'],
             'videos_like' => 'youtube',
-            'available' => 1
+            'available' => 0
         ];
 
         $filter->build();
@@ -989,7 +1026,7 @@ class CatalogFilterTest extends BaseTest
             '34' => ['from' => 10000, 'to' => 20000],
             '25' => ['aaa', 'bbb', 'ccc'],
             '28' => ['like' => 'youtube'],
-            '31' => [1]
+            '31' => ['0', '']
         ], $result);
     }
 
@@ -1244,6 +1281,126 @@ class CatalogFilterTest extends BaseTest
 
 
     /**
+     * Тест получения канонического URL из фильтра - случай с эксклюзивным доп. параметром
+     */
+    public function testGetCanonicalURLFromFilterWithAdditionalExclusive()
+    {
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $catalog = new Page(15);
+        $filterData = [
+            'price_from' => '10000',
+            'price_to' => '60000',
+            'available' => '1',
+            'article' => ['6dd28e9b', '84b12bae', '1db87a14'],
+        ];
+
+        $filter->build();
+        $filter->apply($catalog, $filterData);
+        $result = $filter->getCanonicalURLFromFilter([], 'article', 'aaa', true);
+
+        $this->assertEquals('/catalog/?price_from=10000&price_to=60000&available=1&article%5B0%5D=aaa', $result);
+    }
+
+
+    /**
+     * Тест получения канонического URL из фильтра - случай с добавлением неэксклюзивного доп. параметра
+     */
+    public function testGetCanonicalURLFromFilterWithAdditionalNotExclusiveAdd()
+    {
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $catalog = new Page(15);
+        $filterData = [
+            'price_from' => '10000',
+            'price_to' => '60000',
+            'available' => '1',
+            'article' => ['6dd28e9b', '84b12bae', '1db87a14'],
+        ];
+
+        $filter->build();
+        $filter->apply($catalog, $filterData);
+        $result = $filter->getCanonicalURLFromFilter([], 'article', 'aaa', false);
+
+        $this->assertEquals(
+            '/catalog/?price_from=10000&price_to=60000&available=1&article%5B0%5D=6dd28e9b&article%5B1%5D=84b12bae&article%5B2%5D=1db87a14&article%5B3%5D=aaa',
+            $result
+        );
+    }
+
+
+    /**
+     * Тест получения канонического URL из фильтра - случай с удалением неэксклюзивного доп. параметра
+     */
+    public function testGetCanonicalURLFromFilterWithAdditionalNotExclusiveRemove()
+    {
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $catalog = new Page(15);
+        $filterData = [
+            'price_from' => '10000',
+            'price_to' => '60000',
+            'available' => '1',
+            'article' => ['6dd28e9b', '84b12bae', '1db87a14'],
+        ];
+
+        $filter->build();
+        $filter->apply($catalog, $filterData);
+        $result = $filter->getCanonicalURLFromFilter([], 'article', '84b12bae', false);
+
+        $this->assertEquals(
+            '/catalog/?price_from=10000&price_to=60000&available=1&article%5B0%5D=6dd28e9b&article%5B1%5D=1db87a14',
+            $result
+        );
+    }
+
+
+    /**
+     * Тест метода multisort()
+     */
+    public function testMultisort()
+    {
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $filter->build();
+        $result = $filter->multisort(['25'], ['13' => 13, '15' => 15, '16' => 16]); // 25 - Артикул
+
+        $this->assertEquals(['16' => 16, '13' => 13, '15' => 15], $result);
+    }
+
+
+    /**
+     * Тест метода multisort() - случай с сортирующей функцией
+     */
+    public function testMultisortWithOrderFunction()
+    {
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $filter->build();
+        $result = $filter->multisort([['25', 'strnatcasecmp']], ['13' => 13, '15' => 15, '16' => 16]); // 25 - Артикул
+
+        $this->assertEquals(['16' => 16, '13' => 13, '15' => 15], $result);
+    }
+
+
+    /**
+     * Тест метода multisort() - случай с перегруппирующей функцией
+     */
+    public function testMultisortWithRegroupFunction()
+    {
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $filter->build();
+        $result = $filter->multisort(
+            [[
+                '25',  // 25 - Артикул
+                function ($x) {
+                    return mb_substr($x, 1);
+                },
+                true
+            ]],
+            ['13' => 13, '15' => 15, '16' => 16]
+        );
+
+        $this->assertEquals(['15' => 15, '16' => 16, '13' => 13], $result);
+    }
+
+
+    /**
      * Тест получения ID# товаров с сортировкой
      */
     public function testGetIds()
@@ -1274,14 +1431,34 @@ class CatalogFilterTest extends BaseTest
         $filterData = [
             'price_from' => 10000,
             'price_to' => 60000,
-            'available' => 1
         ];
 
         $filter->build();
         $filter->apply($catalog, $filterData);
         $result = $filter->getIds('article', -1);
 
-        $this->assertEquals([15, 13, 16], $result);
+        $this->assertEquals([14, 15, 13, 16], $result);
+    }
+
+
+    /**
+     * Тест получения ID# товаров с сортировкой - случай с первичной сортировкой по наличию
+     */
+    public function testGetIdsWithAvailabilityOrder()
+    {
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $filter->useAvailabilityOrder = 'available';
+        $catalog = new Page(15);
+        $filterData = [
+            'price_from' => 10000,
+            'price_to' => 60000,
+        ];
+
+        $filter->build();
+        $filter->apply($catalog, $filterData);
+        $result = $filter->getIds('article', -1);
+
+        $this->assertEquals([15, 13, 16, 14], $result);
     }
 
 
@@ -1616,6 +1793,8 @@ class CatalogFilterTest extends BaseTest
         $filter = new CatalogFilter(new Material_Type(4), true);
         $filename = Package::i()->cacheDir . '/system/catalogfilter4.wch.php';
 
+        File::unlink(dirname($filename));
+
         $filter->build();
         $filter->save();
 
@@ -1657,6 +1836,34 @@ class CatalogFilterTest extends BaseTest
 
 
     /**
+     * Тест сохранения файла - случай уже существующего файла - проверим что перезаписывается
+     */
+    public function testSaveWithExistingFile()
+    {
+        $filter = new CatalogFilter(new Material_Type(4), true);
+        $filename = Package::i()->cacheDir . '/system/catalogfilter4.wch.php';
+
+        if (!is_dir(dirname($filename))) {
+            mkdir(dirname($filename), 0777, true);
+        }
+        file_put_contents($filename, 'aaa');
+
+        $result = file_get_contents($filename);
+
+        $this->assertEquals('aaa', $result);
+
+        $filter->build();
+        $filter->save();
+
+        $this->assertFileExists($filename);
+
+        $result = file_get_contents($filename);
+
+        $this->assertNotEquals('aaa', $result);
+    }
+
+
+    /**
      * Тест сохранения файла - случай с некорректным именем файла
      */
     public function testSaveWithInvalidFilepath()
@@ -1676,7 +1883,7 @@ class CatalogFilterTest extends BaseTest
      */
     public function testLoad()
     {
-        $result = CatalogFilter::load(new Material_Type(4), true);
+        $result = CatalogFilter::load(new Material_Type(4), true, null, 'available');
 
         $this->assertEquals('Каталог продукции', $result->materialType->name);
         $this->assertEquals([4, 5], $result->materialTypesIds);
@@ -1710,6 +1917,7 @@ class CatalogFilterTest extends BaseTest
             ],
             $result->propsMapping['31'][1]
         );
+        $this->assertEquals('available', $result->useAvailabilityOrder);
     }
 
 
@@ -1729,6 +1937,21 @@ class CatalogFilterTest extends BaseTest
 
 
     /**
+     * Тест загрузки - случай с пустым файлом
+     */
+    public function testLoadWithEmptyFile()
+    {
+        $this->expectException(Exception::class);
+        $filename = tempnam(sys_get_temp_dir(), 'raas_');
+        touch($filename);
+
+        $result = CatalogFilter::load(new Material_Type(4), false, $filename);
+
+        unlink($filename);
+    }
+
+
+    /**
      * Тест загрузки или построения
      */
     public function testLoadOrBuild()
@@ -1738,7 +1961,7 @@ class CatalogFilterTest extends BaseTest
 
         $this->assertFileDoesNotExist($filename);
 
-        $result = CatalogFilter::loadOrBuild(new Material_Type(4), true);
+        $result = CatalogFilter::loadOrBuild(new Material_Type(4), true, [], null, true, 'available');
 
         $this->assertFileExists($filename);
         $this->assertEquals('Каталог продукции', $result->materialType->name);
@@ -1773,6 +1996,7 @@ class CatalogFilterTest extends BaseTest
             ],
             $result->propsMapping['31'][1]
         );
+        $this->assertEquals('available', $result->useAvailabilityOrder);
     }
 
 
@@ -1823,5 +2047,24 @@ class CatalogFilterTest extends BaseTest
         $result = $filter->count(new Page($pageId), $counterWithChildren);
 
         $this->assertEquals($expected, $result);
+    }
+
+
+    /**
+     * Тест метода clearCaches
+     */
+    public function testClearCaches()
+    {
+        $filename = Package::i()->cacheDir . '/system/catalogfilter4.noch.php';
+        if (!is_dir(dirname($filename))) {
+            mkdir(dirname($filename), 0777, true);
+        }
+        touch($filename);
+
+        $this->assertFileExists($filename);
+
+        CatalogFilter::clearCaches();
+
+        $this->assertFileDoesNotExist($filename);
     }
 }

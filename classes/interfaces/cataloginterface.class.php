@@ -435,11 +435,8 @@ class CatalogInterface extends MaterialInterface
      * @param CatalogFilter $catalogFilter Фильтр каталога
      * @return int[]
      */
-    public function getFilterIds(
-        Block_Material $block,
-        array $get,
-        CatalogFilter $catalogFilter
-    ) {
+    public function getFilterIds(Block_Material $block, array $get, CatalogFilter $catalogFilter)
+    {
         $fullTextFilter = array_values(array_filter((array)$block->filter, function ($x) {
             return $x['relation'] == 'FULLTEXT';
         }));
@@ -456,16 +453,14 @@ class CatalogInterface extends MaterialInterface
 
     public function getFilteringItemSQL($sqlField, $relation, $val)
     {
-        $result = [];
         switch ($relation) {
             case 'FULLTEXT':
-                $result = [];
+                return [];
                 break;
             default:
                 return parent::getFilteringItemSQL($sqlField, $relation, $val);
                 break;
         }
-        return $result;
     }
 
 
@@ -530,7 +525,7 @@ class CatalogInterface extends MaterialInterface
     public function getRawFilterIds(Block_Material $block, array $get, CatalogFilter $catalogFilter)
     {
         $sortVar = (string)$block->sort_var_name;
-        $sortVal = isset($get[$sortVar]) ? $get[$sortVar] : '';
+        $sortVal = ($get[$sortVar] ?? '');
         $orderVar = (string)$block->order_var_name;
         $sortParams = (array)$block->sort;
         $sortDefField = (string)$block->sort_field_default;
@@ -539,9 +534,7 @@ class CatalogInterface extends MaterialInterface
             // Выберем подходящую запись
             // (у которой значение var совпадает со значением переменной сортировки $_GET)
             $sortItem = $this->getMatchingSortParam($sortVal, $sortParams, 'var');
-            $orderRelation = isset($sortItem['relation'])
-                           ? (string)$sortItem['relation']
-                           : '';
+            $orderRelation = (string)($sortItem['relation'] ?? '');
             if ($sortItem) {
                 if ($sortItem['field'] == 'random') {
                     $ids = $catalogFilter->getIds();
@@ -798,9 +791,9 @@ class CatalogInterface extends MaterialInterface
         if ($page->catalogFilter) {
             $metaData['counter'] = $page->catalogFilter->count($page, true);
             $metaData['selfCounter'] = $page->catalogFilter->count($page, false);
-            $priceField = $page->catalogFilter->propertiesByURNs['price'];
+            $priceField = ($page->catalogFilter->propertiesByURNs)['price'] ?? null;
             if ($priceField->id) {
-                $priceValues = array_keys($page->catalogFilter->availableProperties[$priceField->id]);
+                $priceValues = array_keys(($page->catalogFilter->propsMapping)[$priceField->id] ?? []);
                 $priceValues = array_filter($priceValues);
                 if ($priceValues) {
                     $metaData['price_from'] = min($priceValues);

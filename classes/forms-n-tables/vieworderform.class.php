@@ -1,13 +1,21 @@
 <?php
+/**
+ * Форма просмотра заказа
+ */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
-use \RAAS\Form as RAASForm;
-use \RAAS\FormTab;
-use \RAAS\Field as RAASField;
-use \RAAS\FieldSet;
-use \RAAS\CMS\ViewFeedbackForm;
-use \RAAS\Application;
+use RAAS\Form as RAASForm;
+use RAAS\FormTab;
+use RAAS\Field as RAASField;
+use RAAS\FieldSet;
+use RAAS\CMS\ViewFeedbackForm;
+use RAAS\Application;
 
+/**
+ * Форма просмотра заказа
+ */
 class ViewOrderForm extends ViewFeedbackForm
 {
     public function __get($var)
@@ -26,17 +34,17 @@ class ViewOrderForm extends ViewFeedbackForm
     public function __construct(array $params = [])
     {
         parent::__construct($params);
-        $this->caption = sprintf($this->view->_('ORDER_N'), (int)$this->Item->id);
+        $this->caption = sprintf($this->view->_('ORDER_N'), (int)($this->Item ? $this->Item->id : 0));
     }
 
 
-    protected function getParams(array $params = [])
+    protected function getParams(array $params = []): array
     {
         $arr = parent::getParams();
         $arr['action'] = '#history';
         $arr['commit'] = function (RAASForm $Form) {
             $history = new Order_History();
-            $history->uid = Application::i()->user->id;
+            $history->uid = Application::i()->user ? Application::i()->user->id : 0;
             $history->order_id = (int)$Form->Item->id;
             $history->status_id = (int)$_POST['status_id'];
             if ((int)$_POST['paid']) {
@@ -54,17 +62,13 @@ class ViewOrderForm extends ViewFeedbackForm
     }
 
 
-    protected function getChildren()
+    protected function getChildren(): array
     {
-        if (Order_Status::getSet()) {
-            return $this->getChildrenWithStatuses();
-        } else {
-            return $this->getDetails();
-        }
+        return $this->getChildrenWithStatuses();
     }
 
 
-    protected function getChildrenWithStatuses()
+    protected function getChildrenWithStatuses(): array
     {
         $arr = [];
         $arr['common'] = new FormTab([
@@ -90,7 +94,7 @@ class ViewOrderForm extends ViewFeedbackForm
                     'caption' => $this->view->_('ORDER_STATUS'),
                     'placeholder' => $this->view->_('ORDER_STATUS_NEW'),
                     'children' => ['Set' => Order_Status::getSet()],
-                    'default' => $this->Item->status_id,
+                    'default' => $this->Item ? $this->Item->status_id : 0,
                 ],
                 // 2021-01-04, AVS: сделал выпадающее меню вместо галочки, чтобы
                 // не сбрасывался статус оплаты при сохранении, когда фоном
@@ -109,11 +113,6 @@ class ViewOrderForm extends ViewFeedbackForm
                     'import' => function ($field) {
                         return '';
                     },
-                    'export' => function ($field) {
-                        if ($_POST[$field->name]) {
-                            $field->Form->Item->paid = (($_POST[$field->name] + 1) / 2);
-                        }
-                    }
                 ],
                 'description' => [
                     'name' => 'description',
@@ -127,7 +126,7 @@ class ViewOrderForm extends ViewFeedbackForm
     }
 
 
-    protected function getDetails()
+    protected function getDetails(): array
     {
         $arr = [];
         $arr['post_date'] = $this->getFeedbackField([
@@ -154,7 +153,7 @@ class ViewOrderForm extends ViewFeedbackForm
             'meta' => [
                 'Table' => new OrderItemsTable([
                     'Item' => $this->Item,
-                    'items' => $this->meta['items']
+                    'items' => $this->meta['items'] ?? [],
                 ])
             ]
         ]);
@@ -168,10 +167,10 @@ class ViewOrderForm extends ViewFeedbackForm
     }
 
 
-    protected function getStat()
+    protected function getStat(): array
     {
         $arr = parent::getStat();
-        if ($this->Item->paymentInterface->id) {
+        if ($this->Item && $this->Item->paymentInterface && $this->Item->paymentInterface->id) {
             $arr['payment_interface_id'] = [
                 'name' => 'payment_interface_id',
                 'caption' => $this->view->_('PAID_VIA'),

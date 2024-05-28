@@ -2,6 +2,8 @@
 /**
  * Файл стандартного интерфейса корзины
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\HTTP;
@@ -84,7 +86,7 @@ class CartInterface extends FormInterface
         $result = [];
         $cartType = new Cart_Type((int)$this->block->cart_type);
         $user = RAASControllerFrontend::i()->user;
-        $cart = new Cart($cartType, $user);
+        $cart =@ new Cart($cartType, $user); // Для подавления ошибки "...headers already sent"
         $action = $this->get['action'] ?? '';
 
         switch ($action) {
@@ -164,16 +166,11 @@ class CartInterface extends FormInterface
                     foreach ($orderToRepeat->items as $itemToRepeat) {
                         $cart->set($itemToRepeat, (int)$itemToRepeat->amount, $itemToRepeat->meta, false);
                     }
-                    $cart->save();
+                    @$cart->save(); // Для подавления ошибки "...headers already sent"
                 }
                 if ($form->id && $cart->items) {
                     $localError = [];
-                    if ($this->isFormProceed(
-                        $this->block,
-                        $form,
-                        $this->server['REQUEST_METHOD'] ?? '',
-                        $this->post
-                    )) {
+                    if ($this->isFormProceed($this->block, $form, $this->server['REQUEST_METHOD'] ?? '', $this->post)) {
                         // 2019-10-02, AVS: добавили для совместимости с виджетом, где даже
                         // в случае ошибок проверяется соответствие
                         // ($Item instanceof Order)
@@ -182,26 +179,21 @@ class CartInterface extends FormInterface
                         $result['Item'] = $this->getRawOrder($cart);
 
                         // Проверка полей на корректность
-                        $localError = $this->check(
-                            $form,
-                            $this->post,
-                            $this->session,
-                            $this->files
-                        );
+                        $localError = $this->check($form, $this->post, $this->session, $this->files);
 
                         if (!$localError) {
-                            $result = array_merge($result, $this->processOrderForm(
-                                $cart,
-                                $this->page,
-                                $this->post,
-                                $this->server,
-                                $this->files
-                            ));
+                            $result = array_merge(
+                                $result,
+                                $this->processOrderForm($cart, $this->page, $this->post, $this->server, $this->files)
+                            );
                             if (($this->post['epay'] ?? null) != 1) {
                                 $cart->clear();
                                 $result['success'][(int)$this->block->id] = true;
+                                // 2022-07-12, AVS: сделал проверку, чтобы по AJAX'у не редиректил
                             }
-                            // 2022-07-12, AVS: сделал проверку, чтобы по AJAX'у не редиректил
+                            // 2024-05-01, AVS: редирект доступен только без электронной оплаты (там свой редирект)
+                            // 2024-05-01, AVS: ОТМЕНА: при success() устанавливается $Item и $_POST['epay'],
+                            //     а дальше вызывается редирект на платежный шлюз
                             if (!(($this->post['AJAX'] ?? null) || ($this->page->mime == 'application/json'))) {
                                 $url = '?action=success&id=' . (int)$result['Item']->id
                                     . '&crc=' . Application::i()->md5It($result['Item']->id);
@@ -224,11 +216,11 @@ class CartInterface extends FormInterface
                         $result['DATA'] = [];
                         foreach ($form->visFields as $fieldURN => $row) {
                             // 2023-04-18, AVS: убрано, сомнительно по версии клиента
-                            // if ($orderToRepeat && trim($orderVal = $orderToRepeat->{$fieldURN})) {
+                            // if ($orderToRepeat && trim($orderVal = (string)$orderToRepeat->{$fieldURN})) {
                             //     $result['DATA'][$fieldURN] = $orderVal;
                             // } else {
                             $userVal = $user->{$fieldURN};
-                            if ((is_scalar($userVal) && (trim($userVal) !== '')) ||
+                            if ((is_scalar($userVal) && (trim((string)$userVal) !== '')) ||
                                 (!is_scalar($userVal) && $userVal)
                             ) {
                                 $result['DATA'][$fieldURN] = $userVal;
@@ -435,7 +427,7 @@ class CartInterface extends FormInterface
     {
         $userFields = null;
         foreach ($findBy as $fieldURN) {
-            $localVal = trim($post[$fieldURN]);
+            $localVal = trim((string)$post[$fieldURN]);
             if ($localVal) {
                 if (in_array($fieldURN, ['login', 'email'])) {
                     $sqlQuery = "SELECT *
@@ -452,7 +444,7 @@ class CartInterface extends FormInterface
                         $userFieldsTmp = User_Field::getSet();
                         $userFields = [];
                         foreach ($userFieldsTmp as $userField) {
-                            $userFields[trim($userField->urn)] = $userField;
+                            $userFields[trim((string)$userField->urn)] = $userField;
                         }
                     }
                     if ($userField = $userFields[$fieldURN]) {
@@ -751,7 +743,7 @@ class CartInterface extends FormInterface
         if (function_exists('idn_to_utf8')) {
             $host = idn_to_utf8($host);
         }
-        $host = mb_strtoupper($host);
+        $host = mb_strtoupper((string)$host);
 
         $subject = date(RAASViewWeb::i()->_('DATETIMEFORMAT')) . ' ';
         if ($forAdmin) {

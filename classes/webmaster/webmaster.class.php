@@ -367,8 +367,7 @@ class Webmaster extends CMSWebmaster
             $PLC = new PriceLoader_Column([
                 'pid' => $PL->id,
                 'fid' => (int)$catalogType->fields['price_old']->id,
-                'callback' => "\$y = str_replace(',', '.', \$x);\n"
-                           .  "\$y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x));\n"
+                'callback' => "\$y = (float)preg_replace('/[^\\d\\.]+/i', '', trim(\$x));\n"
                            .  "return \$y;",
                 'priority' => ++$i
             ]);

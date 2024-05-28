@@ -2,6 +2,8 @@
 /**
  * Файл стандартного интерфейса обработчика прайсов
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\CSV;
@@ -120,32 +122,32 @@ class PriceloaderInterface extends AbstractInterface
      * @param int $rows Сколько строк пропускать
      * @param int $cols Сколько столбцов пропускать
      * @return [
-     *             'localError' ?=> array<[
-     *                 'name' => 'MISSING'|'INVALID' тип ошибки,
-     *                 'value' => string URN поля, на которое ссылается ошибка,
-     *                 'description' => string Человеко-понятное описание ошибки
-     *             ]> ошибки при загрузке
-     *             'log' ?=> array<[
-     *                 'time' => float Время, прошедшее с начала загрузки
-     *                 'text' => string Текст записи,
-     *                 'row' ?=> int К какой строке относится запись
-     *                               (относительно смещений, начиная с 0),
-     *                 'realrow' ?=> int К какой строке относится запись
-     *                                   (абсолютно, без учета смещений,
-     *                                   начиная с 0),
-     *             ]> Лог выполнения,
-     *             'raw_data' ?=> array<array<string>> Массив сырых данных,
-     *             'ok' ?=> true Обработка завершена
-     *         ]
+     *     'localError' ?=> array<[
+     *         'name' => 'MISSING'|'INVALID' тип ошибки,
+     *         'value' => string URN поля, на которое ссылается ошибка,
+     *         'description' => string Человеко-понятное описание ошибки
+     *     ]> ошибки при загрузке
+     *     'log' ?=> array<[
+     *         'time' => float Время, прошедшее с начала загрузки
+     *         'text' => string Текст записи,
+     *         'row' ?=> int К какой строке относится запись
+     *                       (относительно смещений, начиная с 0),
+     *         'realrow' ?=> int К какой строке относится запись
+     *                           (абсолютно, без учета смещений,
+     *                           начиная с 0),
+     *     ]> Лог выполнения,
+     *     'raw_data' ?=> array<array<string>> Массив сырых данных,
+     *     'ok' ?=> true Обработка завершена
+     * ]
      */
     public function upload(
-        $file,
-        $type,
+        string $file,
+        string $type,
         Page $page,
-        $test = true,
-        $clear = 0,
-        $rows = 0,
-        $cols = 0
+        bool $test = true,
+        int $clear = 0,
+        int $rows = 0,
+        int $cols = 0
     ) {
         $st = microtime(true);
         // Загрузка прайса
@@ -233,6 +235,7 @@ class PriceloaderInterface extends AbstractInterface
         $text = $converter->export($data, $page, $rows, $cols, $encoding);
         if ($debug) {
             return $text;
+        // @codeCoverageIgnoreStart
         } else {
             while (ob_get_level()) {
                 ob_end_clean();
@@ -242,6 +245,7 @@ class PriceloaderInterface extends AbstractInterface
             echo $text;
             exit;
         }
+        // @codeCoverageIgnoreEnd
     }
 
 
@@ -312,7 +316,7 @@ class PriceloaderInterface extends AbstractInterface
         // 2022-07-05, AVS: заменил функцию проверки (было trim),
         // чтобы поля с нулями тоже учитывались
         $filledCellsCounter = count(array_filter($dataRow, function ($x) {
-            return trim($x) !== '';
+            return trim((string)$x) !== '';
         }));
         if ($filledCellsCounter > 1) {
             return true;
@@ -335,7 +339,9 @@ class PriceloaderInterface extends AbstractInterface
      */
     public function convertCell(PriceLoader_Column $col, $data/*, $uniqueIndex = null*/)
     {
-        $data = trim($data);
+        if (is_string($data)) {
+            $data = trim((string)$data);
+        }
         if ($f = $col->Callback) {
             $data = $f($data);
         }
@@ -356,7 +362,7 @@ class PriceloaderInterface extends AbstractInterface
                 } elseif (!is_object($val) && !is_array($val)) {
                     // 2020-02-10, AVS: добавили fallback без fromRich,
                     // на случай если данные грузятся явно
-                    if ($valFR = $col->Field->fromRich(trim($val))) {
+                    if ($valFR = $col->Field->fromRich(trim((string)$val))) {
                         $data[$k] = $valFR;
                     } else {
                         $data[$k] = $val;
@@ -366,10 +372,10 @@ class PriceloaderInterface extends AbstractInterface
         } else {
             // 2020-02-10, AVS: добавили fallback без fromRich,
             // на случай если данные грузятся явно
-            if ($valFR = $col->Field->fromRich(trim($data))) {
+            if ($valFR = $col->Field->fromRich(trim((string)$data))) {
                 $data = $valFR;
             } else {
-                $data = trim($data);
+                $data = trim((string)$data);
             }
         }
         return $data;
@@ -397,20 +403,23 @@ class PriceloaderInterface extends AbstractInterface
                     $sqlBind[] = (int)$uniqueFieldId;
                 }
                 $mtypesIds = MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($loader->mtype);
+                // @codeCoverageIgnoreStart
+                // В текущем окружении не могу проверить отсутствие типов материалов
                 if (!$mtypesIds) {
                     $mtypesIds = [0];
                 }
+                // @codeCoverageIgnoreEnd
                 $sqlQuery .= " WHERE tM.pid IN (" . implode(", ", $mtypesIds) . ")
                             GROUP BY tM.id";
                 $sqlResult = Material::_SQL()->get([$sqlQuery, $sqlBind]);
                 foreach ($sqlResult as $sqlRow) {
-                    $this->assoc[trim($sqlRow['priceloader_unique_field'])][] = (int)$sqlRow['id'];
+                    $this->assoc[trim((string)$sqlRow['priceloader_unique_field'])][] = (int)$sqlRow['id'];
                 }
             }
 
-            if (trim($text) && isset($this->assoc[trim($text)])) {
+            if (trim((string)$text) && isset($this->assoc[trim((string)$text)])) {
                 $result = [];
-                foreach ((array)$this->assoc[trim($text)] as $materialId) {
+                foreach ((array)$this->assoc[trim((string)$text)] as $materialId) {
                     $result[] = new Material($materialId);
                 }
                 return $result;
@@ -433,7 +442,7 @@ class PriceloaderInterface extends AbstractInterface
         $sqlFromBind = $sqlWhereBind = [];
         for ($i = 0; $i < max(count($dataRow), count($loader->columns)); $i++) {
             $col = $loader->columns[$i];
-            if (!is_array($dataRow[$i]) && trim($dataRow[$i])) {
+            if (!is_array($dataRow[$i]) && trim((string)$dataRow[$i])) {
                 $tmpWhere = '';
                 if ($fid = (int)$col->Field->id) {
                     $sqlFrom[] = Material::_dbprefix() . "cms_data AS tD" . $fid
@@ -446,7 +455,7 @@ class PriceloaderInterface extends AbstractInterface
                 }
                 if ($tmpWhere) {
                     $sqlWhere[] = $tmpWhere . " = ? ";
-                    $sqlWhereBind[] = trim($dataRow[$i]);
+                    $sqlWhereBind[] = trim((string)$dataRow[$i]);
                 }
             }
         }
@@ -548,9 +557,7 @@ class PriceloaderInterface extends AbstractInterface
         $postprocessor = $col->Field->Postprocessor;
         $field = $col->Field->deepClone();
         $field->Owner = $item;
-        if (!$field->id) {
-            return null;
-        }
+        // 2024-04-17, AVS: убрал проверку if (!$field->id), т.к. это аналогично той, что проводится в начале метода
         $affectsField = false;
         $oldVal = [];
         if (!$new) {
@@ -560,7 +567,7 @@ class PriceloaderInterface extends AbstractInterface
         $dataArr = (array)$data;
         // 2015-06-01, AVS: добавляем || $new , чтобы у новых товаров артикул
         // тоже заполнялся
-        // 2016-02-01, AVS: закомментировали trim($data), т.к. пустые значения
+        // 2016-02-01, AVS: закомментировали trim((string)$data), т.к. пустые значения
         // тоже должны вставляться
         if (!$isUnique || $new) {
             if ($isFileField = in_array($field->datatype, ['file', 'image'])) {
@@ -584,7 +591,7 @@ class PriceloaderInterface extends AbstractInterface
                 }
 
                 $addedAttachments = [];
-                $dataArr = $this->convertMediaData($dataArr, $addedAttachments, $preprocessor, $postprocessor);
+                $dataArr = $this->convertMediaData($dataArr, $field, $addedAttachments, $preprocessor, $postprocessor);
                 foreach ($dataArr as $val) {
                     $field->addValue($val);
                     $affectsField = true;
@@ -612,12 +619,14 @@ class PriceloaderInterface extends AbstractInterface
     /**
      * Конвертирует данные для медиа-поля
      * @param array $data Данные для поля
+     * @param Field $field Поле, к которому относятся данные
      * @param array $addedAttachments Добавленные вложения
      * @param Snippet|null $preprocessor Препроцессор поля
      * @param Snippet|null $postprocessor Постпроцессор поля
      */
     public function convertMediaData(
         array $data,
+        Field $field,
         array &$addedAttachments,
         Snippet $preprocessor = null,
         Snippet $postprocessor = null
@@ -631,7 +640,7 @@ class PriceloaderInterface extends AbstractInterface
             $basename = basename($val);
             $tempname = sys_get_temp_dir() . '/' . $basename;
             if (stristr($val, '://')) {
-                $text = file_get_contents($val);
+                $text = @file_get_contents($val); // Для подавления ошибок несуществующих файлов
                 if (!$text) {
                     continue;
                 }
@@ -682,7 +691,7 @@ class PriceloaderInterface extends AbstractInterface
         // 2022-07-05, AVS: заменил функцию проверки (было trim),
         // чтобы поля с нулями тоже учитывались
         $filledCellsCounter = count(array_filter($dataRow, function ($x) {
-            return trim($x) !== '';
+            return trim((string)$x) !== '';
         }));
         return $filledCellsCounter == 1;
     }
@@ -706,7 +715,7 @@ class PriceloaderInterface extends AbstractInterface
                 $step = strlen($regs[0]);
             }
         }
-        return [(int)$step, trim($name)];
+        return [(int)$step, trim((string)$name)];
     }
 
 
@@ -901,13 +910,13 @@ class PriceloaderInterface extends AbstractInterface
         if ($uniqueIndex !== null) {
             // 2021-10-08, AVS: добавили возможность нескалярных значений
             if (!is_scalar($dataRow[$uniqueIndex]) ||
-                trim($dataRow[$uniqueIndex])
+                trim((string)$dataRow[$uniqueIndex])
             ) {
                 $itemSet = $this->getItemsByUniqueField(
                     $loader,
                     (
                         is_scalar($dataRow[$uniqueIndex]) ?
-                        trim($dataRow[$uniqueIndex]) :
+                        trim((string)$dataRow[$uniqueIndex]) :
                         $dataRow[$uniqueIndex]
                     )
                 );
@@ -1417,7 +1426,7 @@ class PriceloaderInterface extends AbstractInterface
             } elseif ($col->fid == 'description') {
                 $x = Module::i()->view->_('DESCRIPTION');
             }
-            $header[] = trim($x);
+            $header[] = trim((string)$x);
         }
         return $header;
     }
@@ -1435,7 +1444,7 @@ class PriceloaderInterface extends AbstractInterface
         if ($loader->catalog_offset) {
             $row = [
                 str_repeat(' ', $loader->catalog_offset * ($level - 1)) .
-                trim($page->name)
+                trim((string)$page->name)
             ];
         } else {
             $row = array_fill(0, $level, '');
@@ -1486,7 +1495,7 @@ class PriceloaderInterface extends AbstractInterface
             $x = implode(', ', $x);
         }
         if (is_string($x)) {
-            $x = trim($x);
+            $x = trim((string)$x);
         }
         return $x;
     }
@@ -1516,7 +1525,8 @@ class PriceloaderInterface extends AbstractInterface
      * @param Page $page Страница, в которую загружаем
      * @param int $rows Сколько строк пропускать
      * @param int $level Уровень вложенности
-     * @param array<Material_Type> $materialTypes Типы материалов, которые выгружаем
+     * @param Material_Type[] $materialTypes Типы материалов, которые выгружаем
+     * @return array
      */
     public function exportData(
         PriceLoader $loader,
@@ -1524,7 +1534,7 @@ class PriceloaderInterface extends AbstractInterface
         $rows = 0,
         $level = 0,
         array $materialTypes = []
-    ) {
+    ): array {
         if (!$materialTypes) {
             $materialTypes = $loader->Material_Type->selfAndChildrenIds;
         }
@@ -1558,7 +1568,8 @@ class PriceloaderInterface extends AbstractInterface
                     break;
             }
         }
-        $sqlQuery .= " GROUP BY tM.id";
+        $sqlQuery .= " GROUP BY tM.id
+                       ORDER BY NOT tM.priority, tM.priority, tM.id";
         $sqlResult = Material::_SQL()->get($sqlQuery);
         $materialsIds = array_map(function ($sqlRow) {
             return (int)$sqlRow['id'];

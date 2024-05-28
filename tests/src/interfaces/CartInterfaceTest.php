@@ -43,6 +43,8 @@ class CartInterfaceTest extends BaseTest
         'cms_shop_blocks_cart',
         'cms_shop_cart_types',
         'cms_shop_cart_types_material_types_assoc',
+        'cms_shop_carts',
+        'cms_shop_imageloaders',
         'cms_shop_orders',
         'cms_shop_orders_goods',
         'cms_shop_orders_history',
@@ -1250,5 +1252,40 @@ class CartInterfaceTest extends BaseTest
 
         $lastNameField->defval = '';
         $lastNameField->commit();
+    }
+
+
+    /**
+     * Тест метода process - случай с повтором заказа
+     */
+    public function testProcessWithOrderRepeat()
+    {
+        $order = new Order([
+            'pid' => 1,
+            'uid' => 1,
+            'meta_items' => [
+                ['material_id' => 10, 'name' => 'Товар 1', 'meta' => '', 'realprice' => 1000, 'amount' => 1],
+                ['material_id' => 11, 'name' => 'Товар 2', 'meta' => 'aaa', 'realprice' => 2000, 'amount' => 2],
+                ['material_id' => 12, 'name' => 'Товар 3', 'meta' => '', 'realprice' => 3000, 'amount' => 3],
+            ],
+        ]);
+        $order->commit();
+        $user = new User(1);
+        ControllerFrontend::i()->user = $user;
+
+        $block = new Block_Cart(38);
+        $interface = new CartInterface($block, new Page(25), ['repeat_order' => $order->id]);
+        $result = $interface->process(true);
+
+        $this->assertEquals('test@test.org', $result['DATA']['email']);
+        $this->assertEquals('Тестовый', $result['DATA']['last_name']);
+        $this->assertInstanceOf(Cart::class, $result['Cart']);
+        $this->assertCount(3, $result['Cart']->items);
+        $this->assertEquals(11, $result['Cart']->items[1]->id);
+        $this->assertEquals('aaa', $result['Cart']->items[1]->meta);
+        $this->assertEquals(2, $result['Cart']->items[1]->amount);
+
+        Order::delete($order);
+        ControllerFrontend::i()->user = new User();
     }
 }
