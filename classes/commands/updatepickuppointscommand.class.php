@@ -123,7 +123,7 @@ class UpdatePickupPointsCommand extends Command
     {
         $rx = '/^((г(ор(од)?)?)|(д(ер(евня)?)?)|(с(ело)?)|(п(ос(елок)?)?)|пгт)\.? /umis';
         $cityName = preg_replace($rx, '', $cityName);
-        return trim($cityName);
+        return trim((string)$cityName);
     }
 
 
@@ -153,35 +153,35 @@ class UpdatePickupPointsCommand extends Command
         if (stristr($regionName, 'Чуваш')) {
             $regionName = 'Чувашия';
         }
-        $regionName = trim($regionName);
+        $regionName = trim((string)$regionName);
         if ($strict) {
             $rx = '((г(ор(од)?)?)|((а(вт(ономная)?)?)? ?(о(бл(асть)?)?))|(кр(ай)?)|(р(есп(ублика)?)?))\.?';
-            $regionName = trim(preg_replace('/^' . $rx . ' /umis', '', $regionName));
-            $regionName = trim(preg_replace('/ ' . $rx . '$/umis', '', $regionName));
-            $regionName = Text::beautify($regionName);
+            $regionName = trim(preg_replace('/^' . $rx . ' /umis', '', (string)$regionName));
+            $regionName = trim(preg_replace('/ ' . $rx . '$/umis', '', (string)$regionName));
+            $regionName = Text::beautify((string)$regionName);
         } else {
             $rx = '/^г(ор(од)?)?\.?/umis';
-            $regionName = trim(preg_replace($rx, '', $regionName));
+            $regionName = trim(preg_replace($rx, '', (string)$regionName));
 
             $rx = '/^а(вт(ономная)?)? ?о(бл(асть)?)?\.? (.*?ая)$/umis';
-            $regionName = trim(preg_replace($rx, '$5 автономная область', $regionName));
+            $regionName = trim(preg_replace($rx, '$5 автономная область', (string)$regionName));
 
             $rx = '/^а(вт(ономная)?)? ?о(бл(асть)?)?\.? (.*?й)$/umis';
-            $regionName = trim(preg_replace($rx, '$5 автономный округ', $regionName));
+            $regionName = trim(preg_replace($rx, '$5 автономный округ', (string)$regionName));
 
             $rx = '/^о(бл(асть)?)?\.? (.*?ая)$/umis';
-            $regionName = trim(preg_replace($rx, '$3 область', $regionName));
+            $regionName = trim(preg_replace($rx, '$3 область', (string)$regionName));
 
             $rx = '/^р(есп(ублика)?)?\.? (.*?ая)$/umis';
-            $regionName = trim(preg_replace($rx, '$3 республика', $regionName));
+            $regionName = trim(preg_replace($rx, '$3 республика', (string)$regionName));
 
             $rx = '/^р(есп(ублика)?)?\.? /umis';
-            $regionName = trim(preg_replace($rx, '', $regionName));
+            $regionName = trim(preg_replace($rx, '', (string)$regionName));
 
             $rx = '/^кр(ай)?\.? (.*?ий)$/umis';
-            $regionName = trim(preg_replace($rx, '$2 край', $regionName));
+            $regionName = trim(preg_replace($rx, '$2 край', (string)$regionName));
         }
-        return trim($regionName);
+        return trim((string)$regionName);
     }
 
 
@@ -303,10 +303,10 @@ class UpdatePickupPointsCommand extends Command
         $result = [
             'value' => $cityName,
             'name' => $cityName,
-            'fias' => trim($item['location']['fias_guid']),
+            'fias' => trim((string)($item['location']['fias_guid'] ?? '')),
             'region' => $regionName,
             // 'regionURN' => $regionURN,
-            'country' => trim($item['location']['country_code']),
+            'country' => trim((string)($item['location']['country_code'] ?? '')),
             'cdekCityId' => $item['location']['city_code'],
         ];
         return $result;
@@ -321,27 +321,27 @@ class UpdatePickupPointsCommand extends Command
     public function formatCDEKPoint(array $item): array
     {
         $resultItem = [
-            'id' => trim($item['code']),
-            'name' => trim($item['name']),
-            'address' => trim($item['location']['address']),
-            'postalCode' => trim($item['location']['postal_code']),
+            'id' => trim((string)($item['code'] ?? '')),
+            'name' => trim((string)($item['name'] ?? '')),
+            'address' => trim((string)($item['location']['address'] ?? '')),
+            'postalCode' => trim((string)($item['location']['postal_code'] ?? '')),
             'canPay' => ($item['have_cash'] || $item['have_cashless']) && ($item['type'] != 'POSTAMAT'),
-            'description' => trim($item['address_comment']),
+            'description' => trim((string)($item['address_comment'] ?? '')),
             'lat' => (float)$item['location']['latitude'],
             'lon' => (float)$item['location']['longitude'],
             'serviceURN' => 'cdek',
             'weight' => null,
             'sizes' => [],
         ];
-        if ($item['work_time']) {
+        if ($item['work_time'] ?? null) {
             $resultItem['schedule'] = $item['work_time'];
         }
-        if ($item['phones']) {
+        if ($item['phones'] ?? null) {
             $resultItem['phones'] = array_map(function ($x) {
                 return Text::beautifyPhone($x['number'], 10);
             }, $item['phones']);
         }
-        if ($item['office_image_list']) {
+        if ($item['office_image_list'] ?? null) {
             $resultItem['images'] = array_map(function ($x) {
                 return $x['url'];
             }, $item['office_image_list']);
@@ -448,10 +448,10 @@ class UpdatePickupPointsCommand extends Command
         $cityName = $this->normalizeCityName($item['address']['place'] ?? '');
 
         $result = [
-            'value' => trim($cityName),
-            'name' => trim($cityName),
-            'fias' => trim($item['addressFias']['locationGarCode']),
-            'region' => trim($regionName),
+            'value' => trim((string)$cityName),
+            'name' => trim((string)$cityName),
+            'fias' => trim((string)($item['addressFias']['locationGarCode'] ?? '')),
+            'region' => trim((string)$regionName),
             // 'regionURN' => $regionURN,
         ];
         return $result;
@@ -487,15 +487,15 @@ class UpdatePickupPointsCommand extends Command
             $addressArr[] = $item['addressFias']['ads'];
         }
         $resultItem = [
-            'id' => trim($item['address']['index'] ?? ''),
-            // 'name' => trim($item['name']),
+            'id' => trim((string)($item['address']['index'] ?? '')),
+            // 'name' => trim((string)($item['name'] ?? '')),
             'address' => trim(implode(', ', $addressArr)),
-            'postalCode' => trim($item['address']['index'] ?? ''),
+            'postalCode' => trim((string)($item['address']['index'] ?? '')),
             // 2023-11-21, AVS: $item['ecomOptions']['cardPayment'] и $item['ecomOptions']['cashPayment']
             // почти всегда false, поэтому пока расчитываем как тип - "...ОПС"
-            'canPay' => stristr($item['type'], 'ОПС'),
-            'lat' => (float)$item['latitude'],
-            'lon' => (float)$item['longitude'],
+            'canPay' => stristr(($item['type'] ?? ''), 'ОПС'),
+            'lat' => (float)($item['latitude'] ?? 0),
+            'lon' => (float)($item['longitude'] ?? 0),
             'serviceURN' => 'russianpost',
             // 'inner' => $item,
             'weight' => null,
@@ -505,11 +505,11 @@ class UpdatePickupPointsCommand extends Command
             $resultItem['weight'] = $weightLimit;
         }
         $resultItem['name'] = $item['type'];
-        if ($item['ecomOptions']['getto']) {
+        if ($item['ecomOptions']['getto'] ?? null) {
             $resultItem['description'] = $item['ecomOptions']['getto'];
         }
 
-        if ($item['workTime']) {
+        if ($item['workTime'] ?? null) {
             $resultItem['schedule'] = implode("\n", $item['workTime']);
         }
         // if ($item['phoneDetailList']) {
