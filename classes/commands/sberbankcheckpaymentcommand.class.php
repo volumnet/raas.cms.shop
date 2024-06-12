@@ -27,7 +27,7 @@ class SberbankCheckPaymentCommand extends Command
         $sqlQuery = "SELECT *
                        FROM " . Order::_tablename()
                   . " WHERE payment_id != ''
-                        AND payment_interface_id
+                        AND (payment_interface_id OR (payment_interface_classname != ''))
                         AND payment_url LIKE '%securecardpayment%'
                         AND NOT paid
                         AND post_date >= NOW() - INTERVAL ? SECOND";
@@ -36,8 +36,16 @@ class SberbankCheckPaymentCommand extends Command
 
         foreach ($sqlResult as $order) {
             // Найдем блок корзины
-            $sqlQuery = "SELECT id FROM " . Block_Cart::_tablename2() . " WHERE epay_interface_id = ? AND cart_type = ?";
-            $blockId = Block_Cart::_SQL()->getvalue([$sqlQuery, (int)$order->payment_interface_id, (int)$order->pid]);
+            $sqlQuery = $sqlQuery = "SELECT id FROM " . Block_Cart::_tablename2() . " WHERE cart_type = ?";
+            $sqlBind = [(int)$order->pid];
+            if ($order->payment_interface_classname) {
+                $sqlQuery .= " AND epay_interface_classname = ?";
+                $sqlBind[] = (string)$order->payment_interface_classname;
+            } else {
+                $sqlQuery .= " AND epay_interface_id = ?";
+                $sqlBind[] = (int)$order->payment_interface_id;
+            }
+            $blockId = Block_Cart::_SQL()->getvalue([$sqlQuery, $sqlBind]);
             $block = null;
             $sber = null;
             $page = null;

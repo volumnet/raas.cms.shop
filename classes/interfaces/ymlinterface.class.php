@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 namespace RAAS\CMS\Shop;
 
-use RAAS\CMS\AbstractInterface;
+use RAAS\CMS\BlockInterface;
 use RAAS\CMS\Material_Field;
 use RAAS\CMS\Page;
 use RAAS\CMS\Material;
@@ -16,7 +16,7 @@ use SOME\EventProcessor;
 /**
  * Класс интерфейса Яндекс-Маркета
  */
-class YMLInterface extends AbstractInterface
+class YMLInterface extends BlockInterface
 {
     /**
      * Ограничение по товарам (для отладки)
@@ -70,7 +70,7 @@ class YMLInterface extends AbstractInterface
         $appendHeader = false,
         $maxExecutionTime = null,
         $return = false
-    ) {
+    ): array {
 
         if ($maxExecutionTime) {
             ini_set('max_execution_time', (string)(int)$maxExecutionTime);
@@ -87,11 +87,12 @@ class YMLInterface extends AbstractInterface
                   . $this->outputShopBlock($this->block, true)
                   . $footerText
                   . $memoryText;
-            return $text;
+            return ['result' => $text];
         } else {
             echo $headerText;
             $this->outputShopBlock($this->block, false);
             echo $footerText . $memoryText;
+            return [];
         }
     }
 

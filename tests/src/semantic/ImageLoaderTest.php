@@ -96,6 +96,33 @@ class ImageLoaderTest extends BaseTest
 
 
     /**
+     * Тест метода upload() - случай с указанием класса интерфейса
+     */
+    public function testUploadWithInterfaceClassname()
+    {
+        $loader = new ImageLoader([
+            'mtype' => 4, // Каталог продукции
+            'interface_classname' => MockImageloaderInterface::class,
+        ]);
+        $loader->commit();
+
+        $result = $loader->upload(
+            [['name' => 'test.xls', 'tmp_name' => $this->getResourcesDir() . '/test.xls']],
+            true,
+            true
+        );
+
+        $this->assertEquals($loader, $result['Loader']);
+        $this->assertEquals('test.xls', $result['files'][0]['name']);
+        $this->assertEquals($this->getResourcesDir() . '/test.xls', $result['files'][0]['tmp_name']);
+        $this->assertTrue($result['test']);
+        $this->assertTrue($result['clear']);
+
+        ImageLoader::delete($loader);
+    }
+
+
+    /**
      * Тест метода download()
      */
     public function testDownload()
@@ -120,5 +147,24 @@ class ImageLoaderTest extends BaseTest
 
         ImageLoader::delete($loader);
         Snippet::delete($interface);
+    }
+
+
+    /**
+     * Тест метода download()
+     */
+    public function testDownloadWithInterfaceClassname()
+    {
+        $loader = new ImageLoader([
+            'mtype' => 4, // Каталог продукции
+            'interface_classname' => MockImageloaderInterface::class,
+        ]);
+        $loader->commit();
+
+        $result = $loader->download();
+
+        $this->assertEquals($loader, $result['Loader']);
+
+        ImageLoader::delete($loader);
     }
 }

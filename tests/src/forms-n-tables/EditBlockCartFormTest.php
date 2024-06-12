@@ -9,6 +9,7 @@ use RAAS\Application;
 use RAAS\Field as RAASField;
 use RAAS\FormTab;
 use RAAS\User as RAASUser;
+use RAAS\CMS\InterfaceField;
 use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
 
@@ -52,14 +53,16 @@ class EditBlockCartFormTest extends BaseTest
         $cartTypeField = $form->children['commonTab']->children['cart_type'];
         $snippet = Snippet::importByURN('__raas_shop_cart_interface');
 
-        $this->assertInstanceOf(RAASField::class, $interfaceField);
-        $this->assertEquals($snippet->id, $interfaceField->default);
+        $this->assertInstanceOf(InterfaceField::class, $interfaceField);
+        $this->assertEquals(CartInterface::class, $interfaceField->default);
+        $this->assertEquals(CartInterface::class, $interfaceField->meta['rootInterfaceClass']);
         $this->assertInstanceOf(RAASField::class, $widgetField);
         $this->assertInstanceOf(RAASField::class, $cartTypeField);
         $this->assertEquals('select', $cartTypeField->type);
 
         $this->assertInstanceOf(FormTab::class, $form->children['epayTab']);
-        $this->assertInstanceOf(RAASField::class, $form->children['epayTab']->children['epay_interface_id']);
+        $this->assertInstanceOf(InterfaceField::class, $form->children['epayTab']->children['epay_interface_id']);
+        $this->assertEquals(EPayInterface::class, $form->children['epayTab']->children['epay_interface_id']->meta['rootInterfaceClass']);
     }
 
 

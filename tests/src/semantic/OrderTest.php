@@ -349,6 +349,32 @@ class OrderTest extends BaseTest
 
 
     /**
+     * Проверка метода importByPayment() - случай с указанием класса платежного интерфейса
+     */
+    public function testImportByPaymentWithPaymentInterfaceClassname()
+    {
+        $order = new Order([
+            'pid' => 1,
+            'payment_id' => '12345',
+            'payment_interface_classname' => SberbankInterface::class,
+            'meta_items' => [
+                ['material_id' => 10, 'name' => 'Товар 1', 'meta' => '', 'realprice' => 1000, 'amount' => 1],
+                ['material_id' => 11, 'name' => 'Товар 2', 'meta' => '', 'realprice' => 2000, 'amount' => 2],
+                ['material_id' => 12, 'name' => 'Товар 3', 'meta' => '', 'realprice' => 3000, 'amount' => 3],
+            ],
+        ]);
+        $order->commit();
+
+        $result = Order::importByPayment('12345', SberbankInterface::class);
+
+        $this->assertInstanceOf(Order::class, $result);
+        $this->assertEquals($order->id, $result->id);
+
+        Order::delete($order);
+    }
+
+
+    /**
      * Проверка метода importByPayment() - случай с неуказанным payment_id
      */
     public function testImportByPaymentWithoutPaymentId()

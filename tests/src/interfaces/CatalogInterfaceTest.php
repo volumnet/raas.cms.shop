@@ -11,8 +11,10 @@ use RAAS\CMS\Block;
 use RAAS\CMS\Form;
 use RAAS\CMS\Material;
 use RAAS\CMS\Material_Type;
+use RAAS\CMS\MaterialInterface;
 use RAAS\CMS\Page;
 use RAAS\CMS\Page_Field;
+use RAAS\CMS\Snippet;
 
 /**
  * Класс теста интерфейса каталога
@@ -842,8 +844,20 @@ class CatalogInterfaceTest extends BaseTest
     /**
      * Тест обработки блоков комментариев к товару
      */
-    public function testProcessComments()
+    public function testProcessCommentsWithInterfaceSnippet()
     {
+        $snippet = new Snippet(['urn' => 'test', 'description' => '<' . '?php
+            $interface = new RAAS\CMS\MaterialInterface($Block, $Page, $_GET, $_POST, $_COOKIE, $_SESSION, $_SERVER, $_FILES);
+            return $interface->process();
+        ']);
+        $snippet->commit();
+
+        $commentsBlock = Block::spawn(51); // Отзывы к товарам (список)
+        $commentsBlockInterfaceId = $commentsBlock->interface_id;
+        $commentsBlock->interface_id = $snippet->id;
+        $commentsBlock->interface_classname = '';
+        $commentsBlock->commit();
+
         $block = Block::spawn(34); // Каталог продукции
         $page = new Page(18); // Категория 111
         $material = new Material(12); // Товар 3 - к нему есть отзывы
@@ -856,6 +870,41 @@ class CatalogInterfaceTest extends BaseTest
         $this->assertCount(3, $result['comments']);
         $this->assertEquals('Отзыв 1', $result['comments'][0]->name);
         $this->assertStringContainsString('class="goods-reviews-item', $result['commentsListText']);
+
+        $commentsBlock->interface_id = 0;
+        $commentsBlock->interface_classname = MaterialInterface::class;
+        $commentsBlock->commit();
+
+        Snippet::delete($snippet);
+    }
+
+
+    /**
+     * Тест обработки блоков комментариев к товару - случай указания класса интерфейса
+     */
+    public function testProcessCommentsWithInterfaceClassname()
+    {
+        $commentsBlock = Block::spawn(51); // Отзывы к товарам (список)
+        $commentsBlockInterfaceId = $commentsBlock->interface_id;
+        $commentsBlock->interface_id = 0;
+        $commentsBlock->interface_classname = MaterialInterface::class;
+        $commentsBlock->commit();
+
+        $block = Block::spawn(34); // Каталог продукции
+        $page = new Page(18); // Категория 111
+        $material = new Material(12); // Товар 3 - к нему есть отзывы
+        $interface = new CatalogInterface();
+
+        $result = $interface->processComments($block, $page, $material);
+
+        $this->assertEquals(52, $result['commentFormBlock']->id);
+        $this->assertEquals($commentsBlock->id, $result['commentsListBlock']->id);
+        $this->assertCount(3, $result['comments']);
+        $this->assertEquals('Отзыв 1', $result['comments'][0]->name);
+        $this->assertStringContainsString('class="goods-reviews-item', $result['commentsListText']);
+
+        $commentsBlock->interface_id = $commentsBlockInterfaceId;
+        $commentsBlock->commit();
     }
 
 

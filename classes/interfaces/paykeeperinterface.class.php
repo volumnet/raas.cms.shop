@@ -54,7 +54,7 @@ class PayKeeperInterface extends EPayInterface
     public function findOrder()
     {
         $block = $this->block;
-        $epayInterface = $block ? $block->EPay_Interface : null;
+        $epayInterface = $this->getPaymentInterface($this->block);
         if ($paymentId = $this->get['payment_id'] ?? null) {
             $order = Order::importByPayment($paymentId, $epayInterface);
             if ($order && $order->id) {

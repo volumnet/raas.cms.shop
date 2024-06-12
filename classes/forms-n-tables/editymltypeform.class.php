@@ -85,9 +85,9 @@ class EditYMLTypeForm extends RAASForm
     public function __construct(array $params = [])
     {
         $this->view->js[] = $this->view->publicURL . '/edit_yml_type.js';
-        $Block = isset($params['Block']) ? $params['Block'] : null;
-        $MType = isset($params['MType']) ? $params['MType'] : null;
-        $Page = isset($params['Page']) ? $params['Page'] : null;
+        $block = isset($params['Block']) ? $params['Block'] : null;
+        $mType = isset($params['MType']) ? $params['MType'] : null;
+        $page = isset($params['Page']) ? $params['Page'] : null;
 
         $temp = [];
         foreach (Block_YML::$ymlTypes as $key => $val) {
@@ -112,12 +112,12 @@ class EditYMLTypeForm extends RAASForm
         $defaultParams = [
             'actionMenu' => false,
             'parentUrl' => $this->view->parent->parent->url
-                        .  '&action=edit_block&id=' . (int)$Block->id
-                        . '&pid=' . $Page->id,
-            'caption' => $MType->name,
+                        .  '&action=edit_block&id=' . (int)$block->id
+                        . '&pid=' . $page->id,
+            'caption' => $mType->name,
             'meta' => [
-                'MType' => $MType,
-                'Block' => $Block,
+                'MType' => $mType,
+                'Block' => $block,
             ],
             'children' => [
                 'common' => new FormTab([
@@ -152,7 +152,7 @@ class EditYMLTypeForm extends RAASForm
                             'type' => 'select',
                             'name' => 'ignore_param',
                             'multiple' => true,
-                            'children' => $this->filterFieldsByType($MType),
+                            'children' => $this->filterFieldsByType($mType),
                             'caption' => $this->view->_('EXCEPT')
                         ],
                         'params_callback' => [
@@ -167,13 +167,13 @@ class EditYMLTypeForm extends RAASForm
                     ]
                 ]),
             ],
-            'commit' => function ($Form) use ($Block, $MType) {
+            'commit' => function ($Form) use ($block, $mType) {
                 $type = '';
                 if (isset($_POST['type']) &&
                     trim($_POST['type']) &&
                     isset(Block_YML::$ymlTypes[trim($_POST['type'])])
                 ) {
-                    $type = trim($_POST['type']);
+                    $type = trim((string)$_POST['type']);
                 }
                 $fields = [];
                 if (isset($_POST['field_id'])) {
@@ -280,14 +280,14 @@ class EditYMLTypeForm extends RAASForm
                 } else {
                     $paramsCallback = '';
                 }
-                $Block->addType(
-                    $MType,
-                    $type,
+                $block->addType(
+                    $mType,
+                    (string)$type,
                     $fields,
                     $params,
                     $ignoreParam,
-                    $paramExceptions,
-                    $paramsCallback
+                    (bool)$paramExceptions,
+                    (string)$paramsCallback
                 );
             }
         ];
@@ -305,7 +305,7 @@ class EditYMLTypeForm extends RAASForm
         }
 
         foreach ($temp as $key => $types) {
-            $fieldSet = $this->getYMLFieldFieldSet($key, $MType, $Block, $types);
+            $fieldSet = $this->getYMLFieldFieldSet($key, $mType, $block, $types);
             if ($fieldSet) {
                 $defaultParams['children']['common']->children['fields']->children[$key] = $fieldSet;
             }

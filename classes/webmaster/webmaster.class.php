@@ -48,56 +48,9 @@ class Webmaster extends CMSWebmaster
     {
         $interfaces = [];
         $interfacesData = [
-            'cart_interface' => [
-                'name' => 'CART_INTERFACE',
-                'filename' => 'cart_interface',
-                'locked' => false,
-            ],
-            '__raas_shop_compare_interface' => [
-                'name' => 'COMPARE_STANDARD_INTERFACE',
-                'filename' => 'compare_interface',
-            ],
-            'catalog_interface' => [
-                'name' => 'CATALOG_INTERFACE',
-                'filename' => 'catalog_interface',
-                'locked' => false,
-            ],
-            '__raas_shop_goods_comments_interface' => [
-                'name' => 'GOODS_COMMENTS_STANDARD_INTERFACE',
-                'filename' => 'goods_comments_interface',
-            ],
-            '__raas_shop_spec_interface' => [
-                'name' => 'SPEC_STANDARD_INTERFACE',
-                'filename' => 'spec_interface',
-            ],
             '__raas_shop_order_notify' => [
                 'name' => 'ORDER_STANDARD_NOTIFICATION',
                 'filename' => 'form_notification',
-            ],
-            '__raas_shop_imageloader_interface' => [
-                'name' => 'IMAGELOADER_STANDARD_INTERFACE',
-                'filename' => 'imageloader_interface',
-            ],
-            '__raas_shop_priceloader_interface' => [
-                'name' => 'PRICELOADER_STANDARD_INTERFACE',
-                'filename' => 'priceloader_interface',
-            ],
-            '__raas_shop_yml_interface' => [
-                'name' => 'YML_STANDARD_INTERFACE',
-                'filename' => 'yml_interface',
-            ],
-            // '__raas_robokassa_interface' => [
-            //     'name' => 'ROBOKASSA_INTERFACE',
-            //     'filename' => 'robokassa_interface',
-            // ],
-            'sberbank_interface' => [
-                'name' => 'SBERBANK_INTERFACE',
-                'filename' => 'sberbank_interface',
-                'locked' => false,
-            ],
-            '__raas_my_orders_interface' => [
-                'name' => 'MY_ORDERS_STANDARD_INTERFACE',
-                'filename' => 'my_orders_interface',
             ],
         ];
         foreach ($interfacesData as $interfaceURN => $interfaceData) {
@@ -285,9 +238,7 @@ class Webmaster extends CMSWebmaster
                 'name' => View_Web::i()->_('DEFAULT_IMAGELOADER'),
                 'urn' => 'default',
                 'sep_string' => '_',
-                'interface_id' => (int)Snippet::importByURN(
-                    '__raas_shop_imageloader_interface'
-                )->id,
+                'interface_classname' => ImageloaderInterface::class,
             ]);
             $IL->commit();
         }
@@ -301,9 +252,7 @@ class Webmaster extends CMSWebmaster
                 'name' => View_Web::i()->_('DEFAULT_PRICELOADER'),
                 'urn' => 'default',
                 'cat_id' => (int)$catalog->id,
-                'interface_id' => (int)Snippet::importByURN(
-                    '__raas_shop_priceloader_interface'
-                )->id,
+                'interface_classname' => PriceloaderInterface::class,
             ]);
             $PL->commit();
             $i = 0;
@@ -560,7 +509,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                     . '&russianpost[services][]=41'
                     . '&russianpost[services][]=42'
                     . '&minOrderSum=0',
-            ]), 'content', 'cart_interface', 'cart', $cart);
+            ]), 'content', CartInterface::class, 'cart', $cart);
 
             $this->createBlock(
                 new Block_PHP(),
@@ -631,7 +580,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 'content',
-                '__raas_shop_compare_interface',
+                CompareInterface::class,
                 'favorites',
                 $favorites
             );
@@ -672,7 +621,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 '',
-                '__raas_shop_compare_interface',
+                CompareInterface::class,
                 'favorites',
                 $ajaxFavorites
             );
@@ -712,7 +661,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 'content',
-                '__raas_shop_compare_interface',
+                CompareInterface::class,
                 'compare',
                 $compare
             );
@@ -753,7 +702,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             $this->createBlock(
                 $B,
                 '',
-                '__raas_shop_compare_interface',
+                CompareInterface::class,
                 'compare',
                 $ajaxCompare
             );
@@ -894,7 +843,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'meta_cats' => $catalog->selfAndChildrenIds,
                 'local_delivery_cost' => 0,
             ]);
-            $this->createBlock($B, '', '__raas_shop_yml_interface', null, $yml);
+            $this->createBlock($B, '', YMLInterface::class, null, $yml);
             $B->addType(
                 $catalogType,
                 '',
@@ -1161,8 +1110,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             ],
         ]);
 
-        // @deprecated 2023-03-05, AVS: создание AJAX-страниц для меню устарело, используется X-RAAS-Block-Id
-        // $this->createAJAXMenus($ajax);
         $sqlQuery = "SELECT tB.id
                        FROM " . Block::_tablename() . " AS tB
                        JOIN cms_blocks_menu AS tBM
@@ -1198,79 +1145,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
         $this->adjustBlocks();
         $yml = $this->createYandexMarket($catalogType, $catalog);
         $this->createCron();
-    }
-
-
-    /**
-     * Создает AJAX-меню
-     * @deprecated 2023-03-05, AVS: создание AJAX-страниц для меню устарело, используется X-RAAS-Block-Id
-     */
-    public function createAJAXMenus(Page $ajax)
-    {
-        $cacheInterfaceId = Snippet::importByURN('__raas_cache_interface')->id;
-        $menuInterface =  Snippet::importByURN('__raas_menu_interface');
-        // $temp = Page::getSet([
-        //     'where' => ["pid = " . (int)$ajax->id, "urn = 'menu_left'"]
-        // ]);
-        // if ($temp) {
-        //     $leftMenuPage = $temp[0];
-        // } else {
-        //     $leftMenuPageData = [
-        //         'name' => View_Web::i()->_('LEFT_MENU'),
-        //         'urn' => 'menu_left',
-        //         'template' => 0,
-        //         'cache' => 0,
-        //         'response_code' => 200
-        //     ];
-        //     $leftMenu = Menu::importByURN('left');
-        //     $leftMenuPage = $this->createPage($leftMenuPageData, $ajax);
-        //     $leftMenuWidget = Snippet::importByURN('menu_left');
-        //     $leftMenuBlock = new Block_Menu([
-        //         'menu' => (int)$leftMenu->id,
-        //         'full_menu' => 1,
-        //         'cache_type' => Block::CACHE_DATA,
-        //         'cache_interface_id' => (int)$cacheInterfaceId,
-        //     ]);
-        //     $this->createBlock(
-        //         $leftMenuBlock,
-        //         '',
-        //         $menuInterface,
-        //         $leftMenuWidget,
-        //         $leftMenuPage,
-        //         false
-        //     );
-        // }
-        // $temp = Page::getSet([
-        //     'where' => ["pid = " . (int)$ajax->id, "urn = 'menu_mobile'"]
-        // ]);
-        // if ($temp) {
-        //     $mobileMenuPage = $temp[0];
-        // } else {
-        //     $mobileMenuPageData = [
-        //         'name' => View_Web::i()->_('MOBILE_MENU'),
-        //         'urn' => 'menu_mobile',
-        //         'template' => 0,
-        //         'cache' => 0,
-        //         'response_code' => 200
-        //     ];
-        //     $mobileMenu = Menu::importByURN('mobile');
-        //     $mobileMenuPage = $this->createPage($mobileMenuPageData, $ajax);
-        //     $mobileMenuWidget = Snippet::importByURN('menu_mobile');
-        //     $mobileMenuBlock = new Block_Menu([
-        //         'menu' => (int)$mobileMenu->id,
-        //         'full_menu' => 1,
-        //         'cache_type' => Block::CACHE_DATA,
-        //         'cache_interface_id' => (int)$cacheInterfaceId,
-        //     ]);
-        //     $this->createBlock(
-        //         $mobileMenuBlock,
-        //         '',
-        //         $menuInterface,
-        //         $mobileMenuWidget,
-        //         $mobileMenuPage,
-        //         false
-        //     );
-        // }
     }
 
 

@@ -1681,16 +1681,17 @@ class Sync1CInterfaceTest extends BaseTest
                 ],
                 $materialType,
                 ['id' => 47, 'pid' => 4, 'name' => 'Тестовое поле справочника', 'urn' => 'urn'],
+                // Подтягивается по маппингу Material_Field::class => ['sdklfjweiorjoisdmnfl' => 47],
                 [],
             ],
             [
                 [
                     'id' => 'sdklfjweiorjoisdmnfl',
-                    'pid' => 0,
+                    'pid' => 'asdsdiofusf', // 2024-06-11, AVS: Поправил для установки корректного pid (см. ниже)
                     'name' => 'Name1',
                     'urn' => 'urn1',
                     '@config' => [
-                        'map' => ['id' => true, 'pid' => false],
+                        'map' => ['id' => true, 'pid' => true],
                         'create' => ['pid' => true, 'name' => true, 'urn' => false],
                         'update' => ['pid' => true, 'name' => true, 'urn' => false]
                     ]
@@ -1700,7 +1701,9 @@ class Sync1CInterfaceTest extends BaseTest
                     Material_Type::class => ['asdsdiofusf' => 1]
                 ],
                 $materialType,
-                ['id' => 34, 'pid' => 0, 'name' => 'Name1', 'urn' => 'price_old'],
+                ['id' => 34, 'pid' => 1, 'name' => 'Name1', 'urn' => 'price_old'],
+                // Подтягивается по маппингу Material_Field::class => ['sdklfjweiorjoisdmnfl' => 34],
+                // Обновляется по 'update' => ['pid' => true]
                 [],
             ],
             [
@@ -1717,7 +1720,11 @@ class Sync1CInterfaceTest extends BaseTest
                 ],
                 [Material_Type::class => ['sdklfjweiorjoisdmnfl' => 3, 'asdsdiofusf' => 1]],
                 $materialType,
-                ['id' => 34, 'pid' => 0, 'name' => 'Name1', 'urn' => 'price_old'],
+                ['id' => 34, 'pid' => 1, 'name' => 'Name1', 'urn' => 'price_old'],
+                // 2024-06-11, AVS: не подтягивается из-за изменений в Material_Field
+                // Сейчас они могут быть только с установленным pid
+                // Поправил предыдущее для установки корректного pid
+                // Подтягивается по имени Name1 в контексте нулевого pid (все типы материалов)
                 [],
             ],
             [
@@ -1737,6 +1744,7 @@ class Sync1CInterfaceTest extends BaseTest
                 // 2024-03-13, AVS: поменял на динамическую переменную, т.к. количество полей увеличилось
                 ['id' => static::$fieldsLastId, 'pid' => 0, 'name' => 'Name1', 'urn' => 'name1', 'new' => true],
                 ['bbb' => static::$fieldsLastId],
+                // Не подтягивается, т.к. pid другой
             ],
         ];
     }

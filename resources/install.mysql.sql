@@ -48,9 +48,10 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders (
   post_date datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Post date',
   vis INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Visited',
   ip VARCHAR(255) NOT NULL DEFAULT '0.0.0.0' COMMENT 'IP address',
-  user_agent VARCHAR(255) NOT NULL DEFAULT '0.0.0.0' COMMENT 'User Agent',
+  user_agent VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'User Agent',
   status_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Status ID#',
   paid TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Payment status',
+  payment_interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment interface classname',
   payment_interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Payment interface ID#',
   payment_id VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment ID#',
   payment_url VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment URL',
@@ -61,6 +62,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders (
   KEY (page_id),
   KEY (status_id),
   INDEX (paid),
+  INDEX (payment_interface_classname),
   KEY (payment_interface_id),
   INDEX (payment_id)
 ) COMMENT 'Orders';
@@ -106,6 +108,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   ufid VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Unique field ID#',
   name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Name',
   urn VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'URN',
+  interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Interface classname',
   interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',
   `rows` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Rows from top',
   `cols` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Cols from left',
@@ -119,6 +122,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   PRIMARY KEY (id),
   KEY (mtype),
   KEY (ufid),
+  INDEX (interface_classname),
   KEY (interface_id),
   KEY (cat_id),
   INDEX (urn)
@@ -148,12 +152,14 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloade
   name VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Name',
   urn VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'URN',
   sep_string VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Separator string',
+  interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Interface classname',
   interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Interface ID#',
 
   PRIMARY KEY (id),
   KEY (mtype),
   KEY (ufid),
   KEY (ifid),
+  INDEX (interface_classname),
   KEY (interface_id),
   INDEX (urn)
 ) COMMENT 'Image loaders';
@@ -162,6 +168,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloade
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_cart (
   id int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'ID#',
   cart_type int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Cart type ID#',
+  epay_interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay interface classname',
   epay_interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'E-pay interface ID#',
   epay_login VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay login',
   epay_pass1 VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay pass1',
@@ -171,6 +178,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_car
 
   PRIMARY KEY (id),
   KEY cart_type (cart_type),
+  INDEX (epay_interface_classname),
   KEY (epay_interface_id)
 ) COMMENT='Cart blocks';
 

@@ -132,37 +132,54 @@ class PriceLoader extends SOME
      * ]</pre>
      * @param Page|null $page Корневая страница для загрузки
      * @param bool $test Тестовый режим
-     * @param int|bool $clear Режим очистки неиспользуемых товаров/страниц
+     * @param int $clear Режим очистки неиспользуемых товаров/страниц
      * @param int|null $rows Отступ строк
      * @param int|null $cols Отступ колонок
+     * @return mixed
      */
     public function upload(
         array $file = null,
         Page $page = null,
-        $test = false,
-        $clear = false,
-        $rows = null,
-        $cols = null
+        bool $test = null,
+        int $clear = self::DELETE_PREVIOUS_MATERIALS_NONE,
+        int $rows = null,
+        int $cols = null
     ) {
-        $Loader = $this;
         if ($page === null) {
             $page = $this->Page;
         }
         if ($rows === null) {
-            $rows = $this->rows;
+            $rows = (int)$this->rows;
         }
         if ($cols === null) {
-            $cols = $this->cols;
+            $cols = (int)$this->cols;
         }
-        $out = $this->Interface->process([
-            'Loader' => $this,
-            'file' => $file,
-            'Page' => $page,
-            'test' => $test,
-            'clear' => $clear,
-            'rows' => $rows,
-            'cols' => $cols,
-        ]);
+        $test = (bool)$test;
+        $out = null;
+        if (($interfaceClassname = trim((string)$this->interface_classname)) &&
+            class_exists($interfaceClassname) &&
+            (
+                ($interfaceClassname == PriceloaderInterface::class) ||
+                is_subclass_of($interfaceClassname, PriceloaderInterface::class)
+            )
+        ) {
+            $type = '';
+            if ($file['name'] ?? '') {
+                $type = strtolower(pathinfo((string)$file['name'], PATHINFO_EXTENSION));
+            }
+            $interface = new $interfaceClassname($this);
+            $out = $interface->upload($file['tmp_name'] ?? '', $type, $page, $test, $clear, $rows, $cols);
+        } elseif ($this->Interface) {
+            $out = $this->Interface->process([
+                'Loader' => $this,
+                'file' => $file,
+                'Page' => $page,
+                'test' => $test,
+                'clear' => $clear,
+                'rows' => $rows,
+                'cols' => $cols,
+            ]);
+        }
         return $out;
     }
 
@@ -175,26 +192,41 @@ class PriceLoader extends SOME
      * @param string $type Тип выгружаемого файла
      * @param string $encoding Кодировка
      */
-    public function download(Page $page = null, $rows = 0, $cols = 0, $type = null, $encoding = null)
-    {
-        $Loader = $this;
+    public function download(
+        Page $page = null,
+        int $rows = null,
+        int $cols = null,
+        string $type = null,
+        string $encoding = null
+    ) {
         if ($page === null) {
-            $page = $Loader->Page;
+            $page = $this->Page;
         }
         if ($rows === null) {
-            $rows = $Loader->rows;
+            $rows = (int)$this->rows;
         }
         if ($cols === null) {
-            $cols = $Loader->cols;
+            $cols = (int)$this->cols;
         }
-        $out = $this->Interface->process([
-            'Loader' => $this,
-            'Page' => $page,
-            'rows' => $rows,
-            'cols' => $cols,
-            'type' => $type,
-            'encoding' => $encoding,
-        ]);
+        if (($interfaceClassname = trim((string)$this->interface_classname)) &&
+            class_exists($interfaceClassname) &&
+            (
+                ($interfaceClassname == PriceloaderInterface::class) ||
+                is_subclass_of($interfaceClassname, PriceloaderInterface::class)
+            )
+        ) {
+            $interface = new $interfaceClassname($this);
+            $out = $interface->download($page, $rows, $cols, $type, $encoding);
+        } elseif ($this->Interface) {
+            $out = $this->Interface->process([
+                'Loader' => $this,
+                'Page' => $page,
+                'rows' => $rows,
+                'cols' => $cols,
+                'type' => $type,
+                'encoding' => $encoding,
+            ]);
+        }
         return $out;
     }
 }

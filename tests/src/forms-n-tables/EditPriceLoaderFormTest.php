@@ -9,6 +9,7 @@ use RAAS\Application;
 use RAAS\Field as RAASField;
 use RAAS\FormTab;
 use RAAS\User as RAASUser;
+use RAAS\CMS\InterfaceField;
 use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
 
@@ -43,10 +44,10 @@ class EditPriceLoaderFormTest extends BaseTest
     {
         $form = new EditPriceLoaderForm();
         $interfaceField = $form->children['interface_id'];
-        $snippet = Snippet::importByURN('__raas_shop_priceloader_interface');
 
-        $this->assertInstanceOf(RAASField::class, $interfaceField);
-        $this->assertEquals($snippet->id, $interfaceField->default);
+        $this->assertInstanceOf(InterfaceField::class, $interfaceField);
+        $this->assertEquals(PriceloaderInterface::class, $interfaceField->default);
+        $this->assertEquals(PriceloaderInterface::class, $interfaceField->meta['rootInterfaceClass']);
     }
 
 
@@ -102,7 +103,7 @@ class EditPriceLoaderFormTest extends BaseTest
             'urn' => 'test',
             'mtype' => 4, // Каталог продукции
             'cat_id' => 15, // Каталог продукции
-            'interface_id' => 27, // Сниппет интерфейса загрузчика прайсов
+            'interface_id' => PriceloaderInterface::class,
             'update_materials' => 1,
             'cats_usage' => 2, // Не использовать категории
             'media_action' => 1, // Добавлять только к новым материалам
@@ -120,7 +121,7 @@ class EditPriceLoaderFormTest extends BaseTest
         $this->assertEquals('test', $loader->urn);
         $this->assertEquals(4, $loader->mtype);
         $this->assertEquals(15, $loader->cat_id);
-        $this->assertEquals(27, $loader->interface_id);
+        $this->assertEquals(PriceloaderInterface::class, $loader->interface_classname);
         $this->assertEquals(1, $loader->update_materials);
         $this->assertEquals(2, $loader->cats_usage);
         $this->assertEquals(1, $loader->media_action);

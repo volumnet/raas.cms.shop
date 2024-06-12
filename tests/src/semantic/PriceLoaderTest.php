@@ -89,7 +89,7 @@ class PriceLoaderTest extends BaseTest
             ['name' => 'test.xls', 'tmp_name' => $this->getResourcesDir() . '/test.xls'],
             null,
             true,
-            true
+            1
         );
 
         $this->assertEquals($loader, $result['Loader']);
@@ -98,12 +98,43 @@ class PriceLoaderTest extends BaseTest
         $this->assertInstanceOf(Page::class, $result['Page']);
         $this->assertEquals(15, $result['Page']->id);
         $this->assertTrue($result['test']);
-        $this->assertTrue($result['clear']);
+        $this->assertEquals(1, $result['clear']);
         $this->assertEquals(2, $result['rows']);
         $this->assertEquals(1, $result['cols']);
 
         PriceLoader::delete($loader);
         Snippet::delete($interface);
+    }
+
+
+    /**
+     * Тест метода upload() - случай с указанием класса интерфейса
+     */
+    public function testUploadWithInterfaceClassname()
+    {
+        $page = new Page(15); // Каталог продукции
+        $fileData = ['name' => 'test.xls', 'tmp_name' => $this->getResourcesDir() . '/test.xls'];
+        $loader = new PriceLoader([
+            'mtype' => 4, // Каталог продукции
+            'cat_id' => $page->id,
+            'interface_classname' => MockPriceloaderInterface::class,
+            'rows' => 2,
+            'cols' => 1,
+        ]);
+        $loader->commit();
+
+        $result = $loader->upload($fileData, $page, true, 1);
+
+        $this->assertEquals($loader, $result['Loader']);
+        $this->assertEquals($this->getResourcesDir() . '/test.xls', $result['file']);
+        $this->assertInstanceOf(Page::class, $result['Page']);
+        $this->assertEquals(15, $result['Page']->id);
+        $this->assertTrue($result['test']);
+        $this->assertEquals(1, $result['clear']);
+        $this->assertEquals(2, $result['rows']);
+        $this->assertEquals(1, $result['cols']);
+
+        PriceLoader::delete($loader);
     }
 
 
@@ -134,13 +165,7 @@ class PriceLoaderTest extends BaseTest
         ]);
         $loader->commit();
 
-        $result = $loader->download(
-            null,
-            null,
-            null,
-            'csv',
-            'utf-8'
-        );
+        $result = $loader->download(null, null, null, 'csv', 'utf-8');
 
         $this->assertEquals($loader, $result['Loader']);
         $this->assertInstanceOf(Page::class, $result['Page']);
@@ -152,5 +177,34 @@ class PriceLoaderTest extends BaseTest
 
         PriceLoader::delete($loader);
         Snippet::delete($interface);
+    }
+
+
+    /**
+     * Тест метода download() - случай с указанием класса интерфейса
+     */
+    public function testDownloadWithInterfaceClassname()
+    {
+        $page = new Page(15); // Каталог продукции
+        $loader = new PriceLoader([
+            'mtype' => 4, // Каталог продукции
+            'cat_id' => $page->id, // Каталог продукции
+            'interface_classname' => MockPriceloaderInterface::class,
+            'rows' => 2,
+            'cols' => 1,
+        ]);
+        $loader->commit();
+
+        $result = $loader->download($page, null, null, 'csv', 'utf-8');
+
+        $this->assertEquals($loader, $result['Loader']);
+        $this->assertInstanceOf(Page::class, $result['Page']);
+        $this->assertEquals(15, $result['Page']->id);
+        $this->assertEquals(2, $result['rows']);
+        $this->assertEquals(1, $result['cols']);
+        $this->assertEquals('csv', $result['type']);
+        $this->assertEquals('utf-8', $result['encoding']);
+
+        PriceLoader::delete($loader);
     }
 }

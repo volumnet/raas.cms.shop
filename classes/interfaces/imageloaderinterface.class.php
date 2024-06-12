@@ -1,7 +1,9 @@
 <?php
 /**
- * Интерфейс загрузки изображений
+ * Стандартный интерфейс загрузчика изображений
  */
+declare(strict_types=1);
+
 namespace RAAS\CMS\Shop;
 
 use SOME\EventProcessor;
@@ -16,9 +18,18 @@ use RAAS\CMS\MaterialTypeRecursiveCache;
 use RAAS\CMS\Package;
 use RAAS\CMS\Sub_Main as Package_Sub_Main;
 
+/**
+ * Стандартный интерфейс загрузчика изображений
+ */
 class ImageloaderInterface extends AbstractInterface
 {
     use BatchFindTrait;
+
+    /**
+     * Режим отладки
+     * @var bool
+     */
+    public $debug = false;
 
     /**
      * Загрузчик изображений
@@ -90,7 +101,7 @@ class ImageloaderInterface extends AbstractInterface
      * ]></code></pre> Массив файлов для загрузки
      * @param bool $test Тестовый режим
      * @param bool $clear Очищать предыдущие изображения
-     * @return [
+     * @return array <pre><code>[
      *     'localError' ?=> array<[
      *         'name' => 'MISSING'|'INVALID' тип ошибки,
      *         'value' => string URN поля, на которое ссылается ошибка,
@@ -100,11 +111,10 @@ class ImageloaderInterface extends AbstractInterface
      *         'time' => float Время, прошедшее с начала загрузки
      *         'text' => string Текст записи,
      *     ]> Лог выполнения,
-     *     'raw_data' ?=> array<array<string>> Массив сырых данных,
      *     'ok' ?=> true Обработка завершена
-     * ]
+     * ]</code></pre>
      */
-    public function upload(array $files, bool $test = true, bool $clear = false)
+    public function upload(array $files, bool $test = true, bool $clear = false): array
     {
         $st = microtime(true);
         $affectedMaterialsIds = $proceedFiles = $log = [];
@@ -144,6 +154,14 @@ class ImageloaderInterface extends AbstractInterface
 
     /**
      * Скачивает архив изображений в STDOUT
+     * @return array|null <pre><code>[
+     *     'localError' =>? array<[
+     *         'name' => 'INVALID' Тип ошибки,
+     *         'value' => 'loader' Поле ошибки,
+     *         'description' => string Человеко-понятное описание ошибки
+     *     ]>,
+     *     'file' => string Путь к созданному файлу (только в режиме отладки)
+     * ]</code></pre>
      */
     public function download()
     {
@@ -151,7 +169,7 @@ class ImageloaderInterface extends AbstractInterface
         if ($this->loader->Image_Field->id) {
             $data = $this->exportData($this->loader);
             if ($data) {
-                $this->export($data, $this->loader);
+                return $this->export($data, $this->loader);
             } else {
                 return ['localError' => [[
                     'name' => 'INVALID',
@@ -174,7 +192,7 @@ class ImageloaderInterface extends AbstractInterface
      * @param ImageLoader $loader Загрузчик изображений
      * @return array <pre><code>array<string[] Путь к файлу => экспортируемое имя файла></code></pre>
      */
-    public function exportData(ImageLoader $loader)
+    public function exportData(ImageLoader $loader): array
     {
         $imageField = $loader->Image_Field;
         $uniqueField = $loader->Unique_Field;
@@ -206,17 +224,19 @@ class ImageloaderInterface extends AbstractInterface
             $sqlRow['attachments_ids'] = $attachmentsIds;
             return $sqlRow;
         }, $sqlResult);
-        $affectedMaterialsIds = array_values(array_unique(array_map(function ($sqlRow) {
-            return (int)$sqlRow['id'];
-        }, $sqlResult)));
+        // 2024-06-12, AVS: не используется
+        // $affectedMaterialsIds = array_values(array_unique(array_map(function ($sqlRow) {
+        //     return (int)$sqlRow['id'];
+        // }, $sqlResult)));
         $affectedAttachmentsIds = array_values(array_unique(array_reduce(array_map(function ($sqlRow) {
             return (array)$sqlRow['attachments_ids'];
         }, $sqlResult), 'array_merge', [])));
+        $affectedAttachmentsIds[] = 0; // Чтобы не было ошибки при SQL-запросе
 
         $tmpAttachments = Attachment::getSet(['where' => "id IN (" . implode(", ", $affectedAttachmentsIds) . ")"]);
         $attachments = [];
         foreach ($tmpAttachments as $attachment) {
-            $attachments[trim($attachment->id)] = $attachment;
+            $attachments[trim((string)$attachment->id)] = $attachment;
         }
 
         $result = [];
@@ -226,9 +246,12 @@ class ImageloaderInterface extends AbstractInterface
                 $attachment = $attachments[$attachmentId];
                 $ext = pathinfo($attachment->realname, PATHINFO_EXTENSION);
                 $filename = trim($article . trim($loader->sep_string) . ($i + 1) . '.' . $ext);
+                // @codeCoverageIgnoreStart
+                // Не могу воспроизвести ситуацию, когда бы имена в строгом формате [артикул]_[число] пересекались
                 while (in_array($filename, $result)) {
                     $filename .= $loader->sep_string . $attachment->id;
                 }
+                // @codeCoverageIgnoreEnd
                 $result[$attachment->file] = trim($filename);
             }
         }
@@ -240,21 +263,31 @@ class ImageloaderInterface extends AbstractInterface
      * Создает архив и выводит его в STDOUT
      * @param array $files <pre><code>array<string[] Путь к файлу => string Имя файла></code></pre>
      * @param ImageLoader $loader Загрузчик изображений
+     * @return string Имя созданного файла (только в режиме отладки)
      */
     public function export($files, ImageLoader $loader)
     {
         $tmpname = tempnam(sys_get_temp_dir(), '');
+        if (is_file($tmpname)) {
+            unlink($tmpname); // Deprecated: ZipArchive::open(): Using empty file as ZipArchive is deprecated
+        }
         $zip = new ZipArchive();
         $zip->open($tmpname, ZipArchive::CREATE);
         foreach ($files as $filepath => $filename) {
             $zip->addFile($filepath, $filename);
         }
         $zip->close();
-        header('Content-Type: application/zip');
-        header('Content-Disposition: attachment; filename="' . $loader->Material_Type->name . ' - ' . $loader->Image_Field->name . '.zip"');
-        readfile($tmpname);
-        unlink($tmpname);
-        exit;
+        if ($this->debug) {
+            return $tmpname;
+        // @codeCoverageIgnoreStart
+        } else {
+            header('Content-Type: application/zip');
+            header('Content-Disposition: attachment; filename="' . $loader->Material_Type->name . ' - ' . $loader->Image_Field->name . '.zip"');
+            readfile($tmpname);
+            unlink($tmpname);
+            exit;
+        }
+        // @codeCoverageIgnoreEnd
     }
 
 
@@ -298,7 +331,7 @@ class ImageloaderInterface extends AbstractInterface
                         foreach ($materials as $material) {
                             if ($materialId = (int)$material->id) {
                                 if (!isset($affectedMaterialsIds[$materialId])) {
-                                    $affectedMaterialsIds[trim($materialId)] = (int)$materialId;
+                                    $affectedMaterialsIds[trim((string)$materialId)] = (int)$materialId;
                                 }
                             }
                         }
@@ -357,10 +390,10 @@ class ImageloaderInterface extends AbstractInterface
                 Material::_SQL()->query([$sqlQuery, $sqlBind]);
                 Field::clearCache();
             }
-        } else {
             // 2022-12-15, AVS: САМИ ФАЙЛЫ НЕ ТРОГАЕМ!!! Т.К. ЕСЛИ НЕСКОЛЬКО ТОВАРОВ ССЫЛАЮТСЯ НА ОДИН ATTACHMENT,
             // ОН ПРОПАДЕТ У ВСЕХ!!!
-            // 2022-12-27, AVS: вернул в виде Field::clearLostAttachments()
+            // 2022-12-27, AVS: вернул в виде Field::clearLostAttachments() в upload();
+        } else {
             foreach ($affectedMaterialsIds as $materialId) {
                 $material = new Material($materialId);
                 $logEntry = [
@@ -404,11 +437,16 @@ class ImageloaderInterface extends AbstractInterface
     public function applyFiles(array $files, ImageLoader $loader, array &$log, bool $test = true, float $st = 0)
     {
         if (!$test) {
-            if ($loader->Image_Field->Preprocessor->id) {
+            if ($loader->Image_Field->preprocessor_classname || $loader->Image_Field->Preprocessor->id) {
                 $filesToProcess = array_map(function ($fileData) {
                     return $fileData['tmp_name'];
                 }, $files);
-                $loader->Image_Field->Preprocessor->process(['files' => $filesToProcess]);
+                if ($preprocessorClassname = $loader->Image_Field->preprocessor_classname) {
+                    $preprocessor = new $preprocessorClassname($_GET, $_POST, $_COOKIE, $_SESSION, $_SERVER, $_FILES);
+                    $preprocessor->process($filesToProcess);
+                } elseif ($loader->Image_Field->Preprocessor->id) {
+                    $loader->Image_Field->Preprocessor->process(['files' => $filesToProcess]);
+                }
             }
         }
         $proceedFiles = [];
@@ -418,11 +456,16 @@ class ImageloaderInterface extends AbstractInterface
             }
         }
         if (!$test) {
-            if ($loader->Image_Field->Postprocessor->id) {
+            if ($loader->Image_Field->postprocessor_classname || $loader->Image_Field->Postprocessor->id) {
                 $filesToProcess = array_map(function ($attachment) {
                     return $attachment->file;
                 }, $proceedFiles);
-                $loader->Image_Field->Postprocessor->process(['files' => $filesToProcess]);
+                if ($postprocessorClassname = $loader->Image_Field->postprocessor_classname) {
+                    $postprocessor = new $postprocessorClassname($_GET, $_POST, $_COOKIE, $_SESSION, $_SERVER, $_FILES);
+                    $postprocessor->process($filesToProcess);
+                } elseif ($loader->Image_Field->Postprocessor->id) {
+                    $loader->Image_Field->Postprocessor->process(['files' => $filesToProcess]);
+                }
             }
         }
     }
@@ -456,6 +499,7 @@ class ImageloaderInterface extends AbstractInterface
         $att->mime = $file['type'];
         $att->parent = $loader->Image_Field;
         $att->image = true;
+        $att->copy = true;
         if ($maxSize = (int)Package::i()->registryGet('maxsize')) {
             $att->maxWidth = $att->maxHeight = $maxSize;
         }

@@ -17,7 +17,7 @@ class User_Cart extends Cart
     }
 
 
-    protected function save()
+    public function save()
     {
         if ($this->_user && (int)$this->_user->id) {
             $arr = array();

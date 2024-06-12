@@ -12,6 +12,10 @@ use RAAS\IContext;
 use RAAS\CMS\Snippet;
 use RAAS\CMS\Snippet_Folder;
 
+/**
+ * Класс менеджера обновлений
+ * @codeCoverageIgnore Поскольку мы не можем хранить все версии
+ */
 class Updater extends \RAAS\Updater
 {
     public function preInstall()
@@ -57,15 +61,18 @@ class Updater extends \RAAS\Updater
         if (version_compare($v, '4.3.65') < 0) {
             $this->update20240320();
         }
+        if (version_compare($v, '4.3.71') < 0) {
+            $this->update20240611();
+        }
     }
 
 
     public function postInstall()
     {
         $w = new Webmaster();
-        $s = Snippet::importByURN('__raas_shop_yml_interface');
+        $cartTypes = Cart_Type::getSet();
         $w->checkStdInterfaces();
-        if (!$s || !$s->id) {
+        if (!$cartTypes) {
             $w->createIShop();
         }
     }
@@ -409,6 +416,136 @@ class Updater extends \RAAS\Updater
                 $sqlQuery = "ALTER TABLE `" . SOME::_dbprefix() . $fieldData['table'] . "`
                             CHANGE `" . $fieldData['field'] . "` `" . $fieldData['field'] . "` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '" . $fieldData['comment'] . "'";
                 $this->SQL->query($sqlQuery);
+            }
+        }
+    }
+
+
+    /**
+     * Обновления по версии 4.3.71
+     * Исправление значения по умолчанию в cms_shop_orders.user_agent
+     * Переход от сниппетов интерфейсов к классам
+     */
+    public function update20240611()
+    {
+        // В cms_shop_orders.user_agent по умолчанию пустая строка
+        if (in_array(SOME::_dbprefix() . "cms_shop_orders", $this->tables)) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders
+                        CHANGE user_agent user_agent VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT '' COMMENT 'User Agent'";
+            $this->SQL->query($sqlQuery);
+        }
+
+        // В cms_shop_orders поле payment_interface_classname и ключ к нему
+        if (in_array(SOME::_dbprefix() . "cms_shop_orders", $this->tables) &&
+            !in_array('payment_interface_classname', $this->columns(SOME::_dbprefix() . "cms_shop_orders"))
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_orders
+                           ADD payment_interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Payment interface classname' AFTER paid,
+                           ADD INDEX (payment_interface_classname)";
+            $this->SQL->query($sqlQuery);
+        }
+
+        // В cms_shop_priceloaders поле interface_classname и ключ к нему
+        if (in_array(SOME::_dbprefix() . "cms_shop_priceloaders", $this->tables) &&
+            !in_array('interface_classname', $this->columns(SOME::_dbprefix() . "cms_shop_priceloaders"))
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_priceloaders
+                           ADD interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Interface classname' AFTER urn,
+                           ADD INDEX (interface_classname)";
+            $this->SQL->query($sqlQuery);
+        }
+
+        // В cms_shop_imageloaders поле interface_classname и ключ к нему
+        if (in_array(SOME::_dbprefix() . "cms_shop_imageloaders", $this->tables) &&
+            !in_array('interface_classname', $this->columns(SOME::_dbprefix() . "cms_shop_imageloaders"))
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_imageloaders
+                           ADD interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Interface classname' AFTER sep_string,
+                           ADD INDEX (interface_classname)";
+            $this->SQL->query($sqlQuery);
+        }
+
+        // в cms_shop_blocks_cart поле epay_interface_classname и ключ к нему
+        if (in_array(SOME::_dbprefix() . "cms_shop_blocks_cart", $this->tables) &&
+            !in_array('epay_interface_classname', $this->columns(SOME::_dbprefix() . "cms_shop_blocks_cart"))
+        ) {
+            $sqlQuery = "ALTER TABLE " . SOME::_dbprefix() . "cms_shop_blocks_cart
+                           ADD epay_interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay interface classname' AFTER cart_type,
+                           ADD INDEX (epay_interface_classname)";
+            $this->SQL->query($sqlQuery);
+        }
+
+        $sqlQuery = "SELECT COUNT(*) FROM " . SOME::_dbprefix() . "cms_snippets WHERE urn = '__raas_shop_cart_interface'";
+        $sqlResult = (int)$this->SQL->getvalue($sqlQuery);
+        if ($sqlResult > 0) {
+            foreach ([
+                '__raas_shop_cart_interface' => CartInterface::class,
+                '__raas_my_orders_interface' => MyOrdersInterface::class,
+                '__raas_shop_compare_interface' => CompareInterface::class,
+                '__raas_shop_goods_comments_interface' => GoodsCommentsInterface::class,
+                '__raas_shop_imageloader_interface' => ImageloaderInterface::class,
+                '__raas_shop_priceloader_interface' => PriceloaderInterface::class,
+                '__raas_shop_spec_interface' => SpecInterface::class,
+                '__raas_shop_yml_interface' => YMLInterface::class,
+            ] as $snippetURN => $interfaceClassname) {
+                $sqlBind = ['snippetURN' => $snippetURN, 'interfaceClassname' => $interfaceClassname];
+                // Заменим основной интерфейс
+                $sqlQuery = "UPDATE " . SOME::_dbprefix() . "cms_blocks AS tB
+                               JOIN " . SOME::_dbprefix() . "cms_snippets AS tS ON tB.interface_id = tS.id
+                                SET tB.interface_id = 0,
+                                    tB.interface_classname = :interfaceClassname
+                              WHERE tS.urn = :snippetURN";
+                $this->SQL->query([$sqlQuery, $sqlBind]);
+                // Заменим интерфейс кэширования
+                $sqlQuery = "UPDATE " . SOME::_dbprefix() . "cms_blocks AS tB
+                               JOIN " . SOME::_dbprefix() . "cms_snippets AS tS ON tB.cache_interface_id = tS.id
+                                SET tB.cache_interface_id = 0,
+                                    tB.cache_interface_classname = :interfaceClassname
+                              WHERE tS.urn = :snippetURN";
+                $this->SQL->query([$sqlQuery, $sqlBind]);
+                // Заменим интерфейс процессоров
+                $sqlQuery = "UPDATE " . SOME::_dbprefix() . "cms_fields AS tF
+                               JOIN " . SOME::_dbprefix() . "cms_snippets AS tS ON tF.preprocessor_id = tS.id
+                                SET tF.preprocessor_id = 0,
+                                    tF.preprocessor_classname = :interfaceClassname
+                              WHERE tS.urn = :snippetURN";
+                $this->SQL->query([$sqlQuery, $sqlBind]);
+                $sqlQuery = "UPDATE " . SOME::_dbprefix() . "cms_fields AS tF
+                               JOIN " . SOME::_dbprefix() . "cms_snippets AS tS ON tF.postprocessor_id = tS.id
+                                SET tF.postprocessor_id = 0,
+                                    tF.postprocessor_classname = :interfaceClassname
+                              WHERE tS.urn = :snippetURN";
+                $this->SQL->query([$sqlQuery, $sqlBind]);
+                // Заменим интерфейс оплаты заказов
+                $sqlQuery = "UPDATE " . SOME::_dbprefix() . "cms_shop_orders AS tOr
+                               JOIN " . SOME::_dbprefix() . "cms_snippets AS tS ON tOr.payment_interface_id = tS.id
+                                SET tOr.payment_interface_id = 0,
+                                    tOr.payment_interface_classname = :interfaceClassname
+                              WHERE tS.urn = :snippetURN";
+                $this->SQL->query([$sqlQuery, $sqlBind]);
+                // Заменим платежный интерфейс корзины
+                $sqlQuery = "UPDATE " . SOME::_dbprefix() . "cms_shop_blocks_cart AS tBC
+                               JOIN " . SOME::_dbprefix() . "cms_snippets AS tS ON tBC.epay_interface_id = tS.id
+                                SET tBC.epay_interface_id = 0,
+                                    tBC.epay_interface_classname = :interfaceClassname
+                              WHERE tS.urn = :snippetURN";
+                $this->SQL->query([$sqlQuery, $sqlBind]);
+                // Заменим интерфейс загрузчиков
+                $sqlQuery = "UPDATE " . SOME::_dbprefix() . "cms_shop_priceloaders AS tL
+                               JOIN " . SOME::_dbprefix() . "cms_snippets AS tS ON tL.interface_id = tS.id
+                                SET tL.interface_id = 0,
+                                    tL.interface_classname = :interfaceClassname
+                              WHERE tS.urn = :snippetURN";
+                $this->SQL->query([$sqlQuery, $sqlBind]);
+                $sqlQuery = "UPDATE " . SOME::_dbprefix() . "cms_shop_imageloaders AS tL
+                               JOIN " . SOME::_dbprefix() . "cms_snippets AS tS ON tL.interface_id = tS.id
+                                SET tL.interface_id = 0,
+                                    tL.interface_classname = :interfaceClassname
+                              WHERE tS.urn = :snippetURN";
+                $this->SQL->query([$sqlQuery, $sqlBind]);
+                // Удалим сниппеты
+                $sqlQuery = "DELETE FROM " . SOME::_dbprefix() . "cms_snippets WHERE urn = ?";
+                $this->SQL->query([$sqlQuery, [$snippetURN]]);
             }
         }
     }

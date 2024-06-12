@@ -437,7 +437,7 @@ class CatalogTemplate extends MaterialTypeTemplate
             $block = $this->webmaster->createBlock(
                 $block,
                 'content',
-                'catalog_interface',
+                CatalogInterface::class,
                 $widget,
                 $page,
                 true
@@ -500,7 +500,7 @@ class CatalogTemplate extends MaterialTypeTemplate
         $specBlock = $this->webmaster->createBlock(
             $specBlock,
             'content',
-            '__raas_shop_spec_interface',
+            SpecInterface::class,
             'spec',
             $this->webmaster->Site,
             false
@@ -520,7 +520,7 @@ class CatalogTemplate extends MaterialTypeTemplate
         $newBlock = $this->webmaster->createBlock(
             $newBlock,
             'content',
-            '__raas_shop_spec_interface',
+            SpecInterface::class,
             'spec',
             $this->webmaster->Site,
             false
@@ -541,7 +541,7 @@ class CatalogTemplate extends MaterialTypeTemplate
         $popularBlock = $this->webmaster->createBlock(
             $popularBlock,
             'content',
-            '__raas_shop_spec_interface',
+            SpecInterface::class,
             'spec',
             $this->webmaster->Site,
             false

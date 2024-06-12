@@ -50,7 +50,7 @@ class SberbankInterface extends EPayInterface
     public function findOrder()
     {
         $block = $this->block;
-        $epayInterface = $block ? $block->EPay_Interface : null;
+        $epayInterface = $this->getPaymentInterface($this->block);
         if ($paymentId = $this->get['orderId'] ?? null) { // Возврат на страницу
             $order = Order::importByPayment($paymentId, $epayInterface);
             if ($order && $order->id) {
@@ -63,7 +63,6 @@ class SberbankInterface extends EPayInterface
 
     public function checkWebhook()
     {
-
         if (($mdOrder = $this->get['mdOrder'] ?? null) &&
             ($orderNumber = $this->get['orderNumber'] ?? null) &&
             ($operation = $this->get['operation'] ?? null)

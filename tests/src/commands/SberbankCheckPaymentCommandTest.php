@@ -118,6 +118,66 @@ class SberbankCheckPaymentCommandTest extends BaseTest
 
 
     /**
+     * Тест метода process() - случай с указанием класса платежного интерфейса
+     */
+    public function testProcessWithInterfaceClassname()
+    {
+        $block = new Block_Cart([
+            'cart_type' => 1,
+            'location' => 'content',
+            'epay_interface_classname' => SberbankInterface::class,
+            'cats' => [1],
+        ]);
+        $block->commit();
+        $page = new Page(1);
+        $order = new Order([
+            'pid' => 1,
+            'payment_interface_classname' => SberbankInterface::class,
+            'payment_id' => 'aaaa-bbbb-cccc-dddd',
+            'payment_url' => 'https://securecardpayment.ru/payment/merchants/sbersafe_sberid/payment_ru.html?mdOrder=aaaa-bbbb-cccc-dddd',
+            'page_id' => 1,
+            'meta_items' => [
+                ['material_id' => 10, 'name' => 'Товар 1', 'meta' => '', 'realprice' => 1000, 'amount' => 1],
+                ['material_id' => 11, 'name' => 'Товар 2', 'meta' => '', 'realprice' => 2000, 'amount' => 2],
+                ['material_id' => 12, 'name' => 'Товар 3', 'meta' => '', 'realprice' => 3000, 'amount' => 3],
+            ],
+        ]);
+        $order->commit();
+        $orderId = $order->id;
+        $interface = $this->getMockBuilder(SberbankInterface::class)
+            ->setConstructorArgs([$block])
+            ->setMethods(['getOrderIsPaid'])
+            ->getMock();
+        $interface->expects($this->once())->method('getOrderIsPaid')->with($order, $block, $page)->willReturn(true);
+
+        $command = $this->getMockBuilder(SberbankCheckPaymentCommand::class)
+            ->setConstructorArgs([Controller_Cron::i()])
+            ->setMethods(['getInterface'])
+            ->getMock();
+        $command->expects($this->once())->method('getInterface')->willReturn($interface);
+
+        ob_start();
+        $command->process();
+        $result = ob_get_clean();
+
+        $this->assertStringContainsString('— ОПЛАЧЕН', $result);
+
+        $order = new Order($orderId);
+        $this->assertEquals(true, $order->paid);
+        $this->assertCount(1, $order->history);
+        $this->assertStringContainsString('Оплачено через Сбербанк', $order->history[0]->description);
+        $this->assertEquals(
+            'Оплачено через Сбербанк (проверка по времени) (ID# заказа в системе банка: aaaa-bbbb-cccc-dddd)',
+            $order->history[0]->description
+        );
+        $this->assertEquals(true, $order->history[0]->paid);
+
+        Block_Cart::delete($block);
+        Order::delete($order);
+    }
+
+
+    /**
      * Тест метода process() - случай с отсутствующим блоком
      */
     public function testProcessWithNoBlock()

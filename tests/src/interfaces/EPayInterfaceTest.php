@@ -58,6 +58,66 @@ class EPayInterfaceTest extends BaseTest
 
 
     /**
+     * Тест метода getPaymentInterface()
+     */
+    public function testGetPaymentInterface()
+    {
+        $block = new Block_Cart(['cats' => [1], 'epay_interface_classname' => SberbankInterface::class]);
+        $interface = new SberbankInterface();
+
+        $result = $interface->getPaymentInterface($block);
+
+        $this->assertEquals(SberbankInterface::class, $result);
+    }
+
+
+    /**
+     * Тест метода getPaymentInterface() - случай со сниппетом
+     */
+    public function testGetPaymentInterfaceWithSnippet()
+    {
+        $paymentInterface = new Snippet(['urn' => 'testpayment']);
+        $paymentInterface->commit();
+        $block = new Block_Cart(['cats' => [1], 'epay_interface_id' => $paymentInterface->id]);
+        $interface = new SberbankInterface();
+
+        $result = $interface->getPaymentInterface($block);
+
+        $this->assertInstanceOf(Snippet::class, $result);
+        $this->assertEquals($paymentInterface->id, $result->id);
+
+        Snippet::delete($paymentInterface);
+    }
+
+
+    /**
+     * Тест метода getPaymentInterface() - случай без указания платежного интерфейса
+     */
+    public function testGetPaymentInterfaceWithNull()
+    {
+        $block = new Block_Cart(['cats' => [1]]);
+        $interface = new SberbankInterface();
+
+        $result = $interface->getPaymentInterface($block);
+
+        $this->assertNull($result);
+    }
+
+
+    /**
+     * Тест метода getPaymentInterface() - случай без указания блока
+     */
+    public function testGetPaymentInterfaceWithNoBlock()
+    {
+        $interface = new SberbankInterface();
+
+        $result = $interface->getPaymentInterface();
+
+        $this->assertNull($result);
+    }
+
+
+    /**
      * Тест метода getPositiveItems()
      */
     public function testGetPositiveItems()
@@ -129,12 +189,48 @@ class EPayInterfaceTest extends BaseTest
      */
     public function testFindOrderWithWebhookPaymentIdAndOrderId()
     {
-        $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd']);
+        $paymentInterface = new Snippet(['urn' => 'testpayment']);
+        $paymentInterface->commit();
+
+        $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd', 'payment_interface_id' => $paymentInterface->id]);
         $order->commit();
         $orderId = $order->id;
 
+        $block = new Block_Cart(['cats' => [1], 'epay_interface_id' => $paymentInterface->id]); //
+
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setMethods(['checkWebhook'])
+            ->setConstructorArgs([$block])
+            ->getMock();
+        $interface->expects($this->once())
+            ->method('checkWebhook')
+            ->willReturn(['paymentId' => 'aaaa-bbbb-cccc-dddd', 'orderId' => $orderId]);
+
+        $result = $interface->findOrder();
+
+        $this->assertEquals($orderId, $result->id);
+
+        Order::delete($order);
+        Snippet::delete($paymentInterface);
+    }
+
+
+    /**
+     * Тест метода findOrder() - случай с вебхуком, когда возвращаются paymentId и orderId,
+     * при указании класса платежного интерфейса
+     */
+    public function testFindOrderWithWebhookPaymentIdAndOrderIdAndInterfaceClassname()
+    {
+        $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd', 'payment_interface_classname' => MockEPayInterface::class]);
+        $order->commit();
+        $orderId = $order->id;
+
+
+        $block = new Block_Cart(['cats' => [1], 'epay_interface_classname' => MockEPayInterface::class]); //
+
+        $interface = $this->getMockBuilder(MockEPayInterface::class)
+            ->setMethods(['checkWebhook'])
+            ->setConstructorArgs([$block])
             ->getMock();
         $interface->expects($this->once())
             ->method('checkWebhook')
@@ -402,6 +498,33 @@ class EPayInterfaceTest extends BaseTest
 
         Order::delete($order);
         Snippet::delete($paymentInterface);
+    }
+
+
+    /**
+     * Тест метода processInitialPaymentData() - случай с указанием класса платежного интерфейса
+     */
+    public function testProcessInitialPaymentDataWithInterfaceClassname()
+    {
+        $order = new Order();
+        $order->commit();
+        $orderId = $order->id;
+        $block = new Block_Cart([
+            'id' => 111,
+            'epay_interface_classname' => MockEPayInterface::class,
+            'epay_login' => 'user',
+            'epay_pass1' => 'pass',
+            'epay_test' => 1,
+        ]);
+        $interface = new MockEPayInterface($block);
+
+        $result = $interface->processInitialPaymentData($order, $block, 'aaaa-bbbb-cccc-dddd', 'http://test');
+
+        $this->assertEquals('aaaa-bbbb-cccc-dddd', $order->payment_id);
+        $this->assertEquals(MockEPayInterface::class, $order->payment_interface_classname);
+        $this->assertEquals('http://test', $order->payment_url);
+
+        Order::delete($order);
     }
 
 

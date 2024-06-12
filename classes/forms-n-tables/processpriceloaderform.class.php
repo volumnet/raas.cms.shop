@@ -136,15 +136,15 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                 $Loader = new PriceLoader((int)$_POST['loader']);
                 $Form->meta['OUT'] = array();
                 if ($Loader->id) {
-                    $file = null;
+                    $file = [];
                     if (is_uploaded_file($_FILES['file']['tmp_name'])) {
                         $file = $_FILES['file'];
                     }
+                    $Page = new Page((int)($_POST['cat_id'] ?? 0));
                     $test = isset($_POST['test']);
-                    $clear = isset($_POST['clear']) ? (int)$_POST['clear'] : 0;
-                    $Page = new Page(isset($_POST['cat_id']) ? (int)$_POST['cat_id'] : 0);
-                    $rows = isset($_POST['rows']) ? (int)$_POST['rows'] : 0;
-                    $cols = isset($_POST['cols']) ? (int)$_POST['cols'] : 0;
+                    $clear = (int)($_POST['clear'] ?? 0);
+                    $rows = (int)($_POST['rows'] ?? 0);
+                    $cols = (int)($_POST['cols'] ?? 0);
                     ini_set('max_execution_time', 3600);
                     $IN = $Loader->upload($file, $Page, $test, $clear, $rows, $cols);
                     $Form->meta['OUT'] = $IN;

@@ -110,8 +110,8 @@ class UpdateYMLCommand extends Command
                 $_SERVER,
                 $limit
             );
-            $text = $interface->process(false, null, true);
-            file_put_contents($outputFile, $text);
+            $result = $interface->process(false, null, true);
+            file_put_contents($outputFile, $result['result']);
         } else {
             $this->controller->doLog('Yandex Market file not found');
         }

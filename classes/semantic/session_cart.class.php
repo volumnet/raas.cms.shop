@@ -9,7 +9,7 @@ class Session_Cart extends Cart
     }
 
 
-    protected function save()
+    public function save()
     {
         $_SESSION['cart_' . (int)$this->id] = json_encode($this->items);
     }

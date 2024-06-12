@@ -117,7 +117,7 @@ class ProcessImageLoaderForm extends RAASForm
                         }
                     }
                     $test = isset($_POST['test']);
-                    $clear = isset($_POST['clear']) ? (int)$_POST['clear'] : 0;
+                    $clear = (bool)($_POST['clear'] ?? 0);
                     $IN = $Loader->upload($files, $test, $clear);
                     $form->meta['OUT'] = $IN;
                 }

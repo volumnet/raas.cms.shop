@@ -14,7 +14,7 @@ use RAAS\CMS\Page;
  */
 class GoodsCommentsInterface extends MaterialInterface
 {
-    public function process()
+    public function process(): array
     {
         $result = parent::process();
         if ($this->get['AJAX'] == $this->block->id) {

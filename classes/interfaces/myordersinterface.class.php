@@ -10,7 +10,7 @@ use SOME\HTTP;
 use RAAS\Redirector;
 use RAAS\Controller_Frontend as RAASControllerFrontend;
 use RAAS\View_Web as RAASViewWeb;
-use RAAS\CMS\AbstractInterface;
+use RAAS\CMS\BlockInterface;
 use RAAS\CMS\Block_PHP;
 use RAAS\CMS\Page;
 use RAAS\CMS\User;
@@ -18,7 +18,7 @@ use RAAS\CMS\User;
 /**
  * Класс интерфейса сервиса "Мои заказы"
  */
-class MyOrdersInterface extends AbstractInterface
+class MyOrdersInterface extends BlockInterface
 {
     /**
      * Конструктор класса
@@ -55,7 +55,7 @@ class MyOrdersInterface extends AbstractInterface
     }
 
 
-    public function process()
+    public function process(): array
     {
         $user = $this->getUser();
         $order = $this->getOrder(

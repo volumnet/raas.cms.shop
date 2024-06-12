@@ -36,6 +36,9 @@
     <testsuite name="EditBlockCartForm">
       <file>src/forms-n-tables/EditBlockCartFormTest.php</file>
     </testsuite>
+    <testsuite name="EditBlockYMLForm">
+      <file>src/forms-n-tables/EditBlockYMLFormTest.php</file>
+    </testsuite>
     <testsuite name="EditImageLoaderForm">
       <file>src/forms-n-tables/EditImageLoaderFormTest.php</file>
     </testsuite>
@@ -56,6 +59,9 @@
     </testsuite>
     <testsuite name="EPayInterface">
       <file>src/interfaces/EPayInterfaceTest.php</file>
+    </testsuite>
+    <testsuite name="ImageloaderInterface">
+      <file>src/interfaces/ImageloaderInterfaceTest.php</file>
     </testsuite>
     <testsuite name="MyOrdersInterface">
       <file>src/interfaces/MyOrdersInterfaceTest.php</file>
@@ -87,6 +93,9 @@
     <testsuite name="Block_Cart">
       <file>src/semantic/BlockCartTest.php</file>
     </testsuite>
+    <testsuite name="Block_YML">
+      <file>src/semantic/BlockYMLTest.php</file>
+    </testsuite>
     <testsuite name="ImageLoader">
       <file>src/semantic/ImageLoaderTest.php</file>
     </testsuite>
@@ -95,6 +104,9 @@
     </testsuite>
     <testsuite name="PriceLoader">
       <file>src/semantic/PriceLoaderTest.php</file>
+    </testsuite>
+    <testsuite name="Updater">
+      <file>src/UpdaterTest.php</file>
     </testsuite>
     <testsuite name="XmlDataConverter">
       <file>src/XmlDataConverterTest.php</file>

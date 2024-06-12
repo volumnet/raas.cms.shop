@@ -1,15 +1,15 @@
 {
     "name": "volumnet/raas.cms.shop",
     "description": "RAAS.CMS.Shop",
-    "version": "4.3.70",
+    "version": "4.3.71",
     "license": "GPL-3.0-or-later",
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
         "phpoffice/phpspreadsheet": "*",
-        "volumnet/some4": ">=4.6.15",
-        "volumnet/raas.kernel": ">=4.3.32",
-        "volumnet/raas.cms": ">=4.3.75"
+        "volumnet/some4": ">=4.6.30",
+        "volumnet/raas.kernel": ">=4.3.43",
+        "volumnet/raas.cms": ">=4.3.87"
     },
     "require-dev": {
         "phpunit/phpunit": "5.*",

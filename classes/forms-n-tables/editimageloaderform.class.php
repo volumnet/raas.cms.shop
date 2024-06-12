@@ -7,12 +7,13 @@ declare(strict_types=1);
 namespace RAAS\CMS\Shop;
 
 use RAAS\Field as RAASField;
+use RAAS\FieldSet;
 use RAAS\Form as RAASForm;
 use RAAS\Option;
-use RAAS\CMS\Material_Type;
-use RAAS\CMS\Material_Field;
 use RAAS\CMS\Form as CMSForm;
-use RAAS\FieldSet;
+use RAAS\CMS\InterfaceField;
+use RAAS\CMS\Material_Field;
+use RAAS\CMS\Material_Type;
 use RAAS\CMS\Snippet_Folder;
 use RAAS\CMS\Snippet;
 
@@ -36,33 +37,14 @@ class EditImageLoaderForm extends RAASForm
 
     protected function getInterfaceField()
     {
-        $wf = function (Snippet_Folder $x) use (&$wf) {
-            $temp = [];
-            foreach ($x->children as $row) {
-                if (strtolower($row->urn) != '__raas_views') {
-                    $o = new Option(['value' => '', 'caption' => $row->name, 'disabled' => 'disabled']);
-                    $o->__set('children', $wf($row));
-                    $temp[] = $o;
-                }
-            }
-            foreach ($x->snippets as $row) {
-                $temp[] = new Option([
-                    'value' => $row->id,
-                    'caption' => $row->urn . (($row->name && ($row->name != $row->urn)) ? (': ' . $row->name) : ''),
-                ]);
-            }
-            return $temp;
-        };
-        $snippet = Snippet::importByURN('__raas_shop_imageloader_interface');
-        $field = new RAASField([
-            'type' => 'select',
-            'class' => 'input-xxlarge',
+        $field = new InterfaceField([
             'name' => 'interface_id',
-            'required' => true,
+            'meta' => [
+                'interfaceClassnameFieldName' => 'interface_classname',
+                'rootInterfaceClass' => ImageloaderInterface::class
+            ],
             'caption' => $this->view->_('INTERFACE'),
-            'placeholder' => $this->view->_('_NONE'),
-            'children' => $wf(new Snippet_Folder()),
-            'default' => (int)$snippet->id
+            'default' => ImageloaderInterface::class,
         ]);
         return $field;
     }

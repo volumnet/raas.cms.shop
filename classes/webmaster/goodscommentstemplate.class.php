@@ -11,6 +11,7 @@ use RAAS\CMS\Block_Material;
 use RAAS\CMS\FishRandomUserRetriever;
 use RAAS\CMS\FishYandexReferatsRetriever;
 use RAAS\CMS\Form;
+use RAAS\CMS\FormInterface;
 use RAAS\CMS\Material;
 use RAAS\CMS\MaterialTypeTemplate;
 use RAAS\CMS\Material_Field;
@@ -298,7 +299,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
     ) {
         $additionalData = array_merge(
             [
-                'interface_id' => (int)Snippet::importByURN('__raas_shop_goods_comments_interface')->id,
+                'interface_classname' => GoodsCommentsInterface::class,
                 'name' => View_Web::i()->_('REVIEWS'),
                 'nat' => 0,
                 'vis' => 0,
@@ -332,7 +333,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
             $blockData = array_merge([
                 'vis' => 0,
                 'form' => (int)$form->id,
-                'interface_id' => (int)Snippet::importByURN('__raas_form_interface')->id,
+                'interface_classname' => FormInterface::class,
                 'widget_id' => (int)$widget->id,
                 'location' => 'content',
                 'inherit' => 1,

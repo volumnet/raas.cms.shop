@@ -9,6 +9,7 @@ use RAAS\Application;
 use RAAS\Field as RAASField;
 use RAAS\FormTab;
 use RAAS\User as RAASUser;
+use RAAS\CMS\InterfaceField;
 use RAAS\CMS\Page;
 use RAAS\CMS\Snippet;
 
@@ -42,10 +43,10 @@ class EditImageLoaderFormTest extends BaseTest
     {
         $form = new EditImageLoaderForm();
         $interfaceField = $form->children['interface_id'];
-        $snippet = Snippet::importByURN('__raas_shop_imageloader_interface');
 
-        $this->assertInstanceOf(RAASField::class, $interfaceField);
-        $this->assertEquals($snippet->id, $interfaceField->default);
+        $this->assertInstanceOf(InterfaceField::class, $interfaceField);
+        $this->assertEquals(ImageloaderInterface::class, $interfaceField->default);
+        $this->assertEquals(ImageloaderInterface::class, $interfaceField->meta['rootInterfaceClass']);
     }
 
 
@@ -100,7 +101,7 @@ class EditImageLoaderFormTest extends BaseTest
             'name' => 'Тестовый загрузчик',
             'urn' => 'test',
             'mtype' => 4, // Каталог продукции
-            'interface_id' => 26, // Сниппет интерфейса загрузчика изображений
+            'interface_id' => ImageloaderInterface::class, // Сниппет интерфейса загрузчика изображений
             'ifid' => 27, // Изображение
             'ufid' => 25,
             'sep_string' => '_',
@@ -113,7 +114,7 @@ class EditImageLoaderFormTest extends BaseTest
         $this->assertEquals('Тестовый загрузчик', $loader->name);
         $this->assertEquals('test', $loader->urn);
         $this->assertEquals(4, $loader->mtype);
-        $this->assertEquals(26, $loader->interface_id);
+        $this->assertEquals(ImageloaderInterface::class, $loader->interface_classname);
         $this->assertEquals(25, $loader->ufid);
         $this->assertEquals(27, $loader->ifid);
         $this->assertEquals('_', $loader->sep_string);

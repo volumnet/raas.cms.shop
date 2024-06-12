@@ -45,7 +45,7 @@ class CatalogInterface extends MaterialInterface
 
 
 
-    public function process()
+    public function process(): array
     {
         $this->setCatalogFilter($this->block, $this->page, $this->get);
         $result = parent::process();
@@ -60,22 +60,22 @@ class CatalogInterface extends MaterialInterface
      * @param Material $item Материал для обработки
      * @param array $get Поля $_GET параметров
      * @param array $server Поля $_SERVER параметров
-     * @return [
-     *             'Item' => Material Обрабатываемый материал,
-     *             'prev' ?=> Material Предыдущий материал,
-     *             'next' ?=> Material Следующий материал,
-     *             'commentFormBlock' ?=> Block_Form блок формы комментариев,
-     *             'commentsListBlock' ?=> Block_Material блок списка комментариев,
-     *             'comments' ?=> array<Material> список комментариев
-     *             'commentsListText' ?=> string результат отработки блока
-     *                                    списка комментариев
-     *             'rating' => int Рейтинг товара
-     *             'faqFormBlock' ?=> Block_Form блок формы вопрос-ответ,
-     *             'faqListBlock' ?=> Block_Material блок списка вопросов и ответов,
-     *             'faq' ?=> array<Material> список вопросов и ответов
-     *             'faqListText' ?=> string результат отработки блока
-     *                               списка вопросов и ответов
-     *         ]
+     * @return array <pre><code>[
+     *     'Item' => Material Обрабатываемый материал,
+     *     'prev' ?=> Material Предыдущий материал,
+     *     'next' ?=> Material Следующий материал,
+     *     'commentFormBlock' ?=> Block_Form блок формы комментариев,
+     *     'commentsListBlock' ?=> Block_Material блок списка комментариев,
+     *     'comments' ?=> array<Material> список комментариев
+     *     'commentsListText' ?=> string результат отработки блока
+     *                            списка комментариев
+     *     'rating' => int Рейтинг товара
+     *     'faqFormBlock' ?=> Block_Form блок формы вопрос-ответ,
+     *     'faqListBlock' ?=> Block_Material блок списка вопросов и ответов,
+     *     'faq' ?=> array<Material> список вопросов и ответов
+     *     'faqListText' ?=> string результат отработки блока
+     *                       списка вопросов и ответов
+     * ]</code></pre>
      */
     public function processMaterial(
         Block_Material $block,
@@ -83,10 +83,10 @@ class CatalogInterface extends MaterialInterface
         Material $item,
         array $get = [],
         array $server = []
-    ) {
+    ): array {
         $legacy = $this->checkLegacyArbitraryMaterialAddress($block, $page, $item, $server);
         if ($legacy) {
-            return;
+            return [];
         }
         $t = new DiagTimer();
         $this->setPageMetatags($page, $item, $block);
@@ -215,7 +215,7 @@ class CatalogInterface extends MaterialInterface
     }
 
 
-    public function processList(Block_Material $block, Page $page, array $get = [])
+    public function processList(Block_Material $block, Page $page, array $get = []): array
     {
         $t = new DiagTimer();
         $result = parent::processList($block, $page, $get);
@@ -235,7 +235,7 @@ class CatalogInterface extends MaterialInterface
     }
 
 
-    public function getList(Block_Material $block, Page $page, array $get = [], Pages $pages = null)
+    public function getList(Block_Material $block, Page $page, array $get = [], Pages $pages = null): array
     {
         $st = microtime(true);
         $this->filterIds = $this->getFilterIds($block, $get, $page->catalogFilter);
@@ -261,11 +261,8 @@ class CatalogInterface extends MaterialInterface
     }
 
 
-    public function getIdsList(
-        Block_Material $block,
-        Page $page,
-        array $get = []
-    ) {
+    public function getIdsList(Block_Material $block, Page $page, array $get = []): array
+    {
         $this->filterIds = $this->getFilterIds($block, $get, $page->catalogFilter);
         return parent::getIdsList($block, $page, $get);
     }
@@ -278,26 +275,18 @@ class CatalogInterface extends MaterialInterface
      * @param Page|null $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @param Pages|null $pages Постраничная разбивка
-     * @return [
-     *             'from' => array<
-     *                 string[] псевдоним поля => string SQL-инструкция
-     *                                                   по выборке таблицы
-     *             > Список подключаемых таблиц,
-     *             'where' => array<string SQL-инструкция> Ограничения
-     *                                                     для SQL WHERE,
-     *             'sort' => string Сортировка для SQL ORDER BY
-     *             'order' => ""|"ASC"|"DESC" Порядок сортировки
-     *                                        для SQL ORDER BY,
-     *             'bind' => array<mixed Значение связки> Связки
-     *                                                    для SQL-выражения
-     *         ]
+     * @return array <pre><code>[
+     *     'from' => array<
+     *         string[] псевдоним поля => string SQL-инструкция по выборке таблицы
+     *     > Список подключаемых таблиц,
+     *     'where' => array<string SQL-инструкция> Ограничения для SQL WHERE,
+     *     'sort' => string Сортировка для SQL ORDER BY
+     *     'order' => ""|"ASC"|"DESC" Порядок сортировки для SQL ORDER BY,
+     *     'bind' => array<mixed Значение связки> Связки для SQL-выражения
+     * ]</code></pre>
      */
-    public function getSQLParts(
-        Block_Material $block,
-        Page $page,
-        array $get = [],
-        Pages $pages = null
-    ) {
+    public function getSQLParts(Block_Material $block, Page $page, array $get = [], Pages $pages = null): array
+    {
         $st = microtime(true);
 
         $sqlFromAccess = $sqlFromBindAccess = $sqlWhereAccess = [];
@@ -655,21 +644,21 @@ class CatalogInterface extends MaterialInterface
      *                             где задается ID# блока формы комментариев
      * @param string $listBlockVar Переменная в доп. параметрах,
      *                             где задается ID# блока списка комментариев
-     * @return [
-     *             'commentFormBlock' ?=> Block_Form блок формы комментариев,
-     *             'commentsListBlock' ?=> Block_Material блок списка комментариев,
-     *             'comments' ?=> array<Material> список комментариев
-     *             'commentsListText' ?=> string результат отработки блока
-     *                                    списка комментариев
-     *         ]
+     * @return array <pre><code>[
+     *     'commentFormBlock' ?=> Block_Form блок формы комментариев,
+     *     'commentsListBlock' ?=> Block_Material блок списка комментариев,
+     *     'comments' ?=> array<Material> список комментариев
+     *     'commentsListText' ?=> string результат отработки блока
+     *                            списка комментариев
+     * ]</code></pre>
      */
     public function processComments(
         Block_Material $block,
         Page $page,
         Material $item,
-        $formBlockVar = 'commentFormBlock',
-        $listBlockVar = 'commentsListBlock'
-    ) {
+        string $formBlockVar = 'commentFormBlock',
+        string $listBlockVar = 'commentsListBlock'
+    ): array {
         $result = [];
         parse_str(trim($block->params), $blockParams);
         if (isset($blockParams[$formBlockVar])) {
@@ -695,13 +684,22 @@ class CatalogInterface extends MaterialInterface
                     'config' => $commentsListBlock->config,
                 ];
                 $commentsListData = [];
-                if ($commentsListBlock->Interface->id) {
+                if ($commentsListBlockInterfaceClassname = $commentsListBlock->interface_classname) {
+                    $commentsListBlockInterface = new $commentsListBlockInterfaceClassname(
+                        $commentsListBlock,
+                        $page,
+                        $this->get,
+                        $this->post,
+                        $this->cookie,
+                        $this->session,
+                        $this->server,
+                        $this->files
+                    );
+                    $commentsListData = $commentsListBlockInterface->process();
+                } elseif ($commentsListBlock->Interface->id) {
                     $commentsListData = $commentsListBlock->Interface->process($commentsListParams);
                 }
-                $commentsListData = array_merge(
-                    (array)$commentsListData,
-                    (array)$commentsListParams
-                );
+                $commentsListData = array_merge((array)$commentsListData, (array)$commentsListParams);
                 // 2021-08-22, AVS: если указана фильтрация на уровне блока
                 // списка комментариев
                 // (предполагается, что используется интерфейс комментариев),
@@ -710,7 +708,7 @@ class CatalogInterface extends MaterialInterface
                 if (!($commentsListBlock->additionalParams['materialFieldURN'] ?? null)) {
                     $commentsListData['Set'] = array_values(
                         array_filter(
-                            (array)$commentsListData['Set'],
+                            (array)($commentsListData['Set'] ?? []),
                             function ($x) use ($item) {
                                 return $this->commentsFilterFunction($x, $item);
                             }

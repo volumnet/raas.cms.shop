@@ -76,14 +76,25 @@ class ImageLoader extends SOME
      * @param bool $clear Очистить предыдущие изображения
      * @return mixed
      */
-    public function upload(array $files = null, bool $test = false, bool $clear = false)
+    public function upload(array $files = [], bool $test = false, bool $clear = false)
     {
-        $out = $this->Interface->process([
-            'Loader' => $this,
-            'files' => $files,
-            'test' => $test,
-            'clear' => $clear,
-        ]);
+        if (($interfaceClassname = trim((string)$this->interface_classname)) &&
+            class_exists($interfaceClassname) &&
+            (
+                ($interfaceClassname == ImageloaderInterface::class) ||
+                is_subclass_of($interfaceClassname, ImageloaderInterface::class)
+            )
+        ) {
+            $interface = new $interfaceClassname($this);
+            $out = $interface->upload($files, $test, $clear);
+        } elseif ($this->Interface) {
+            $out = $this->Interface->process([
+                'Loader' => $this,
+                'files' => $files,
+                'test' => $test,
+                'clear' => $clear,
+            ]);
+        }
         return $out;
     }
 
@@ -94,7 +105,18 @@ class ImageLoader extends SOME
      */
     public function download()
     {
-        $out = $this->Interface->process(['Loader' => $this]);
+        if (($interfaceClassname = trim((string)$this->interface_classname)) &&
+            class_exists($interfaceClassname) &&
+            (
+                ($interfaceClassname == ImageloaderInterface::class) ||
+                is_subclass_of($interfaceClassname, ImageloaderInterface::class)
+            )
+        ) {
+            $interface = new $interfaceClassname($this);
+            $out = $interface->download();
+        } elseif ($this->Interface) {
+            $out = $this->Interface->process(['Loader' => $this]);
+        }
         return $out;
     }
 }

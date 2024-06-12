@@ -10,6 +10,7 @@ use RAAS\Field as RAASField;
 use RAAS\FormTab;
 use RAAS\CMS\Form as CMSForm;
 use RAAS\CMS\EditBlockForm;
+use RAAS\CMS\InterfaceField;
 use RAAS\CMS\Snippet;
 
 /**
@@ -17,31 +18,14 @@ use RAAS\CMS\Snippet;
  */
 class EditBlockCartForm extends EditBlockForm
 {
+    const DEFAULT_BLOCK_CLASSNAME = Block_Cart::class;
+
     protected static $currencies = ['RUR', 'USD', 'EUR', 'UAH', 'BYR', 'KZT'];
 
     public function __construct(array $params = [])
     {
         parent::__construct($params);
         $this->children['epayTab'] = $this->getEPayTab();
-    }
-
-
-    protected function getInterfaceField(): RAASField
-    {
-        $field = parent::getInterfaceField();
-        $snippet = Snippet::importByURN('__raas_shop_cart_interface');
-        if ($snippet && $snippet->id) {
-            $field->default = $snippet->id;
-        // @codeCoverageIgnoreStart
-        // Fallback, невозможно проверить при наличии __raas_shop_cart_interface
-        } else {
-            $snippet = Snippet::importByURN('cart_interface');
-            if ($snippet && $snippet->id) {
-                $field->default = $snippet->id;
-            }
-        }
-        // @codeCoverageIgnoreEnd
-        return $field;
     }
 
 
@@ -122,13 +106,16 @@ class EditBlockCartForm extends EditBlockForm
     }
 
 
-    protected function getEPayField(): RAASField
+    protected function getEPayField(): InterfaceField
     {
-        $field = $this->getInterfaceField();
-        $field->required = false;
-        $field->caption = Module::i()->view->_('EPAY_INTERFACE');
-        $field->name = 'epay_interface_id';
-        $field->default = null;
+        $field = new InterfaceField([
+            'name' => 'epay_interface_id',
+            'meta' => [
+                'interfaceClassnameFieldName' => 'epay_interface_classname',
+                'rootInterfaceClass' => EPayInterface::class
+            ],
+            'caption' => Module::i()->view->_('EPAY_INTERFACE'),
+        ]);
         return $field;
     }
 }

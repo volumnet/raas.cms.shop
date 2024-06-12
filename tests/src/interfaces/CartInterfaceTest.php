@@ -747,7 +747,7 @@ class CartInterfaceTest extends BaseTest
         $result = @$interface->process(true);
         $cartData = json_decode($_COOKIE['cart_1'], true);
 
-        $this->assertEquals('history:back', $result);
+        $this->assertEquals('history:back', $result['redirectUrl']);
         $this->assertEquals(1, $cartData[10]['']);
         $this->assertEquals(20, $cartData[11]['aaa']);
 
@@ -818,7 +818,7 @@ class CartInterfaceTest extends BaseTest
         $result = @$interface->process(true);
         $cartData = json_decode($_COOKIE['cart_1'], true);
 
-        $this->assertEquals('?', $result);
+        $this->assertEquals('?', $result['redirectUrl']);
         $this->assertEquals(1, $cartData[10]['']);
         $this->assertEquals(5, $cartData[11]['aaa']);
     }
@@ -950,7 +950,7 @@ class CartInterfaceTest extends BaseTest
 
 
     /**
-     * Тест метода process() - случай success с установкой данных из электронной оплаты
+     * Тест метода process() - случай success с платежом
      */
     public function testProcessWithEPaySuccess()
     {
@@ -980,6 +980,45 @@ class CartInterfaceTest extends BaseTest
         $this->assertEquals(1, $result['Cart_Type']->id);
         $convertMeta = $result['convertMeta'];
         $this->assertEquals('aaa', $convertMeta('aaa'));
+        $this->assertEquals('$cart->clear();', $result['@debug.action']);
+        $this->assertEquals(true, $result['success'][38]);
+
+        $_COOKIE['cart_1'] = '';
+
+        Snippet::delete($snippet);
+    }
+
+
+    /**
+     * Тест метода process() - случай success с платежом и указанным классом платежного интерфейса
+     */
+    public function testProcessWithEPaySuccessAndEPayInterfaceClassname()
+    {
+        $_COOKIE['cart_1'] = json_encode([
+            '10' => ['' => 1],
+            '11' => ['aaa' => 2],
+            '12' => ['' => 3],
+            '13' => ['' => 0],
+        ]);
+        $block = new Block_Cart(38);
+        $block->epay_interface_classname = MockEPayInterface::class;
+        $interface = new CartInterface(
+            $block,
+            new Page(25),
+            [
+                'action' => 'success',
+            ]
+        );
+
+        $result = $interface->process(true);
+
+        $this->assertEmpty($result['Material'] ?? null);
+        $this->assertEmpty($result['Item'] ?? null);
+        $this->assertEquals(1, $result['Cart']->cartType->id);
+        $this->assertEquals(1, $result['Cart_Type']->id);
+        $convertMeta = $result['convertMeta'];
+        $this->assertEquals('aaa', $convertMeta('aaa'));
+        $this->assertEquals(true, $result['success'][38]);
         $this->assertEquals('$cart->clear();', $result['@debug.action']);
 
         $_COOKIE['cart_1'] = '';
@@ -1212,9 +1251,9 @@ class CartInterfaceTest extends BaseTest
         // Комментируем ошибки из-за setcookie после вывода текста
         $result = @$interface->process(true);
 
-        $this->assertStringContainsString('?action=success&id=', $result);
-        $this->assertStringContainsString('&crc=', $result);
-        $this->assertStringContainsString('&epay=1', $result);
+        $this->assertStringContainsString('?action=success&id=', $result['redirectUrl']);
+        $this->assertStringContainsString('&crc=', $result['redirectUrl']);
+        $this->assertStringContainsString('&epay=1', $result['redirectUrl']);
     }
 
 

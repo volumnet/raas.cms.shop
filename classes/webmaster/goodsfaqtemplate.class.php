@@ -252,7 +252,7 @@ class GoodsFAQTemplate extends GoodsCommentsTemplate
     ) {
         $additionalData = array_merge(
             [
-                'interface_id' => (int)Snippet::importByURN('__raas_shop_goods_comments_interface')->id,
+                'interface_classname' => GoodsCommentsInterface::class,
                 'name' => View_Web::i()->_('FAQ'),
                 'nat' => 0,
                 'vis' => 0,

@@ -12,6 +12,8 @@ use RAAS\CMS\Snippet;
 
 class Block_Cart extends Block
 {
+    const ALLOWED_INTERFACE_CLASSNAME = CartInterface::class;
+
     protected static $tablename2 = 'cms_shop_blocks_cart';
 
     protected static $references = [
@@ -48,15 +50,22 @@ class Block_Cart extends Block
 
     public function getAddData(): array
     {
-        return [
+        $result = [
             'id' => (int)$this->id,
             'cart_type' => (int)$this->cart_type,
-            'epay_interface_id' => (int)$this->epay_interface_id,
             'epay_login' => trim((string)$this->epay_login),
             'epay_pass1' => trim((string)$this->epay_pass1),
             'epay_pass2' => trim((string)$this->epay_pass2),
             'epay_test' => (int)$this->epay_test,
             'epay_currency' => trim((string)$this->epay_currency),
         ];
+        if ($epayInterfaceClassname = trim((string)$this->epay_interface_classname)) {
+            $result['epay_interface_id'] = 0;
+            $result['epay_interface_classname'] = $epayInterfaceClassname;
+        } elseif ($epayInterfaceId = trim((string)$this->epay_interface_id)) {
+            $result['epay_interface_id'] = $epayInterfaceId;
+            $result['epay_interface_classname'] = '';
+        }
+        return $result;
     }
 }

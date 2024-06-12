@@ -123,13 +123,31 @@ abstract class EPayInterface extends AbstractInterface
 
 
     /**
+     * Возвращает платежный интерфейс (строку класса или сниппет) блока, либо null, если не указан
+     * @param Block_Cart|null $block Блок для проверки
+     * @return Snippet|string|null
+     */
+    public function getPaymentInterface(Block_Cart $block = null)
+    {
+        if ($block) {
+            if ($block->epay_interface_classname) {
+                return $block->epay_interface_classname;
+            } elseif ($block->EPay_Interface->id) {
+                return $block->EPay_Interface;
+            }
+        }
+        return null;
+    }
+
+
+    /**
      * Ищет заказ
      * @return Order|null Заказ, либо null, если заказ не найден
      */
     public function findOrder()
     {
         if ($webhookData = $this->checkWebhook()) {
-            $epayInterface = $this->block ? $this->block->EPay_Interface : null;
+            $epayInterface = $this->getPaymentInterface($this->block);
             $paymentId = $webhookData['paymentId'] ?? null;
             $orderId = $webhookData['orderId'] ?? null;
             if ($paymentId) {
@@ -371,7 +389,13 @@ abstract class EPayInterface extends AbstractInterface
     public function processInitialPaymentData(Order $order, Block_Cart $block, string $paymentId, string $paymentURL)
     {
         $order->payment_id = $paymentId;
-        $order->payment_interface_id = (int)$block->EPay_Interface->id;
+        if ($block->epay_interface_classname) {
+            $order->payment_interface_classname = (string)$block->epay_interface_classname;
+            $order->payment_interface_id = 0;
+        } elseif ($block->EPay_Interface->id) {
+            $order->payment_interface_classname = '';
+            $order->payment_interface_id = (int)$block->EPay_Interface->id;
+        }
         $order->payment_url = $paymentURL;
         $order->commit();
         $logMessage = 'Зарегистрировано в системе ' . $this->getBankName()

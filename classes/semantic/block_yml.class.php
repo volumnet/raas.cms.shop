@@ -13,6 +13,8 @@ use RAAS\CMS\Page;
 
 class Block_YML extends Block
 {
+    const ALLOWED_INTERFACE_CLASSNAME = YMLInterface::class;
+
     protected static $tablename2 = 'cms_shop_blocks_yml';
 
     protected static $links = [
@@ -36,6 +38,12 @@ class Block_YML extends Block
         'types'
     ];
 
+    /**
+     * Стандартные поля YML
+     * 2024-06-06, AVS: (непонятно зачем разделение между полями, используется в YMLInterface
+     * и разделяется полями по типу фида)
+     * @param array <pre><code>[string[], string[]]</code></pre>
+     */
     public static $defaultFields = [
         [
             'available',
@@ -417,12 +425,6 @@ return "false";'
         ],
     ];
 
-    public function __construct($import_data = null)
-    {
-        parent::__construct($import_data);
-    }
-
-
     public function commit()
     {
         if (!$this->name) {
@@ -443,10 +445,7 @@ return "false";'
                 },
                 $this->meta_cats
             );
-            static::$SQL->add(
-                static::$dbprefix . "cms_shop_blocks_yml_pages_assoc",
-                $arr
-            );
+            static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_pages_assoc", $arr);
         }
         if ($this->meta_currencies) {
             $sqlQuery = "DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_currencies
@@ -458,121 +457,112 @@ return "false";'
                 },
                 $this->meta_currencies
             );
-            static::$SQL->add(
-                static::$dbprefix . "cms_shop_blocks_yml_currencies",
-                $arr
-            );
+            static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_currencies", $arr);
         }
     }
 
 
+    /**
+     * Добавляет тип материалов к блоку
+     * @param Material_Type $mtype Тип материалов для добавления
+     * @param string $type YML-тип представления (ключи массива static::$ymlTypes)
+     * @param array $fields <pre><code>array<string[] URN поля в YML-выгрузке => [
+     *     'field_id' =>? string|int ID# поля или URN нативного поля типа материалов,
+     *     'field_static_value' =>? string Значение по умолчанию,
+     *     'field_callback' =>? string Код обработки поля
+     *         (передаются параметры $x - значение (doRich()) поля, $Field - собственно поле, $Item - материал)
+     * ]></code></pre> Основные поля
+     * @param array $params <pre><code>array<[
+     *     'param_name' =>? string Название параметра,
+     *     'field_id' =>? string|int ID# поля или URN нативного поля типа материалов,
+     *     'field_callback' =>? string Код обработки поля
+     *         (передаются параметры $x - значение (doRich()) поля, $Field - собственно поле, $Item - материал)
+     *     'param_unit' =>? string Единица измерения
+     *     'param_static_value' =>? string Значение по умолчанию,
+     * ]></code></pre>
+     * @param string[] $ignoredFields Список ID# (или URN для нативных) игнорируемых полей
+     * @param bool $paramExceptions Использовать все неиспользованные поля
+     * @param string $paramsCallback Код глобального обработчика параметров
+     *     (передаются параметры $x - значение (doRich()) поля, $Field - собственно поле, $Item - материал)
+     */
     public function addType(
-        Material_Type $MType,
-        $type = '',
+        Material_Type $mtype,
+        string $type = '',
         array $fields = [],
         array $params = [],
-        array $ignored_fields = [],
-        $param_exceptions = false,
-        $params_callback = ''
+        array $ignoredFields = [],
+        bool $paramExceptions = false,
+        string $paramsCallback = ''
     ) {
-        $this->removeType($MType);
+        $this->removeType($mtype);
         $arr = [
             'id' => $this->id,
-            'mtype' => (int)$MType->id,
+            'mtype' => (int)$mtype->id,
             'type' => trim((string)$type),
-            'param_exceptions' => (int)$param_exceptions,
-            'params_callback' => trim((string)$params_callback)
+            'param_exceptions' => (int)$paramExceptions,
+            'params_callback' => trim((string)$paramsCallback)
         ];
-        static::$SQL->add(
-            static::$dbprefix . "cms_shop_blocks_yml_material_types_assoc",
-            $arr
-        );
+        static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_material_types_assoc", $arr);
 
         $arr = [];
         foreach ($fields as $key => $row) {
-            $row2 = [
-                'id' => $this->id,
-                'mtype' => (int)$MType->id,
-                'field_name' => $key
-            ];
-            foreach ([
-                'field_id',
-                'field_callback',
-                'field_static_value'
-            ] as $k) {
+            $row2 = ['id' => $this->id, 'mtype' => (int)$mtype->id, 'field_name' => $key];
+            foreach (['field_id', 'field_callback', 'field_static_value'] as $k) {
                 if (isset($row[$k])) {
                     $row2[$k] = trim((string)($row[$k] ?? ''));
                 }
             }
             $arr[] = $row2;
         }
-        static::$SQL->add(
-            static::$dbprefix . "cms_shop_blocks_yml_fields",
-            $arr
-        );
+        static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_fields", $arr);
 
         $arr = [];
         foreach ($params as $row) {
-            $row2 = [
-                'id' => $this->id,
-                'mtype' => (int)$MType->id
-            ];
-            foreach ([
-                'param_name',
-                'field_id',
-                'field_callback',
-                'param_static_value',
-                'param_unit'
-            ] as $k) {
+            $row2 = ['id' => $this->id, 'mtype' => (int)$mtype->id];
+            foreach (['param_name', 'field_id', 'field_callback', 'param_static_value', 'param_unit'] as $k) {
                 if (isset($row[$k])) {
                     $row2[$k] = trim((string)($row[$k] ?? ''));
                 }
             }
             $arr[] = $row2;
         }
-        static::$SQL->add(
-            static::$dbprefix . "cms_shop_blocks_yml_params",
-            $arr
-        );
+        static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_params", $arr);
 
-        if ($ignored_fields) {
+        if ($ignoredFields) {
             $arr = [];
-            foreach ($ignored_fields as $val) {
-                $row2 = [
-                    'id' => $this->id,
-                    'mtype' => (int)$MType->id,
-                    'field_id' => trim((string)$val)
-                ];
+            foreach ($ignoredFields as $val) {
+                $row2 = ['id' => $this->id, 'mtype' => (int)$mtype->id, 'field_id' => trim((string)$val)];
                 $arr[] = $row2;
             }
-            static::$SQL->add(
-                static::$dbprefix . "cms_shop_blocks_yml_ignored_fields",
-                $arr
-            );
+            static::$SQL->add(static::$dbprefix . "cms_shop_blocks_yml_ignored_fields", $arr);
         }
     }
 
 
-    public function removeType(Material_Type $MType)
+    /**
+     * Удаляет тип материалов из блока
+     * @param Material_Type $mtype Тип материалов для удаления
+     */
+    public function removeType(Material_Type $mtype)
     {
         $sqlQuery = "DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_material_types_assoc
                       WHERE id = " . (int)$this->id
-                  . "   AND mtype = " . (int)$MType->id;
+                  . "   AND mtype = " . (int)$mtype->id;
         static::$SQL->query($sqlQuery);
 
         $sqlQuery = "DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_fields
                       WHERE id = " . (int)$this->id
-                  . "   AND mtype = " . (int)$MType->id;
+                  . "   AND mtype = " . (int)$mtype->id;
         static::$SQL->query($sqlQuery);
 
         $sqlQuery = "DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_params
                       WHERE id = " . (int)$this->id
-                  . "   AND mtype = " . (int)$MType->id;
+                  . "   AND mtype = " . (int)$mtype->id;
         static::$SQL->query($sqlQuery);
 
         $sqlQuery = "DELETE FROM " . static::$dbprefix . "cms_shop_blocks_yml_ignored_fields
                       WHERE id = " . (int)$this->id
-                  . "   AND mtype = " . (int)$MType->id;
+                  . "   AND mtype = " . (int)$mtype->id;
         static::$SQL->query($sqlQuery);
     }
 
@@ -599,14 +589,14 @@ return "false";'
                        FROM " . static::$dbprefix . "cms_shop_blocks_yml_currencies
                       WHERE id = " . (int)$this->id;
         $sqlResult = (array)static::$SQL->get($sqlQuery);
-        $Set = [];
+        $set = [];
         foreach ($sqlResult as $row) {
-            $Set[$row['currency_name']] = [
+            $set[$row['currency_name']] = [
                 'rate' => $row['currency_rate'],
                 'plus' => $row['currency_plus']
             ];
         }
-        return $Set;
+        return $set;
     }
 
     protected function _types()
@@ -615,7 +605,7 @@ return "false";'
                        FROM " . static::$dbprefix . "cms_shop_blocks_yml_material_types_assoc
                       WHERE id = " . (int)$this->id;
         $sqlResult = (array)static::$SQL->get($sqlQuery);
-        $Set = [];
+        $set = [];
         foreach ($sqlResult as $row) {
             $mtype = new Material_Type((int)$row['mtype']);
             if ((int)$mtype->id) {
@@ -700,10 +690,10 @@ return "false";'
                     }
                 }
                 $mtype->settings = $mtarr;
-                $Set[(int)$mtype->id] = $mtype;
+                $set[(int)$mtype->id] = $mtype;
             }
         }
-        return $Set;
+        return $set;
     }
 
 

@@ -42,12 +42,13 @@ class UpdatePickupPointsCommand extends Command
     public function process()
     {
         $pointsByServices = [];
-        $this->cityURNByFias = (bool)array_intersect(['fias', 'withfias', 'newurn'], (array)$GLOBALS['argv']);
-        if (in_array('cdek', (array)$GLOBALS['argv'])) {
+        $args = (array)func_get_args();
+        $this->cityURNByFias = (bool)array_intersect(['fias', 'withfias', 'newurn'], $args);
+        if (in_array('cdek', $args)) {
             $pointsByServices['cdek'] = $this->processCDEK();
             $this->controller->doLog('Обработаны точки выдачи СДЭК');
         }
-        if (in_array('russianpost', (array)$GLOBALS['argv'])) {
+        if (in_array('russianpost', $args)) {
             $pointsByServices['russianpost'] = $this->processRussianPost();
             $this->controller->doLog('Обработаны точки выдачи Почты России');
         }

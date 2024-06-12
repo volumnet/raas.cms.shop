@@ -314,10 +314,10 @@ class Order extends Feedback
     /**
      * Находит заказ по ID# оплаты и платежному интерфейсу
      * @param string $paymentId ID# оплаты
-     * @param Snippet|null $paymentInterface Интерфейс оплаты (для дополнительной проверки)
+     * @param Snippet|string|null $paymentInterface Интерфейс оплаты (класс либо сниппет для дополнительной проверки)
      * @return Order|null Возвращает найденный заказ, либо null, если ничего не найдено
      */
-    public static function importByPayment($paymentId, Snippet $paymentInterface = null)
+    public static function importByPayment($paymentId, $paymentInterface = null)
     {
         if (!$paymentId) {
             return null;
@@ -325,9 +325,14 @@ class Order extends Feedback
         $sqlQuery = "SELECT * FROM " . static::_tablename()
                   . " WHERE payment_id = ?";
         $sqlBind = [$paymentId];
-        if ($paymentInterface && $paymentInterface->id) {
-            $sqlQuery .= " AND payment_interface_id = ?";
-            $sqlBind[] = (int)$paymentInterface->id;
+        if ($paymentInterface) {
+            if (is_string($paymentInterface) && class_exists($paymentInterface)) {
+                $sqlQuery .= " AND payment_interface_classname = ?";
+                $sqlBind[] = $paymentInterface;
+            } elseif (($paymentInterface instanceof Snippet) && $paymentInterface->id) {
+                $sqlQuery .= " AND payment_interface_id = ?";
+                $sqlBind[] = (int)$paymentInterface->id;
+            }
         }
         $sqlQuery .= " LIMIT 1";
         $sqlResult = static::$SQL->getline([$sqlQuery, $sqlBind]);

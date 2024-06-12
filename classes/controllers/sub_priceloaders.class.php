@@ -14,11 +14,11 @@ class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
         if ($this->action == 'download') {
             $Loader = new PriceLoader((int)$_GET['loader']);
             if ($Loader->id) {
-                $rows = isset($_GET['rows']) ? (int)$_GET['rows'] : 0;
-                $cols = isset($_GET['cols']) ? (int)$_GET['cols'] : 0;
                 $Page = isset($_GET['cat_id']) ? (new Page((int)$_GET['cat_id'])) : $Loader->Page;
-                $type = isset($_GET['type']) ? trim($_GET['type']) : '';
-                $encoding = isset($_GET['encoding']) ? trim($_GET['encoding']) : '';
+                $rows = (int)($_GET['rows'] ?? 0);
+                $cols = (int)($_GET['cols'] ?? 0);
+                $type = trim((string)($_GET['type'] ?? ''));
+                $encoding = trim((string)$_GET['encoding'] ?? '');
                 ini_set('max_execution_time', 3600);
                 $IN = $Loader->download($Page, $rows, $cols, $type, $encoding);
             }

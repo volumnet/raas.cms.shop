@@ -20,9 +20,9 @@ class CompareInterface extends CartInterface
     /**
      * Отрабатывает интерфейс
      * @param bool $debug Режим отладки
-     * @return mixed
+     * @return array
      */
-    public function process($debug = false)
+    public function process($debug = false): array
     {
         $result = [];
         $cartType = new Cart_Type((int)$this->block->cart_type);
@@ -65,7 +65,7 @@ class CompareInterface extends CartInterface
                 $url = HTTP::queryString('action=&id=&meta=&amount=') ?: '?';
             }
             if ($debug) {
-                return $url;
+                return ['redirectUrl' => $url];
             } else {
                 new Redirector($url);
             }

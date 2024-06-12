@@ -1,6 +1,7 @@
 <?php
 namespace RAAS\CMS\Shop;
 
+use SOME\Text;
 use RAAS\Application;
 use RAAS\Field as RAASField;
 use RAAS\CMS\Sub_Dev as CMSSubDev;
@@ -38,7 +39,9 @@ $_RAASForm_Control = function (RAASField $Field) use (
             }
             break;
         case 'payment_interface_id':
-            if ($Item->paymentInterface->id) {
+            if ($Item->payment_interface_classname) {
+                echo Text::getClassCaption($Item->payment_interface_classname);
+            } elseif ($Item->paymentInterface->id) {
                 echo '<a href="' . CMSSubDev::i()->url . '&action=edit_snippet&id=' . (int)$Item->payment_interface_id . '" target="_blank">' .
                         htmlspecialchars($Item->paymentInterface->name) .
                      '</a>';

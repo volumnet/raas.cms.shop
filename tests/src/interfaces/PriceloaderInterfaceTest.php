@@ -737,6 +737,7 @@ class PriceloaderInterfaceTest extends BaseTest
      */
     public function testConvertMediaData()
     {
+        unset($GLOBALS['preprocessorData'], $GLOBALS['postprocessorData']);
         $preprocessor = new Snippet(['urn' => 'testpreprocessor', 'description' => '<' . '?php' . ' $GLOBALS["preprocessorData"][] = $files; ']);
         $preprocessor->commit();
         $postprocessor = new Snippet(['urn' => 'testpostprocessor', 'description' => '<' . '?php' . ' $GLOBALS["postprocessorData"][] = $files; ']);
@@ -781,6 +782,43 @@ class PriceloaderInterfaceTest extends BaseTest
 
         Snippet::delete($preprocessor);
         Snippet::delete($postprocessor);
+        foreach ($addedAttachments as $att) {
+            Attachment::delete($att);
+        }
+        unset($GLOBALS['preprocessorData'], $GLOBALS['postprocessorData']);
+    }
+
+
+    /**
+     * Тест метода convertMediaData - случай с указанием классов файловых процессоров
+     */
+    public function testConvertMediaDataWithProcessorsClassnames()
+    {
+        unset($GLOBALS['preprocessorData'], $GLOBALS['postprocessorData']);
+        $preprocessor = PreprocessorMock::class;
+        $postprocessor = PostprocessorMock::class;
+        $field = new Material_Field(29); // Файлы
+
+        $interface = $this->getInterface();
+        $data = [
+            '',
+            'http://test/files/cms/common/image/nophoto.jpg',
+            'http://test123/notexisting.jpg',
+            '/vendor/volumnet/raas.cms.shop/tests/resources/test.xls',
+        ];
+        $addedAttachments = [];
+
+        $result = $interface->convertMediaData($data, $field, $addedAttachments, $preprocessor, $postprocessor);
+
+        $this->assertEquals([
+            [sys_get_temp_dir() . '/nophoto.jpg'],
+            [sys_get_temp_dir() . '/test.xls'],
+        ], $GLOBALS['preprocessorData']);
+        $this->assertEquals([
+            [$addedAttachments[0]->file],
+            [$addedAttachments[1]->file],
+        ], $GLOBALS['postprocessorData']);
+
         foreach ($addedAttachments as $att) {
             Attachment::delete($att);
         }

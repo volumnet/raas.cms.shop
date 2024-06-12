@@ -12,7 +12,7 @@ use RAAS\Application;
 use RAAS\Controller_Frontend as RAASControllerFrontend;
 use RAAS\Redirector;
 use RAAS\View_Web as RAASViewWeb;
-use RAAS\CMS\AbstractInterface;
+use RAAS\CMS\BlockInterface;
 use RAAS\CMS\Block;
 use RAAS\CMS\DiagTimer;
 use RAAS\CMS\FormInterface;
@@ -63,7 +63,7 @@ class CartInterface extends FormInterface
         array $server = [],
         array $files = []
     ) {
-        AbstractInterface::__construct(
+        BlockInterface::__construct(
             $block,
             $page,
             $get,
@@ -79,9 +79,9 @@ class CartInterface extends FormInterface
     /**
      * Отрабатывает интерфейс
      * @param bool $debug Режим отладки
-     * @return mixed
+     * @return array
      */
-    public function process(bool $debug = false)
+    public function process(bool $debug = false): array
     {
         $result = [];
         $cartType = new Cart_Type((int)$this->block->cart_type);
@@ -201,7 +201,7 @@ class CartInterface extends FormInterface
                                     $url .= '&epay=' . $this->post['epay'];
                                 }
                                 if ($debug) {
-                                    return $url;
+                                    return ['redirectUrl' => $url];
                                 // @codeCoverageIgnoreStart
                                 // Не можем проверить редирект
                                 } else {
@@ -249,7 +249,7 @@ class CartInterface extends FormInterface
                 $url = HTTP::queryString('action=&id=&meta=&amount=&clear=') ?: '?';
             }
             if ($debug) {
-                return $url;
+                return ['redirectUrl' => $url];
             // @codeCoverageIgnoreStart
             // Не можем проверить редирект
             } else {
@@ -265,15 +265,28 @@ class CartInterface extends FormInterface
         if ($additional = $this->getAdditionals($cart, $this->post, $user)) {
             $result['additional'] = $additional;
         }
-        if ($this->block->EPay_Interface->id) {
-            $epayResult = $this->block->EPay_Interface->process(array_merge(
-                [
-                    'Block' => $this->block,
-                    'Page' => $this->page,
-                    'config' => $this->block->config,
-                ],
-                $result
-            ));
+        if ($this->block->epay_interface_classname || $this->block->EPay_Interface->id) {
+            if ($epayInterfaceClassname = $this->block->epay_interface_classname) {
+                $epayInterface = new $epayInterfaceClassname(
+                    $this->block,
+                    $this->page,
+                    $this->get,
+                    $this->post,
+                    $this->cookie,
+                    $this->session,
+                    $this->server
+                );
+                $epayResult = $epayInterface->process($result['Item'] ?? null);
+            } else {
+                $epayResult = $this->block->EPay_Interface->process(array_merge(
+                    [
+                        'Block' => $this->block,
+                        'Page' => $this->page,
+                        'config' => $this->block->config,
+                    ],
+                    $result
+                ));
+            }
             if ($epayResult['success'][$this->block->id] ?? null) {
                 if ($debug) {
                     $result['@debug.action'] = '$cart->clear();';

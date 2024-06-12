@@ -1,6 +1,6 @@
 <?php
 /**
- * Файл стандартного интерфейса обработчика прайсов
+ * Стандартный интерфейс загрузчика прайсов
  */
 declare(strict_types=1);
 
@@ -28,7 +28,7 @@ use RAAS\CMS\Snippet;
 use RAAS\CMS\Sub_Main as Package_Sub_Main;
 
 /**
- * Класс интерфейса обработчика прайсов
+ * Стандартный интерфейс загрузчика прайсов
  * @property-read PriceLoader $loader Загрузчик прайсов
  */
 class PriceloaderInterface extends AbstractInterface
@@ -121,7 +121,7 @@ class PriceloaderInterface extends AbstractInterface
      *                   )
      * @param int $rows Сколько строк пропускать
      * @param int $cols Сколько столбцов пропускать
-     * @return [
+     * @return array <pre><code>[
      *     'localError' ?=> array<[
      *         'name' => 'MISSING'|'INVALID' тип ошибки,
      *         'value' => string URN поля, на которое ссылается ошибка,
@@ -138,7 +138,7 @@ class PriceloaderInterface extends AbstractInterface
      *     ]> Лог выполнения,
      *     'raw_data' ?=> array<array<string>> Массив сырых данных,
      *     'ok' ?=> true Обработка завершена
-     * ]
+     * ]</code></pre>
      */
     public function upload(
         string $file,
@@ -148,7 +148,7 @@ class PriceloaderInterface extends AbstractInterface
         int $clear = 0,
         int $rows = 0,
         int $cols = 0
-    ) {
+    ): array {
         $st = microtime(true);
         // Загрузка прайса
         $affectedPagesIds = $affectedMaterialsIds = $log = $rawData = [];
@@ -221,8 +221,14 @@ class PriceloaderInterface extends AbstractInterface
      * @param bool $debug Дебаг-режим (не выходит по exit)
      * @return string|null В debug-режиме возвращает текст файла
      */
-    public function download(Page $page = null, $rows = 0, $cols = 0, $type = 'xls', $encoding = 'UTF-8', $debug = false)
-    {
+    public function download(
+        Page $page = null,
+        int $rows = 0,
+        int $cols = 0,
+        string $type = 'xls',
+        string $encoding = 'UTF-8',
+        bool $debug = false
+    ) {
         ini_set('max_execution_time', 900);
         if (!($page->id ?? null)) {
             $page = $this->loader->Page;
@@ -553,8 +559,8 @@ class PriceloaderInterface extends AbstractInterface
         if (!$col->Field->id) {
             return null;
         }
-        $preprocessor = $col->Field->Preprocessor;
-        $postprocessor = $col->Field->Postprocessor;
+        $preprocessor = $col->Field->preprocessor_classname ?: $col->Field->Preprocessor;
+        $postprocessor = $col->Field->postprocessor_classname ?: $col->Field->Postprocessor;
         $field = $col->Field->deepClone();
         $field->Owner = $item;
         // 2024-04-17, AVS: убрал проверку if (!$field->id), т.к. это аналогично той, что проводится в начале метода
@@ -621,15 +627,15 @@ class PriceloaderInterface extends AbstractInterface
      * @param array $data Данные для поля
      * @param Field $field Поле, к которому относятся данные
      * @param array $addedAttachments Добавленные вложения
-     * @param Snippet|null $preprocessor Препроцессор поля
-     * @param Snippet|null $postprocessor Постпроцессор поля
+     * @param Snippet|string|null $preprocessor Сниппет или класс препроцессора поля
+     * @param Snippet|string|null $postprocessor Сниппет или класс постпроцессора поля
      */
     public function convertMediaData(
         array $data,
         Field $field,
         array &$addedAttachments,
-        Snippet $preprocessor = null,
-        Snippet $postprocessor = null
+        $preprocessor = null,
+        $postprocessor = null
     ) {
         $newDataArr = [];
         $addedAttachments = [];
@@ -649,8 +655,13 @@ class PriceloaderInterface extends AbstractInterface
                 copy(Application::i()->baseDir . $val, $tempname);
             }
             if (is_file($tempname)) {
-                if ($preprocessor && $preprocessor->id) {
-                    $preprocessor->process(['files' => [$tempname]]);
+                if ($preprocessor) {
+                    if (is_string($preprocessor) && class_exists($preprocessor)) {
+                        $preprocessorInterface = new $preprocessor($_GET, $_POST, $_COOKIE, $_SESSION, $_SERVER, $_FILES);
+                        $preprocessorInterface->process([$tempname]);
+                    } elseif (($preprocessor instanceof Snippet) && $preprocessor->id) {
+                        $preprocessor->process(['files' => [$tempname]]);
+                    }
                 }
                 $mime = mime_content_type($tempname);
                 $att = Attachment::createFromFile(
@@ -660,8 +671,13 @@ class PriceloaderInterface extends AbstractInterface
                     (int)Package::i()->context->registryGet('tn'),
                     $mime
                 );
-                if ($postprocessor && $postprocessor->id) {
-                    $postprocessor->process(['files' => [$att->file]]);
+                if ($postprocessor) {
+                    if (is_string($postprocessor) && class_exists($postprocessor)) {
+                        $postprocessorInterface = new $postprocessor($_GET, $_POST, $_COOKIE, $_SESSION, $_SERVER, $_FILES);
+                        $postprocessorInterface->process([$att->file]);
+                    } elseif (($postprocessor instanceof Snippet) && $postprocessor->id) {
+                        $postprocessor->process(['files' => [$att->file]]);
+                    }
                 }
                 unlink($tempname);
                 $addedAttachments[] = $att;
