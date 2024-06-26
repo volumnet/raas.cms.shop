@@ -229,7 +229,9 @@ class PriceloaderInterface extends AbstractInterface
         string $encoding = 'UTF-8',
         bool $debug = false
     ) {
-        ini_set('max_execution_time', 900);
+        // 2024-06-25, AVS: заменил на строку, т.к. PHP 7.4.33 выдает фатальную ошибку
+        // В PHP8 ошибка не наблюдается, тестами не выявляется
+        ini_set('max_execution_time', '900');
         if (!($page->id ?? null)) {
             $page = $this->loader->Page;
         }
