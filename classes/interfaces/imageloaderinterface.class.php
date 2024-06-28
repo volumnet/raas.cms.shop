@@ -563,14 +563,16 @@ class ImageloaderInterface extends AbstractInterface
                             GROUP BY tM.id";
                 $sqlResult = Material::_SQL()->get([$sqlQuery, $sqlBind]);
                 foreach ($sqlResult as $sqlRow) {
-                    $this->assoc[Text::beautify($sqlRow['imageloader_unique_field'])][] = (int)$sqlRow['id'];
+                    if ($uniqueValue = Text::beautify($sqlRow['imageloader_unique_field'])) {
+                        $this->assoc[$uniqueValue][] = (int)$sqlRow['id'];
+                    }
                 }
             }
 
             if ($text = Text::beautify($text)) {
                 $result = [];
                 foreach ($this->assoc as $article => $materialsIds) {
-                    $rx = '/^' . preg_quote($article) . '($|' . preg_quote($loader->sep_string) . ')/umis';
+                    $rx = '/^' . preg_quote((string)$article) . '($|' . preg_quote((string)$loader->sep_string) . ')/umis';
                     if (preg_match($rx, $text)) {
                         foreach ($materialsIds as $materialId) {
                             $result[] = new Material($materialId);
