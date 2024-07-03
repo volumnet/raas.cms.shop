@@ -376,7 +376,11 @@ class Sync1CInterface extends AbstractInterface
                         }
                     }
                 }
-                $entity->$key = $val;
+                // 2024-07-03, AVS: обновляем только регулярные поля и id
+                // Иначе из-за обновлений порядка получения свойств в SOME перезаписываются $entity->fields
+                if (in_array($classname::typeof($key), [$classname::FIELD_ID, $classname::FIELD_REGULAR])) {
+                    $entity->$key = $val;
+                }
             }
         }
     }

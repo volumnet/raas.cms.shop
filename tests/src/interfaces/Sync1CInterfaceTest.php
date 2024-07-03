@@ -1598,8 +1598,13 @@ class Sync1CInterfaceTest extends BaseTest
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по типам материалов
      * @dataProvider processMaterialTypeDataProvider
      */
-    public function testProcessMaterialType(array $data, array $mapping, Material_Type $defaultParent, array $expectedTest, array $mappingTest)
-    {
+    public function testProcessMaterialType(
+        array $data,
+        array $mapping,
+        Material_Type $defaultParent,
+        array $expectedTest,
+        array $mappingTest
+    ) {
         $interface = new Sync1CInterface();
 
         $result = $interface->processMaterialType($data, $mapping, $defaultParent);
@@ -1761,8 +1766,13 @@ class Sync1CInterfaceTest extends BaseTest
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по кастомным полям
      * @dataProvider processFieldDataProvider
      */
-    public function testProcessField(array $data, array $mapping, Material_Type $defaultParent, array $expectedTest, array $mappingTest)
-    {
+    public function testProcessField(
+        array $data,
+        array $mapping,
+        Material_Type $defaultParent,
+        array $expectedTest,
+        array $mappingTest
+    ) {
         $interface = new Sync1CInterface();
 
         $result = $interface->processField($data, $mapping, $defaultParent);

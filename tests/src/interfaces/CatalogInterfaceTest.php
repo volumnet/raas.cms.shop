@@ -858,6 +858,10 @@ class CatalogInterfaceTest extends BaseTest
         $commentsBlock->interface_classname = '';
         $commentsBlock->commit();
 
+        $commentsSnippet = new Snippet(56); // Отзывы к товарам
+        $commentsSnippet->description = '<div class="goods-comments"></div>';
+        $commentsSnippet->commit();
+
         $block = Block::spawn(34); // Каталог продукции
         $page = new Page(18); // Категория 111
         $material = new Material(12); // Товар 3 - к нему есть отзывы
@@ -869,7 +873,7 @@ class CatalogInterfaceTest extends BaseTest
         $this->assertEquals(51, $result['commentsListBlock']->id);
         $this->assertCount(3, $result['comments']);
         $this->assertEquals('Отзыв 1', $result['comments'][0]->name);
-        $this->assertStringContainsString('class="goods-reviews-item', $result['commentsListText']);
+        $this->assertStringContainsString('class="goods-comments', $result['commentsListText']);
 
         $commentsBlock->interface_id = 0;
         $commentsBlock->interface_classname = MaterialInterface::class;
@@ -895,13 +899,17 @@ class CatalogInterfaceTest extends BaseTest
         $material = new Material(12); // Товар 3 - к нему есть отзывы
         $interface = new CatalogInterface();
 
+        $commentsSnippet = new Snippet(56); // Отзывы к товарам
+        $commentsSnippet->description = '<div class="goods-comments"></div>';
+        $commentsSnippet->commit();
+
         $result = $interface->processComments($block, $page, $material);
 
         $this->assertEquals(52, $result['commentFormBlock']->id);
         $this->assertEquals($commentsBlock->id, $result['commentsListBlock']->id);
         $this->assertCount(3, $result['comments']);
         $this->assertEquals('Отзыв 1', $result['comments'][0]->name);
-        $this->assertStringContainsString('class="goods-reviews-item', $result['commentsListText']);
+        $this->assertStringContainsString('class="goods-comments', $result['commentsListText']);
 
         $commentsBlock->interface_id = $commentsBlockInterfaceId;
         $commentsBlock->commit();
@@ -1037,6 +1045,13 @@ class CatalogInterfaceTest extends BaseTest
         $item = new Material(12);
         $interface = new CatalogInterface();
 
+        $commentsSnippet = new Snippet(56); // Отзывы к товарам
+        $commentsSnippet->description = '<div class="goods-comments"></div>';
+        $commentsSnippet->commit();
+        $faqSnippet = new Snippet(55); // Вопрос-ответ к товарам
+        $faqSnippet->description = '<div class="goods-faq"></div>';
+        $faqSnippet->commit();
+
         $result = $interface->processMaterial($block, $page, $item, [], []);
 
         $this->assertEquals('Товар 3', $page->name);
@@ -1049,7 +1064,7 @@ class CatalogInterfaceTest extends BaseTest
         $this->assertEquals(51, $result['commentsListBlock']->id);
         $this->assertCount(3, $result['comments']);
         $this->assertEquals('Отзыв 1', $result['comments'][0]->name);
-        $this->assertStringContainsString('class="goods-reviews', $result['commentsListText']);
+        $this->assertStringContainsString('class="goods-comments', $result['commentsListText']);
         $this->assertEquals(2, $result['rating']);
         $this->assertEquals(53, $result['faqFormBlock']->id);
         $this->assertEquals(50, $result['faqListBlock']->id);

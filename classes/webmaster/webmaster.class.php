@@ -47,24 +47,11 @@ class Webmaster extends CMSWebmaster
     public function checkStdInterfaces()
     {
         $interfaces = [];
-        $interfacesData = [
-            '__raas_shop_order_notify' => [
-                'name' => 'ORDER_STANDARD_NOTIFICATION',
-                'filename' => 'form_notification',
-            ],
-        ];
-        foreach ($interfacesData as $interfaceURN => $interfaceData) {
-            $interfaces[$interfaceURN] = $this->checkSnippet(
-                $this->interfacesFolder,
-                $interfaceURN,
-                $interfaceData['name'],
-                file_get_contents(
-                    Module::i()->resourcesDir .
-                    '/interfaces/' . $interfaceData['filename'] . '.php'
-                ),
-                isset($interfaceData['locked']) ? (bool)$interfaceData['locked'] : true
-            );
-        }
+        $interfaces['__raas_shop_order_notify'] = $this->checkSnippet(
+            $this->interfacesFolder,
+            '__raas_shop_order_notify',
+            'shop/form_notification.php',
+        );
 
         return $interfaces;
     }

@@ -960,7 +960,10 @@ class CartInterfaceTest extends BaseTest
             '12' => ['' => 3],
             '13' => ['' => 0],
         ]);
-        $snippet = new Snippet(['description' => '<' . "?php return ['success' => [38 => true]]; "]);
+        $snippet = new Snippet([
+            'urn' => 'epay_test',
+            'description' => '<' . "?php return ['success' => [38 => true]]; "
+        ]);
         $snippet->commit();
         $block = new Block_Cart(38);
         $block->epay_interface_id = $snippet->id;
@@ -1037,7 +1040,7 @@ class CartInterfaceTest extends BaseTest
             '13' => ['' => 0],
         ]);
         $_COOKIE['cart_1'] = $cartData;
-        $snippet = new Snippet(['description' => '<' . "?php return ['aaa' => 'bbb']; "]);
+        $snippet = new Snippet(['urn' => 'epay_test', 'description' => '<' . "?php return ['aaa' => 'bbb']; "]);
         $snippet->commit();
         $block = new Block_Cart(38);
         $block->epay_interface_id = $snippet->id;
