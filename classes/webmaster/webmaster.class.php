@@ -70,7 +70,7 @@ class Webmaster extends CMSWebmaster
             'cart/compare' => View_Web::i()->_('COMPARISON'),
             // 'cart/order' => View_Web::i()->_('VIEW_ORDER'),
             // 'epay/robokassa' => View_Web::i()->_('ROBOKASSA'),
-            'epay/sberbank' => View_Web::i()->_('SBERBANK'),
+            // 'epay/sberbank' => View_Web::i()->_('SBERBANK'),
             'materials/comments/rating' => View_Web::i()->_('RATING'),
             'cart/cart_main' => View_Web::i()->_('CART_MAIN'),
             'cart/favorites_main' => View_Web::i()->_('FAVORITES_MAIN'),

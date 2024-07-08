@@ -24,7 +24,8 @@ class SpecInterface extends CatalogInterface
         &$sqlOrder,
         array $filterIds = []
     ) {
-        if ($block->additionalParams['type'] == 'popular') {
+        $additionalParams = $block->additionalParams;
+        if (($additionalParams['type'] ?? null) == 'popular') {
             $sqlSort = "(SELECT COUNT(*) FROM cms_shop_orders_goods WHERE material_id = tM.id)";
             $sqlOrder = "DESC";
         } else {

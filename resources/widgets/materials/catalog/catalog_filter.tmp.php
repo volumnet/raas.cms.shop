@@ -181,13 +181,21 @@ $static = (bool)(int)$Block->additionalParams['static'];
 <!--raas-teleport-from#catalog-filter-->
 <!--/nodesktop-->
 <div class="catalog-filter__outer">
-  <div class="catalog-filter" <?php echo $static ? '': ' style="display: none" data-v-bind_style="{ display: \'block\' }"'?> data-vue-role="catalog-filter" data-v-bind_catalog-id="<?php echo (int)$catalog->id?>" data-v-bind_block-id="<?php echo (int)$catalogBlock->id?>" data-v-bind_source="<?php echo htmlspecialchars(json_encode($result))?>" data-v-slot="vm">
+  <div
+    class="catalog-filter"
+    <?php echo $static ? '': 'style="display: none" data-v-bind_style="{ display: \'block\' }"'?>
+    data-vue-role="catalog-filter"
+    data-v-bind_catalog-id="<?php echo (int)$catalog->id?>"
+    data-v-bind_block-id="<?php echo (int)$catalogBlock->id?>"
+    data-v-bind_source="<?php echo htmlspecialchars(json_encode($result))?>"
+    data-v-slot="vm"
+  >
     <div class="catalog-filter__header">
       <div class="catalog-filter__title">
         <?php echo htmlspecialchars($Block->name)?>
       </div>
       <div class="catalog-filter__close">
-        <button class="catalog-filter__close-link btn-close" data-v-on_click="vm.close()"></button>
+        <button type="button" class="catalog-filter__close-link btn-close" data-v-on_click="vm.close()"></button>
       </div>
     </div>
     <form action="" method="get" class="catalog-filter__inner">
@@ -208,7 +216,10 @@ $static = (bool)(int)$Block->additionalParams['static'];
                 }
                 $property = $catalog->catalogFilter->properties[$propId];
                 ?>
-                <div class="catalog-filter-properties-list__item catalog-filter-property catalog-filter-property_active">
+                <div class="
+                  catalog-filter-properties-list__item
+                  catalog-filter-property catalog-filter-property_active
+                ">
                   <div class="catalog-filter-property__title">
                     <?php echo htmlspecialchars($property->name)?>
                   </div>
@@ -234,9 +245,27 @@ $static = (bool)(int)$Block->additionalParams['static'];
                         <div class="catalog-filter-range">
                           <div class="catalog-filter-range__controls">
                             <?php echo FROM?>
-                            <input type="number" class="catalog-filter-range__control form-control" name="<?php echo htmlspecialchars($property->urn . '_from')?>" min="<?php echo $min?>" max="<?php echo $max?>" step="<?php echo $step?>" placeholder="<?php echo $min?>" value="<?php echo htmlspecialchars($DATA[$property->urn . '_from'])?>" />
+                            <input
+                              type="number"
+                              class="catalog-filter-range__control form-control"
+                              name="<?php echo htmlspecialchars($property->urn . '_from')?>"
+                              min="<?php echo $min?>"
+                              max="<?php echo $max?>"
+                              step="<?php echo $step?>"
+                              placeholder="<?php echo $min?>"
+                              value="<?php echo htmlspecialchars($DATA[$property->urn . '_from'])?>"
+                            />
                             <?php echo TO?>
-                            <input type="number" class="catalog-filter-range__control form-control" name="<?php echo htmlspecialchars($property->urn . '_to')?>" min="<?php echo $min?>" max="<?php echo $max?>" step="<?php echo $step?>" placeholder="<?php echo $min?>" value="<?php echo htmlspecialchars($DATA[$property->urn . '_to'])?>" />
+                            <input
+                              type="number"
+                              class="catalog-filter-range__control form-control"
+                              name="<?php echo htmlspecialchars($property->urn . '_to')?>"
+                              min="<?php echo $min?>"
+                              max="<?php echo $max?>"
+                              step="<?php echo $step?>"
+                              placeholder="<?php echo $min?>"
+                              value="<?php echo htmlspecialchars($DATA[$property->urn . '_to'])?>"
+                            />
                           </div>
                         </div>
                     <?php } elseif ($multiple = true) { // Выбор множественного значения ?>
@@ -269,9 +298,42 @@ $static = (bool)(int)$Block->additionalParams['static'];
                           }
                           foreach ($values as $key => $value) {
                               if (trim($value['doRich']) && trim($value['value'])) { ?>
-                                <label class="catalog-filter-property-values-list__item catalog-filter-property-value<?php echo !$value['enabled'] ? ' catalog-filter-property-value_disabled' : ''?>">
-                                  <input type="<?php echo (($property->datatype == 'checkbox') && !$property->multiple) ? 'radio' : 'checkbox'?>" class="catalog-filter-property-value__input" name="<?php echo htmlspecialchars($property->urn) . (($property->datatype == 'checkbox' && !$property->multiple) ? '' : '[]')?>" value="<?php echo htmlspecialchars($value['value'])?>"<?php echo ($value['checked'] ? ' checked="checked"' : '') . (!$value['enabled'] ? ' disabled="disabled"' : '')?>>
-                                  <a href="<?php echo htmlspecialchars($catalog->catalogFilter->getCanonicalURLFromFilter($catalog->catalogFilter->filter, $property->urn, $value['value']))?>" rel="nofollow">
+                                <label class="
+                                  catalog-filter-property-values-list__item
+                                  catalog-filter-property-value
+                                  <?php echo !$value['enabled'] ? 'catalog-filter-property-value_disabled' : ''?>
+                                ">
+                                  <input
+                                    type="<?php
+                                        if (($property->datatype == 'checkbox') && !$property->multiple) {
+                                            echo 'radio';
+                                        } else {
+                                            echo 'checkbox';
+                                        }
+                                    ?>"
+                                    class="catalog-filter-property-value__input"
+                                    name="<?php
+                                        echo htmlspecialchars($property->urn);
+                                        if ($property->datatype != 'checkbox' || $property->multiple) {
+                                            echo '[]';
+                                        }
+                                    ?>"
+                                    value="<?php echo htmlspecialchars($value['value'])?>"
+                                    <?php
+                                    echo ($value['checked'] ? 'checked="checked"' : '') .
+                                        (!$value['enabled'] ? ' disabled="disabled"' : '');
+                                    ?>
+                                  >
+                                  <a
+                                    href="<?php echo htmlspecialchars(
+                                        $catalog->catalogFilter->getCanonicalURLFromFilter(
+                                            $catalog->catalogFilter->filter,
+                                            $property->urn,
+                                            $value['value']
+                                        )
+                                    )?>"
+                                    rel="nofollow"
+                                  >
                                     <?php echo htmlspecialchars($value['doRich'])?>
                                   </a>
                                 </label>
@@ -279,13 +341,19 @@ $static = (bool)(int)$Block->additionalParams['static'];
                           } ?>
                         </div>
                     <?php } else { ?>
-                        <select class="catalog-filter-property-selector form-control" name="<?php echo htmlspecialchars($property->urn)?>">
+                        <select
+                          class="catalog-filter-property-selector form-control"
+                          name="<?php echo htmlspecialchars($property->urn)?>"
+                        >
                           <option value=""<?php echo !$DATA[$property->urn] ? ' selected="selected"' : ''?>>
                             <?php echo DOESNT_MATTER?>
                           </option>
                           <?php foreach ($values as $key => $value) {
                               if (!$value || $value['enabled']) { ?>
-                                  <option value="<?php echo htmlspecialchars($value['doRich'])?>"<?php echo $value['checked'] ? ' selected="selected"' : ''?>>
+                                  <option
+                                    value="<?php echo htmlspecialchars($value['doRich'])?>"
+                                    <?php echo $value['checked'] ? 'selected="selected"' : ''?>
+                                  >
                                     <?php echo htmlspecialchars($value['doRich'])?>
                                   </option>
                               <?php }
@@ -297,7 +365,15 @@ $static = (bool)(int)$Block->additionalParams['static'];
             <?php }
         } ?>
       </div>
-      <div class="catalog-filter-preview-marker" data-vue-role="catalog-filter-preview-marker" data-v-bind_counter="vm.counter" data-v-bind_active="!!vm.previewTimeoutId" data-v-bind_last-active-element="vm.lastActiveElement" data-v-bind_float="vm.floatingMarker" data-v-on_submit="vm.submit()">
+      <div
+        class="catalog-filter-preview-marker"
+        data-vue-role="catalog-filter-preview-marker"
+        data-v-bind_counter="vm.counter"
+        data-v-bind_active="!!vm.previewTimeoutId"
+        data-v-bind_last-active-element="vm.lastActiveElement"
+        data-v-bind_float="vm.floatingMarker"
+        data-v-on_submit="vm.submit()"
+      >
         <?php if ($static) { ?>
             <span class="catalog-filter-preview-marker__results">
               <?php echo FOUND?>
@@ -322,10 +398,6 @@ $static = (bool)(int)$Block->additionalParams['static'];
     </form>
   </div>
 </div>
-<?php
-AssetManager::requestCSS(['/css/catalog-filter.css']);
-AssetManager::requestJS(['/js/catalog-filter.js']);
-?>
 <!--nodesktop-->
 <!--/raas-teleport-from#catalog-filter-->
 <!--/nodesktop-->

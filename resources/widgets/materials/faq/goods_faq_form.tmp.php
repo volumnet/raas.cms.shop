@@ -32,9 +32,21 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
       <div class="goods-faq-form__title">
         <?php echo YOU_CAN_ASK_QUESTION_BY_FILLING_FORM_BELOW?>
       </div>
-      <form class="form-horizontal" action="" method="post" enctype="multipart/form-data" data-vue-role="ajax-form" data-v-bind_block-id="<?php echo (int)$Block->id?>" data-v-slot="vm">
+      <form
+        class="form-horizontal"
+        action=""
+        method="post"
+        enctype="multipart/form-data"
+        data-vue-role="ajax-form"
+        data-v-bind_block-id="<?php echo (int)$Block->id?>"
+        data-v-slot="vm"
+      >
         <input type="hidden" name="material" value="<?php echo (int)$Page->Material->id?>" />
-        <div class="feedback__notifications" data-v-bind_class="{ 'feedback__notifications_active': true }" data-v-if="vm.success">
+        <div
+          data-v-if="vm.success"
+          class="feedback__notifications"
+          data-v-bind_class="{ 'feedback__notifications_active': true }"
+        >
           <div class="alert alert-success">
             <?php echo QUESTION_SUCCESSFULLY_SENT?>
           </div>
@@ -48,7 +60,11 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
                 ASTERISK_MARKED_FIELDS_ARE_REQUIRED
             )?>
           </div>
-          <div class="feedback__notifications" data-v-bind_class="{ 'feedback__notifications_active': true }" data-v-if="vm.hasErrors">
+          <div
+            data-v-if="vm.hasErrors"
+            class="feedback__notifications"
+            data-v-bind_class="{ 'feedback__notifications_active': true }"
+          >
             <div class="alert alert-danger">
               <ul>
                 <li data-v-for="error in vm.errors" data-v-html="error"></li>
@@ -85,7 +101,10 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
                   $fieldCaption .= '<span class="feedback__asterisk">*</span>';
               }
               ?>
-              <div class="form-group" data-v-bind_class="{ 'text-danger': !!vm.errors.<?php echo htmlspecialchars($fieldURN)?> }">
+              <div
+                class="form-group"
+                data-v-bind_class="{ 'text-danger': !!vm.errors.<?php echo htmlspecialchars($fieldURN)?> }"
+              >
                 <?php
                 if (($field->datatype == 'checkbox') &&
                     !$field->multiple
@@ -95,7 +114,10 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
                       <?php echo $fieldHTML . ' ' . $fieldCaption; ?>
                     </label>
                 <?php } else { ?>
-                    <label class="feedback__control-label" <?php echo !$field->multiple ? ' for="' . htmlspecialchars($field->getHTMLId($Block)) . '"' : ''?>>
+                    <label
+                      class="feedback__control-label"
+                      <?php echo !$field->multiple ? 'for="' . htmlspecialchars($field->getHTMLId($Block)) . '"' : ''?>
+                    >
                       <?php echo $fieldCaption; ?>:
                     </label>
                     <div class="feedback__input-container">
@@ -105,7 +127,12 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
               </div>
           <?php } ?>
           <div class="feedback__controls">
-            <button class="feedback__submit btn btn-primary" type="submit" data-v-bind_disabled="vm.loading" data-v-bind_class="{ 'feedback__submit_loading': vm.loading }">
+            <button
+              type="submit"
+              class="feedback__submit btn btn-primary"
+              data-v-bind_disabled="vm.loading"
+              data-v-bind_class="{ 'feedback__submit_loading': vm.loading }"
+            >
               <?php echo SEND?>
             </button>
           </div>
@@ -113,6 +140,4 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
       </form>
     </div>
     <?php
-    AssetManager::requestCSS('/css/feedback.css');
-    AssetManager::requestJS('/js/feedback.js');
 }

@@ -91,10 +91,12 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
             $aClasses[] = 'menu-catalog__link_has-children';
         }
         $text .= '<li class="' . implode(' ', $liClasses) . '">'
-              .  '  <a class="' . implode(' ', $aClasses) . '" ' . ($active ? '' : ' href="' . htmlspecialchars($url) . '"') . '>'
+              .  '  <' . ($active ? 'span' : 'a href="' . htmlspecialchars($url) . '"') . '
+                      class="' . implode(' ', $aClasses) . '"
+                    >'
               .       htmlspecialchars($name)
               .       ($ch ? '<span class="menu-catalog__children-trigger"></span>' : '')
-              .  '  </a>'
+              .  '  </' . ($active ? 'span' : 'a') . '>'
               .     $ch
               .  '</li>';
     }
@@ -113,4 +115,3 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
   </a>
   <?php echo $showMenu($menuArr ?: $Item, $Page)?>
 </nav>
-<?php AssetManager::requestJS('/js/menu-catalog.js');

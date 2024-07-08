@@ -8,5 +8,11 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<div class="compare-main" data-vue-role="compare-main" data-v-bind_cart="compare" data-v-bind_title="'<?php echo COMPARE?>'" data-v-bind_href="'/compare/'"></div>
+<div
+  class="compare-main"
+  data-vue-role="compare-main"
+  data-v-bind_cart="compare"
+  data-v-bind_title="'<?php echo COMPARE?>'"
+  data-v-bind_href="'/compare/'"
+></div>
 <!--/noindex-->

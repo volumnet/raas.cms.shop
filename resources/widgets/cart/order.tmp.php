@@ -21,19 +21,33 @@ $getField = function($row) {
             $arr[$key] = date('d.m.Y H:i', strtotime($val));
             break;
         case 'color':
-            $arr[$key] = '<span style="display: inline-block; height: 16px; width: 16px; background-color: ' . htmlspecialchars($val) . '"></span>';
+            $arr[$key] = '<span style="
+                            display: inline-block;
+                            height: 16px;
+                            width: 16px;
+                            background-color: ' . htmlspecialchars($val) . '
+                          "></span>';
             break;
         case 'email':
             $arr[$key] .= '<a href="mailto:' . htmlspecialchars($val) . '">' . htmlspecialchars($val) . '</a>';
             break;
         case 'url':
-            $arr[$key] .= '<a href="' . (!preg_match('/^http(s)?:\\/\\//umi', trim($val)) ? 'http://' : '') . htmlspecialchars($val) . '">' . htmlspecialchars($val) . '</a>';
+            $arr[$key] .= '<a href="' . (!preg_match('/^http(s)?:\\/\\//umi', trim($val)) ? 'http://' : '') . htmlspecialchars($val) . '">'
+                       .     htmlspecialchars($val)
+                       .  '</a>';
             break;
         case 'file':
             $arr[$key] .= '<a href="/' . $val->fileURL . '">' . htmlspecialchars($val->name) . '</a>';
             break;
         case 'image':
-            $arr[$key] .= '<a href="/' . $val->fileURL . '"><img loading="lazy" src="/' . $val->tnURL. '" alt="' . htmlspecialchars($val->name) . '" title="' . htmlspecialchars($val->name) . '" /></a>';
+            $arr[$key] .= '<a href="/' . $val->fileURL . '">
+                             <img
+                               loading="lazy"
+                               src="/' . $val->tnURL. '"
+                               alt="' . htmlspecialchars($val->name) . '"
+                               title="' . htmlspecialchars($val->name) . '"
+                             />
+                           </a>';
             break;
         case 'htmlarea':
             $arr[$key] = '<div>' . $val . '</div>';
@@ -74,14 +88,20 @@ $getField = function($row) {
               <div class="cart-list__item cart-item">
                 <div class="cart-item__image">
                   <?php if ($item->visImages) { ?>
-                      <a <?php echo $item->url ? 'href="' . htmlspecialchars($item->url) . '" target="_blank"' : ''?>>
-                        <img loading="lazy" src="/<?php echo htmlspecialchars(addslashes($item->visImages[0]->tnURL))?>" alt="<?php echo htmlspecialchars($item->visImages[0]->name ?: $item->name)?>" target="_blank" /></a>
+                      <<?php echo $item->url ? 'a href="' . htmlspecialchars($item->url) . '" target="_blank"' : 'span'?>>
+                        <img
+                          loading="lazy"
+                          src="/<?php echo htmlspecialchars(addslashes($item->visImages[0]->tnURL))?>"
+                          alt="<?php echo htmlspecialchars($item->visImages[0]->name ?: $item->name)?>"
+                          target="_blank"
+                        />
+                      </<?php echo $item->url ? 'a' : 'span'?>>
                   <?php } ?>
                 </div>
                 <div class="cart-item__title">
-                  <a <?php echo $item->url ? 'href="' . htmlspecialchars($item->url) . '" target="_blank"' : ''?>>
+                  <<?php echo $item->url ? 'a href="' . htmlspecialchars($item->url) . '" target="_blank"' : 'span'?>>
                     <?php echo htmlspecialchars($item->name)?>
-                  </a>
+                  </<?php echo $item->url ? 'a' : 'span'?>>
                 </div>
                 <div class="cart-item__price">
                   <?php echo htmlspecialchars(Text::formatPrice($item->realprice))?> ₽

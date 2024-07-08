@@ -8,6 +8,7 @@ namespace RAAS\CMS\Shop;
 
 use Exception;
 use RAAS\Application;
+use RAAS\Redirector;
 use RAAS\CMS\AbstractInterface;
 use RAAS\CMS\Material;
 use RAAS\CMS\Page;

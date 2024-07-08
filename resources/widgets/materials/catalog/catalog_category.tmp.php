@@ -19,7 +19,12 @@ $queryString = http_build_query($get);
 $queryString = $queryString ? '?' . $queryString : '';
 ?>
 <a class="catalog-category" href="<?php echo $page->url . $queryString ?>">
-  <img class="catalog-category__image" loading="lazy" src="/<?php echo htmlspecialchars($page->image->smallURL ?: 'files/cms/common/image/design/nophoto.jpg')?>" alt="<?php echo htmlspecialchars($page->image->name ?: $page->name)?>" />
+  <img
+    class="catalog-category__image"
+    loading="lazy"
+    src="/<?php echo htmlspecialchars($page->image->smallURL ?: 'files/cms/common/image/design/nophoto.jpg')?>"
+    alt="<?php echo htmlspecialchars($page->image->name ?: $page->name)?>"
+  />
   <div class="catalog-category__title">
     <?php echo htmlspecialchars($page->name)?>
     <?php if ($counter = (int)$page->counter) { ?>

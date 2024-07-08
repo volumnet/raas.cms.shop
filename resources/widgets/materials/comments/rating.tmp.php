@@ -15,5 +15,3 @@ use RAAS\AssetManager;
       <li class="rating__item rating__item_<?php echo $starClass[$halfStar]?>"></li>
   <?php } ?>
 </ol>
-<?php
-AssetManager::requestCSS('/css/rating.css');

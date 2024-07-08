@@ -1,6 +1,7 @@
 <?php
 /**
  * Виджет оплаты для Уральского банка реконструкции и развития
+ * @@deprecated 2024-07-05 в пользу epay.tmp.php
  * @param array<string[] ID# блока => bool> $success Успешное завершение
  * @param array<string[] URN поля => string Описание ошибки> $localError Ошибки
  * @param Block_Cart $Block Текущий блок

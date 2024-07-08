@@ -84,7 +84,10 @@ if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
         $result['orderECommerce'] = [];
         $catalogMaterialType = Material_Type::importByURN('catalog');
         foreach ((array)$Item->items as $i => $item) {
-            if (in_array($item->pid, MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id))) { // Каталог продукции
+            if (in_array(
+                $item->pid,
+                MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id)
+            )) { // Каталог продукции
                 $eCommerceData['orderECommerce'][] = ECommerce::getProduct($item, $i);
             }
         }
@@ -119,7 +122,14 @@ if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
     $formArr['fields']['city']['datatype'] = 'city';
     $formArr['fields']['city']['stdSource'] = array_values($cities);
     ?>
-    <cart class="cart" :cart="cart" :block-id="<?php echo (int)$Block->id?>" id="cart" :form="<?php echo htmlspecialchars(json_encode($formArr))?>" :initial-form-data="<?php echo htmlspecialchars(json_encode((object)$cartData['formData']))?>">
+    <cart
+      class="cart"
+      :cart="cart"
+      :block-id="<?php echo (int)$Block->id?>"
+      id="cart"
+      :form="<?php echo htmlspecialchars(json_encode($formArr))?>"
+      :initial-form-data="<?php echo htmlspecialchars(json_encode((object)$cartData['formData']))?>"
+    >
       <div class="cart__loading">
         <?php echo CART_IS_LOADING?>
       </div>

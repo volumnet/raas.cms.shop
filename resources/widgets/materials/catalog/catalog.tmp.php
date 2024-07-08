@@ -61,11 +61,23 @@ if ($Item) {
                         <meta property="og:type" content="product.item" />
                         <meta property="og:url" content="' . $host . $itemData['url'] . '" />';
     if ($itemData['visImages']) {
-        $Page->headData .= ' <meta property="og:image" content="' . $host . '/' . $itemData['visImages'][0]['fileURL'] . '" />';
+        $Page->headData .= ' <meta
+                               property="og:image"
+                               content="' . $host . '/' . $itemData['visImages'][0]['fileURL'] . '"
+                             />';
     }
     ?>
     <div class="catalog">
-      <div class="catalog-article" itemscope itemtype="http://schema.org/Product"  data-vue-role="catalog-article" data-v-bind_item="<?php echo htmlspecialchars(json_encode($itemData))?>" data-v-bind_bind-amount-to-cart="true" data-v-slot="vm" data-id="<?php echo (int)$Item->id?>">
+      <div
+        class="catalog-article"
+        itemscope
+        itemtype="http://schema.org/Product"
+        data-vue-role="catalog-article"
+        data-v-bind_item="<?php echo htmlspecialchars(json_encode($itemData))?>"
+        data-v-bind_bind-amount-to-cart="true"
+        data-v-slot="vm"
+        data-id="<?php echo (int)$Item->id?>"
+      >
         <?php /*
         <meta itemprop="name" content="<?php echo htmlspecialchars($itemData['name'])?>" />
         */ ?>
@@ -84,20 +96,53 @@ if ($Item) {
                           'uploadDate' => date('Y-m-d', strtotime($itemData['modify_date'])),
                       ];
                       ?>
-                      <div itemscope itemtype="http://schema.org/VideoObject" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((vm.selectedImage == <?php echo $i?>) ? 'block' : 'none')}">
+                      <div
+                        itemscope
+                        itemtype="http://schema.org/VideoObject"
+                        <?php echo $i ? 'style="display: none"' : ''?>
+                        data-v-bind_style="{display: ((vm.selectedImage == <?php echo $i?>) ? 'block' : 'none')}"
+                      >
                         <meta itemprop="name" content="<?php echo htmlspecialchars($itemData['name'])?>" />
                         <meta itemprop="description" content="<?php echo htmlspecialchars($itemData['name'])?>" />
-                        <meta itemprop="uploadDate" content="<?php echo date('Y-m-d', strtotime($itemData['modify_date']))?>" />
-                        <meta itemprop="thumbnailUrl" content="https://i.ytimg.com/vi/<?php echo htmlspecialchars(addslashes($ytid))?>/hqdefault.jpg" />
-                        <a itemprop="url" class="catalog-article__image-video" href="https://youtube.com/embed/<?php echo $ytid?>" data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__image" title="<?php echo htmlspecialchars($row['name'])?>">
-                          <img loading="lazy" itemprop="thumbnail" src="https://i.ytimg.com/vi/<?php echo htmlspecialchars($ytid)?>/hqdefault.jpg" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>">
+                        <meta
+                          itemprop="uploadDate"
+                          content="<?php echo date('Y-m-d', strtotime($itemData['modify_date']))?>"
+                        />
+                        <meta
+                          itemprop="thumbnailUrl"
+                          content="https://i.ytimg.com/vi/<?php echo htmlspecialchars(addslashes($ytid))?>/hqdefault.jpg"
+                        />
+                        <a
+                          itemprop="url"
+                          class="catalog-article__image-video"
+                          href="https://youtube.com/embed/<?php echo $ytid?>"
+                          data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__image"
+                          title="<?php echo htmlspecialchars($row['name'])?>"
+                        >
+                          <img
+                            loading="lazy"
+                            itemprop="thumbnail"
+                            src="https://i.ytimg.com/vi/<?php echo htmlspecialchars($ytid)?>/hqdefault.jpg"
+                            alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>"
+                          >
                         </a>
                       </div>
                       <script type="application/ld+json"><?php echo json_encode($videoJsonLd)?></script>
                   <?php } else {
                       $jsonLd['image'][] = '/' . $row['fileURL']; ?>
-                      <a itemprop="image" href="<?php echo $row['fileURL']?>" <?php echo $i ? 'style="display: none"' : ''?> data-v-bind_style="{display: ((vm.selectedImage == <?php echo $i?>) ? 'block' : 'none')}" data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__image">
-                        <img loading="lazy" src="/<?php echo Package::i()->tn(ltrim($row['fileURL'], '/'), 461, null, 'inline')?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" /></a>
+                      <a
+                        itemprop="image"
+                        href="<?php echo $row['fileURL']?>"
+                        <?php echo $i ? 'style="display: none"' : ''?>
+                        data-v-bind_style="{display: ((vm.selectedImage == <?php echo $i?>) ? 'block' : 'none')}"
+                        data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__image"
+                      >
+                        <img
+                          loading="lazy"
+                          src="/<?php echo Package::i()->tn(ltrim($row['fileURL'], '/'), 461, null, 'inline')?>"
+                          alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>"
+                        />
+                      </a>
                   <?php }
               }
               if (!$photoVideo) { ?>
@@ -116,8 +161,15 @@ if ($Item) {
               <button
                 type="button"
                 data-v-on_click="slider.prev()"
-                class="catalog-article-images-list__arrow catalog-article-images-list__arrow_prev slider__arrow slider__arrow_prev"
-                data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.prevAvailable, 'slider__arrow_active': slider.prevAvailable }"
+                class="
+                  catalog-article-images-list__arrow
+                  catalog-article-images-list__arrow_prev
+                  slider__arrow slider__arrow_prev
+                "
+                data-v-bind_class="{
+                    'catalog-article-images-list__arrow_active': slider.prevAvailable,
+                    'slider__arrow_active': slider.prevAvailable
+                }"
               ></button>
               <div class="catalog-article-images-list__inner slider__list" data-role="slider-list">
                 <div class="catalog-article-images-list__list slider-list slider-list_horizontal">
@@ -131,21 +183,36 @@ if ($Item) {
                       }
                       ?>
                       <a
-                        class="catalog-article-images-list__item slider-list__item catalog-article-images-item<?php echo $row['ytid'] ? ' catalog-article-images-item_video' : ''?>"
+                        class="
+                          catalog-article-images-list__item
+                          slider-list__item
+                          catalog-article-images-item
+                          <?php echo $row['ytid'] ? 'catalog-article-images-item_video' : ''?>
+                        "
                         href="<?php echo htmlspecialchars($href)?>"
                         data-v-on_click="vm.clickThumbnail(<?php echo (int)$i?>, $event)"
                         data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__images"
                         data-role="slider-item"
-                        data-v-bind_class="{ 'catalog-article-images-list__item_active': (slider.activeFrame == <?php echo $i?>), 'slider-list__item_active': (slider.activeFrame == <?php echo $i?>) }"
+                        data-v-bind_class="{
+                            'catalog-article-images-list__item_active': (slider.activeFrame == <?php echo $i?>),
+                            'slider-list__item_active': (slider.activeFrame == <?php echo $i?>)
+                        }"
                       >
-                        <img loading="lazy" src="<?php echo htmlspecialchars($image)?>" alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" />
+                        <img
+                          loading="lazy"
+                          src="<?php echo htmlspecialchars($image)?>"
+                          alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>"
+                        />
                       </a>
                   <?php }
                   if (!$photoVideo) { ?>
                       <span
                         class="catalog-article-images-list__item slider-list__item catalog-article-images-item"
                         data-role="slider-item"
-                        data-v-bind_class="{ 'catalog-article-images-list__item_active': true, 'slider-list__item_active': true }"
+                        data-v-bind_class="{
+                          'catalog-article-images-list__item_active': true,
+                          'slider-list__item_active': true
+                        }"
                       >
                         <img loading="lazy" src="/files/cms/common/image/design/nophoto.jpg" alt="" />
                       </span>
@@ -155,8 +222,15 @@ if ($Item) {
               <button
                 type="button"
                 data-v-on_click="slider.next()"
-                class="catalog-article-images-list__arrow catalog-article-images-list__arrow_next slider__arrow slider__arrow_next"
-                data-v-bind_class="{ 'catalog-article-images-list__arrow_active': slider.nextAvailable, 'slider__arrow_active': slider.nextAvailable }"
+                class="
+                  catalog-article-images-list__arrow
+                  catalog-article-images-list__arrow_next
+                  slider__arrow slider__arrow_next
+                "
+                data-v-bind_class="{
+                    'catalog-article-images-list__arrow_active': slider.nextAvailable,
+                    'slider__arrow_active': slider.nextAvailable
+                }"
               ></button>
             </div>
             <!--/noindex-->
@@ -178,9 +252,16 @@ if ($Item) {
                 </div>
               </div>
                 <?php if ($brand = $Item->brand) { ?>
-                    <a href="<?php echo htmlspecialchars($brand->url)?>" class="catalog-article__header-right catalog-article__brand" title="<?php echo htmlspecialchars($brand->name)?>">
+                    <a
+                      href="<?php echo htmlspecialchars($brand->url)?>"
+                      class="catalog-article__header-right catalog-article__brand"
+                      title="<?php echo htmlspecialchars($brand->name)?>"
+                    >
                       <?php if ($brand->image->id) { ?>
-                          <img src="/<?php echo htmlspecialchars($brand->image->fileURL)?>" alt="<?php echo htmlspecialchars($brand->name)?>">
+                          <img
+                            src="/<?php echo htmlspecialchars($brand->image->fileURL)?>"
+                            alt="<?php echo htmlspecialchars($brand->name)?>"
+                          >
                       <?php } else {
                           echo htmlspecialchars($brand->name);
                       } ?>
@@ -258,7 +339,12 @@ if ($Item) {
                               <span class="catalog-article-props-item__title">
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
-                              <span class="catalog-article-props-item__value" itemprop="<?php echo $schemaOrgURN?>" itemscope itemtype="http://schema.org/QuantitativeValue">
+                              <span
+                                class="catalog-article-props-item__value"
+                                itemprop="<?php echo $schemaOrgURN?>"
+                                itemscope
+                                itemtype="http://schema.org/QuantitativeValue"
+                              >
                                 <span itemprop="value">
                                   <?php echo htmlspecialchars($textValue)?>
                                 </span>
@@ -291,7 +377,12 @@ if ($Item) {
                               <span class="catalog-article-props-item__title">
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
-                              <span class="catalog-article-props-item__value" itemprop="brand" itemscope itemtype="http://schema.org/Brand">
+                              <span
+                                class="catalog-article-props-item__value"
+                                itemprop="brand"
+                                itemscope
+                                itemtype="http://schema.org/Brand"
+                              >
                                 <span itemprop="name">
                                   <?php echo htmlspecialchars($textValue)?>
                                 </span>
@@ -306,7 +397,12 @@ if ($Item) {
                                 'value' => $textValue
                             ];
                             ?>
-                            <div class="catalog-article-props-list__item catalog-article-props-item" itemprop="additionalProperty" itemscope itemtype="http://schema.org/PropertyValue">
+                            <div
+                              class="catalog-article-props-list__item catalog-article-props-item"
+                              itemprop="additionalProperty"
+                              itemscope
+                              itemtype="http://schema.org/PropertyValue"
+                            >
                               <span class="catalog-article-props-item__title" itemprop="name">
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
@@ -330,16 +426,35 @@ if ($Item) {
             <div class="catalog-article__offer" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
               <meta itemprop="sku" content="<?php echo htmlspecialchars($itemData['article'])?>" />
               <link itemprop="url" href="<?php echo htmlspecialchars($host . $itemData['url'])?>" />
-              <link itemprop="availability" href="http://schema.org/<?php echo $itemData['available'] ? 'InStock' : 'PreOrder'?>" />
+              <link
+                itemprop="availability"
+                href="http://schema.org/<?php echo $itemData['available'] ? 'InStock' : 'PreOrder'?>"
+              />
               <?php if ($itemData['price']) { ?>
                   <div class="catalog-article__price-container" data-price="<?php echo (float)$itemData['price']?>">
                     <?php if ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) { ?>
-                        <span class="catalog-article__price catalog-article__price_old" data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)" data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount))">
+                        <span
+                          data-v-if="vm.item.price_old && (vm.item.price_old > vm.item.price)"
+                          class="catalog-article__price catalog-article__price_old"
+                          data-v-html="vm.formatPrice(vm.item.price_old * Math.max(vm.item.min || 1, vm.amount))"
+                        >
                           <?php echo Text::formatPrice((float)$itemData['price_old'])?>
                         </span>
                     <?php } ?>
-                    <span class="catalog-article__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) ? ' catalog-article__price_new' : ''?>">
-                      <span data-role="price-container" itemprop="price" content="<?php echo (float)$itemData['price']?>" data-v-html="vm.formatPrice(vm.item.price * Math.max(vm.item.min || 1, vm.amount))">
+                    <span class="
+                      catalog-article__price
+                      <?php
+                      if ($itemData['price_old'] && ($itemData['price_old'] != $itemData['price'])) {
+                          echo 'catalog-article__price_new';
+                      }
+                      ?>
+                    ">
+                      <span
+                        data-role="price-container"
+                        itemprop="price"
+                        content="<?php echo (float)$itemData['price']?>"
+                        data-v-html="vm.formatPrice(vm.item.price * Math.max(vm.item.min || 1, vm.amount))"
+                      >
                         <?php echo Text::formatPrice((float)$itemData['price'])?>
                       </span>
                       <span itemprop="priceCurrency" content="RUB" class="catalog-article__currency">₽</span>
@@ -351,7 +466,10 @@ if ($Item) {
                     <?php } ?>
                   </div>
               <?php } ?>
-              <div class="catalog-article__available catalog-article__available_<?php echo $itemData['available'] ? '' : 'not-'?>available">
+              <div class="
+                catalog-article__available
+                catalog-article__available_<?php echo $itemData['available'] ? '' : 'not-'?>available"
+              >
                 <?php echo $itemData['available'] ? AVAILABLE : AVAILABLE_CUSTOM?>
               </div>
             </div>
@@ -359,20 +477,58 @@ if ($Item) {
             <?php if ($itemData['price'] && $itemData['available']) { ?>
                 <div class="catalog-article__add-to-cart-outer">
                   <div class="catalog-article__amount-block" title="<?php echo IN_CART?>" data-v-if="vm.inCart">
-                    <button type="button" class="catalog-article__decrement" data-v-bind_disabled="vm.amount <= 0" data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();">–</button>
-                    <input type="number" class="form-control catalog-article__amount" autocomplete="off" min="0" step="<?php echo (int)$itemData['step'] ?: 1?>"<?php echo $itemData['max'] ? (' max="' . (int)$itemData['max'] . '"') : ''?> data-v-bind_value="vm.amount" data-v-on_change="vm.setAmount($event.target.value); vm.setCart();" />
-                    <button type="button" class="catalog-article__increment" data-v-bind_disabled="vm.item.max && (vm.amount >= vm.item.max)" data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();">+</button>
+                    <button
+                      type="button"
+                      class="catalog-article__decrement"
+                      data-v-bind_disabled="vm.amount <= 0"
+                      data-v-on_click="vm.setAmount(parseInt(vm.amount) - parseInt(vm.item.step || 1)); vm.setCart();"
+                    >–</button>
+                    <input
+                      type="number"
+                      class="form-control catalog-article__amount"
+                      autocomplete="off"
+                      min="0"
+                      step="<?php echo (int)$itemData['step'] ?: 1?>"
+                      <?php echo $itemData['max'] ? ('max="' . (int)$itemData['max'] . '"') : ''?>
+                      data-v-bind_value="vm.amount"
+                      data-v-on_change="vm.setAmount($event.target.value); vm.setCart();"
+                    />
+                    <button
+                      type="button"
+                      class="catalog-article__increment"
+                      data-v-bind_disabled="vm.item.max && (vm.amount >= vm.item.max)"
+                      data-v-on_click="vm.setAmount(parseInt(vm.amount) + parseInt(vm.item.step || 1)); vm.setCart();"
+                    >+</button>
                   </div>
-                  <button type="button" data-v-else data-v-on_click="vm.setAmount(Math.max(vm.item.min, 1)); vm.setCart()" class="btn btn-primary catalog-article__add-to-cart">
+                  <button
+                    data-v-else
+                    type="button"
+                    data-v-on_click="vm.setAmount(Math.max(vm.item.min, 1)); vm.setCart()"
+                    class="btn btn-primary catalog-article__add-to-cart"
+                  >
                     <?php echo DO_BUY?>
                   </button>
                 </div>
             <?php } ?>
             <div class="catalog-article__controls">
-              <button type="button" data-v-on_click="vm.toggleFavorites()" class="catalog-article__add-to-favorites" data-v-bind_class="{ 'catalog-article__add-to-favorites_active': vm.inFavorites}" data-v-bind_title="vm.inFavorites ? '<?php echo IN_FAVORITES?>' : '<?php echo TO_FAVORITES?>'" data-v-html="vm.inFavorites ? '<?php echo IN_FAVORITES?>' : '<?php echo TO_FAVORITES?>'">
+              <button
+                type="button"
+                data-v-on_click="vm.toggleFavorites()"
+                class="catalog-article__add-to-favorites"
+                data-v-bind_class="{ 'catalog-article__add-to-favorites_active': vm.inFavorites}"
+                data-v-bind_title="vm.inFavorites ? '<?php echo IN_FAVORITES?>' : '<?php echo TO_FAVORITES?>'"
+                data-v-html="vm.inFavorites ? '<?php echo IN_FAVORITES?>' : '<?php echo TO_FAVORITES?>'"
+              >
                 <?php echo TO_FAVORITES?>
               </button>
-              <button type="button" data-v-on_click="vm.toggleCompare()" class="catalog-article__add-to-compare" data-v-bind_class="{ 'catalog-article__add-to-compare_active': vm.inCompare}" data-v-bind_title="vm.inCompare ? '<?php echo IN_COMPARISON?>' : '<?php echo TO_COMPARISON?>'" data-v-html="vm.inCompare ? '<?php echo IN_COMPARISON?>' : '<?php echo TO_COMPARISON?>'">
+              <button
+                type="button"
+                data-v-on_click="vm.toggleCompare()"
+                class="catalog-article__add-to-compare"
+                data-v-bind_class="{ 'catalog-article__add-to-compare_active': vm.inCompare}"
+                data-v-bind_title="vm.inCompare ? '<?php echo IN_COMPARISON?>' : '<?php echo TO_COMPARISON?>'"
+                data-v-html="vm.inCompare ? '<?php echo IN_COMPARISON?>' : '<?php echo TO_COMPARISON?>'"
+              >
                 <?php echo TO_COMPARISON?>
               </button>
             </div>
@@ -422,7 +578,15 @@ if ($Item) {
                     if ($files = $Item->files) { ?>
                         <div class="catalog-article-files-list">
                           <?php foreach ($files as $file) { ?>
-                              <a href="/<?php echo htmlspecialchars($file->fileURL)?>" class="catalog-article-files-list__item catalog-article-files-item catalog-article-files-item_<?php echo mb_strtolower(pathinfo($file->fileURL, PATHINFO_EXTENSION))?>" target="_blank">
+                              <a
+                                href="/<?php echo htmlspecialchars($file->fileURL)?>"
+                                class="
+                                  catalog-article-files-list__item
+                                  catalog-article-files-item
+                                  catalog-article-files-item_<?php echo mb_strtolower(pathinfo($file->fileURL, PATHINFO_EXTENSION))?>
+                                "
+                                target="_blank"
+                              >
                                 <?php echo htmlspecialchars($file->name ?: basename($file->fileURL))?>
                               </a>
                           <?php } ?>
@@ -468,7 +632,14 @@ if ($Item) {
               <ul class="nav nav-tabs catalog-article-tabs-nav-list" role="tablist">
                 <?php $i = 0; foreach ($tabs as $key => $row) { ?>
                     <li class="nav-item catalog-article-tabs-nav-list__item">
-                      <a class="catalog-article-tabs-nav-item nav-link<?php echo !$i ? ' active' : ''?>" href="#<?php echo $key?>" aria-controls="<?php echo $key?>" role="tab" data-bs-toggle="tab" data-bs-target="#<?php echo $key?>">
+                      <a
+                        class="catalog-article-tabs-nav-item nav-link<?php echo !$i ? ' active' : ''?>"
+                        href="#<?php echo $key?>"
+                        aria-controls="<?php echo $key?>"
+                        role="tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#<?php echo $key?>"
+                      >
                         <?php echo htmlspecialchars($row['name'])?>
                       </a>
                     </li>
@@ -478,7 +649,11 @@ if ($Item) {
             <div class="catalog-article__tabs-list">
               <div class="catalog-article-tabs-list tab-content">
                 <?php $i = 0; foreach ($tabs as $key => $row) { ?>
-                    <div class="tab-pane fade show catalog-article-tabs-list__item <?php echo !$i ? ' active' : ''?>" id="<?php echo $key?>" role="tabpanel">
+                    <div
+                      class="tab-pane fade show catalog-article-tabs-list__item <?php echo !$i ? ' active' : ''?>"
+                      id="<?php echo $key?>"
+                      role="tabpanel"
+                    >
                       <div class="catalog-article-tabs-item">
                         <?php echo $row['description']?>
                       </div>
@@ -494,12 +669,39 @@ if ($Item) {
                 <div class="catalog-article-related__title h2">
                   <?php echo htmlspecialchars($Item->fields['related']->name)?>
                 </div>
-                <div class="catalog-article-related__inner slider slider_horizontal" data-vue-role="raas-slider" data-vue-type="horizontal" data-v-bind_wrap="true" data-v-bind_autoscroll="true" data-v-slot="slider">
-                  <a data-v-on_click="slider.prev()" class="catalog-article-related__arrow catalog-article-related__arrow_prev slider__arrow slider__arrow_prev" data-v-bind_class="{ 'catalog-article-related__arrow_active': slider.prevAvailable, 'slider__arrow_active': slider.prevAvailable }"></a>
+                <div
+                  class="catalog-article-related__inner slider slider_horizontal"
+                  data-vue-role="raas-slider"
+                  data-vue-type="horizontal"
+                  data-v-bind_wrap="true"
+                  data-v-bind_autoscroll="true"
+                  data-v-slot="slider"
+                >
+                  <button
+                    type="button"
+                    data-v-on_click="slider.prev()"
+                    class="
+                      catalog-article-related__arrow
+                      catalog-article-related__arrow_prev
+                      slider__arrow
+                      slider__arrow_prev
+                    "
+                    data-v-bind_class="{
+                        'catalog-article-related__arrow_active': slider.prevAvailable,
+                        'slider__arrow_active': slider.prevAvailable
+                    }"
+                  ></button>
                   <div class="catalog-article-related__list slider__list" data-role="slider-list">
                     <div class="catalog-article-related-list slider-list slider-list_horizontal">
                       <?php foreach ((array)$related as $i => $item) { ?>
-                          <div class="catalog-article-related-list__item slider-list__item" data-role="slider-item" data-v-bind_class="{ 'catalog-article-related-list__item_active': (slider.activeFrame == <?php echo $i?>), 'slider-list__item_active': (slider.activeFrame == <?php echo $i?>) }">
+                          <div
+                            class="catalog-article-related-list__item slider-list__item"
+                            data-role="slider-item"
+                            data-v-bind_class="{
+                                'catalog-article-related-list__item_active': (slider.activeFrame == <?php echo $i?>),
+                                'slider-list__item_active': (slider.activeFrame == <?php echo $i?>)
+                            }"
+                          >
                             <?php Snippet::importByURN('catalog_item')->process([
                                 'item' => $item,
                                 'page' => $Page,
@@ -509,7 +711,20 @@ if ($Item) {
                       <?php } ?>
                     </div>
                   </div>
-                  <a data-v-on_click="slider.next()" class="catalog-article-related__arrow catalog-article-related__arrow_next slider__arrow slider__arrow_next" data-v-bind_class="{ 'catalog-article-related__arrow_active': slider.nextAvailable, 'slider__arrow_active': slider.nextAvailable }"></a>
+                  <button
+                    type="button"
+                    data-v-on_click="slider.next()"
+                    class="
+                      catalog-article-related__arrow
+                      catalog-article-related__arrow_next
+                      slider__arrow
+                      slider__arrow_next
+                    "
+                    data-v-bind_class="{
+                        'catalog-article-related__arrow_active': slider.nextAvailable,
+                        'slider__arrow_active': slider.nextAvailable
+                    }"
+                  ></button>
                 </div>
               </div>
             </div>

@@ -57,7 +57,12 @@ if ($Item) {
     <div class="brands">
       <div class="brands__article brands-article">
         <?php if ($Item->image->id) { ?>
-            <img class="brands-article__image" loading="lazy" src="/<?php echo htmlspecialchars($Item->image->fileURL)?>" alt="<?php echo htmlspecialchars($Item->image->name ?: $row->name)?>" />
+            <img
+              class="brands-article__image"
+              loading="lazy"
+              src="/<?php echo htmlspecialchars($Item->image->fileURL)?>"
+              alt="<?php echo htmlspecialchars($Item->image->name ?: $row->name)?>"
+            />
         <?php } ?>
         <div class="brands-article__description">
           <?php echo $Item->description; ?>
@@ -90,7 +95,12 @@ if ($Item) {
         <?php foreach ($Set as $item) { ?>
             <a class="brands-list__item brands-item" href="<?php echo htmlspecialchars($item->url)?>">
               <?php if ($item->image->id) { ?>
-                  <img loading="lazy" src="/<?php echo htmlspecialchars($item->image->fileURL)?>" alt="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" title="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>" />
+                  <img
+                    loading="lazy"
+                    src="/<?php echo htmlspecialchars($item->image->fileURL)?>"
+                    alt="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>"
+                    title="<?php echo htmlspecialchars($item->image->name ?: $item->name)?>"
+                  />
               <?php } else {
                   echo htmlspecialchars($item->name);
               } ?>

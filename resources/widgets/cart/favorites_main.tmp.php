@@ -8,5 +8,11 @@ namespace RAAS\CMS\Shop;
 
 ?>
 <!--noindex-->
-<div class="favorites-main" data-vue-role="favorites-main" data-v-bind_cart="favorites" data-v-bind_title="'<?php echo FAVORITES?>'" data-v-bind_href="'/favorites/'"></div>
+<div
+  class="favorites-main"
+  data-vue-role="favorites-main"
+  data-v-bind_cart="favorites"
+  data-v-bind_title="'<?php echo FAVORITES?>'"
+  data-v-bind_href="'/favorites/'"
+></div>
 <!--/noindex-->

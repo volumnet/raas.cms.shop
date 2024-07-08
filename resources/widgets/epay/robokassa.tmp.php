@@ -1,6 +1,7 @@
 <?php
 /**
  * Подтверждение оплаты платежной системы "Робокасса"
+ * @deprecated 2024-07-05
  * @param array<string[] ID# блока => bool> $success Успешное завершение
  * @param array<string[] URN поля => string Описание ошибки> $localError Ошибки
  * @param Block_Cart $Block Текущий блок
@@ -41,7 +42,12 @@ if ($Item->id) { ?>
     </h2>
     <?php Snippet::importByURN('order')->process(['order' => $Item]); ?>
     <?php if ($requestForPayment) { ?>
-        <form action="<?php echo htmlspecialchars($paymentURL)?>" method="post" enctype="multipart/form-data" class="cart">
+        <form
+          action="<?php echo htmlspecialchars($paymentURL)?>"
+          method="post"
+          enctype="multipart/form-data"
+          class="cart"
+        >
           <div class="form-horizontal">
             <div class="form-group">
               <?php if ($Block->epay_test) { ?>
@@ -50,10 +56,18 @@ if ($Item->id) { ?>
               <input type="hidden" name="MrchLogin" value="<?php echo htmlspecialchars($Block->epay_login)?>" />
               <input type="hidden" name="OutSum" value="<?php echo number_format((float)$Item->sum, 2, '.', '')?>" />
               <input type="hidden" name="InvId" value="<?php echo (int)$Item->id?>" />
-              <input type="hidden" name="Desc" value="<?php echo sprintf(ORDER_NUM, (int)$Item->id, $_SERVER['HTTP_HOST'])?>" />
+              <input
+                type="hidden"
+                name="Desc"
+                value="<?php echo sprintf(ORDER_NUM, (int)$Item->id, $_SERVER['HTTP_HOST'])?>"
+              />
               <input type="hidden" name="SignatureValue" value="<?php echo htmlspecialchars($crc)?>" />
               <?php if (!$Block->epay_test && $Block->epay_currency && ($Block->epay_currency != 'RUR')) { ?>
-                  <input type="hidden" name="OutSumCurrency" value="<?php echo htmlspecialchars($Block->epay_currency)?>" />
+                  <input
+                    type="hidden"
+                    name="OutSumCurrency"
+                    value="<?php echo htmlspecialchars($Block->epay_currency)?>"
+                  />
               <?php } ?>
               <input type="hidden" name="Culture" value="<?php echo htmlspecialchars($Page->lang)?>" />
               <input type="hidden" name="Encoding" value="UTF-8" />

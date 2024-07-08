@@ -25,8 +25,23 @@ if ($children) { ?>
       <div class="popular-cats__title h2">
         <?php echo htmlspecialchars($Block->name)?>
       </div>
-      <div class="popular-cats__inner slider slider_horizontal" data-vue-role="raas-slider" data-vue-type="horizontal" data-v-bind_wrap="true" data-v-bind_autoscroll="true" data-v-slot="vm">
-        <a data-v-on_click="vm.prev()" class="popular-cats__arrow popular-cats__arrow_prev slider__arrow slider__arrow_prev" data-v-bind_class="{ 'popular-cats__arrow_active': vm.prevAvailable, 'slider__arrow_active': vm.prevAvailable }"></a>
+      <div
+        class="popular-cats__inner slider slider_horizontal"
+        data-vue-role="raas-slider"
+        data-vue-type="horizontal"
+        data-v-bind_wrap="true"
+        data-v-bind_autoscroll="true"
+        data-v-slot="vm"
+      >
+        <button
+          type="button"
+          data-v-on_click="vm.prev()"
+          class="popular-cats__arrow popular-cats__arrow_prev slider__arrow slider__arrow_prev"
+          data-v-bind_class="{
+              'popular-cats__arrow_active': vm.prevAvailable,
+              'slider__arrow_active': vm.prevAvailable
+          }"
+        ></button>
         <div class="popular-cats__list slider__list" data-role="slider-list">
           <div class="popular-cats-list slider-list slider-list_horizontal">
             <?php
@@ -45,9 +60,16 @@ if ($children) { ?>
             <?php } ?>
           </div>
         </div>
-        <a data-v-on_click="vm.next()" class="popular-cats__arrow popular-cats__arrow_next slider__arrow slider__arrow_next" data-v-bind_class="{ 'popular-cats__arrow_active': vm.nextAvailable, 'slider__arrow_active': vm.nextAvailable }"></a>
+        <button
+          type="button"
+          data-v-on_click="vm.next()"
+          class="popular-cats__arrow popular-cats__arrow_next slider__arrow slider__arrow_next"
+          data-v-bind_class="{
+              'popular-cats__arrow_active': vm.nextAvailable,
+              'slider__arrow_active': vm.nextAvailable
+          }"
+        ></button>
       </div>
     </div>
     <?php
-    AssetManager::requestCSS('/css/popular-cats.css');
 }

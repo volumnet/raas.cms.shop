@@ -64,7 +64,14 @@ if ($item instanceof Material) {
     <div class="catalog-item__offer">
       <?php if ($itemData['price']) { ?>
           <div class="catalog-item__price-container">
-            <span class="catalog-item__price <?php echo ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) ? ' catalog-item__price_new' : ''?>">
+            <span class="
+              catalog-item__price
+              <?php
+              if ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) {
+                  echo 'catalog-item__price_new';
+              }
+              ?>
+            ">
               <?php echo Text::formatPrice((float)$itemData['price'])?> ₽
             </span>
             <?php if ($itemData['price_old'] && ($itemData['price_old'] > $itemData['price'])) { ?>
@@ -79,7 +86,10 @@ if ($item instanceof Material) {
             <?php } ?>
           </div>
       <?php } ?>
-      <div class="catalog-item__available catalog-item__available_<?php echo $itemData['available'] ? '' : 'not-'?>available">
+      <div class="
+        catalog-item__available
+        catalog-item__available_<?php echo $itemData['available'] ? '' : 'not-'?>available
+      ">
         <?php echo $itemData['available'] ? 'В наличии' : 'Под заказ'?>
       </div>
       <?php if ($itemData['price'] && $itemData['available']) { ?>

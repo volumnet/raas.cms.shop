@@ -93,10 +93,12 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax, $useAjax) {
             $aClasses[] = 'menu-left__link_has-children';
         }
         $text .= '<li class="' . implode(' ', $liClasses) . '">'
-              .  '  <a class="' . implode(' ', $aClasses) . '" ' . ($active ? '' : ' href="' . htmlspecialchars($url) . '"') . '>'
+              .  '  <' . ($active ? 'span ' : 'a href="' . htmlspecialchars($url) . '"') . '
+                      class="' . implode(' ', $aClasses) . '"
+                    >'
               .       htmlspecialchars($name)
               .       ($ch ? '<span class="menu-left__children-trigger"></span>' : '')
-              .  '  </a>'
+              .  '  </' . ($active ? 'span' : 'a') . '>'
               .     $ch
               .  '</li>';
     }
@@ -125,6 +127,3 @@ $current = $ajax ? new Page($_GET['id']) : $Page;
   </div>
   <?php echo $showMenu($menuArr ?: $Item, $current)?>
 </nav>
-<?php
-AssetManager::requestCSS('/css/menu-left.css');
-AssetManager::requestJS('/js/menu-left.js');

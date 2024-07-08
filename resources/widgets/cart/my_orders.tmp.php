@@ -25,7 +25,10 @@ use RAAS\CMS\Package;
       }
       ?>
       <div class="my-orders__article">
-        <my-orders-article :block-id="<?php echo (int)$Block->id?>" :item="<?php echo htmlspecialchars(json_encode($orderData))?>"></my-orders-article>
+        <my-orders-article
+          :block-id="<?php echo (int)$Block->id?>"
+          :item="<?php echo htmlspecialchars(json_encode($orderData))?>"
+        ></my-orders-article>
       </div>
       <?php
       AssetManager::requestCSS('/css/my-orders-article.css');
@@ -46,7 +49,11 @@ use RAAS\CMS\Package;
           exit;
       }
       ?>
-      <my-orders-list class="my-orders__list" :block-id="<?php echo (int)$Block->id?>" :initial-items="<?php echo htmlspecialchars(json_encode($ordersData))?>"></my-orders-list>
+      <my-orders-list
+        class="my-orders__list"
+        :block-id="<?php echo (int)$Block->id?>"
+        :initial-items="<?php echo htmlspecialchars(json_encode($ordersData))?>"
+      ></my-orders-list>
       <?php
       AssetManager::requestCSS('/css/my-orders-list.css');
       AssetManager::requestJS('/js/my-orders-list.js');

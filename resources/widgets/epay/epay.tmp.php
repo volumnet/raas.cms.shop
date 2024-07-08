@@ -15,7 +15,10 @@ if ($success[(int)$Block->id] || $localError) {
           $catalogMaterialType = Material_Type::importByURN('catalog');
           $eCommerceData = ['action' => 'purchase', 'orderId' => (int)$Item->id, 'products' => []];
           foreach ((array)$Item->items as $i => $item) {
-              if (in_array($item->pid, MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id))) { // Каталог продукции
+              if (in_array(
+                  $item->pid,
+                  MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id)
+              )) { // Каталог продукции
                   $eCommerceData['products'][] = ECommerce::getProduct($item, $i);
               }
           }
