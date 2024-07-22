@@ -54,6 +54,7 @@ use RAAS\CMS\PageRecursiveCache;
  *     'values' => array<
  *         int[] Индекс значения => string|<materialValue>|<attachmentValue> Значение
  *     >,
+ *     'unit' => string Единица измерения
  * ]);
  * </code></pre>
  */
@@ -414,6 +415,9 @@ class UpdatePropsCacheCommand extends Command
                     $resultFieldData = $fieldData;
                     unset($resultFieldData['field'], $resultFieldData['richNeeded']);
                     $resultFieldData['values'] = $values;
+                    if (in_array($fieldData['datatype'], ['text', 'number', 'range']) && isset($fieldData['source'])) {
+                        $resultFieldData['unit'] = $fieldData['source'];
+                    }
                     $result[$materialId][$fieldId] = $resultFieldData;
                 }
             }

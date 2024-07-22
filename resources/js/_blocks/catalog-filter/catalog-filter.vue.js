@@ -20,6 +20,14 @@ export default {
             required: true,
         },
         /**
+         * ID# блока фильтра
+         * @type {Number}
+         */
+        filterBlockId: {
+            type: Number,
+            default: null,
+        },
+        /**
          * Источник данных фильтра
          * @type {Object} <pre><code>{
          *     counter: Number Счетчик товаров,
@@ -286,7 +294,7 @@ export default {
          */
         async preview() {
             let url = this.getPreviewUrl();
-            const result = await this.$root.api(url);
+            const result = await this.$root.api(url, null, this.filterBlockId);
             this.update(result);
             if (this.previewTimeoutId) {
                 window.clearTimeout(this.previewTimeoutId);

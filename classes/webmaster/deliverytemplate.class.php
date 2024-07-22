@@ -77,6 +77,7 @@ class DeliveryTemplate extends MaterialTypeTemplate
         $citiesField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 1,
+            'multiple' => 1,
             'name' => View_Web::i()->_('CITIES'),
             'urn' => 'cities',
             'datatype' => 'text',

@@ -64,10 +64,21 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
         ]);
         $deliveryField->commit();
 
+        $canUseWithPostamatesField = new Material_Field([
+            'pid' => $this->materialType->id,
+            'vis' => 1,
+            'name' => View_Web::i()->_('CAN_USE_WITH_POSTAMATES'),
+            'urn' => 'can_use_with_postamates',
+            'datatype' => 'checkbox',
+            'defval' => 1,
+        ]);
+        $canUseWithPostamatesField->commit();
+
         return [
             $epayField->urn => $epayField,
             $commissionField->urn => $commissionField,
             $deliveryField->urn => $deliveryField,
+            $canUseWithPostamatesField->urn => $canUseWithPostamatesField,
         ];
     }
 
@@ -149,6 +160,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
             'sitemaps_priority' => 0.5,
         ]);
         $item->commit();
+        $item->fields['can_use_with_postamates']->addValue(1);
         $result[] = $item;
 
         $item = new Material([
@@ -159,6 +171,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
             'sitemaps_priority' => 0.5,
         ]);
         $item->commit();
+        $item->fields['can_use_with_postamates']->addValue(1);
         $result[] = $item;
 
         $item = new Material([
@@ -170,6 +183,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
         ]);
         $item->commit();
         $item->fields['epay']->addValue(1);
+        $item->fields['can_use_with_postamates']->addValue(1);
         $result[] = $item;
 
         return $result;

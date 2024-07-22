@@ -25,9 +25,9 @@ $viewVariants = [
     'list' => ['urn' => 'list', 'name' => VIEW_AS_LIST],
 ];
 $sortVariants = [
-    ['urn' => 'price:asc', 'name' => SORT_BY_PRICE_ASC],
-    ['urn' => 'price:desc', 'name' => SORT_BY_PRICE_DESC],
-    ['urn' => 'name', 'name' => SORT_BY_NAME],
+    ['urn' => 'price:asc', 'name' => SORT_BY_PRICE_ASC, 'shortName' => PRICE . ' ▲'],
+    ['urn' => 'price:desc', 'name' => SORT_BY_PRICE_DESC, 'shortName' => PRICE . ' ▼'],
+    ['urn' => 'name', 'name' => SORT_BY_NAME, 'shortName' => NAME],
 ];
 $defaultSort = $sort . (($sort != 'name') ? (':' . $order) : '');
 $matchingVariants = array_values(array_filter(
@@ -66,8 +66,11 @@ $defaultSortVariant = $matchingVariants ? $matchingVariants[0] : $sortVariants[0
           data-v-bind_value="vm.sort"
           data-v-on_input="vm.changeSort($event); vm.update();"
         >
-          <button type="button" class="catalog-controls-sort__title">
+          <button type="button" class="catalog-controls-sort__title_desktop">
             <?php echo htmlspecialchars($defaultSortVariant['name'])?>
+          </button>
+          <button type="button" class="btn btn-primary catalog-controls-sort__title catalog-controls-sort__title_mobile">
+            <?php echo htmlspecialchars($defaultSortVariant['shortName'])?>
           </button>
         </div>
       </div>

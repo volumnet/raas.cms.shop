@@ -17,7 +17,7 @@ class GoodsCommentsInterface extends MaterialInterface
     public function process(): array
     {
         $result = parent::process();
-        if ($this->get['AJAX'] == $this->block->id) {
+        if (($this->get['AJAX'] ?? null) == $this->block->id) {
             $result['votes'] = [];
             $localError = [];
             if ($this->post['id'] && $this->post['vote']) {
@@ -148,6 +148,14 @@ class GoodsCommentsInterface extends MaterialInterface
      */
     public function getVotes(array $set = [])
     {
+        $ip = '0.0.0.0';
+        if (isset($this->server['HTTP_X_FORWARDED_FOR']) && $this->server['HTTP_X_FORWARDED_FOR']) {
+            $forwardedFor = explode(',', (string)$this->server['HTTP_X_FORWARDED_FOR']);
+            $forwardedFor = array_map('trim', $forwardedFor);
+            $ip = $forwardedFor[0];
+        } elseif (isset($this->server['REMOTE_ADDR'])) {
+            $ip = $this->server['REMOTE_ADDR'];
+        }
         $ids = array_map(function ($x) {
             return (int)$x->id;
         }, $set);
@@ -172,6 +180,8 @@ class GoodsCommentsInterface extends MaterialInterface
         // echo $sqlQuery; var_dump($sqlBind); exit;
         $result = [];
         foreach ($sqlResult as $sqlRow) {
+            $sqlRow['pros'] = (int)$sqlRow['pros'];
+            $sqlRow['cons'] = (int)$sqlRow['cons'];
             $result[trim($sqlRow['id'])] = $sqlRow;
         }
         return $result;

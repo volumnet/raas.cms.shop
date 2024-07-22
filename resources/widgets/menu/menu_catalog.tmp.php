@@ -14,11 +14,12 @@ namespace RAAS\CMS\Shop;
 
 use SOME\HTTP;
 use RAAS\AssetManager;
+use RAAS\CMS\Field;
 use RAAS\CMS\Menu;
 use RAAS\CMS\Package;
 use RAAS\CMS\Page;
 
-$ajax = (bool)stristr($Page->url, '/ajax/');
+$ajax = (bool)stristr($Page->url, '/ajax/') || (($_GET['AJAX'] ?? null) == $Block->id);
 
 /**
  * Получает код списка меню
@@ -34,17 +35,36 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
     static $level = 0;
     if ($node instanceof Menu) {
         $children = $node->visSubMenu;
+        $rootName = $node->name;
+        $rootUrl = $node->url;
+        $rootId = $node->page_id;
     } else {
         $children = (isset($node['children']) && is_array($node['children'])) ? $node['children'] : [];
+        $rootName = $node['name'];
+        $rootUrl = $node['url'];
+        $rootId = $node['page_id'];
     }
+    $childrenText = '';
     for ($i = 0; $i < count($children); $i++) {
         $row = $children[$i];
         if ($node instanceof Menu) {
             $url = $row->url;
             $name = $row->name;
+            if (!$level) {
+                $page = $row->page;
+            }
+            // $itemId = (int)$page->id;
+            $itemId = (int)$row->page_id;
         } else {
             $url = $row['url'];
             $name = $row['name'];
+            if (!$level) {
+                $page = new Page($row['page_id']);
+            }
+            $itemId = (int)$row['page_id'];
+        }
+        if (!$level) {
+            $image = $page->icon->id ? $page->icon : ($page->image->id ? $page->image : null);
         }
         $active = $semiactive = false;
         // 2021-02-23, AVS: заменил HTTP::queryString('', true) на $current->url,
@@ -59,10 +79,13 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
             $semiactive = true;
         }
         $ch = '';
-        if (1 || $active || $semiactive || $ajax || !stristr($url, '/catalog/')) { // Для подгрузки AJAX'ом
+        if (/*$active || $semiactive ||*/ $ajax || !stristr($url, '/catalog/')) { // Для подгрузки AJAX'ом
             $level++;
             $ch = $showMenu($row, $current);
             $level--;
+        }
+        if (!$level) {
+            $childrenText .= $ch;
         }
         if (preg_match('/class="[\\w\\- ]*?active[\\w\\- ]*?"/umi', $ch)) {
             $semiactive = true;
@@ -77,41 +100,57 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
             'menu-catalog__link_' . (!$level ? 'main' : 'inner'),
             'menu-catalog__link_level_' . $level
         );
-        if ($active) {
-            $liClasses[] = 'menu-catalog__item_active';
-            $liClasses[] = 'menu-catalog__item_focused';
-            $aClasses[] = 'menu-catalog__link_active';
-        } elseif ($semiactive) {
-            $liClasses[] = 'menu-catalog__item_semiactive';
-            $liClasses[] = 'menu-catalog__item_focused';
-            $aClasses[] = 'menu-catalog__link_semiactive';
-        }
+        $innerClasses = [
+            'menu-catalog__inner',
+            'menu-catalog__inner_' . (!$level ? 'main' : 'inner'),
+            'menu-catalog__inner_level_' . $level
+        ];
+        // if ($active) {
+        //     $liClasses[] = 'menu-catalog__item_active';
+        //     $liClasses[] = 'menu-catalog__item_focused';
+        //     $aClasses[] = 'menu-catalog__link_active';
+        // } elseif ($semiactive) {
+        //     $liClasses[] = 'menu-catalog__item_semiactive';
+        //     $liClasses[] = 'menu-catalog__item_focused';
+        //     $aClasses[] = 'menu-catalog__link_semiactive';
+        // }
         if ($ch) {
             $liClasses[] = 'menu-catalog__item_has-children';
             $aClasses[] = 'menu-catalog__link_has-children';
         }
-        $text .= '<li class="' . implode(' ', $liClasses) . '">'
-              .  '  <' . ($active ? 'span' : 'a href="' . htmlspecialchars($url) . '"') . '
-                      class="' . implode(' ', $aClasses) . '"
-                    >'
+        $text .= '<div class="' . implode(' ', $liClasses) . '" data-id="' . $itemId . '">'
+              .  '  <a class="' . implode(' ', $aClasses) . '" ' . (0 && $active ? '' : ' href="' . htmlspecialchars($url) . '"') . ((!$level && $image) ? ' style="background-image: url(\'/' . addslashes($image->fileURL) . '\')"' : '') . '>'
               .       htmlspecialchars($name)
               .       ($ch ? '<span class="menu-catalog__children-trigger"></span>' : '')
-              .  '  </' . ($active ? 'span' : 'a') . '>'
-              .     $ch
-              .  '</li>';
+              .  '  </a>'
+              .     ($level ? $ch : '')
+              .  '</div>';
     }
     $ulClasses = array(
         'menu-catalog__list',
         'menu-catalog__list_' . (!$level ? 'main' : 'inner'),
         'menu-catalog__list_level_' . $level
     );
-    return $text ? '<ul class="' . implode(' ', $ulClasses) . '">' . $text . '</ul>' : $text;
+    if ($text) {
+        if (!$level) {
+            $text = '<div class="' . implode(' ', $ulClasses) . '">' . $text . '</div>' . $childrenText;
+        } else {
+            $text = '<div data-id="' . $rootId . '" class="' . implode(' ', $ulClasses) . '">' . $text . '</div>';
+        }
+    }
+    return $text;
 };
+
+$usePage = $ajax ? new Page($_GET['id'] ?: 1) : $Page;
+$menuText = $showMenu($menuArr ?: $Item, $usePage);
 ?>
 
-<nav class="menu-catalog" data-vue-role="menu-catalog" data-v-slot="vm">
-  <a href="/catalog/" class="menu-catalog__trigger" data-v-on_click.prevent.stop="vm.toggle()">
+<nav class="menu-catalog" data-vue-role="menu-catalog" data-v-bind_page-id="<?php echo (int)$usePage->id?>" data-v-bind_block-id="<?php echo (int)$Block->id?>" data-v-slot="vm">
+  <a href="/catalog/" class="menu-catalog__trigger" data-v-on_click.prevent.stop="vm.toggle($event)">
     <?php echo htmlspecialchars($Block->name)?>
   </a>
-  <?php echo $showMenu($menuArr ?: $Item, $Page)?>
+  <div class="menu-catalog__outer">
+    <?php echo $menuText?>
+  </div>
 </nav>
+<?php AssetManager::requestJS('/js/menu-catalog.js');

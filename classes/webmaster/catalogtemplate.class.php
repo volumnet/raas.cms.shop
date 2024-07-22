@@ -203,40 +203,44 @@ class CatalogTemplate extends MaterialTypeTemplate
         $lengthField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 1,
-            'name' => View_Web::i()->_('LENGTH_CM'),
+            'name' => View_Web::i()->_('LENGTH'),
             'multiple' => 0,
             'urn' => 'length',
             'datatype' => 'number',
+            'source' => View_Web::i()->_('CM'),
         ]);
         $lengthField->commit();
 
         $widthField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 0,
-            'name' => View_Web::i()->_('WIDTH_CM'),
+            'name' => View_Web::i()->_('WIDTH'),
             'multiple' => 0,
             'urn' => 'width',
             'datatype' => 'number',
+            'source' => View_Web::i()->_('CM'),
         ]);
         $widthField->commit();
 
         $heightField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 0,
-            'name' => View_Web::i()->_('HEIGHT_CM'),
+            'name' => View_Web::i()->_('HEIGHT'),
             'multiple' => 0,
             'urn' => 'height',
             'datatype' => 'number',
+            'source' => View_Web::i()->_('CM'),
         ]);
         $heightField->commit();
 
         $weightField = new Material_Field([
             'pid' => $this->materialType->id,
             'vis' => 1,
-            'name' => View_Web::i()->_('WEIGHT_G'),
+            'name' => View_Web::i()->_('WEIGHT'),
             'multiple' => 0,
             'urn' => 'weight',
             'datatype' => 'number',
+            'source' => View_Web::i()->_('GR'),
         ]);
         $weightField->commit();
 
@@ -590,7 +594,7 @@ class CatalogTemplate extends MaterialTypeTemplate
                 'https://www.youtube.com/watch?v=YVgc2PQd_bo'
             );
             $item->fields['spec']->addValue(1);
-            $item->fields['available']->addValue((int)(bool)($i % 4));
+            $item->fields['available']->addValue((int)rand(0, 10));
             $item->fields['min']->addValue($i % 4 ? 1 : 2);
             $item->fields['step']->addValue($i % 4 ? 1 : 2);
             foreach (['test.doc', 'test.pdf'] as $val) {

@@ -98,7 +98,7 @@ class CartInterface extends FormInterface
                     $items = [];
                     if (is_array($this->get['id'])) {
                         foreach ($this->get['id'] as $idMeta => $amount) {
-                            list($id, $meta) = explode('_', $idMeta);
+                            list($id, $meta) = explode('_', (string)$idMeta);
                             $id = (int)$id;
                             $material = new Material((int)$id);
                             $amount = (int)$amount;
@@ -576,7 +576,7 @@ class CartInterface extends FormInterface
         foreach ($cart->items as $cartItem) {
             if ($cartItem->amount) {
                 $material = new Material($cartItem->id);
-                $price = $cart->getPrice($material, (float)$cartItem->amount);
+                $price = $cart->getPrice($material, (float)$cartItem->amount, $cartItem->metaJSON);
                 $orderItems[] = [
                     'material_id' => $cartItem->id,
                     'name' => $cartItem->name,

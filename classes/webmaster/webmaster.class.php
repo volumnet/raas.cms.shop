@@ -436,40 +436,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
      */
     public function createCart(Cart_Type $cartType, Page $ajax, Form $form)
     {
-        // @deprecated 2023-03-05, AVS: создание AJAX-страниц для корзин устарело, используется X-RAAS-Block-Id
-        // $temp = Page::getSet([
-        //     'where' => ["pid = " . (int)$ajax->id, "urn = 'cart'"]
-        // ]);
-        // if ($temp) {
-        //     $ajaxCart = $temp[0];
-        //     $ajaxCart->trust();
-        // } else {
-        //     $ajaxCart = $this->createPage(
-        //         [
-        //             'name' => View_Web::i()->_('CART'),
-        //             'urn' => 'cart',
-        //             'template' => 0,
-        //             'cache' => 0,
-        //             'response_code' => 200,
-        //             'mime' => 'application/json',
-        //         ],
-        //         $ajax
-        //     );
-        //     $ajaxBlock = $this->createBlock(new Block_Cart([
-        //         'cart_type' => (int)$cartType->id,
-        //         'params' => 'cdek[authLogin]='
-        //             . '&cdek[secure]='
-        //             . '&cdek[senderCityId]=250'
-        //             . '&cdek[pickupTariff]=136'
-        //             . '&cdek[deliveryTariff]=137'
-        //             . '&russianpost[login]='
-        //             . '&russianpost[password]='
-        //             . '&russianpost[token]='
-        //             . '&minOrderSum=0',
-        //     ]), '', 'cart_interface', 'cart', $ajaxCart);
-        // }
-
-
         $temp = Page::getSet([
             'where' => ["pid = " . (int)$this->Site->id, "urn = 'cart'"]
         ]);
@@ -496,7 +462,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                     . '&russianpost[services][]=41'
                     . '&russianpost[services][]=42'
                     . '&minOrderSum=0',
-            ]), 'content', CartInterface::class, 'cart', $cart);
+            ]), 'content', CartInterfaceExtended::class, 'cart', $cart);
 
             $this->createBlock(
                 new Block_PHP(),
@@ -583,36 +549,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             );
         }
 
-        $temp = Page::getSet([
-            'where' => ["pid = " . (int)$ajax->id, "urn = 'favorites'"]
-        ]);
-        if ($temp) {
-            $ajaxFavorites = $temp[0];
-            $ajaxFavorites->trust();
-        } else {
-            $ajaxFavorites = $this->createPage(
-                [
-                    'name' => View_Web::i()->_('FAVORITES'),
-                    'urn' => 'favorites',
-                    'template' => 0,
-                    'cache' => 0,
-                    'response_code' => 200,
-                    'mime' => 'application/json',
-                ],
-                $ajax
-            );
-            $B = new Block_Cart([
-                'name' => View_Web::i()->_('FAVORITES'),
-                'cart_type' => (int)$cartType->id,
-            ]);
-            $this->createBlock(
-                $B,
-                '',
-                CompareInterface::class,
-                'favorites',
-                $ajaxFavorites
-            );
-        }
         return $favorites;
     }
 
@@ -664,36 +600,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
             );
         }
 
-        $temp = Page::getSet([
-            'where' => ["pid = " . (int)$ajax->id, "urn = 'compare'"]
-        ]);
-        if ($temp) {
-            $ajaxCompare = $temp[0];
-            $ajaxCompare->trust();
-        } else {
-            $ajaxCompare = $this->createPage(
-                [
-                    'name' => View_Web::i()->_('COMPARISON'),
-                    'urn' => 'compare',
-                    'template' => 0,
-                    'cache' => 0,
-                    'response_code' => 200,
-                    'mime' => 'application/json',
-                ],
-                $ajax
-            );
-            $B = new Block_Cart([
-                'name' => View_Web::i()->_('COMPARISON'),
-                'cart_type' => (int)$cartType->id,
-            ]);
-            $this->createBlock(
-                $B,
-                '',
-                CompareInterface::class,
-                'compare',
-                $ajaxCompare
-            );
-        }
         return $compare;
     }
 
@@ -730,37 +636,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
      */
     public function createFilter(Block_Material $catalogBlock)
     {
-        $pagesSet = Page::getSet([
-            'where' => ["pid = " . (int)$this->Site->id, "urn = 'ajax'"]
-        ]);
-        $ajax = array_shift($pagesSet);
-        $catalogFilterPages = Page::getSet([
-            'where' => ["pid = " . (int)$ajax->id, "urn = 'catalog_filter'"]
-        ]);
-        if ($catalogFilterPages) {
-            $catalogFilterPage = $catalogFilterPages[0];
-            $catalogFilterPage->trust();
-        } else {
-            $catalogFilterPage = $this->createPage(
-                [
-                    'name' => View_Web::i()->_('CATALOG_FILTER'),
-                    'urn' => 'catalog_filter',
-                    'template' => 0,
-                    'cache' => 1,
-                    'mime' => 'application/json',
-                    'response_code' => 200
-                ],
-                $ajax
-            );
-            $this->createBlock(
-                new Block_PHP(),
-                '',
-                null,
-                'catalog_filter',
-                $catalogFilterPage
-            );
-        }
-
         $catalogPages = Page::getSet([
             'where' => ["pid = " . (int)$this->Site->id, "urn = 'catalog'"]
         ]);
@@ -900,7 +775,6 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                             'name' => View_Web::i()->_('ESTIMATED_WEIGHT'),
                             'urn' => 'weight',
                             'vis' => false,
-                            'required' => true,
                             'datatype' => 'number',
                         ],
                         [
@@ -1017,6 +891,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                             'urn' => 'agree',
                             'required' => true,
                             'datatype' => 'checkbox',
+                            'defval' => 1,
                         ],
                     ]
                 ]
@@ -1069,6 +944,7 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'fullMenu' => true,
                 'blockPage' => $catalog,
                 'inheritBlock' => true,
+                'blockVisMaterial' => Block::BYMATERIAL_WITHOUT,
             ],
             [
                 'pageId' => (int)$catalog->id,

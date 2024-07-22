@@ -110,7 +110,6 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax, $useAjax) {
     return $text ? '<ul class="' . implode(' ', $ulClasses) . '">' . $text . '</ul>' : $text;
 };
 
-$current = $ajax ? new Page($_GET['id']) : $Page;
 ?>
 <nav
   class="menu-left"
@@ -125,5 +124,9 @@ $current = $ajax ? new Page($_GET['id']) : $Page;
       <?php echo htmlspecialchars($Block->name)?>
     </a>
   </div>
-  <?php echo $showMenu($menuArr ?: $Item, $current)?>
+  <?php echo $showMenu($menuArr ?: $Item, $Page)?>
 </nav>
+
+<?php
+AssetManager::requestCSS('/css/menu-left.css');
+AssetManager::requestJS('/js/menu-left.js');

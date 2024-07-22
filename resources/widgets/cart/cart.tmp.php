@@ -101,8 +101,8 @@ if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
     header('Content-Type: application/json');
     echo json_encode($result);
     exit;
-} elseif ($epayWidget && ($epayWidget instanceof Snippet) {
-    eval('?' . '>' . $epayWidget->description);
+} elseif ($epayWidget && ($epayWidget instanceof Snippet)) {
+    $epayWidget->process($IN);
 } elseif ($success[(int)$Block->id]) { ?>
     <div class="notifications">
       <div class="alert alert-success"><?php echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id)?></div>

@@ -24,16 +24,16 @@ if (!$DATA['sort']) {
 
 $pageMime = $Page->mime;
 
-if ($pageMime == 'application/json') {
-    $catalog = new Page($DATA['id']);
-    $catalogBlock = Block::spawn((int)$DATA['block_id']);
-    unset($DATA['block_id'], $DATA['id']);
-} else {
+// if ($pageMime == 'application/json') {
+//     $catalog = new Page($DATA['id']);
+//     $catalogBlock = Block::spawn((int)$DATA['block_id']);
+//     unset($DATA['block_id'], $DATA['id']);
+// } else {
     $catalogBlock = Block::spawn((int)$Block->additionalParams['catalogBlockId']);
     $catalog = $Page;
-}
+// }
 if (!($catalogBlock instanceof Block_Material)) { // Для защиты от прямого доступа
-    if ($pageMime == 'application/json') {
+    if (($pageMime == 'application/json') || (($_GET['AJAX'] ?? null) == $Block->id)) {
         echo '{}';
         exit;
     } else {
@@ -119,6 +119,7 @@ foreach ($availableProperties as $propId => $availableProperty) {
                 // по умолчанию AJAX-ом не подгружается, оставляя только
                 // выбранное значение
                 // if (($pageMime == 'application/json') || // Чтобы не перегружать код всеми значениями
+                //     (($_GET['AJAX'] ?? null) == $Block->id)
                 //     ($valueData['checked']) ||
                 //     ($prop->datatype == 'number')
                 // ) {
@@ -168,7 +169,7 @@ if (!$filterProps) {
 }
 $result['properties'] = $properties;
 
-if ($pageMime == 'application/json') {
+if (($pageMime == 'application/json') || (($_GET['AJAX'] ?? null) == $Block->id)) {
     echo json_encode($result);
     exit;
 } elseif (!$catalog->catalogFilter->getIds()) {
@@ -187,7 +188,9 @@ $static = (bool)(int)$Block->additionalParams['static'];
     data-vue-role="catalog-filter"
     data-v-bind_catalog-id="<?php echo (int)$catalog->id?>"
     data-v-bind_block-id="<?php echo (int)$catalogBlock->id?>"
+    data-v-bind_filter-block-id="<?php echo (int)$Block->id?>"
     data-v-bind_source="<?php echo htmlspecialchars(json_encode($result))?>"
+    data-vue-ajax-preview-url="<?php echo htmlspecialchars($Page->url)?>"
     data-v-slot="vm"
   >
     <div class="catalog-filter__header">

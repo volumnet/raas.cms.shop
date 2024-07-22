@@ -71,68 +71,77 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
               </ul>
             </div>
           </div>
-          <?php
-          $formRenderer = new FormRenderer(
-              $Form,
-              $Block,
-              $DATA,
-              $localError
-          );
-          echo $formRenderer->renderSignatureField();
-          echo $formRenderer->renderHiddenAntispamField();
-          foreach ($Form->visFields as $fieldURN => $field) {
-              $fieldRenderer = FormFieldRenderer::spawn(
-                  $field,
-                  $Block,
-                  $DATA[$fieldURN],
-                  $localError
-              );
-              $renderData = [
-                  'data-v-bind_class' => "{ 'is-invalid': !!vm.errors." . $fieldURN . " }",
-                  'data-v-bind_title' => "vm.errors." . $fieldURN . " || ''"
-              ];
-              if ($fieldURN == 'rating') {
-                  $renderData['data-vue-role'] = 'raas-field';
-                  $renderData['type'] = 'rating';
-                  $renderData['class'] = ['form-control' => false];
-                  $renderData['data-raas-field'] = null;
-              }
-              $fieldHTML = $fieldRenderer->render($renderData);
-              $fieldCaption = htmlspecialchars($field->name);
-              if ($fieldURN == 'agree') {
-                  $fieldCaption = '<a href="/privacy/" target="_blank">' .
-                                     $fieldCaption .
-                                  '</a>';
-              }
-              if ($field->required) {
-                  $fieldCaption .= '<span class="feedback__asterisk">*</span>';
-              }
-              ?>
-              <div
-                class="form-group"
-                data-v-bind_class="{ 'text-danger': !!vm.errors.<?php echo htmlspecialchars($fieldURN)?> }"
-              >
-                <?php
-                if (($field->datatype == 'checkbox') &&
-                    !$field->multiple
-                ) { ?>
-                    <div class="feedback__control-label"></div>
-                    <label class="feedback__input-container">
-                      <?php echo $fieldHTML . ' ' . $fieldCaption; ?>
-                    </label>
-                <?php } else { ?>
-                    <label
-                      class="feedback__control-label"
-                      <?php echo !$field->multiple ? 'for="' . htmlspecialchars($field->getHTMLId($Block)) . '"' : ''?>
-                    >
-                      <?php echo $fieldCaption; ?>:
-                    </label>
-                    <div class="feedback__input-container">
-                      <?php echo $fieldHTML; ?>
-                    </div>
-                <?php } ?>
-              </div>
-          <?php } ?>
+          <fieldset class="feedback__fieldset">
+            <?php
+            $formRenderer = new FormRenderer(
+                $Form,
+                $Block,
+                $DATA,
+                $localError
+            );
+            echo $formRenderer->renderSignatureField();
+            echo $formRenderer->renderHiddenAntispamField();
+            foreach ($Form->visFields as $fieldURN => $field) {
+                if ($field->urn == 'agree') {
+                    continue;
+                }
+                $fieldRenderer = FormFieldRenderer::spawn(
+                    $field,
+                    $Block,
+                    $DATA[$fieldURN],
+                    $localError[$fieldURN] ?? ''
+                );
+                $renderData = [
+                    'data-v-bind_class' => "{ 'is-invalid': !!vm.errors." . $fieldURN . " }",
+                    'data-v-bind_title' => "vm.errors." . $fieldURN . " || ''"
+                ];
+                if ($fieldURN == 'rating') {
+                    $renderData['data-vue-role'] = 'raas-field';
+                    $renderData['type'] = 'rating';
+                    $renderData['class'] = ['form-control' => false];
+                    $renderData['data-raas-field'] = null;
+                }
+                $fieldHTML = $fieldRenderer->render($renderData);
+                $fieldCaption = htmlspecialchars($field->name);
+                if ($fieldURN == 'agree') {
+                    $fieldCaption = '<a href="/privacy/" target="_blank">' .
+                                       $fieldCaption .
+                                    '</a>';
+                }
+                if ($field->required) {
+                    $fieldCaption .= '<span class="feedback__asterisk">*</span>';
+                }
+                ?>
+                <div
+                  class="form-group"
+                  data-v-bind_class="{ 'text-danger': !!vm.errors.<?php echo htmlspecialchars($fieldURN)?> }"
+                >
+                  <?php
+                  if (($field->datatype == 'checkbox') &&
+                      !$field->multiple
+                  ) { ?>
+                      <div class="feedback__control-label"></div>
+                      <label class="feedback__input-container">
+                        <?php echo $fieldHTML . ' ' . $fieldCaption; ?>
+                      </label>
+                  <?php } else { ?>
+                      <label
+                        class="feedback__control-label"
+                        <?php echo !$field->multiple ? 'for="' . htmlspecialchars($field->getHTMLId($Block)) . '"' : ''?>
+                      >
+                        <?php echo $fieldCaption; ?>:
+                      </label>
+                      <div class="feedback__input-container">
+                        <?php echo $fieldHTML; ?>
+                      </div>
+                  <?php } ?>
+                </div>
+            <?php } ?>
+          </fieldset>
+          <input type="hidden" name="agree" value="1">
+          <div class="feedback-modal__agree feedback__agree" v-html="">
+            <?php echo AGREE_BY_CLICKING_SEND?>
+          </div>
           <div class="feedback__controls">
             <button
               type="submit"

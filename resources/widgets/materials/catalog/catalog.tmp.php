@@ -23,7 +23,8 @@ if ($Item) {
     $photoVideo = (array)$itemData['visImages'];
     foreach ($itemData['videos'] as $video) {
         $ytid = $ytname = '';
-        if (preg_match('/^(.*?)((http(s?):\\/\\/.*?(((\\?|&)v=)|(embed\\/)|(youtu\\.be\\/)))([\\w\\-\\_]+).*?)$/', $video, $regs)) {
+        $youtubeRx = '/^(.*?)((http(s?):\\/\\/.*?(((\\?|&)v=)|(embed\\/)|(youtu\\.be\\/)))([\\w\\-\\_]+).*?)$/umis';
+        if (preg_match($youtubeRx, (string)$video['url'], $regs)) {
             $ytname = trim($regs[1]);
             $ytid = trim($regs[10]);
         }
@@ -139,7 +140,7 @@ if ($Item) {
                       >
                         <img
                           loading="lazy"
-                          src="/<?php echo Package::i()->tn(ltrim($row['fileURL'], '/'), 461, null, 'inline')?>"
+                          src="/<?php echo Package::i()->tn(ltrim($row['fileURL'], '/'), 600, null, 'inline')?>"
                           alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>"
                         />
                       </a>
@@ -295,6 +296,10 @@ if ($Item) {
 
             $propsArr = [];
             foreach ($props as $fieldURN => $field) {
+                $unit = '';
+                if (in_array($field->datatype, ['text', 'number', 'range']) && $field->source) {
+                    $unit = $field->source;
+                }
                 $fieldName = $field->name;
                 $fieldValues = $field->getValues(true);
                 $fieldValues = array_values(array_filter($fieldValues));
@@ -325,9 +330,19 @@ if ($Item) {
                                 $schemaOrgURN = $fieldURN;
                             }
                             if ($fieldURN == 'weight') {
-                                $unitCode = 'KGM';
+                                if (preg_match('/кг|kg/umis', $unit)) {
+                                    $unitCode = 'KGM';
+                                } else {
+                                    $unitCode = 'GRM';
+                                }
                             } else {
-                                $unitCode = 'CMT';
+                                if (preg_match('/см|cm/umis', $unit)) {
+                                    $unitCode = 'CMT';
+                                } elseif (preg_match('/мм|mm/umis', $unit)) {
+                                    $unitCode = 'MMT';
+                                } else {
+                                    $unitCode = 'MTR';
+                                }
                             }
                             $jsonLd[$schemaOrgURN] = [
                                 '@type' => 'QuantitativeValue',
@@ -348,7 +363,9 @@ if ($Item) {
                                 <span itemprop="value">
                                   <?php echo htmlspecialchars($textValue)?>
                                 </span>
-                                <meta itemprop="unitCode" content="<?php echo $unitCode?>">
+                                <span itemprop="unitCode" content="<?php echo $unitCode?>">
+                                  <?php echo htmlspecialchars($unit)?>
+                                </span>
                               </span>
                             </div>
                             <?php
@@ -394,7 +411,7 @@ if ($Item) {
                             $jsonLd['additionalProperty'][] = [
                                 '@type' => 'PropertyValue',
                                 'name' => $fieldName,
-                                'value' => $textValue
+                                'value' => $textValue . ($unit ? (' ' . $unit) : ''),
                             ];
                             ?>
                             <div
@@ -407,7 +424,9 @@ if ($Item) {
                                 <?php echo htmlspecialchars($fieldName)?>:
                               </span>
                               <span class="catalog-article-props-item__value" itemprop="value">
-                                <?php echo htmlspecialchars($textValue)?>
+                                <?php
+                                echo htmlspecialchars($textValue . ($unit ? (' ' . $unit) : ''));
+                                ?>
                               </span>
                             </div>
                             <?php
@@ -533,17 +552,6 @@ if ($Item) {
               </button>
             </div>
             <!--/noindex-->
-
-            <!--noindex-->
-            <div class="catalog-article__share">
-              <div class="catalog-article__share-title">
-                <?php echo SHARE?>:
-              </div>
-              <div class="catalog-article__share-inner">
-                <?php Snippet::importByURN('share')->process()?>
-              </div>
-            </div>
-            <!--/noindex-->
           </div>
         </div>
         <?php
@@ -629,11 +637,11 @@ if ($Item) {
         }
         if ($tabs) { ?>
             <div class="catalog-article__tabs-nav-list">
-              <ul class="nav nav-tabs catalog-article-tabs-nav-list" role="tablist">
+              <ul class="catalog-article-tabs-nav-list" role="tablist">
                 <?php $i = 0; foreach ($tabs as $key => $row) { ?>
-                    <li class="nav-item catalog-article-tabs-nav-list__item">
+                    <li class="catalog-article-tabs-nav-list__item">
                       <a
-                        class="catalog-article-tabs-nav-item nav-link<?php echo !$i ? ' active' : ''?>"
+                        class="catalog-article-tabs-nav-item<?php echo !$i ? ' active' : ''?>"
                         href="#<?php echo $key?>"
                         aria-controls="<?php echo $key?>"
                         role="tab"
@@ -647,10 +655,10 @@ if ($Item) {
               </ul>
             </div>
             <div class="catalog-article__tabs-list">
-              <div class="catalog-article-tabs-list tab-content">
+              <div class="catalog-article-tabs-list">
                 <?php $i = 0; foreach ($tabs as $key => $row) { ?>
                     <div
-                      class="tab-pane fade show catalog-article-tabs-list__item <?php echo !$i ? ' active' : ''?>"
+                      class="catalog-article-tabs-list__item <?php echo !$i ? ' active' : ''?>"
                       id="<?php echo $key?>"
                       role="tabpanel"
                     >

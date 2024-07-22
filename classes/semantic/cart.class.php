@@ -395,9 +395,10 @@ class Cart
      * Получает стоимость товара
      * @param Material $material Материал товара
      * @param float $amount Количество товара
+     * @param array $metaJSON Дополнительные данные
      * @return float
      */
-    public function getPrice(Material $material, $amount = 1)
+    public function getPrice(Material $material, $amount = 1, array $metaJSON = [])
     {
         $materialType = $this->getCartMaterialType($material->material_type);
         $priceURN = $this->getPriceURN($materialType);

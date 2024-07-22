@@ -54,7 +54,12 @@ if ($item instanceof Material) {
                     <?php echo htmlspecialchars($propRow['name'])?>:
                   </span>
                   <span class="catalog-item-props-item__value">
-                    <?php echo htmlspecialchars($propRow['value'])?>
+                    <?php
+                    echo htmlspecialchars($propRow['value']);
+                    if ($propRow['unit'] ?? null) {
+                        echo ' ' . htmlspecialchars($propRow['unit']);
+                    }
+                    ?>
                   </span>
                 </div>
             <?php } ?>
