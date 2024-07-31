@@ -48,14 +48,15 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax, $useAjax) {
             $url = $row['url'];
             $name = $row['name'];
         }
+        if ($url == '#') {
+            $url = '';
+        }
         $active = $semiactive = false;
         // 2021-06-16, AVS: Заменил ($url == $current->url) на (!$ajax && ($url == $_SERVER['REQUEST_URI'])),
         // чтобы при активном материале ссылка не была активной
         if (!$ajax && ($url == $_SERVER['REQUEST_URI'])) {
             $active = true;
-        } elseif (preg_match('/^' . preg_quote($url, '/') . '/umi', $current->url) &&
-            ($url != '/')
-        ) {
+        } elseif (preg_match('/^' . preg_quote($url, '/') . '/umi', $current->url) && $url && ($url != '/')) {
             $semiactive = true;
         }
         // 2021-02-23, AVS: заменил HTTP::queryString('', true) на $current->url,

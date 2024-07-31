@@ -81,6 +81,9 @@
     <testsuite name="Sync1CInterface">
       <file>src/interfaces/Sync1CInterfaceTest.php</file>
     </testsuite>
+    <testsuite name="TochkaInterface">
+      <file>src/interfaces/TochkaInterfaceTest.php</file>
+    </testsuite>
     <testsuite name="UBRRInterface">
       <file>src/interfaces/UBRRInterfaceTest.php</file>
     </testsuite>

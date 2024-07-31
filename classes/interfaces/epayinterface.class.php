@@ -153,7 +153,7 @@ abstract class EPayInterface extends AbstractInterface
             $orderId = $webhookData['orderId'] ?? null;
             if ($paymentId) {
                 $order = Order::importByPayment($paymentId, $epayInterface);
-                if ($orderId && $order && ($order->id == $orderId)) {
+                if ($order && $order->id && (!$orderId || ($order->id == $orderId))) {
                     return $order;
                 }
             } elseif ($orderId) {

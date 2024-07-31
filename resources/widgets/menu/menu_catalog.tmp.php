@@ -63,6 +63,9 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
             }
             $itemId = (int)$row['page_id'];
         }
+        if ($url == '#') {
+            $url = '';
+        }
         if (!$level) {
             $image = $page->icon->id ? $page->icon : ($page->image->id ? $page->image : null);
         }
@@ -73,9 +76,7 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
         // чтобы при активном материале ссылка не была активной
         if (!$ajax && ($url == $_SERVER['REQUEST_URI'])) {
             $active = true;
-        } elseif (preg_match('/^' . preg_quote($url, '/') . '/umi', $current->url) &&
-            ($url != '/')
-        ) {
+        } elseif (preg_match('/^' . preg_quote($url, '/') . '/umi', $current->url) && $url && ($url != '/')) {
             $semiactive = true;
         }
         $ch = '';
