@@ -64,6 +64,9 @@ class Updater extends \RAAS\Updater
         if (version_compare($v, '4.3.71') < 0) {
             $this->update20240611();
         }
+        if (version_compare($v, '4.3.97') < 0) {
+            $this->update20240731();
+        }
     }
 
 
@@ -553,6 +556,24 @@ class Updater extends \RAAS\Updater
                     $this->SQL->query([$sqlQuery, [$snippetURN]]);
                 }
             }
+        }
+    }
+
+
+    /**
+     * Обновление по версии 4.3.97 - увеличение размера пароля платежной системы
+     */
+    public function update20240731()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_blocks_cart", $this->tables) &&
+            in_array('epay_pass1', $this->columns(SOME::_dbprefix() . "cms_shop_blocks_cart"))
+        ) {
+            $sqlQuery = "ALTER TABLE `cms_shop_blocks_cart`
+                              CHANGE `epay_pass1` `epay_pass1` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'E-pay pass1'";
+            $this->SQL->query($sqlQuery);
+            $sqlQuery = "ALTER TABLE `cms_shop_blocks_cart`
+                              CHANGE `epay_pass2` `epay_pass2` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'E-pay pass2'";
+            $this->SQL->query($sqlQuery);
         }
     }
 }

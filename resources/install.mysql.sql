@@ -171,8 +171,8 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_car
   epay_interface_classname VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay interface classname',
   epay_interface_id INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'E-pay interface ID#',
   epay_login VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay login',
-  epay_pass1 VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay pass1',
-  epay_pass2 VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'E-pay pass2',
+  epay_pass1 TEXT NULL DEFAULT NULL COMMENT 'E-pay pass1',
+  epay_pass2 TEXT NULL DEFAULT NULL COMMENT 'E-pay pass2',
   epay_test TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'E-pay test mode',
   epay_currency VARCHAR(255) NOT NULL DEFAULT '' COMMENT 'Currency',
 
