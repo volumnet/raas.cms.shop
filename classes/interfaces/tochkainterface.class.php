@@ -138,9 +138,9 @@ class TochkaInterface extends EPayInterface
     public function getURL(bool $isTest = false): string
     {
         if ($isTest) {
-            $url = 'https://enter.tochka.com/sandbox/v2/acquiring/1.0/';
+            $url = 'https://enter.tochka.com/sandbox/v2/acquiring/v1.0/';
         } else {
-            $url = 'https://enter.tochka.com/uapi/acquiring/1.0/';
+            $url = 'https://enter.tochka.com/uapi/acquiring/v1.0/';
         }
         return $url;
     }

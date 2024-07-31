@@ -53,8 +53,8 @@ class TochkaInterfaceTest extends BaseTest
     public function getURLDataProvider()
     {
         return [
-            [true, 'https://enter.tochka.com/sandbox/v2/acquiring/1.0/'],
-            [false, 'https://enter.tochka.com/uapi/acquiring/1.0/'],
+            [true, 'https://enter.tochka.com/sandbox/v2/acquiring/v1.0/'],
+            [false, 'https://enter.tochka.com/uapi/acquiring/v1.0/'],
         ];
     }
 
@@ -170,7 +170,7 @@ class TochkaInterfaceTest extends BaseTest
 
         $result = $interface->exec('payments', [], true);
 
-        $this->assertEquals([], $result);
+        $this->assertEquals(400, $result['code']);
     }
 
 
@@ -186,7 +186,7 @@ class TochkaInterfaceTest extends BaseTest
         $interface->expects($this->once())->method('doLog'); // Один на получение токена, один - на собственно запрос
         $result = $interface->exec('payments', ['aaa' => 'bbb'], true);
 
-        $this->assertEquals([], $result);
+        $this->assertEquals(400, $result['code']);
     }
 
 
