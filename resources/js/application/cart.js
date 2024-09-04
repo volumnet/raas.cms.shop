@@ -194,7 +194,7 @@ export default class {
             'sum', 
             'count', 
             'rollup', 
-            'additional'
+            // 'additional',
         ]) {
             if (remoteData[key] !== undefined) {
                 this[key] = remoteData[key];
@@ -202,6 +202,14 @@ export default class {
                 this[key] = null;
             }
         }
+        let newAdditional = {};
+        if (this.additional) {
+            Object.assign(newAdditional, this.additional);
+        }
+        if (remoteData.additional) {
+            Object.assign(newAdditional, remoteData.additional);
+        }
+        this.additional = newAdditional;
         if (eCommerce) {
             // console.log(remoteData);
             eCommerce.updateCart(this.items, !remoteData.success); // Именно здесь, поскольку до установки dataLoaded, eCommerce не генерирует событий

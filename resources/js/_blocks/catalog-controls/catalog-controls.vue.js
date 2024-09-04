@@ -21,7 +21,6 @@ export default {
                 { arrayFormat: 'bracket' }
             )
         );
-        
         return {
             activeViewVariant: 'blocks', // Активный вариант отображения
             query: query, // Запрос
@@ -75,6 +74,9 @@ export default {
             this.$forceUpdate();
         },
         changeView(viewVariant) {
+            if (!viewVariant) {
+                return;
+            }
             Cookie.set(
                 'view_as', 
                 viewVariant, 

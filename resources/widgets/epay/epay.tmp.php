@@ -1,4 +1,7 @@
 <?php
+/**
+ * Виджет электронной оплаты
+ */
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Material;

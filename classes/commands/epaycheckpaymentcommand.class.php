@@ -40,7 +40,7 @@ class EPayCheckPaymentCommand extends Command
                            AND payment_url LIKE ? ";
             $sqlBind[] = static::PAYMENT_URL_TO_FIND;
         } else {
-            $sqlQuery .= "AND payment_interface_classname != ''";
+            $sqlQuery .= " AND payment_interface_classname != ''";
         }
         $sqlResult = Order::getSQLSet([$sqlQuery, $sqlBind]);
 

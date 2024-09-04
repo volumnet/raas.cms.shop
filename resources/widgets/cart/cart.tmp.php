@@ -102,7 +102,7 @@ if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
     echo json_encode($result);
     exit;
 } elseif ($epayWidget && ($epayWidget instanceof Snippet)) {
-    $epayWidget->process($IN);
+    $epayWidget->process(array_merge($IN, ['Block' => $Block, 'Page' => $Page]));
 } elseif ($success[(int)$Block->id]) { ?>
     <div class="notifications">
       <div class="alert alert-success"><?php echo sprintf(ORDER_SUCCESSFULLY_SENT, $Item->id)?></div>

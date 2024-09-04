@@ -28,8 +28,8 @@ class UpdateYMLCommand extends Command
     public function process(
         $ymlPageURL = '/yml/',
         $outputFile = null,
-        $https = false,
-        $forceUpdate = false,
+        $https = true,
+        $forceUpdate = true,
         $forceLockUpdate = false,
         $limit = 0
     ) {
