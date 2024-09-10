@@ -50,7 +50,7 @@ class Webmaster extends CMSWebmaster
         $interfaces['__raas_shop_order_notify'] = $this->checkSnippet(
             $this->interfacesFolder,
             '__raas_shop_order_notify',
-            'shop/form_notification.php',
+            'shop/form_notification.php'
         );
 
         return $interfaces;
