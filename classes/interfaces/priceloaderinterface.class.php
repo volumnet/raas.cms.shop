@@ -393,10 +393,10 @@ class PriceloaderInterface extends AbstractInterface
     /**
      * Поиск товара по уникальному полю
      * @param PriceLoader $loader Загрузчик
-     * @param string $text Значение поля
+     * @param string|array $text Значение поля - array сделано для совместимости с другими загрузчиками
      * @return Material[] Массив найденных товаров
      */
-    public function getItemsByUniqueField(PriceLoader $loader, string $text): array
+    public function getItemsByUniqueField(PriceLoader $loader, $text): array
     {
         if ($ufid = $loader->ufid) {
             // Получим ассоциации
