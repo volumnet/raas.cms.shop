@@ -839,7 +839,7 @@ class CatalogFilter
             } elseif (isset($filterValues['like'])) {
                 $newMappingValues = [];
                 foreach ((array)$propsMapping[$propId] as $val => $valIds) {
-                    if (stristr($val, $filterValues['like'])) {
+                    if (stristr((string)$val, (string)$filterValues['like'])) {
                         $newMappingValues[$val] = $valIds;
                     }
                 }
