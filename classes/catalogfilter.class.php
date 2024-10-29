@@ -1244,7 +1244,7 @@ class CatalogFilter
             $sortKey = $this->propertiesByURNs[$sort]->id;
         }
         if ($this->useAvailabilityOrder) {
-            $availabilityProp = $this->propertiesByURNs[$this->useAvailabilityOrder];
+            $availabilityProp = $this->propertiesByURNs[$this->useAvailabilityOrder] ?? null;
         }
         if ($availabilityPropId = (int)($availabilityProp->id ?? 0)) {
             $ids = $this->multisort([

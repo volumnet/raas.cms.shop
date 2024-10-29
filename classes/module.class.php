@@ -73,12 +73,19 @@ class Module extends RAASModule
         );
         $sqlWhat = [
             "tOr.*",
-            "SUM(tOG.amount) AS c",
-            "SUM(tOG.realprice * tOG.amount) AS total_sum",
+            "(
+                SELECT SUM(tOG.amount)
+                  FROM cms_shop_orders_goods AS tOG
+                 WHERE tOG.order_id = tOr.id
+            ) AS c",
+            "(
+                SELECT SUM(tOG.realprice * tOG.amount)
+                  FROM cms_shop_orders_goods AS tOG
+                 WHERE tOG.order_id = tOr.id
+            ) AS total_sum"
         ];
         $sqlFrom = [
             Order::_tablename() .  " AS tOr",
-            Order::_dbprefix() . "cms_shop_orders_goods AS tOG ON tOG.order_id = tOr.id"
         ];
         $sqlFromBind = [];
         $sqlWhereBind = [];

@@ -135,7 +135,7 @@ class OrdersTable extends Table
             'data-role' => 'multitable',
             'meta' => [
                 'allContextMenu' => $view->getAllOrdersContextMenu(),
-                'allValue' => 'all&pid=' . (int)($Item->id ?? 0),
+                'allValue' => 'all&pid=' . (int)($params['Item']->id ?? 0),
             ],
         ];
         unset($params['columns']);

@@ -84,7 +84,7 @@ class Cart
                                 'id' => $material->id,
                                 'name' => $material->name,
                                 'meta' => $meta,
-                                'realprice' => (float)$this->getPrice($material, (float)$c),
+                                'realprice' => (float)$this->getPrice($material, (float)$c, (array)json_decode($meta, true)),
                                 'amount' => (float)$c,
                             ]);
                             $result[] = $row;
