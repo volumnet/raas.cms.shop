@@ -1,4 +1,7 @@
 <?php
+/**
+ * Контроллер подмодуля загрузчиков изображений
+ */
 namespace RAAS\CMS\Shop;
 
 class Sub_Imageloaders extends \RAAS\Abstract_Sub_Controller
@@ -7,42 +10,61 @@ class Sub_Imageloaders extends \RAAS\Abstract_Sub_Controller
     
     public function run()
     {
-        $Form = new ProcessImageLoaderForm();
-        $OUT = $Form->process();
-        if ($this->action == 'download') {
-            $Loader = new ImageLoader((int)$_GET['loader']);
-            if ($Loader->id) {
-                $IN = $Loader->download();
+        $loader = new ImageLoader($this->id);
+        if ($loader->id) {
+            if ($this->action == 'download') {
+                ini_set('max_execution_time', 3600);
+                $loader->download();
+            } else {
+                $this->upload($loader);
             }
         } else {
-            $IN = isset($Form->meta['OUT']) ? $Form->meta['OUT'] : array();
+            $this->view->showlist(['Set' => ImageLoader::getSet()]);
         }
-        if (isset($IN['localError'])) {
-            $OUT['localError'] = $IN['localError'];
-        } elseif ($IN === false) {
-            $OUT['localError'] = array(
-                array(
-                    'name' => 'INVALID', 
-                    'value' => 'file', 
+    }
+
+
+    /**
+     * Отображает параметры загрузки загрузчика изображений
+     */
+    protected function upload(ImageLoader $loader)
+    {
+        $form = new ProcessImageLoaderForm(['loader' => $loader]);
+        $out = $form->process();
+        $in = (array)($form->meta['OUT'] ?? []);
+        if (isset($in['localError'])) {
+            $out['localError'] = $in['localError'];
+        } elseif ($in === false) {
+            $out['localError'] = [
+                [
+                    'name' => 'INVALID',
+                    'value' => 'file',
                     'description' => $this->view->_(
-                        ($_SERVER['REQUEST_METHOD'] == 'POST') ? 'ERR_SOME_ERROR_DUE_UPLOADING' : 'ERR_SOME_ERROR_DUE_DOWNLOADING'
+                        ($_SERVER['REQUEST_METHOD'] == 'POST') ?
+                        'ERR_SOME_ERROR_DUE_UPLOADING' :
+                        'ERR_SOME_ERROR_DUE_DOWNLOADING'
                     )
+                ]
+            ];
+        }
+        if (isset($in['localSuccess'])) {
+            $out['localSuccess'] = $in['localSuccess'];
+        } elseif (isset($in['ok']) || ($in === true)) {
+            $out['localSuccess'] = [
+                'name' => 'SUCCESS',
+                'value' => 'file',
+                'description' => $this->view->_(
+                    ($_SERVER['REQUEST_METHOD'] == 'POST') ?
+                    'IMAGES_SUCCESSFULLY_UPLOADED' :
+                    'IMAGES_SUCCESSFULLY_DOWNLOADED'
                 )
-            );
+            ];
         }
-        if (isset($IN['localSuccess'])) {
-            $OUT['localSuccess'] = $IN['localSuccess'];
-        } elseif (isset($IN['ok']) || ($IN === true)) {
-            $OUT['localSuccess'] = array(
-                'name' => 'SUCCESS', 
-                'value' => 'file', 
-                'description' => $this->view->_(($_SERVER['REQUEST_METHOD'] == 'POST') ? 'IMAGES_SUCCESSFULLY_UPLOADED' : 'IMAGES_SUCCESSFULLY_DOWNLOADED')
-            );
+        if (isset($in['log']) && $out['DATA']['show_log']) {
+            $out['log'] = (array)$in['log'];
         }
-        if (isset($IN['log']) && $OUT['DATA']['show_log']) {
-            $OUT['log'] = (array)$IN['log'];
-        }
-        $OUT['url'] = $this->url;
-        $this->view->main($OUT);
+        $out['url'] = $this->url;
+        $out['loader'] = $loader;
+        $this->view->upload($out);
     }
 }

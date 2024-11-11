@@ -6,6 +6,9 @@ namespace RAAS\CMS\Shop;
 
 use RAAS\Form as RAASForm;
 
+/**
+ * Форма обработки загрузчиков изображений
+ */
 class ProcessImageLoaderForm extends RAASForm
 {
     public function __get($var)
@@ -23,52 +26,36 @@ class ProcessImageLoaderForm extends RAASForm
 
     public function __construct(array $params = [])
     {
-        $view = $this->view;
-        $t = Module::i();
-        if ($CONTENT['loaders'] = ImageLoader::getSet()) {
-            $loader = $CONTENT['loaders'][0];
-        } else {
-            $loader = new ImageLoader();
-        }
+        $loader = $params['loader'] ?? null;
 
         $defaultParams = [
-            'caption' => $view->_('IMAGELOADERS'),
+            'caption' => $this->view->_('IMAGELOADERS'),
             'parentUrl' => Sub_Imageloaders::i()->url . '&action=imageloaders',
-            'action' => Sub_Imageloaders::i()->url . '&action=imageloaders',
-            'data-role' => 'loader-form',
             'class' => 'form-horizontal',
+            'meta' => [
+                'loader' => $loader,
+            ],
             'children' => [
-                'loader' => [
-                    'type' => 'select',
-                    'name' => 'loader',
-                    'caption' => $this->view->_('LOADER'),
-                    'class' => 'span4',
-                    'children' => [
-                        'Set' => $CONTENT['loaders'],
-                        'additional' => function ($row) use ($view) {
-                            $arr = [];
-                            if (is_numeric($row->ufid)) {
-                                $text = $row->Unique_Field->name;
-                            } elseif ($row->ufid == 'name') {
-                                $text = $view->_('NAME');
-                            } elseif ($row->ufid == 'urn') {
-                                $text = $view->_('URN');
-                            } elseif ($row->ufid == 'description') {
-                                $text = $view->_('DESCRIPTION');
-                            } else {
-                                $text = '';
-                            }
-                            $file_format = ($text ? '[' . $text . ']' . $row->sep_string : '') . '[' . $view->_('FILENAME') . '].(jpg|gif|png)';
-                            $arr['data-material-type'] = $row->Material_Type->name;
-                            $arr['data-image-field'] = $row->Image_Field->name;
-                            if ($file_format) {
-                                $arr['data-file-format'] = $file_format;
-                            }
-                            return $arr;
-                        }
-                    ],
-                    'required' => true,
-                    'default' => ($this->view->action == 'download') ? (isset($_GET['loader']) ? (int)$_GET['loader'] : 0) : (int)$loader->id
+                'material_type' => [
+                    'name' => 'material_type',
+                    'caption' => $this->view->_('MATERIAL_TYPE'),
+                    'export' => 'is_null',
+                    'import' => 'is_null',
+                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                ],
+                'image_field' => [
+                    'name' => 'image_field',
+                    'caption' => $this->view->_('IMAGE_FIELD'),
+                    'export' => 'is_null',
+                    'import' => 'is_null',
+                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                ],
+                'filename_format' => [
+                    'name' => 'filename_format',
+                    'caption' => $this->view->_('FILENAME_FORMAT'),
+                    'export' => 'is_null',
+                    'import' => 'is_null',
+                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
                 ],
                 'test' => [
                     'type' => 'checkbox',
@@ -88,25 +75,23 @@ class ProcessImageLoaderForm extends RAASForm
                     'caption' => $this->view->_('FILE_TO_UPLOAD'),
                     'class' => 'span3',
                     'multiple' => true,
-                    'accept' => 'image/jpeg,image/png,image/gif,application/zip,application/x-compressed,application/x-zip-compressed,multipart/x-zip'
+                    'accept' => 'image/jpeg,image/png,image/gif,application/zip,application/x-compressed,application/x-zip-compressed,multipart/x-zip',
+                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
                 ],
                 'show_log' => [
                     'type' => 'checkbox',
                     'name' => 'show_log',
                     'caption' => $this->view->_('SHOW_LOG'),
                     'style' => 'margin: 0;',
-                    'default' => ($this->view->action == 'download') ?
-                        (isset($_GET['show_log']) ? (int)$_GET['show_log'] : 0) :
-                        1,
+                    'default' => ($this->view->action == 'download') ? (int)($_GET['show_log'] ?? 0) : 1,
                 ],
             ],
             'template' => 'loaders.tmp.php',
-            'commit' => function ($form) {
-                $Loader = new ImageLoader((int)$_POST['loader']);
+            'commit' => function ($form) use ($loader) {
                 $form->meta['OUT'] = [];
-                if ($Loader->id) {
+                if ($loader->id) {
                     $files = [];
-                    foreach ($_FILES['file']['tmp_name'] as $key => $val) {
+                    foreach (($_FILES['file']['tmp_name'] ?? []) as $key => $val) {
                         if (is_uploaded_file($val)) {
                             $files[] = [
                                 'name' => $_FILES['file']['name'][$key],
@@ -116,14 +101,22 @@ class ProcessImageLoaderForm extends RAASForm
                             ];
                         }
                     }
-                    $test = isset($_POST['test']);
+                    $test = (bool)($_POST['test'] ?? 0);
                     $clear = (bool)($_POST['clear'] ?? 0);
-                    $IN = $Loader->upload($files, $test, $clear);
-                    $form->meta['OUT'] = $IN;
+                    ini_set('max_execution_time', 3600);
+                    $out = $loader->upload($files, $test, $clear);
+                    $form->meta['OUT'] = $out;
                 }
+            },
+            'import' => function ($form) {
+                $result = $form->importDefault();
+                $result['clear'] = 0;
+                $result['test'] = 1;
+                return $result;
             },
             'oncommit' => 'is_null',
             'redirect' => 'is_null',
+            'submitCaption' => $this->view->_('UPLOAD'),
         ];
         $arr = array_merge($defaultParams, $params);
         parent::__construct($arr);

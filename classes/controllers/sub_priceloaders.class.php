@@ -1,62 +1,91 @@
 <?php
+/**
+ * Контроллер подмодуля загрузчиков прайсов
+ */
 namespace RAAS\CMS\Shop;
-use \RAAS\Redirector;
-use \RAAS\CMS\Page;
 
+use RAAS\CMS\Page;
+
+/**
+ * Контроллер подмодуля загрузчиков прайсов
+ */
 class Sub_Priceloaders extends \RAAS\Abstract_Sub_Controller
 {
     protected static $instance;
 
     public function run()
     {
-        $Form = new ProcessPriceLoaderForm();
-        $OUT = $Form->process();
-        if ($this->action == 'download') {
-            $Loader = new PriceLoader((int)$_GET['loader']);
-            if ($Loader->id) {
-                $Page = isset($_GET['cat_id']) ? (new Page((int)$_GET['cat_id'])) : $Loader->Page;
-                $rows = (int)($_GET['rows'] ?? 0);
-                $cols = (int)($_GET['cols'] ?? 0);
-                $type = trim((string)($_GET['type'] ?? ''));
-                $encoding = trim((string)$_GET['encoding'] ?? '');
-                ini_set('max_execution_time', 3600);
-                $IN = $Loader->download($Page, $rows, $cols, $type, $encoding);
+        $loader = new PriceLoader($this->id);
+        if ($loader->id) {
+            if ($this->action == 'download') {
+                $this->download($loader);
+            } else {
+                $this->upload($loader);
             }
-            $OUT['DATA']['rows'] = (int)$_GET['rows'];
-            $OUT['DATA']['cols'] = (int)$_GET['cols'];
-            $OUT['DATA']['show_log'] = (int)$_GET['show_log'];
         } else {
-            $IN = isset($Form->meta['OUT']) ? $Form->meta['OUT'] : array();
+            $this->view->showlist(['Set' => PriceLoader::getSet()]);
         }
-        if (isset($IN['localError'])) {
-            $OUT['localError'] = $IN['localError'];
-        } elseif ($IN === false) {
-            $OUT['localError'] = array(
-                array(
+    }
+
+
+    /**
+     * Загрузка прайс-листа
+     * @param PriceLoader $loader Загрузчик
+     */
+    protected function upload(PriceLoader $loader)
+    {
+        $form = new ProcessPriceLoaderForm(['loader' => $loader]);
+        $out = $form->process();
+        $in = (array)($form->meta['OUT'] ?? []);
+        if (isset($in['localError'])) {
+            $out['localError'] = $in['localError'];
+        } elseif ($in === false) {
+            $out['localError'] = [
+                [
                     'name' => 'INVALID',
                     'value' => 'file',
                     'description' => $this->view->_(
-                        ($_SERVER['REQUEST_METHOD'] == 'POST') ? 'ERR_SOME_ERROR_DUE_UPLOADING' : 'ERR_SOME_ERROR_DUE_DOWNLOADING'
+                        ($_SERVER['REQUEST_METHOD'] == 'POST') ?
+                        'ERR_SOME_ERROR_DUE_UPLOADING' :
+                        'ERR_SOME_ERROR_DUE_DOWNLOADING'
                     )
-                )
-            );
+                ]
+            ];
         }
-        if (isset($IN['localSuccess'])) {
-            $OUT['localSuccess'] = $IN['localSuccess'];
-        } elseif (isset($IN['ok']) || ($IN === true)) {
-            $OUT['localSuccess'] = array(
+        if (isset($in['localSuccess'])) {
+            $out['localSuccess'] = $in['localSuccess'];
+        } elseif (isset($in['ok']) || ($in === true)) {
+            $out['localSuccess'] = [
                 'name' => 'SUCCESS',
                 'value' => 'file',
-                'description' => $this->view->_(($_SERVER['REQUEST_METHOD'] == 'POST') ? 'PRICE_SUCCESSFULLY_UPLOADED' : 'PRICE_SUCCESSFULLY_DOWNLOADED')
-            );
+                'description' => $this->view->_(
+                    ($_SERVER['REQUEST_METHOD'] == 'POST') ?
+                    'PRICE_SUCCESSFULLY_UPLOADED' :
+                    'PRICE_SUCCESSFULLY_DOWNLOADED'
+                )
+            ];
         }
-        if (isset($IN['log']) && $OUT['DATA']['show_log']) {
-            $OUT['log'] = (array)$IN['log'];
+        if (isset($in['log']) && $out['DATA']['show_log']) {
+            $out['log'] = (array)$in['log'];
         }
-        if (isset($IN['raw_data']) && $OUT['DATA']['show_data']) {
-            $OUT['raw_data'] = (array)$IN['raw_data'];
+        if (isset($in['raw_data']) && $out['DATA']['show_data']) {
+            $out['raw_data'] = (array)$in['raw_data'];
         }
-        $OUT['url'] = $this->url;
-        $this->view->main($OUT);
+        $out['url'] = $this->url;
+        $out['loader'] = $loader;
+        $this->view->upload($out);
+    }
+
+
+    /**
+     * Скачивание прайс-листа
+     * @param PriceLoader $loader Загрузчик
+     */
+    public function download(PriceLoader $loader)
+    {
+        $form = new DownloadPriceLoaderForm(['loader' => $loader]);
+        $out = $form->process();
+        $out['loader'] = $loader;
+        $this->view->download($out);
     }
 }

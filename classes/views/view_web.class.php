@@ -35,7 +35,7 @@ class View_Web extends \RAAS\Module_View_Web
                 $menuItem['submenu'][] = array(
                     'name' => $row->name . ($row->unreadOrders ? ' (' . (int)$row->unreadOrders . ')' : ''),
                     'href' => $this->url . '&id=' . (int)$row->id,
-                    'active' => ($row->id == $this->id)
+                    'active' => (!$this->sub) && ($row->id == $this->id)
                 );
             }
         }
