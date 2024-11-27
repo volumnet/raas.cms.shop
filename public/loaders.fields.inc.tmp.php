@@ -60,7 +60,7 @@ $_RAASForm_Control = function (RAASField $field) use (
             $uniqueFieldName = '';
             if (is_numeric($loader->ufid)) {
                 $uniqueFieldName = $loader->Unique_Field->name;
-            } else {
+            } elseif ($column->fid) {
                 $uniqueFieldName = View_Web::i()->context->_(mb_strtoupper($column->fid));
             }
             $fileFormat = '';
@@ -88,7 +88,7 @@ $_RAASForm_Control = function (RAASField $field) use (
                         <?php
                         if (is_numeric($column->fid)) {
                             echo htmlspecialchars($column->Field->name);
-                        } else {
+                        } elseif ($column->fid) {
                             echo htmlspecialchars(View_Web::i()->_(mb_strtoupper($column->fid)));
                         }
                         ?>

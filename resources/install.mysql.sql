@@ -118,6 +118,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   update_materials TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Allow to update materials',
   catalog_offset INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Catalog offset',
   media_action TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Media fields action',
+  step_interface TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Step interface',
 
   PRIMARY KEY (id),
   KEY (mtype),

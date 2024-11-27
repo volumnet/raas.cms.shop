@@ -103,7 +103,7 @@ class ProcessImageLoaderForm extends RAASForm
                     }
                     $test = (bool)($_POST['test'] ?? 0);
                     $clear = (bool)($_POST['clear'] ?? 0);
-                    ini_set('max_execution_time', 3600);
+                    ini_set('max_execution_time', 600);
                     $out = $loader->upload($files, $test, $clear);
                     $form->meta['OUT'] = $out;
                 }

@@ -13,7 +13,7 @@ class Sub_Imageloaders extends \RAAS\Abstract_Sub_Controller
         $loader = new ImageLoader($this->id);
         if ($loader->id) {
             if ($this->action == 'download') {
-                ini_set('max_execution_time', 3600);
+                ini_set('max_execution_time', 600);
                 $loader->download();
             } else {
                 $this->upload($loader);

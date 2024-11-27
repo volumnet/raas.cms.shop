@@ -21,6 +21,11 @@ use RAAS\CMS\Snippet;
  * @property-read Snippet $Interface Интерфейс загрузчика
  * @property-read Page $Page Корневая страница
  * @property-read PriceLoader_Column[] $columns Набор колонок
+ * @property-read array $columnsByIds <pre><code>array<
+ *     string[] ID# колонки загрузчика => PriceLoader_Column
+ * ></code></pre> Колонки по их ID#
+ * @property-read PriceLoader_Column|null $uniqueColumn Уникальная колонка
+ * @property-read PriceLoader_Column|null $nameColumn Колонка наименования
  */
 class PriceLoader extends SOME
 {
@@ -109,6 +114,9 @@ class PriceLoader extends SOME
             'FK' => 'pid'
         ]
     ];
+
+
+    protected static $cognizableVars = ['uniqueColumn', 'columnsByIds', 'nameColumn'];
 
     public function commit()
     {
@@ -228,5 +236,51 @@ class PriceLoader extends SOME
             ]);
         }
         return $out;
+    }
+
+
+    /**
+     * Получает уникальную колонку
+     * @return PriceLoader_Column|null
+     */
+    protected function _uniqueColumn()
+    {
+        foreach ($this->columns as $column) {
+            if ($column->fid == $this->ufid) {
+                return $column;
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * Получает колонки загрузчика по их ID#
+     * @return array <pre><code>array<
+     *     string[] ID# колонки загрузчика => PriceLoader_Column
+     * ></code></pre>
+     */
+    protected function _columnsByIds()
+    {
+        $result = [];
+        foreach ($this->columns as $column) {
+            $result[(string)$column->id] = $column;
+        }
+        return $result;
+    }
+
+
+    /**
+     * Получает колонку наименования
+     * @return PriceLoader_Column|null
+     */
+    protected function _nameColumn()
+    {
+        foreach ($this->columns as $column) {
+            if ($column->fid == 'name') {
+                return $column;
+            }
+        }
+        return null;
     }
 }

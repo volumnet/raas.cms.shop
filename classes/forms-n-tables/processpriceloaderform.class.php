@@ -151,7 +151,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                     $clear = (int)($_POST['clear'] ?? 0);
                     $rows = (int)($_POST['rows'] ?? 0);
                     $cols = (int)($_POST['cols'] ?? 0);
-                    ini_set('max_execution_time', 3600);
+                    ini_set('max_execution_time', 600);
                     $out = $loader->upload($file, $page, $test, $clear, $rows, $cols);
                     $form->meta['OUT'] = $out;
                 }

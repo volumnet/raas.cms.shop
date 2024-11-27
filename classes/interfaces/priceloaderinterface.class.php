@@ -1,6 +1,39 @@
 <?php
 /**
  * Стандартный интерфейс загрузчика прайсов
+ *
+ * Предустановленные типы:
+ * <pre><code>
+ * <ДАННЫЕ ПОШАГОВОЙ ЗАГРУЗКИ> => [
+ *     'step' => int Шаг,
+ *     'startRow' =>? int Количество пропущенных строк,
+ *     'rootCategoryId' =>? int ID# корневой категории,
+ *     'columns' => array<int[] => [
+ *         'index' => int Индекс колонки (совпадает с индексом массива),
+ *         'columnId' => ID# колонки загрузчика,
+ *     ]>,
+ *     'rows' => array<int[] => [
+ *         'type' =>? 'page'|'material' Тип строки
+ *             (не может быть несколько, т.к. строка либо страничная, либо материальная),
+ *         'action' =>? 'create'|'select'|'update' Действие
+ *             (не может быть несколько, т.к.:
+ *                 страница будет всего одна, если она найдена - то select, если нет - то create
+ *                 материалов может быть несколько, если они найдены - тогда все update, если не найдены, то один create
+ *             ),
+ *         'contextId' =>? int|string ID# контекстной страницы или ее временный ID# в формате "tmp.(...)"
+ *             (один, поскольку контекст строки всегда один),
+ *         'entity' =>? array<[
+ *             'id' =>? int|string ID# сущности или ее временный ID# в формате "tmp.(...)",
+ *             'name' => string Название,
+ *             'level' =>? int Уровень вложенности
+ *         ]> Сущность,
+ *         'cells' => array<int[] => [
+ *             'rawValue' => string Сырое значение из таблицы,
+ *             'value' =>? mixed Обработанное значение,
+ *         ]> Ячейки,
+ *     ]> Строки,
+ * ]
+ * </code></pre>
  */
 declare(strict_types=1);
 
@@ -13,6 +46,7 @@ use SOME\Text;
 use RAAS\Application;
 use RAAS\Attachment;
 use RAAS\Exception;
+use RAAS\User as RAASUser;
 use RAAS\CMS\AbstractInterface;
 use RAAS\CMS\Block;
 use RAAS\CMS\Field;
@@ -487,7 +521,7 @@ class PriceloaderInterface extends AbstractInterface
      * @param PriceLoader $loader Загрузчик прайсов
      * @return Material Созданный материал
      */
-    public function createItem(PriceLoader $loader)
+    public function createItem(PriceLoader $loader): Material
     {
         $row = new Material();
         $row->pid = $loader->Material_Type->id;
@@ -526,21 +560,31 @@ class PriceloaderInterface extends AbstractInterface
     /**
      * Проверяет и при необходимости размещает материал на странице
      * @param Material $item Материал для размещения
-     * @param Page $root Корень загрузки прайса
-     * @param Page $context Текущая категория загрузки прайса
+     * @param Page|int $root Корень загрузки прайса или его ID#
+     * @param Page|int $context Текущая категория загрузки прайса или ее ID#
      * @param bool $new Товар только что создан
      */
-    public function checkAssoc(Material $item, Page $root, Page $context, $new)
+    public function checkAssoc(Material $item, $root, $context, bool $new)
     {
+        if (is_scalar($root)) {
+            $rootId = (int)$root;
+        } else {
+            $rootId = (int)$root->id;
+        }
+        if (is_scalar($context)) {
+            $contextId = (int)$context;
+        } else {
+            $contextId = (int)$context->id;
+        }
         if ($item->id &&
             !$item->material_type->global_type &&
-            $context->id &&
-            ($new || ($context->id != $root->id)) &&
-            !in_array($context->id, $item->pages_ids)
+            $contextId &&
+            ($new || ($contextId != $rootId)) &&
+            !in_array($contextId, $item->pages_ids)
         ) {
             Material::_SQL()->add(
                 Material::_dbprefix() . "cms_materials_pages_assoc",
-                ['id' => (int)$item->id, 'pid' => (int)$context->id]
+                ['id' => (int)$item->id, 'pid' => (int)$contextId]
             );
         }
     }
@@ -774,14 +818,19 @@ class PriceloaderInterface extends AbstractInterface
 
     /**
      * Ищет страницу с заданным именем в заданном контексте
-     * @param Page $context Контекст, в котором ищется страница
+     * @param Page|int $context Контекст, в котором ищется страница, либо его ID#
      * @param string $name Наименование страницы
      * @return Page|null
      */
-    public function getPage(Page $context, $name)
+    public function getPage($context, string $name)
     {
+        if (is_scalar($context)) {
+            $contextId = (int)$context;
+        } else {
+            $contextId = (int)$context->id;
+        }
         $sqlResult = Page::getSet(['where' => [
-            "pid = " . (int)$context->id,
+            "pid = " . $contextId,
             "name = '" . Page::_SQL()->real_escape_string($name) . "'"
         ]]);
         if ($sqlResult) {
@@ -793,28 +842,33 @@ class PriceloaderInterface extends AbstractInterface
 
     /**
      * Создает страницу
-     * @param Page $context Текущий контекст (родительская страница)
+     * @param Page|int $context Контекст, в котором ищется страница, либо его ID#
      * @param string $name Наименование новой страницы
      * @param bool $test Тестовый режим
      * @return Page Новая страница
      */
-    public function createPage(Page $context, $name, $test = true)
+    public function createPage($context, string $name, bool $test = true): Page
     {
+        if (is_scalar($context)) {
+            $contextId = (int)$context;
+        } else {
+            $contextId = (int)$context->id;
+        }
         $arr = [
-            'pid' => (int)$context->id,
+            'pid' => $contextId,
             'vis' => 1,
             'name' => $name,
         ];
-        $context = new Page($arr);
-        $this->inheritPageNativeFields($context);
+        $page = new Page($arr);
+        $this->inheritPageNativeFields($page);
         if (!$test) {
             // 2020-02-10, AVS: для ускорения не обновляем связанные страницы
-            $context->dontUpdateAffectedPages = true;
-            $context->commit();
-            $this->inheritPageCustomFields($context);
-            $context->rollback();
+            $page->dontUpdateAffectedPages = true;
+            $page->commit();
+            $this->inheritPageCustomFields($page);
+            $page->rollback();
         }
-        return $context;
+        return $page;
     }
 
 
@@ -1607,5 +1661,508 @@ class PriceloaderInterface extends AbstractInterface
             }
         }
         return $data;
+    }
+
+
+    /**
+     * Пошаговая загрузка прайса на сервер — шаг 1: загрузка файла
+     * @param string $file Путь к загружаемому файлу
+     * @param string $type Тип (расширение) загружаемого файла
+     * @return array <pre><code>[
+     *     'localError' ?=> array<[
+     *         'name' => 'MISSING'|'INVALID' тип ошибки,
+     *         'value' => string URN поля, на которое ссылается ошибка,
+     *         'description' => string Человеко-понятное описание ошибки
+     *     ]> ошибки при загрузке
+     *     'data' ?=> array <pre><code><ДАННЫЕ ПОШАГОВОЙ ЗАГРУЗКИ></code></pre> Массив данных для сохранения,
+     * ]</code></pre>
+     */
+    public function stepUpload(string $file, string $type): array
+    {
+        $st = microtime(true);
+        // Загрузка прайса
+        $affectedPagesIds = $affectedMaterialsIds = $log = $rawData = [];
+        if (!$file || !is_file($file)) {
+            return ['localError' => [[
+                'name' => 'MISSING',
+                'value' => 'file',
+                'description' => Module::i()->view->_('UPLOAD_FILE_REQUIRED')
+            ]]];
+        }
+        if (is_file($file)) {
+            try {
+                $data = $this->parse($file, $type);
+                // $data = $this->adjustData($data, $rows, $cols);
+                if (!$data || ((count($data) == 1) && (count(array_filter($data[0])) == 1))) {
+                    throw new Exception(Module::i()->view->_('ERR_EMPTY_FILE'));
+                }
+            } catch (Exception $e) {
+                return ['localError' => [[
+                    'name' => 'INVALID',
+                    'value' => 'file',
+                    'description' => $e->getMessage(),
+                ]]];
+            }
+        }
+
+        $result = [
+            'step' => 1,
+            'columns' => [],
+            'startRow' => (int)$this->loader->rows,
+            'rootCategoryId' => (int)$this->loader->cat_id,
+            'rows' => [],
+        ];
+        $loaderColumns = $this->loader->columns;
+        $loaderColumnsIdsByName = [];
+        $columnsMapping = [];
+        // Найдем стандартное назначение колонок
+        for ($i = 0; $i < count($loaderColumns); $i++) {
+            $column = $loaderColumns[$i];
+            if ($column->fid) {
+                $columnsMapping[(string)$column->id] = $i;
+                if ($column->Field->id) {
+                    $columnName = $column->Field->name;
+                } else {
+                    $columnName = Module::i()->view->_(mb_strtoupper($column->fid));
+                }
+                $loaderColumnsIdsByName[Text::beautify($columnName)] = $column->id;
+            }
+        }
+
+        // Попробуем найти назначение по заголовкам
+        for ($i = 0; $i < min(count($data), max(10, (int)$this->loader->rows)); $i++) { // Ищем по первым 10, но не менее значения rows
+            $rowFieldsMatching = 0;
+            for ($j = 0; $j < count($data[$i]); $j++) {
+                $columnDataBeautified = Text::beautify((string)($data[$i][$j] ?? ''));
+                if ($columnId = ($loaderColumnsIdsByName[$columnDataBeautified] ?? null)) {
+                    $columnsMapping[$columnId] = $j;
+                    $rowFieldsMatching++;
+                }
+            }
+            if ($rowFieldsMatching >= 2) { // Если найдено 2, останавливаемся
+                if ($i + 1 > (int)$result['startRow']) {
+                    $result['startRow'] = $i + 1;
+                }
+                break;
+            }
+        }
+
+        $columnsMappingReversed = array_map('intval', array_flip($columnsMapping));
+        for ($i = 0; $i < count($data); $i++) {
+            for ($j = 0; $j < count($data[$i]); $j++) {
+                if (!isset($result['columns'][$j])) {
+                    $columnData = ['index' => $j];
+                    $columnData['columnId'] = $columnsMappingReversed[$j] ?? null;
+                    $result['columns'][$j] = $columnData;
+                }
+                $result['rows'][$i]['cells'][$j]['rawValue'] = $data[$i][$j];
+            }
+        }
+
+        return ['data' => $result];
+    }
+
+
+    /**
+     * Пошаговая загрузка прайса на сервер — шаг 2: сопоставление
+     * @param array $data <pre><code><ДАННЫЕ ПОШАГОВОЙ ЗАГРУЗКИ></code></pre> Данные из предыдущего этапа
+     * @param int $catId ID# корневой категории
+     * @param int $rows Отступ строк
+     * @param array $columnsIds <pre><code>array<
+     *     int[] Номер колонки данных => int|null ID# колонки загрузчика
+     * ></code></pre> Соответствие колонок данных колонкам загрузчика
+     * @return array <pre><code>[
+     *     'localError' ?=> array<[
+     *         'name' => 'MISSING'|'INVALID' тип ошибки,
+     *         'value' => string URN поля, на которое ссылается ошибка,
+     *         'description' => string Человеко-понятное описание ошибки
+     *     ]> ошибки при загрузке
+     *     'data' ?=> array <pre><code><ДАННЫЕ ПОШАГОВОЙ ЗАГРУЗКИ></code></pre> Массив данных для сохранения,
+     * ]</code></pre>
+     */
+    public function stepMatching(array $data, int $catId, int $rows, array $columnsIds): array
+    {
+        $data['startRow'] = $rows;
+        $data['rootCategoryId'] = $catId;
+        $columnsIds = array_map('intval', $columnsIds);
+        $columns = [];
+        $callbacks = [];
+
+        for ($i = 0; $i < count($columnsIds); $i++) {
+            $columnId = $columnsIds[$i] ?: null;
+            $data['columns'][$i]['columnId'] = $columnId;
+            $columns[$i] = $columnId ? (new PriceLoader_Column($columnId)) : null;
+        }
+        $affectedColumnsIds = array_map(function ($x) {
+            return $x['columnId'];
+        }, $data['columns']);
+        $localError = [];
+
+        // Проверим наличие уникальной колонки среди полей
+        $uniqueColumn = $this->loader->uniqueColumn;
+        if (!$uniqueColumn || !in_array($uniqueColumn->id, $affectedColumnsIds)) {
+            $errorMessage = Module::i()->view->_('UNIQUE_COLUMN_NOT_SET');
+            if ($uniqueColumn->id) {
+                if ($uniqueColumn->Field->id) {
+                    $uniqueColumnName = $uniqueColumn->Field->name;
+                } else {
+                    $uniqueColumnName = Module::i()->view->_(mb_strtoupper($uniqueColumn->fid));
+                }
+                if ($uniqueColumnName) {
+                    $errorMessage .= ' (' . $uniqueColumnName . ')';
+                }
+            }
+            $localError[] = [
+                'name' => 'INVALID',
+                'value' => 'columns',
+                'description' => $errorMessage,
+            ];
+            return ['data' => $data, 'localError' => $localError];
+        } else {
+            $uniqueIndex = array_search($uniqueColumn->id, $affectedColumnsIds);
+        }
+
+        // Найдем соответствие строк товарам и материалам
+
+        $rootId = (int)$data['rootCategoryId'];
+        $backtrace = [];
+        $contextId = $rootId;
+        $virtualLevel = null; // При запрете создавать новые категории, сюда
+                              // устанавливается уровень не найденной категории
+                              // (чтобы игнорировать дочерние)
+        // Очистим шапку
+        for ($i = 0; $i < $rows; $i++) {
+            unset(
+                $data['rows'][$i]['contextId'],
+                $data['rows'][$i]['type'],
+                $data['rows'][$i]['action'],
+                $data['rows'][$i]['entity']
+            );
+        }
+        for ($i = $rows; $i < count($data['rows']); $i++) {
+            $dataRow = array_map(function ($x) {
+                return $x['rawValue'];
+            }, $data['rows'][$i]['cells']);
+            unset(
+                $data['rows'][$i]['type'],
+                $data['rows'][$i]['action'],
+                $data['rows'][$i]['entity']
+            );
+            if ($this->isItemDataRow($dataRow)) {
+                $data['rows'][$i]['contextId'] = $contextId;
+                $name = '';
+                // Товар
+                // Преобразуем строку данных
+                for ($j = 0; $j < count($dataRow); $j++) {
+                    if (($columnsIds[$j] ?? null) &&
+                        ($column = ($this->loader->columnsByIds[(string)$columnsIds[$j]] ?? null))
+                    ) {
+                        $convertedValue = $this->convertCell($column, $dataRow[$j]);
+                        $data['rows'][$i]['cells'][$j]['value'] = $convertedValue;
+                        $dataRow[$j] = $convertedValue;
+                        if ($this->loader->nameColumn && ($columnsIds[$j] == $this->loader->nameColumn->id)) {
+                            $name = $convertedValue;
+                        }
+                    }
+                }
+                // Найдем соответствия
+                $itemSet = $this->getItems($this->loader, $dataRow, $uniqueIndex);
+                if (($itemSet && $this->loader->update_materials) || (!$itemSet && $this->loader->create_materials)) {
+                    $data['rows'][$i]['type'] = 'material';
+                    if ($itemSet) {
+                        $data['rows'][$i]['action'] = 'update';
+                        foreach ($itemSet as $item) {
+                            $data['rows'][$i]['entity'][] = [
+                                'id' => (int)$item->id,
+                                'name' => $item->name,
+                                'level' => count($backtrace),
+                            ];
+                        }
+                    } else {
+                        $data['rows'][$i]['action'] = 'create';
+                        $data['rows'][$i]['entity'][] = [
+                            'id' => 'tmp.' . uniqid(''),
+                            'name' => $name,
+                            'level' => count($backtrace),
+                        ];
+                    }
+                }
+            } elseif ($this->isPageDataRow($dataRow)) {
+                // Категория
+                list($step, $name) = $this->parseCategoryRow($this->loader, $dataRow);
+                $step = (int)$step;
+                $name = trim((string)$name);
+                if (!$virtualLevel || ($step <= $virtualLevel)) {
+                    if ($step > 0) {
+                        $backtrace = $this->cropBacktrace($backtrace, $step);
+                    } else {
+                        $backtrace = [];
+                    }
+                    if ($backtrace) {
+                        $contextId = array_values(array_reverse($backtrace))[0];
+                    } else {
+                        $contextId = $rootId;
+                    }
+                    $data['rows'][$i]['contextId'] = $contextId;
+
+                    $foundPage = $this->getPage($contextId, $name);
+                    if ($foundPage || $this->loader->create_pages) {
+                        $data['rows'][$i]['type'] = 'page';
+                        if ($foundPage) {
+                            $data['rows'][$i]['action'] = 'select';
+                            $contextId = (int)$foundPage->id;
+                        } elseif ($this->loader->create_pages) {
+                            $data['rows'][$i]['action'] = 'create';
+                            $contextId = 'tmp.' . uniqid('');
+                        }
+                        $data['rows'][$i]['entity'][] = [
+                            'id' => $contextId,
+                            'name' => $name,
+                            'level' => count($backtrace),
+                        ];
+                        $backtrace[$step] = $contextId;
+                        $virtualLevel = null;
+                    } else {
+                        $virtualLevel = $step;
+                    }
+                }
+            } else {
+                unset($data['rows'][$i]['contextId']);
+            }
+        }
+        $data['step'] = 2;
+
+        return ['data' => $data, 'localError' => $localError];
+    }
+
+
+    /**
+     * Пошаговая загрузка прайса на сервер — шаг 3: применение
+     * @param array $data <pre><code><ДАННЫЕ ПОШАГОВОЙ ЗАГРУЗКИ></code></pre> Данные из предыдущего этапа
+     * @return array <pre><code>[
+     *     'localError' ?=> array<[
+     *         'name' => 'MISSING'|'INVALID' тип ошибки,
+     *         'value' => string URN поля, на которое ссылается ошибка,
+     *         'description' => string Человеко-понятное описание ошибки
+     *     ]> ошибки при загрузке
+     *     'data' ?=> array <pre><code><ДАННЫЕ ПОШАГОВОЙ ЗАГРУЗКИ></code></pre> Массив данных для сохранения,
+     * ]</code></pre>
+     */
+    public function stepApply(array $data): array
+    {
+        $localError = [];
+        $pageMapping = [];
+        $columns = [];
+        $uniqueColumn = $this->loader->uniqueColumn;
+        $uniqueIndex = null;
+        for ($i = 0; $i < count($data['columns']); $i++) {
+            $dataColumn =& $data['columns'][$i];
+            $columns[$i] = $dataColumn['columnId'] ? (new PriceLoader_Column($dataColumn['columnId'])) : null;
+            if ($dataColumn['columnId'] && ($dataColumn['columnId'] == $uniqueColumn->id)) {
+                $uniqueIndex = $i;
+            }
+        }
+
+        // Найдем задействованные материалы
+        $affectedMaterialsIds = [];
+        $affectedMaterials = [];
+        for ($i = $data['startRow']; $i < count($data['rows']); $i++) {
+            $row =& $data['rows'][$i];
+            if (($row['type'] == 'material') && ($row['action'] == 'update') && ($row['entity'] ?? [])) {
+                for ($j = 0; $j < count($row['entity']); $j++) {
+                    $affectedMaterialsIds[] = (int)$row['entity'][$j]['id'];
+                }
+            }
+        }
+        if ($affectedMaterialsIds) {
+            $itemsSet = Material::getSet([
+                'where' => "id IN (" . implode(",", $affectedMaterialsIds) . ")",
+                'orderBy' => "id",
+            ]);
+            foreach ($itemsSet as $item) {
+                $affectedMaterials[(string)$item->id] = $item;
+            }
+        }
+
+        // Создадим недостающие страницы
+        for ($i = $data['startRow']; $i < count($data['rows']); $i++) {
+            $row =& $data['rows'][$i];
+            if (($row['contextId'] ?? null) && ($pageMapping[$row['contextId']] ?? null)) {
+                $row['contextId'] = $pageMapping[$row['contextId']];
+            }
+            if (($row['type'] == 'page') && ($row['action'] == 'create') && ($row['entity'][0]['id'] ?? null)) {
+                $page = $this->createPage($row['contextId'], ($row['entity'][0]['name'] ?? ''), false);
+                $pageMapping[$row['entity'][0]['id']] = (int)$page->id;
+                $row['entity'][0]['id'] = (int)$page->id;
+            }
+        }
+
+        // Обновим/создадим материалы
+        for ($i = $data['startRow']; $i < count($data['rows']); $i++) {
+            $row =& $data['rows'][$i];
+            $cells =& $row['cells'];
+            if (($row['type'] == 'material') && ($row['entity'] ?? [])) {
+                $itemsSet = [];
+                for ($j = 0; $j < count($row['entity']); $j++) {
+                    if ($row['action'] == 'create') {
+                        $itemsSet[] = $this->createItem($this->loader);
+                    } else {
+                        $itemsSet[] = $affectedMaterials[(string)$row['entity'][$j]['id']];
+                    }
+                }
+                foreach ($itemsSet as $j => $item) {
+                    $new = !$item->id;
+                    for ($k = 0; $k < count($cells); $k++) {
+                        if ($columns[$k] ?? null) {
+                            $this->applyNativeField($columns[$k], $item, $cells[$k]['value'], ($uniqueIndex === $k));
+                        }
+                    }
+                    $item->dontUpdateAffectedPages = true;
+                    $item->dontCheckPages = true;
+                    $item->commit();
+                    $this->checkAssoc($item, (int)$data['rootCategoryId'], (int)$row['contextId'], $new);
+                    $affectedFields = [];
+                    for ($k = 0; $k < count($cells); $k++) {
+                        if ($columns[$k] ?? null) {
+                            $affectedFields[] = $this->applyCustomField(
+                                $columns[$k],
+                                $item,
+                                $cells[$k]['value'],
+                                $new,
+                                ($uniqueIndex === $k)
+                            );
+                        }
+                    }
+                    // Применим значения по умолчанию к тем полям, которые не присутствовали
+                    if ($new) {
+                        foreach ($item->fields as $field) {
+                            if ($field->defval && !in_array($field->urn, $affectedFields)) {
+                                $field->addValue($field->defval);
+                            }
+                        }
+                    }
+                    // $item->rollback();
+                    $row['entity'][$j]['name'] = $item->name;
+                    if ($row['action'] == 'create') {
+                        $row['entity'][$j]['id'] = (int)$item->id;
+                    }
+                }
+            }
+        }
+        Material_Type::updateAffectedPagesForSelf();
+        Material_Type::updateAffectedPagesForMaterials();
+        $data['step'] = 3;
+        return ['data' => $data, 'localError' => $localError];
+    }
+
+
+    /**
+     * Загружает данные пошаговой загрузки
+     * @param string $filename Имя файла для загрузки
+     * @return array
+     */
+    public function loadStepData(string $filename): array
+    {
+        $data = [];
+        if (is_file($filename)) {
+            $data = @include $filename;
+            $data = (array)$data;
+        }
+        return $data;
+    }
+
+
+    /**
+     * Сохраняет данные пошаговой загрузки
+     * @param string $filename Имя файла для загрузки
+     * @param array $data Данные пошаговой загрузки
+     */
+    public function saveStepData(string $filename, array $data)
+    {
+        $labelId = 'RAASCMSSHOPPRICELOADER' . date('YmdHis') . md5((string)rand());
+        $text = '<' . "?php\nreturn unserialize(<<" . "<'"
+              . $labelId . "'\n" . serialize($data) . "\n"
+              . $labelId . "\n);\n";
+        file_put_contents($filename, $text);
+        if (!Application::i()->prod) {
+            $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            file_put_contents(str_replace('.php', '.json', $filename), $json);
+        }
+    }
+
+
+    /**
+     * Очищает данные пошаговой загрузки
+     * @param string $filename Имя файла для загрузки
+     */
+    public function clearStepData(string $filename)
+    {
+        $jsonfile = str_replace('.php', '.json', $filename);
+        if (is_file($filename)) {
+            unlink($filename);
+        }
+        if (is_file($jsonfile)) {
+            unlink($jsonfile);
+        }
+    }
+
+
+    /**
+     * Получает список ID# задействованных материалов
+     * @param array $data Данные пошаговой загрузки
+     * @return int[]
+     */
+    public function getStepAffectedMaterialsIds(array $data): array
+    {
+        $result = [];
+        foreach (($data['rows'] ?? []) as $row) {
+            if (($row['type'] ?? null) == 'material') {
+                foreach (($row['entity'] ?? []) as $entity) {
+                    $result[(string)$entity['id']] = (int)$entity['id'];
+                }
+            }
+        }
+        $result = array_filter($result);
+        $result = array_values($result);
+        return $result;
+    }
+
+
+    /**
+     * Получает список ID# задействованных страниц
+     * @param array $data Данные пошаговой загрузки
+     * @return int[]
+     */
+    public function getStepAffectedPagesIds(array $data): array
+    {
+        $result = [];
+        // Получим категории, задействованные напрямую
+        foreach (($data['rows'] ?? []) as $row) {
+            if (($row['type'] ?? null) == 'page') {
+                foreach (($row['entity'] ?? []) as $entity) {
+                    $result[(string)$entity['id']] = (int)$entity['id'];
+                }
+            }
+        }
+
+        // Получим категории, задействованные косвенно (там, где лежат задействованные материалы)
+        $affectedMaterialsIds = $this->getStepAffectedMaterialsIds($data);
+        if ($affectedMaterialsIds) {
+            $sqlQuery = "SELECT DISTINCT pid
+                           FROM cms_materials_pages_assoc
+                          WHERE id IN (" . implode(", ", $affectedMaterialsIds) . ")";
+            $sqlResult = Material::_SQL()->getcol($sqlQuery);
+            foreach ($sqlResult as $sqlValue) {
+                $result[(string)$sqlValue] = (int)$sqlValue;
+            }
+        }
+
+        $result = array_filter($result);
+        $result = array_values($result);
+
+        // Распространим действие на все вышестоящие страницы
+        $result = PageRecursiveCache::i()->getSelfAndParentsIds($result);
+
+        return $result;
     }
 }

@@ -7,3 +7,4 @@ config.php
 /nbproject
 .phpunit.result.cache
 .phpintel
+/node_modules

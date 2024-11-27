@@ -67,6 +67,9 @@ class Updater extends \RAAS\Updater
         if (version_compare($v, '4.3.97') < 0) {
             $this->update20240731();
         }
+        if (version_compare($v, '4.4.6') < 0) {
+            $this->update20241125();
+        }
     }
 
 
@@ -573,6 +576,21 @@ class Updater extends \RAAS\Updater
             $this->SQL->query($sqlQuery);
             $sqlQuery = "ALTER TABLE `cms_shop_blocks_cart`
                               CHANGE `epay_pass2` `epay_pass2` TEXT CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'E-pay pass2'";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     * Обновление по версии 4.4.6 - добавление пошагового интерфейса для загрузчиков прайсов
+     */
+    public function update20241125()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_priceloaders", $this->tables) &&
+            !in_array('step_interface', $this->columns(SOME::_dbprefix() . "cms_shop_priceloaders"))
+        ) {
+            $sqlQuery = "ALTER TABLE cms_shop_priceloaders
+                           ADD step_interface TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Step interface'";
             $this->SQL->query($sqlQuery);
         }
     }

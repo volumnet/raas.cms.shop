@@ -166,6 +166,11 @@ class EditPriceLoaderForm extends RAASForm
                     'required' => true,
                 ],
                 'interface_id' => $this->getInterfaceField(),
+                'step_interface' => [
+                    'type' => 'checkbox',
+                    'name' => 'step_interface',
+                    'caption' => $this->view->_('STEP_INTERFACE')
+                ],
                 'create_pages' => [
                     'type' => 'checkbox',
                     'name' => 'create_pages',
