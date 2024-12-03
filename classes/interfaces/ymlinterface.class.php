@@ -424,15 +424,15 @@ class YMLInterface extends BlockInterface
                 $ignoredFields[] = $fieldArr['field_id'];
             }
         }
-        if ($mtype->settings['params'] ||
-            $mtype->settings['param_exceptions']
+        if (($mtype->settings['params'] ?? null) ||
+            ($mtype->settings['param_exceptions'] ?? null)
         ) {
-            foreach ($mtype->settings['params'] as $paramArr) {
+            foreach ((array)($mtype->settings['params'] ?? []) as $paramArr) {
                 $ignoredFields[] =  $paramArr['field']->id
                                  ?: $paramArr['field_id'];
             }
-            if ($mtype->settings['param_exceptions']) {
-                foreach ((array)$mtype->settings['ignored'] as $ignored) {
+            if ((array)($mtype->settings['param_exceptions'] ?? null)) {
+                foreach ((array)($mtype->settings['ignored'] ?? []) as $ignored) {
                     if ($ignored instanceof Material_Field) {
                         $ignoredFields[] = $ignored->id;
                     } else {
@@ -606,7 +606,7 @@ class YMLInterface extends BlockInterface
                 case 'oldprice':
                     $offerTxt .= $this->getOfferOldPriceBlock(
                         $material,
-                        (array)$mtype->settings['fields'][$key]
+                        (array)($mtype->settings['fields'][$key] ?? [])
                     );
                     break;
                 default:
@@ -621,8 +621,8 @@ class YMLInterface extends BlockInterface
             }
         }
 
-        if ($mtype->settings['params'] ||
-            $mtype->settings['param_exceptions']
+        if (($mtype->settings['params'] ?? []) ||
+            ($mtype->settings['param_exceptions'] ?? [])
         ) {
             $params = $this->getMTypeParams($mtype, $ignoredFields);
             foreach ($params as $param) {
@@ -830,7 +830,7 @@ class YMLInterface extends BlockInterface
         Material_Type $mtype,
         array $ignoredFields = []
     ) {
-        $params = $mtype->settings['params'];
+        $params = (array)($mtype->settings['params'] ?? []);
         if ($mtype->settings['param_exceptions']) {
             foreach (['name', 'description'] as $key) {
                 if (!in_array($key, $ignoredFields)) {
@@ -881,22 +881,28 @@ class YMLInterface extends BlockInterface
             return '';
         }
         $v = $this->getValue($material, $key, $settings);
+        if ($v instanceof Material) {
+            $v = $v->name;
+        }
+        if (!is_scalar($v)) {
+            return '';
+        }
         $v = trim((string)$v);
         if ($v === '') {
             return '';
         }
         $paramAttrs = '';
-        if ($settings['name']) {
+        if ($settings['name'] ?? null) {
             $paramAttrs .= ' name="'
                         .      htmlspecialchars($settings['name'])
                         .  '"';
-        } elseif ($settings['field']->id) {
+        } elseif (($settings['field'] ?? null) && $settings['field']->id) {
             $paramAttrs .= ' name="'
                         .      htmlspecialchars($settings['field']->name)
                         .  '"';
-        } elseif ($settings['field_id'] == 'name') {
+        } elseif (($settings['field_id'] ?? null) == 'name') {
             $paramAttrs .= ' name="' . htmlspecialchars(NAME) . '"';
-        } elseif ($settings['field_id'] == 'description') {
+        } elseif (($settings['field_id'] ?? null) == 'description') {
             $paramAttrs .= ' name="' . htmlspecialchars(DESCRIPTION) . '"';
         } else {
             $paramAttrs .= ' name="'

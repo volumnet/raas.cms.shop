@@ -47,35 +47,35 @@ class RecalculatePriceCommand extends Command
             return;
         }
         $materialType = Material_Type::importByURN($materialTypeURN);
-        if (!$materialType->id) {
+        if (!($materialType && $materialType->id)) {
             $logMessage = 'Material type "' . $materialTypeURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
         $page = new Page();
-        $pageDiscountField = $page->fields[$pageDiscountFieldURN];
-        if (!$pageDiscountField->id) {
+        $pageDiscountField = $page->fields[$pageDiscountFieldURN] ?? null;
+        if (!($pageDiscountField && $pageDiscountField->id)) {
             $logMessage = 'Page field "' . $pageDiscountFieldURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
-        $priceField = $materialType->fields[$priceFieldURN];
-        if (!$priceField->id) {
+        $priceField = $materialType->fields[$priceFieldURN] ?? null;
+        if (!($priceField && $priceField->id)) {
             $logMessage = 'Catalog field "' . $priceFieldURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
-        $basePriceField = $materialType->fields[$basePriceFieldURN];
-        if (!$basePriceField->id) {
+        $basePriceField = $materialType->fields[$basePriceFieldURN] ?? null;
+        if (!($basePriceField && $basePriceField->id)) {
             $logMessage = 'Catalog field "' . $basePriceFieldURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
-        $fixPriceField = $materialType->fields[$fixPriceFieldURN];
+        $fixPriceField = $materialType->fields[$fixPriceFieldURN] ?? null;
         if (!$fixPriceField->id) {
             $logMessage = 'Catalog field "' . $fixPriceFieldURN . '"' .
                 ' is not found';

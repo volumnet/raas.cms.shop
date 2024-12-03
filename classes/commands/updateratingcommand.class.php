@@ -45,22 +45,22 @@ class UpdateRatingCommand extends Command
             $this->controller->doLog('Data is actual');
             return;
         }
-        $catalogMaterialType = Material_Type::importByURN($catalogMaterialTypeURN);
-        if (!$catalogMaterialType->id) {
+        $catalogMaterialType = Material_Type::importByURN($catalogMaterialTypeURN) ?? null;
+        if (!($catalogMaterialType && $catalogMaterialType->id)) {
             $logMessage = 'Material type "' . $catalogMaterialTypeURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
-        $catalogRatingField = $catalogMaterialType->fields[$catalogRatingFieldURN];
-        if (!$catalogRatingField->id) {
+        $catalogRatingField = $catalogMaterialType->fields[$catalogRatingFieldURN] ?? null;
+        if (!($catalogRatingField && $catalogRatingField->id)) {
             $logMessage = 'Catalog field "' . $catalogRatingFieldURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
-        $catalogReviewsCounterField = $catalogMaterialType->fields[$catalogReviewsCounterFieldURN];
-        if (!$catalogReviewsCounterField->id) {
+        $catalogReviewsCounterField = $catalogMaterialType->fields[$catalogReviewsCounterFieldURN] ?? null;
+        if (!($catalogReviewsCounterField && $catalogReviewsCounterField->id)) {
             $logMessage = 'Catalog field "' . $catalogReviewsCounterFieldURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
@@ -68,21 +68,21 @@ class UpdateRatingCommand extends Command
         }
 
         $commentsMaterialType = Material_Type::importByURN($commentsMaterialTypeURN);
-        if (!$commentsMaterialType->id) {
+        if (!($commentsMaterialType && $commentsMaterialType->id)) {
             $logMessage = 'Material type "' . $commentsMaterialTypeURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
-        $commentsMaterialField = $commentsMaterialType->fields[$commentsMaterialFieldURN];
-        if (!$commentsMaterialField->id) {
+        $commentsMaterialField = $commentsMaterialType->fields[$commentsMaterialFieldURN] ?? null;
+        if (!($commentsMaterialField && $commentsMaterialField->id)) {
             $logMessage = 'Goods comments field "' . $commentsMaterialFieldURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);
             return;
         }
-        $commentsRatingField = $commentsMaterialType->fields[$commentsRatingFieldURN];
-        if (!$commentsRatingField->id) {
+        $commentsRatingField = $commentsMaterialType->fields[$commentsRatingFieldURN] ?? null;
+        if (!($commentsRatingField && $commentsRatingField->id)) {
             $logMessage = 'Goods comments field "' . $commentsRatingFieldURN . '"' .
                 ' is not found';
             $this->controller->doLog($logMessage);

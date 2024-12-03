@@ -21,7 +21,7 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
         </tr>
       </thead>
       <tbody data-role="raas-repo-container">
-        <?php foreach ((array)$DATA['add_param_name'] as $i => $temp) { ?>
+        <?php foreach ((array)($DATA['add_param_name'] ?? []) as $i => $temp) { ?>
             <tr data-role="raas-repo-element">
               <td><input type="text" class="span2" name="add_param_name[]" value="<?php echo htmlspecialchars($DATA['add_param_name'][$i] ?? '')?>" /></td>
               <td>
@@ -43,20 +43,20 @@ $_RAASForm_FieldSet = function(\RAAS\FieldSet $FieldSet) use (&$_RAASForm_Form_T
       </tbody>
       <tbody>
         <tr data-role="raas-repo">
-          <td><input type="text" class="span2" name="add_param_name[]" value="<?php echo htmlspecialchars($DATA['add_param_name'][$i] ?? '')?>" disabled="disabled" /></td>
+          <td><input type="text" class="span2" name="add_param_name[]" disabled="disabled" /></td>
           <td>
             <select class="span2" name="add_param_field[]" disabled="disabled">
-              <option value="" <?php echo !$DATA['add_param_field'][$i] ? 'selected="selected"' : ''?>>--</option>
+              <option value="">--</option>
               <?php foreach ($fields as $row) { ?>
-                  <option value="<?php echo htmlspecialchars($row['value'])?>" <?php echo ($DATA['add_param_field'][$i] ?? '') == $row['value'] ? 'selected="selected"' : ''?>>
+                  <option value="<?php echo htmlspecialchars($row['value'])?>">
                     <?php echo htmlspecialchars($row['caption'])?>
                   </option>
               <?php } ?>
             </select>
           </td>
-          <td><input type="text" name="add_param_callback[]" value="<?php echo htmlspecialchars($DATA['add_param_callback'][$i] ?? '')?>" disabled="disabled" /></td>
-          <td><input type="text" class="span2" name="add_param_value[]" value="<?php echo htmlspecialchars($DATA['add_param_value'][$i] ?? '')?>" disabled="disabled" /></td>
-          <td><input type="text" class="span1" name="add_param_unit[]" value="<?php echo htmlspecialchars($DATA['add_param_unit'][$i] ?? '')?>" disabled="disabled" /></td>
+          <td><input type="text" name="add_param_callback[]" disabled="disabled" /></td>
+          <td><input type="text" class="span2" name="add_param_value[]" disabled="disabled" /></td>
+          <td><input type="text" class="span1" name="add_param_unit[]" disabled="disabled" /></td>
           <td><a href="#" class="close" data-role="raas-repo-del">&times;</a></td>
         </tr>
       </tbody>

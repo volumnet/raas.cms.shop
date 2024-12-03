@@ -169,7 +169,8 @@ class EditPriceLoaderForm extends RAASForm
                 'step_interface' => [
                     'type' => 'checkbox',
                     'name' => 'step_interface',
-                    'caption' => $this->view->_('STEP_INTERFACE')
+                    'caption' => $this->view->_('STEP_INTERFACE'),
+                    'default' => 1,
                 ],
                 'create_pages' => [
                     'type' => 'checkbox',
@@ -180,13 +181,13 @@ class EditPriceLoaderForm extends RAASForm
                     'type' => 'checkbox',
                     'name' => 'create_materials',
                     'caption' => $this->view->_('ALLOW_TO_CREATE_MATERIALS'),
-                    'default' => 1
+                    'default' => 1,
                 ],
                 'update_materials' => [
                     'type' => 'checkbox',
                     'name' => 'update_materials',
                     'caption' => $this->view->_('ALLOW_TO_UPDATE_MATERIALS'),
-                    'default' => 1
+                    'default' => 1,
                 ],
                 'cats_usage' => [
                     'type' => 'select',

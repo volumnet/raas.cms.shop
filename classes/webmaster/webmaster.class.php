@@ -240,6 +240,7 @@ class Webmaster extends CMSWebmaster
                 'urn' => 'default',
                 'cat_id' => (int)$catalog->id,
                 'interface_classname' => PriceloaderInterface::class,
+                'step_interface' => 1,
             ]);
             $PL->commit();
             $i = 0;

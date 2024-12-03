@@ -90,7 +90,7 @@ class UpdatePropsCacheCommand extends Command
         $fieldsetsURNs = explode(',', $fieldsetsURNs);
         $fieldsetsURNs = array_map('trim', $fieldsetsURNs);
         foreach ($fieldsetsURNs as $fieldsetURN) {
-            $fieldset = $page->fields[$fieldsetURN];
+            $fieldset = $page->fields[$fieldsetURN] ?? null;
             if (!$fieldset) {
                 $logMessage = 'Page field "' . $fieldsetURN . '"' .
                     ' is not found';
@@ -102,8 +102,8 @@ class UpdatePropsCacheCommand extends Command
         $additionalFieldsURNs = explode(',', $additionalFieldsURNs);
         $additionalFieldsURNs = array_map('trim', $additionalFieldsURNs);
         foreach ($additionalFieldsURNs as $additionalFieldURN) {
-            $field = $materialType->fields[$additionalFieldURN];
-            if (!$field->id) {
+            $field = $materialType->fields[$additionalFieldURN] ?? null;
+            if (!($field && $field->id)) {
                 $logMessage = 'Material field "' . $additionalFieldURN . '"' .
                     ' is not found';
                 $this->controller->doLog($logMessage);
@@ -139,7 +139,7 @@ class UpdatePropsCacheCommand extends Command
             $lastModifiedPageTimestamp
         );
 
-        $cacheUpdated = strtotime(Module::i()->registryGet('cache_shop_props_updated'));
+        $cacheUpdated = strtotime((string)Module::i()->registryGet('cache_shop_props_updated'));
         return $lastModified > $cacheUpdated;
     }
 
