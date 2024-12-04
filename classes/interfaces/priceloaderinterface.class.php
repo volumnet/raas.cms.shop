@@ -2065,6 +2065,9 @@ class PriceloaderInterface extends AbstractInterface
     {
         $data = [];
         if (is_file($filename)) {
+            if (function_exists('opcache_invalidate')) {
+                opcache_invalidate($filename, true);
+            }
             $data = @include $filename;
             $data = (array)$data;
         }
