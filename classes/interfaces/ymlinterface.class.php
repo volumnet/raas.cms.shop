@@ -756,7 +756,7 @@ class YMLInterface extends BlockInterface
         }
         $v = $this->getValue($material, $key, $settings);
         if ($asDescription) {
-            $v = strip_tags($v);
+            $v = strip_tags((string)$v);
             $v = html_entity_decode($v, ENT_COMPAT | ENT_HTML401, 'UTF-8');
             $v = preg_replace('/(\\r|\\n)+/umi', ' ', $v);
             $v = \SOME\Text::cuttext($v, 512, '...');

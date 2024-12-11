@@ -588,10 +588,10 @@ class CatalogTemplate extends MaterialTypeTemplate
                 ($price % 2) ? (int)($price * (100 + rand(5, 25)) / 100) : 0
             );
             $item->fields['videos']->addValue(
-                'https://www.youtube.com/watch?v=YVgc2PQd_bo'
+                'https://rutube.ru/video/0f8778b4b61fa43667831b7301f33c4e/'
             );
             $item->fields['videos']->addValue(
-                'https://www.youtube.com/watch?v=YVgc2PQd_bo'
+                'https://vkvideo.ru/video-45960892_456246794'
             );
             $item->fields['spec']->addValue(1);
             $item->fields['available']->addValue((int)rand(0, 10));

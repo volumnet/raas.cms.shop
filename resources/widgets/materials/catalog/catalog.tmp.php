@@ -20,24 +20,10 @@ use RAAS\CMS\Snippet;
 if ($Item) {
     $formatter = new ItemArrayFormatter($Item);
     $itemData = $formatter->format();
-    $photoVideo = (array)$itemData['visImages'];
-    foreach ($itemData['videos'] as $video) {
-        $ytid = $ytname = '';
-        $youtubeRx = '/^(.*?)((http(s?):\\/\\/.*?(((\\?|&)v=)|(embed\\/)|(youtu\\.be\\/)))([\\w\\-\\_]+).*?)$/umis';
-        if (preg_match($youtubeRx, (string)$video['url'], $regs)) {
-            $ytname = trim($regs[1]);
-            $ytid = trim($regs[10]);
-        }
-        if ($ytid) {
-            $videoEntry = [
-                'ytid' => $ytid,
-            ];
-            if ($ytname) {
-                $videoEntry['name'] = $ytname;
-            }
-            $photoVideo[] = $videoEntry;
-        }
-    }
+    $photoVideo = array_merge(
+        (array)$itemData['visImages'],
+        (array)$itemData['videos']
+    );
 
     $host = 'http' . (mb_strtolower($_SERVER['HTTPS']) == 'on' ? 's' : '') . '://'
           . $_SERVER['HTTP_HOST'];
@@ -86,14 +72,14 @@ if ($Item) {
           <div class="catalog-article__images-container">
             <div class="catalog-article__image">
               <?php foreach ($photoVideo as $i => $row) {
-                  if ($ytid = $row['ytid']) {
+                  if (($row['isVideo'] ?? false)) {
                       $videoJsonLd = [
                           '@context' => 'http://schema.org',
                           '@type' => 'VideoObject',
-                          'name' => $itemData['name'],
-                          'description' => $itemData['name'],
-                          'url' => 'https://youtube.com/embed/' . $ytid,
-                          'thumbnailUrl' => 'https://i.ytimg.com/vi/' . addslashes($ytid) . '/hqdefault.jpg',
+                          'name' => $row['name'] ?: $itemData['name'],
+                          'description' => $row['name'] ?: $itemData['name'],
+                          'url' => $row['url'],
+                          'thumbnailUrl' => $row['image'],
                           'uploadDate' => date('Y-m-d', strtotime($itemData['modify_date'])),
                       ];
                       ?>
@@ -103,27 +89,27 @@ if ($Item) {
                         <?php echo $i ? 'style="display: none"' : ''?>
                         data-v-bind_style="{display: ((vm.selectedImage == <?php echo $i?>) ? 'block' : 'none')}"
                       >
-                        <meta itemprop="name" content="<?php echo htmlspecialchars($itemData['name'])?>" />
-                        <meta itemprop="description" content="<?php echo htmlspecialchars($itemData['name'])?>" />
+                        <meta itemprop="name" content="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" />
+                        <meta itemprop="description" content="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>" />
                         <meta
                           itemprop="uploadDate"
                           content="<?php echo date('Y-m-d', strtotime($itemData['modify_date']))?>"
                         />
                         <meta
                           itemprop="thumbnailUrl"
-                          content="https://i.ytimg.com/vi/<?php echo htmlspecialchars(addslashes($ytid))?>/hqdefault.jpg"
+                          content="<?php echo htmlspecialchars($row['image'])?>"
                         />
                         <a
                           itemprop="url"
                           class="catalog-article__image-video"
-                          href="https://youtube.com/embed/<?php echo $ytid?>"
+                          href="<?php echo htmlspecialchars($row['url'])?>"
                           data-lightbox-gallery="catalog-article<?php echo (int)$Block->id?>__image"
-                          title="<?php echo htmlspecialchars($row['name'])?>"
+                          title="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>"
                         >
                           <img
                             loading="lazy"
                             itemprop="thumbnail"
-                            src="https://i.ytimg.com/vi/<?php echo htmlspecialchars($ytid)?>/hqdefault.jpg"
+                            src="<?php echo htmlspecialchars($row['image'])?>"
                             alt="<?php echo htmlspecialchars($row['name'] ?: $itemData['name'])?>"
                           >
                         </a>
@@ -175,9 +161,9 @@ if ($Item) {
               <div class="catalog-article-images-list__inner slider__list" data-role="slider-list">
                 <div class="catalog-article-images-list__list slider-list slider-list_horizontal">
                   <?php foreach ($photoVideo as $i => $row) {
-                      if ($row['ytid']) {
-                          $image = 'https://i.ytimg.com/vi/' . htmlspecialchars($ytid) . '/hqdefault.jpg';
-                          $href = 'https://youtube.com/embed/' . $ytid;
+                      if ($row['isVideo'] ?? false) {
+                          $image = $row['image'];
+                          $href = $row['url'];
                       } else {
                           $image = $row['smallURL'];
                           $href = $row['fileURL'];
@@ -188,7 +174,7 @@ if ($Item) {
                           catalog-article-images-list__item
                           slider-list__item
                           catalog-article-images-item
-                          <?php echo $row['ytid'] ? 'catalog-article-images-item_video' : ''?>
+                          <?php echo ($row['isVideo'] ?? false) ? 'catalog-article-images-item_video' : ''?>
                         "
                         href="<?php echo htmlspecialchars($href)?>"
                         data-v-on_click="vm.clickThumbnail(<?php echo (int)$i?>, $event)"
