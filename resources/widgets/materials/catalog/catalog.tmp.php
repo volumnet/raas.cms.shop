@@ -728,11 +728,7 @@ if ($Item) {
     <script type="application/ld+json"><?php echo json_encode($jsonLd)?></script>
     <?php
     AssetManager::requestCSS(['/css/catalog-article.css']);
-    AssetManager::requestJS([
-        '//yastatic.net/es5-shims/0.0.2/es5-shims.min.js',
-        '//yastatic.net/share2/share.js',
-        '/js/catalog-article.js'
-    ]);
+    AssetManager::requestJS(['/js/catalog-article.js']);
 } else {
     $itemsData = [
         'pages' => (int)$Pages->pages,

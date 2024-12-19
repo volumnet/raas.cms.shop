@@ -90,16 +90,16 @@ export default {
          * Проверяет наличие в корзинах
          */
         checkCarts() {
-            if (window.app.cart) {
+            if (window.app.cart && window.app.cart.checkAmount) {
                 this.inCart = window.app.cart.checkAmount(this.actualItem);
                 if (this.bindAmountToCart) {
                     this.amount = this.inCart;
                 }
             }
-            if (window.app.favorites) {
+            if (window.app.favorites && window.app.favorites.checkAmount) {
                 this.inFavorites = window.app.favorites.checkAmount(this.actualItem);
             }
-            if (window.app.compare) {
+            if (window.app.compare && window.app.compare.checkAmount) {
                 this.inCompare = window.app.compare.checkAmount(this.actualItem);
             }
         },

@@ -790,7 +790,7 @@ class CatalogInterface extends MaterialInterface
             $metaData['counter'] = $page->catalogFilter->count($page, true);
             $metaData['selfCounter'] = $page->catalogFilter->count($page, false);
             $priceField = ($page->catalogFilter->propertiesByURNs)['price'] ?? null;
-            if ($priceField->id) {
+            if ($priceField && $priceField->id) {
                 $priceValues = array_keys(($page->catalogFilter->catalogPropsMapping)[$priceField->id] ?? []);
                 $priceValues = array_filter($priceValues);
                 if ($priceValues) {
