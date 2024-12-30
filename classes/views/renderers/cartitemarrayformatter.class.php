@@ -45,7 +45,7 @@ class CartItemArrayFormatter
             'id' => (int)$this->item->id,
             'name' => trim($this->item->name),
             'meta' => trim($this->item->meta),
-            'metaJSON' => $this->item->metaJSON,
+            'metaJSON' => (object)$this->item->metaJSON,
             'amount' => (int)$this->item->amount,
             'price' => (float)$this->item->realprice,
         ]);

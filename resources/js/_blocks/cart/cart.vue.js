@@ -82,6 +82,13 @@ export default {
         $(window).on('raas.shop.cart-updated', () => {
             this.checkResultForAdditional();
         });
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState == 'visible') {
+                if (!this.success) {
+                    this.getAdditional();
+                }
+            }
+        });
     },
     methods: {
         getAdditionalData() {

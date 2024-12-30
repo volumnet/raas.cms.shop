@@ -85,7 +85,8 @@ class CartItem
                 $this->$var = (int)$val;
                 break;
             case 'realprice':
-                $this->$var = (float)$val;
+                // 2024-12-26, AVS: сделал округление до копеек
+                $this->$var = (int)((float)$val * 100) / 100;
                 break;
             case 'name':
             case 'meta':

@@ -575,7 +575,7 @@ class CartInterface extends FormInterface
         $user = Controller_Frontend::i()->user;
         foreach ($cart->items as $cartItem) {
             if ($cartItem->amount) {
-                $material = new Material($cartItem->id);
+                $material = new Material($cartItem->id); // 2024-12-26, AVS: Сделано для совместимости со старыми корзинами, где товары это stdObject
                 $price = $cart->getPrice($material, (float)$cartItem->amount, $cartItem->metaJSON);
                 $orderItems[] = [
                     'material_id' => $cartItem->id,

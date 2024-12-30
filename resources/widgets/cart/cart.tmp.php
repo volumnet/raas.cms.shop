@@ -81,16 +81,6 @@ if (($Page->mime == 'application/json') || (int)($_GET['AJAX'] ?? 0)) {
     if ($success[(int)$Block->id]) {
         $result['success'] = true;
         $result['orderId'] = $Item->id;
-        $result['orderECommerce'] = [];
-        $catalogMaterialType = Material_Type::importByURN('catalog');
-        foreach ((array)$Item->items as $i => $item) {
-            if (in_array(
-                $item->pid,
-                MaterialTypeRecursiveCache::i()->getSelfAndChildrenIds($catalogMaterialType->id)
-            )) { // Каталог продукции
-                $eCommerceData['orderECommerce'][] = ECommerce::getProduct($item, $i);
-            }
-        }
     }
     if ($localError) {
         $result['localError'] = $localError;

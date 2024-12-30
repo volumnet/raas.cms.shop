@@ -173,6 +173,7 @@ export default class {
                     this.abortControllersByTypes[requestType] = null;
                 }
                 this.updateData(remoteData);
+                this.loading = false;
                 return remoteData;
             } catch (e) {
                 // Перехват прерывания
