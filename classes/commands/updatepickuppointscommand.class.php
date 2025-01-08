@@ -122,7 +122,7 @@ class UpdatePickupPointsCommand extends Command
      */
     public function normalizeCityName(string $cityName): string
     {
-        $rx = '/^((г(ор(од)?)?)|(д(ер(евня)?)?)|(с(ело)?)|(п(ос(елок)?)?)|пгт)\.? /umis';
+        $rx = '/^((г(ор(од)?)?)|(д(ер(евня)?)?)|(с(ело)?)|(п(ос(елок)?)?)|пгт|(станица)|(ст-ца)|(х(утор)?)|(у(лус)?))\.? /umis';
         $cityName = preg_replace($rx, '', $cityName);
         return trim((string)$cityName);
     }
