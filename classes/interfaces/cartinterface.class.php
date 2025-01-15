@@ -43,9 +43,9 @@ class CartInterface extends FormInterface
 
     /**
      * Конструктор класса
-     * @param Block_Cart|null $block Блок, для которого применяется
+     * @param ?Block_Cart $block Блок, для которого применяется
      *                               интерфейс
-     * @param Page|null $page Страница, для которой применяется интерфейс
+     * @param ?Page $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @param array $post Поля $_POST параметров
      * @param array $cookie Поля $_COOKIE параметров
@@ -54,8 +54,8 @@ class CartInterface extends FormInterface
      * @param array $files Поля $_FILES параметров
      */
     public function __construct(
-        Block_Cart $block = null,
-        Page $page = null,
+        ?Block_Cart $block = null,
+        ?Page $page = null,
         array $get = [],
         array $post = [],
         array $cookie = [],
@@ -307,13 +307,13 @@ class CartInterface extends FormInterface
      * Функция расчета дополнительных пунктов для корзины
      * @param Cart $cart Корзина
      * @param array $post POST-данные
-     * @param User $user Пользователь
+     * @param ?User $user Пользователь
      * @return array <pre>[
      *     'items' => array<CartItem>,
      *     string[] => mixed Дополнительные данные
      * ]</pre>
      */
-    public function getAdditionals(Cart $cart, array $post = [], User $user = null): array
+    public function getAdditionals(Cart $cart, array $post = [], ?User $user = null): array
     {
         if ($additionalsCallback = $this->additionalsCallback) {
             $result = $additionalsCallback($cart, $this->post, $user);
@@ -361,7 +361,7 @@ class CartInterface extends FormInterface
     /**
      * Обрабатывает форму заказа
      * @param Cart $cart Корзина
-     * @param Page $page Текущая страница
+     * @param ?Page $page Текущая страница
      * @param array $post Данные $_POST-полей
      * @param array $server Данные $_SERVER-полей
      * @param array $files Данные $_FILES-полей
@@ -372,7 +372,7 @@ class CartInterface extends FormInterface
      */
     public function processOrderForm(
         Cart $cart,
-        Page $page = null,
+        ?Page $page = null,
         array $post = [],
         array $server = [],
         array $files = []
@@ -604,7 +604,7 @@ class CartInterface extends FormInterface
     /**
      * Уведомление о заказе
      * @param Order $order Заказ
-     * @param Material $material Созданный материал
+     * @param ?Material $material Созданный материал
      * @param bool $forAdmin Уведомление для администратора
      *                       (если нет, то для пользователя)
      * @param bool $debug Режим отладки
@@ -622,7 +622,7 @@ class CartInterface extends FormInterface
      */
     public function notifyOrder(
         Order $order,
-        Material $material = null,
+        ?Material $material = null,
         bool $forAdmin = false,
         bool $debug = false
     ) {

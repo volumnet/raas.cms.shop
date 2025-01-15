@@ -107,8 +107,8 @@ class PriceloaderInterface extends AbstractInterface
     /**
      * Конструктор класса
      * @param PriceLoader $loader Загрузчик прайсов
-     * @param Block|null $block Блок, для которого применяется интерфейс
-     * @param Page|null $page Страница, для которой применяется интерфейс
+     * @param ?Block $block Блок, для которого применяется интерфейс
+     * @param ?Page $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @param array $post Поля $_POST параметров
      * @param array $cookie Поля $_COOKIE параметров
@@ -118,8 +118,8 @@ class PriceloaderInterface extends AbstractInterface
      */
     public function __construct(
         PriceLoader $loader,
-        Block $block = null,
-        Page $page = null,
+        ?Block $block = null,
+        ?Page $page = null,
         array $get = [],
         array $post = [],
         array $cookie = [],
@@ -247,7 +247,7 @@ class PriceloaderInterface extends AbstractInterface
 
     /**
      * Выгрузка прайса с сервера
-     * @param Page $page Страница, из которой выгружаем
+     * @param ?Page $page Страница, из которой выгружаем
      * @param int $rows Сколько строк пропускать
      * @param int $cols Сколько столбцов пропускать
      * @param 'csv'|'xls'|'xlsx' $type Формат, в котором выгружаем
@@ -256,7 +256,7 @@ class PriceloaderInterface extends AbstractInterface
      * @return string|null В debug-режиме возвращает текст файла
      */
     public function download(
-        Page $page = null,
+        ?Page $page = null,
         int $rows = 0,
         int $cols = 0,
         string $type = 'xls',
@@ -1594,7 +1594,7 @@ class PriceloaderInterface extends AbstractInterface
     /**
      * Выгружает данные
      * @param PriceLoader $loader Загрузчик прайсов
-     * @param Page $page Страница, в которую загружаем
+     * @param ?Page $page Страница, в которую загружаем
      * @param int $rows Сколько строк пропускать
      * @param int $level Уровень вложенности
      * @param Material_Type[] $materialTypes Типы материалов, которые выгружаем
@@ -1602,7 +1602,7 @@ class PriceloaderInterface extends AbstractInterface
      */
     public function exportData(
         PriceLoader $loader,
-        Page $page = null,
+        ?Page $page = null,
         $rows = 0,
         $level = 0,
         array $materialTypes = []

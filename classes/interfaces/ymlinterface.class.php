@@ -26,7 +26,7 @@ class YMLInterface extends BlockInterface
     /**
      * Конструктор класса
      * @param Block_YML $block Блок, для которого применяется интерфейс
-     * @param Page|null $page Страница, для которой применяется интерфейс
+     * @param ?Page $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @param array $post Поля $_POST параметров
      * @param array $cookie Поля $_COOKIE параметров
@@ -36,7 +36,7 @@ class YMLInterface extends BlockInterface
      */
     public function __construct(
         Block_YML $block,
-        Page $page = null,
+        ?Page $page = null,
         array $get = [],
         array $post = [],
         array $cookie = [],

@@ -133,25 +133,25 @@ class PriceLoader extends SOME
 
     /**
      * Загрузить прайс
-     * @param array|null $file Файл для загрузки <pre>[
+     * @param ?array $file Файл для загрузки <pre>[
      *     'name' => string Имя файла при загрузке,
      *     'tmp_name' => string Путь к загруженному временному файлу,
      *     'type' => string MIME-тип
      * ]</pre>
-     * @param Page|null $page Корневая страница для загрузки
+     * @param ?Page $page Корневая страница для загрузки
      * @param bool $test Тестовый режим
      * @param int $clear Режим очистки неиспользуемых товаров/страниц
-     * @param int|null $rows Отступ строк
-     * @param int|null $cols Отступ колонок
+     * @param ?int $rows Отступ строк
+     * @param ?int $cols Отступ колонок
      * @return mixed
      */
     public function upload(
-        array $file = null,
-        Page $page = null,
-        bool $test = null,
+        ?array $file = null,
+        ?Page $page = null,
+        ?bool $test = null,
         int $clear = self::DELETE_PREVIOUS_MATERIALS_NONE,
-        int $rows = null,
-        int $cols = null
+        ?int $rows = null,
+        ?int $cols = null
     ) {
         if ($page === null) {
             $page = $this->Page;
@@ -194,18 +194,18 @@ class PriceLoader extends SOME
 
     /**
      * Выгрузить прайс
-     * @param Page|null $page Корневая страница для загрузки
-     * @param int|null $rows Отступ строк
-     * @param int|null $cols Отступ колонок
-     * @param string $type Тип выгружаемого файла
-     * @param string $encoding Кодировка
+     * @param ?Page $page Корневая страница для загрузки
+     * @param ?int $rows Отступ строк
+     * @param ?int $cols Отступ колонок
+     * @param ?string $type Тип выгружаемого файла
+     * @param ?string $encoding Кодировка
      */
     public function download(
-        Page $page = null,
-        int $rows = null,
-        int $cols = null,
-        string $type = null,
-        string $encoding = null
+        ?Page $page = null,
+        ?int $rows = null,
+        ?int $cols = null,
+        ?string $type = null,
+        ?string $encoding = null
     ) {
         if ($page === null) {
             $page = $this->Page;

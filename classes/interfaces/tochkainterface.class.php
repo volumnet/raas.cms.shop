@@ -58,13 +58,13 @@ class TochkaInterface extends EPayInterface
      * @param Order $order Обрабатываемый заказ
      * @param Block_Cart $block Блок настроек
      * @param Page $page Текущая страница
-     * @param string $debugInput Проверочный входной запрос для отладки
+     * @param ?string $debugInput Проверочный входной запрос для отладки
      * @return array|null <pre><code>[
      *     'orderId' =>? string ID# заказа,
      *     'paymentId' =>? string ID# платежа
      * ]</code></pre> Данные вебхука или null, если вебхук не обнаружен
      */
-    public function checkWebhook(string $debugInput = null)
+    public function checkWebhook(?string $debugInput = null)
     {
         if (($this->server['REQUEST_METHOD'] ?? '') == 'POST') {
             $jwt = $this->post['@raw'] ?: file_get_contents('php://input'); // $this->post['@raw'] для проверки

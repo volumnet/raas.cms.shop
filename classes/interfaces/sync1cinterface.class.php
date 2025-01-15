@@ -47,31 +47,31 @@ class Sync1CInterface extends AbstractInterface
 
     /**
      * Загрузка прайса на сервер
-     * @param Page $page Страница, в которую загружаем
-     * @param Material_Type $materialType Тип материалов
-     * @param string $goodsFile Путь к файлу номенклатуры
-     * @param string $offersFile Путь к файлу предложений
-     * @param string $goodsXSLFile Путь к XSL-файлу преобразования номенклатуры
-     * @param string $offersXSLFile Путь к XSL-файлу преобразования предложений
-     * @param string|null $mappingFile Файл маппинга
+     * @param ?Page $page Страница, в которую загружаем
+     * @param ?Material_Type $materialType Тип материалов
+     * @param ?string $goodsFile Путь к файлу номенклатуры
+     * @param ?string $offersFile Путь к файлу предложений
+     * @param ?string $goodsXSLFile Путь к XSL-файлу преобразования номенклатуры
+     * @param ?string $offersXSLFile Путь к XSL-файлу преобразования предложений
+     * @param ?string $mappingFile Файл маппинга
      * @param string $articleFieldURN URN поля с артикулом
      * @param string $dir Путь к папке с файлами для медиа-полей
      * @param int $clear Очищать предыдущие материалы (константа из self::DELETE_PREVIOUS_MATERIALS_...)
-     * @param callable(string Текст для вывода) $logger Логгер
+     * @param ?callable $logger Логгер <pre><code>function (string Текст для вывода)</code></pre>
      * @param int $saveMappingAfterIterations Сохранять файл маппинга после определенного количества итераций
      */
     public function process(
-        Page $page = null,
-        Material_Type $materialType = null,
-        $goodsFile = null,
-        $offersFile = null,
-        $goodsXSLFile = null,
-        $offersXSLFile = null,
-        $mappingFile = null,
+        ?Page $page = null,
+        ?Material_Type $materialType = null,
+        ?$goodsFile = null,
+        ?$offersFile = null,
+        ?$goodsXSLFile = null,
+        ?$offersXSLFile = null,
+        ?$mappingFile = null,
         $articleFieldURN = 'article',
         $dir = __DIR__,
         $clear = self::DELETE_PREVIOUS_MATERIALS_NONE,
-        callable $logger = null,
+        ?callable $logger = null,
         $saveMappingAfterIterations = 100
     ) {
         $data = $this->loadData($goodsFile, $offersFile, $goodsXSLFile, $offersXSLFile);
@@ -296,7 +296,7 @@ class Sync1CInterface extends AbstractInterface
      * @param string $searchField Наименование поля, по которому ищем
      * @param string $parentClassname Наименование родительского класса
      * @param string $pidN Наименование поля ID# родителя
-     * @param SOME $defaultParent Родительская сущность по умолчанию
+     * @param ?SOME $defaultParent Родительская сущность по умолчанию
      * @param bool $withParentChildren Учитывать дочерние элементы для родительского, в качестве родительских
      * @return SOME Найденная или созданная сущность
      */
@@ -308,7 +308,7 @@ class Sync1CInterface extends AbstractInterface
         $searchField = 'name',
         $parentClassname = null,
         $pidN = 'pid',
-        SOME $defaultParent = null,
+        ?SOME $defaultParent = null,
         $withParentChildren = false
     ) {
         $entity = $this->findEntityById($classname, $data, $idN, $mapping);
@@ -795,8 +795,8 @@ class Sync1CInterface extends AbstractInterface
      *     string[] Артикул => int ID# товара
      * ></code></pre> маппинг по артикулам
      * @param string $dir Путь к папке с файлами для медиа-полей
-     * @param callable(string Текст для вывода) $logger Логгер
-     * @param string|null $mappingFile Файл маппинга
+     * @param ?callable $logger Логгер <pre><code>function (string Текст для вывода)</code></pre>
+     * @param ?string $mappingFile Файл маппинга
      * @param int $saveMappingAfterIterations Сохранять файл маппинга после определенного количества итераций
      * @return array<string[] Имя класса => array<int>> Задействованные сущности
      */
@@ -806,8 +806,8 @@ class Sync1CInterface extends AbstractInterface
         array $data,
         array $articlesMapping,
         string $dir,
-        callable $logger = null,
-        string $mappingFile = null,
+        ?callable $logger = null,
+        ?string $mappingFile = null,
         int $saveMappingAfterIterations = 100
     ): array {
         $mapping = $this->loadMapping($mappingFile);
@@ -859,13 +859,13 @@ class Sync1CInterface extends AbstractInterface
      * @param Material_Type $materialType Тип материалов
      * @param Page $deleteRoot Корень для удаления материалов
      * @param array<int> $affectedMaterialsIds Массив ID# "затронутых" материалов
-     * @param callable(string Текст для вывода) $logger Логгер
+     * @param callable $logger Логгер <pre><code>function (string Текст для вывода)</code></pre>
      */
     public function clearMaterials(
         Material_Type $materialType,
         Page $deleteRoot,
         array $affectedMaterialsIds = [],
-        callable $logger = null
+        ?callable $logger = null
     ) {
         $logger ? $logger('Start clearing old materials') : null;
         $assets = $this->findMaterialsFieldsAndAttachmentsToClear($materialType, $deleteRoot, $affectedMaterialsIds);
@@ -901,9 +901,9 @@ class Sync1CInterface extends AbstractInterface
      * Очищает страницы
      * @param Page $deleteRoot Корень для удаления материалов
      * @param array<int> $affectedPagesIds Массив ID# "затронутых" страниц
-     * @param callable(string Текст для вывода) $logger Логгер
+     * @param ?callable $logger Логгер <pre><code>function (string Текст для вывода)</code></pre>
      */
-    public function clearPages(Page $deleteRoot, array $affectedPagesIds = [], callable $logger = null)
+    public function clearPages(Page $deleteRoot, array $affectedPagesIds = [], ?callable $logger = null)
     {
         $logger ? $logger('Start clearing old pages') : null;
         $assets = $this->findPagesFieldsAndAttachmentsToClear($deleteRoot, $affectedPagesIds);
@@ -937,17 +937,17 @@ class Sync1CInterface extends AbstractInterface
 
     /**
      * Очищает материалы и/или страницы
-     * @param Page $deleteRoot Корень для удаления материалов
-     * @param Material_Type $materialType Тип материалов
+     * @param ?Page $deleteRoot Корень для удаления материалов
+     * @param ?Material_Type $materialType Тип материалов
      * @param int $clear Очищать предыдущие материалы (константа из self::DELETE_PREVIOUS_MATERIALS_...)
-     * @param callable(string Текст для вывода) $logger Логгер
+     * @param ?callable $logger Логгер <pre><code>function (string Текст для вывода)</code></pre>
      * @param array<string[] Имя класса => array<int>> $affected Массив ID# "затронутых" сущностей по классам
      */
     public function clear(
-        Page $deleteRoot = null,
-        Material_Type $materialType = null,
+        ?Page $deleteRoot = null,
+        ?Material_Type $materialType = null,
         $clear = self::DELETE_PREVIOUS_MATERIALS_NONE,
-        callable $logger = null,
+        ?callable $logger = null,
         array $affected = array()
     ) {
         if (isset($affected[Material::class]) &&

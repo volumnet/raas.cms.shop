@@ -57,7 +57,7 @@ class YooKassaInterface extends EPayInterface
     }
 
 
-    public function checkWebhook(string $debugInput = null)
+    public function checkWebhook(?string $debugInput = null)
     {
         if (($this->server['REQUEST_METHOD'] ?? '') == 'POST') {
             $request = $this->post['@raw'] ?? file_get_contents('php://input'); // $this->post['@raw'] для проверки

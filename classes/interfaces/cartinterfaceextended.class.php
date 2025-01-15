@@ -25,8 +25,8 @@ class CartInterfaceExtended extends CartInterface
     public $cities = [];
 
     public function __construct(
-        Block_Cart $block = null,
-        Page $page = null,
+        ?Block_Cart $block = null,
+        ?Page $page = null,
         array $get = [],
         array $post = [],
         array $cookie = [],
@@ -488,7 +488,7 @@ class CartInterfaceExtended extends CartInterface
      * @param float $sumForDelivery Сумма заказа
      * @param int[] $sizes Размеры в см
      * @param float $weight Вес в кг
-     * @param string|null $postalCode Индекс места назначения
+     * @param ?string $postalCode Индекс места назначения
      * @param bool $withPoints Получить точки выдачи
      */
     public function getDeliveries(
@@ -496,7 +496,7 @@ class CartInterfaceExtended extends CartInterface
         float $sumForDelivery,
         array $sizes,
         float $weight,
-        string $postalCode = null,
+        ?string $postalCode = null,
         bool $withPoints = false
     ): array {
         $result = [];
@@ -688,7 +688,7 @@ class CartInterfaceExtended extends CartInterface
     }
 
 
-    public function getAdditionals(Cart $cart, array $post = [], User $user = null): array
+    public function getAdditionals(Cart $cart, array $post = [], ?User $user = null): array
     {
         $result = [];
         $sum = (float)$cart->sum;

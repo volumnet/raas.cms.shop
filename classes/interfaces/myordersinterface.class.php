@@ -22,9 +22,9 @@ class MyOrdersInterface extends BlockInterface
 {
     /**
      * Конструктор класса
-     * @param Block_PHP|null $block Блок, для которого применяется
+     * @param ?Block_PHP $block Блок, для которого применяется
      *                               интерфейс
-     * @param Page|null $page Страница, для которой применяется интерфейс
+     * @param ?Page $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @param array $post Поля $_POST параметров
      * @param array $cookie Поля $_COOKIE параметров
@@ -33,8 +33,8 @@ class MyOrdersInterface extends BlockInterface
      * @param array $files Поля $_FILES параметров
      */
     public function __construct(
-        Block_PHP $block = null,
-        Page $page = null,
+        ?Block_PHP $block = null,
+        ?Page $page = null,
         array $get = [],
         array $post = [],
         array $cookie = [],

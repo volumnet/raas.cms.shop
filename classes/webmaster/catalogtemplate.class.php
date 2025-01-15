@@ -423,7 +423,7 @@ class CatalogTemplate extends MaterialTypeTemplate
 
     public function createBlock(
         Page $page,
-        Snippet $widget = null,
+        ?Snippet $widget = null,
         array $additionalData = []
     ) {
         if ($widget->id && $page->id) {

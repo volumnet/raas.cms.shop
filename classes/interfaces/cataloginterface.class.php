@@ -145,9 +145,9 @@ class CatalogInterface extends MaterialInterface
      * Устанавливает теги страницы
      * @param Page|null $page Страница, для которой применяется интерфейс
      * @param Material $item Текущий материал
-     * @param Block_Material $block Блок, для которого применяется интерфейс
+     * @param ?Block_Material $block Блок, для которого применяется интерфейс
      */
-    public function setPageMetatags(Page $page, Material $item, Block_Material $block = null)
+    public function setPageMetatags(Page $page, Material $item, ?Block_Material $block = null)
     {
         parent::setPageMetatags($page, $item);
         $blockParams = [];
@@ -181,10 +181,10 @@ class CatalogInterface extends MaterialInterface
 
     /**
      * Устанавливает наследуемые шаблоны метатегов для листинга
-     * @param Page|null $page Страница, для которой применяется интерфейс
-     * @param Block_Material $block Блок, для которого применяется интерфейс
+     * @param Page $page Страница, для которой применяется интерфейс
+     * @param ?Block_Material $block Блок, для которого применяется интерфейс
      */
-    public function setListMetatags(Page $page, Block_Material $block = null)
+    public function setListMetatags(Page $page, ?Block_Material $block = null)
     {
         $blockParams = [];
         if ($block) {
@@ -235,7 +235,7 @@ class CatalogInterface extends MaterialInterface
     }
 
 
-    public function getList(Block_Material $block, Page $page, array $get = [], Pages $pages = null): array
+    public function getList(Block_Material $block, Page $page, array $get = [], ?Pages $pages = null): array
     {
         $st = microtime(true);
         $this->filterIds = $this->getFilterIds($block, $get, $page->catalogFilter);
@@ -274,7 +274,7 @@ class CatalogInterface extends MaterialInterface
      *                                   интерфейс
      * @param Page|null $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
-     * @param Pages|null $pages Постраничная разбивка
+     * @param ?Pages $pages Постраничная разбивка
      * @return array <pre><code>[
      *     'from' => array<
      *         string[] псевдоним поля => string SQL-инструкция по выборке таблицы
@@ -285,7 +285,7 @@ class CatalogInterface extends MaterialInterface
      *     'bind' => array<mixed Значение связки> Связки для SQL-выражения
      * ]</code></pre>
      */
-    public function getSQLParts(Block_Material $block, Page $page, array $get = [], Pages $pages = null): array
+    public function getSQLParts(Block_Material $block, Page $page, array $get = [], ?Pages $pages = null): array
     {
         $st = microtime(true);
 

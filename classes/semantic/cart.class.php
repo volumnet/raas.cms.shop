@@ -131,10 +131,10 @@ class Cart
 
     /**
      * Конструктор класса
-     * @param Cart_Type $cartType Тип корзины
-     * @param User $user Пользователь сайта
+     * @param ?Cart_Type $cartType Тип корзины
+     * @param ?User $user Пользователь сайта
      */
-    public function __construct(Cart_Type $cartType = null, User $user = null)
+    public function __construct(?Cart_Type $cartType = null, ?User $user = null)
     {
         $this->_user = $user;
         if ($cartType) {

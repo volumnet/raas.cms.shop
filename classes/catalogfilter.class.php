@@ -1264,12 +1264,12 @@ class CatalogFilter
 
     /**
      * Получает товары с учетом (или без учета) сортировки
+     * @param ?Pages $pages Постраничная разбивка
      * @param string $sort URN поля для сортировки, либо пустая строка
      *                     для сортировки только по порядку отображения
-     * @param Pages|null $pages Постраничная разбивка
      * @return array<Material>
      */
-    public function getMaterials(Pages $pages = null, $sort = '', $order = 1)
+    public function getMaterials(?Pages $pages = null, $sort = '', $order = 1)
     {
         $ids = $this->getIds($sort, $order);
         if (!$ids) {

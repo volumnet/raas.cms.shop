@@ -45,8 +45,8 @@ abstract class EPayInterface extends AbstractInterface
 
     /**
      * Конструктор класса
-     * @param Block_Cart $block Блок, для которого применяется интерфейс
-     * @param Page|null $page Страница, для которой применяется интерфейс
+     * @param ?Block_Cart $block Блок, для которого применяется интерфейс
+     * @param ?Page $page Страница, для которой применяется интерфейс
      * @param array $get Поля $_GET параметров
      * @param array $post Поля $_POST параметров
      * @param array $cookie Поля $_COOKIE параметров
@@ -54,8 +54,8 @@ abstract class EPayInterface extends AbstractInterface
      * @param array $server Поля $_SERVER параметров
      */
     public function __construct(
-        Block_Cart $block = null,
-        Page $page = null,
+        ?Block_Cart $block = null,
+        ?Page $page = null,
         array $get = [],
         array $post = [],
         array $cookie = [],
@@ -69,7 +69,7 @@ abstract class EPayInterface extends AbstractInterface
     /**
      * Обрабатывает интерфейс
      * 2024-05-01, AVS: Использование /success и /fail считаем устаревшим (вызывается result())
-     * @param Order|null Заказ для обработки
+     * @param ?Order Заказ для обработки
      * @return array <pre><code>[
      *     'epayWidget' ?=> Snippet Виджет оплаты
      *     'Item' ?=> Order Текущий заказ
@@ -78,7 +78,7 @@ abstract class EPayInterface extends AbstractInterface
      *     'paymentURL' ?=> string Платежный URL,
      * ]</code></pre>
      */
-    public function process(Order $order = null): array
+    public function process(?Order $order = null): array
     {
         $out = [];
         $additionalURLArray = $this->page->additionalURLArray;
@@ -125,10 +125,10 @@ abstract class EPayInterface extends AbstractInterface
 
     /**
      * Возвращает платежный интерфейс (строку класса или сниппет) блока, либо null, если не указан
-     * @param Block_Cart|null $block Блок для проверки
+     * @param ?Block_Cart $block Блок для проверки
      * @return Snippet|string|null
      */
-    public function getPaymentInterface(Block_Cart $block = null)
+    public function getPaymentInterface(?Block_Cart $block = null)
     {
         if ($block) {
             if ($block->epay_interface_classname) {
@@ -323,9 +323,9 @@ abstract class EPayInterface extends AbstractInterface
      * Записывает сообщение в историю заказа
      * @param Order $order Заказ
      * @param string $message Сообщение
-     * @param bool|null $paid Сменить статус оплаты
+     * @param ?bool $paid Сменить статус оплаты
      */
-    public function logHistory(Order $order, string $message, bool $paid = null)
+    public function logHistory(Order $order, string $message, ?bool $paid = null)
     {
         if ($paid !== null) {
             $orderPaid = (int)$paid;

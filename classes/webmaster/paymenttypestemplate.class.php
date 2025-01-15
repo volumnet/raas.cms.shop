@@ -85,7 +85,7 @@ class PaymentTypesTemplate extends MaterialTypeTemplate
 
     public function createBlock(
         Page $page,
-        Snippet $widget = null,
+        ?Snippet $widget = null,
         array $additionalData = []
     ) {
         $additionalData = array_merge(

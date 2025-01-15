@@ -294,7 +294,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
 
     public function createBlock(
         Page $page,
-        Snippet $widget = null,
+        ?Snippet $widget = null,
         array $additionalData = []
     ) {
         $additionalData = array_merge(
@@ -326,7 +326,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
     public function createFormBlock(
         Page $page,
         Form $form,
-        Snippet $widget = null,
+        ?Snippet $widget = null,
         array $additionalData = []
     ) {
         if ($widget->id && $page->id) {
@@ -399,7 +399,7 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
         $name,
         $urn,
         CMSWebmaster $webmaster,
-        Block_Material $catalogBlock = null
+        ?Block_Material $catalogBlock = null
     ) {
         $newMaterialType = false;
         $materialType = Material_Type::importByURN($urn);

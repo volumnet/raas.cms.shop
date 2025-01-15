@@ -27,17 +27,17 @@ class ECommerce
 
     /**
      * Получает данные продукта
-     * @param Material|null $item Товар
-     * @param int|null $position Позиция
-     * @param Page|null $page Категория (страница) для явного указания
-     * @param array|null $propsCache Кэш свойств товара
+     * @param ?Material $item Товар
+     * @param ?int $position Позиция
+     * @param ?Page $page Категория (страница) для явного указания
+     * @param ?array $propsCache Кэш свойств товара
      * @return array
      */
     public static function getProduct(
-        Material $item = null,
+        ?Material $item = null,
         $position = null,
-        Page $page = null,
-        array $propsCache = null
+        ?Page $page = null,
+        ?array $propsCache = null
     ) {
         if ($item && $item->id) {
             $brand = '';
