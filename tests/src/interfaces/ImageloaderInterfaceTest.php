@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use SOME\CSV;
 use SOME\ZipArchive;
@@ -18,8 +21,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Класс теста интерфейса загрузчика изображений
- * @covers RAAS\CMS\Shop\ImageloaderInterface
  */
+#[CoversClass(ImageloaderInterface::class)]
 class ImageloaderInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -625,7 +628,7 @@ class ImageloaderInterfaceTest extends BaseTest
         $filesData = [
             [
                 'name' => 'f4dbdf21_1.jpg',
-                'tmp_name' => $this->getResourcesDir() . '/test.xls',
+                'tmp_name' => static::getResourcesDir() . '/test.xls',
             ],
         ];
 

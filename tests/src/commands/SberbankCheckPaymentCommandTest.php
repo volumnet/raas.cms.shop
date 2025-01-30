@@ -5,6 +5,9 @@
 namespace RAAS\CMS\Shop;
 
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Cron;
@@ -16,8 +19,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест класса SberbankCheckPaymentCommand
- * @covers RAAS\CMS\Shop\SberbankCheckPaymentCommand
  */
+#[CoversClass(SberbankCheckPaymentCommand::class)]
 class SberbankCheckPaymentCommandTest extends BaseTest
 {
     public static $tables = [
@@ -85,13 +88,13 @@ class SberbankCheckPaymentCommandTest extends BaseTest
         $orderId = $order->id;
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block])
-            ->setMethods(['getOrderIsPaid'])
+            ->onlyMethods(['getOrderIsPaid'])
             ->getMock();
         $interface->expects($this->once())->method('getOrderIsPaid')->with($order, $block, $page)->willReturn(true);
 
         $command = $this->getMockBuilder(SberbankCheckPaymentCommand::class)
             ->setConstructorArgs([Controller_Cron::i()])
-            ->setMethods(['getInterface'])
+            ->onlyMethods(['getInterface'])
             ->getMock();
         $command->expects($this->once())->method('getInterface')->willReturn($interface);
 
@@ -146,13 +149,13 @@ class SberbankCheckPaymentCommandTest extends BaseTest
         $orderId = $order->id;
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block])
-            ->setMethods(['getOrderIsPaid'])
+            ->onlyMethods(['getOrderIsPaid'])
             ->getMock();
         $interface->expects($this->once())->method('getOrderIsPaid')->with($order, $block, $page)->willReturn(true);
 
         $command = $this->getMockBuilder(SberbankCheckPaymentCommand::class)
             ->setConstructorArgs([Controller_Cron::i()])
-            ->setMethods(['getInterface'])
+            ->onlyMethods(['getInterface'])
             ->getMock();
         $command->expects($this->once())->method('getInterface')->willReturn($interface);
 
@@ -288,7 +291,7 @@ class SberbankCheckPaymentCommandTest extends BaseTest
         $orderId = $order->id;
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block])
-            ->setMethods(['getOrderIsPaid'])
+            ->onlyMethods(['getOrderIsPaid'])
             ->getMock();
         $interface->expects($this->once())
             ->method('getOrderIsPaid')
@@ -297,7 +300,7 @@ class SberbankCheckPaymentCommandTest extends BaseTest
 
         $command = $this->getMockBuilder(SberbankCheckPaymentCommand::class)
             ->setConstructorArgs([Controller_Cron::i()])
-            ->setMethods(['getInterface'])
+            ->onlyMethods(['getInterface'])
             ->getMock();
         $command->expects($this->once())->method('getInterface')->willReturn($interface);
 

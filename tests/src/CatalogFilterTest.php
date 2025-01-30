@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use SOME\File;
 use SOME\Pages;
@@ -18,8 +21,8 @@ use RAAS\CMS\Page;
 
 /**
  * Класс теста фильтра каталога
- * @covers RAAS\CMS\Shop\CatalogFilter
  */
+#[CoversClass(CatalogFilter::class)]
 class CatalogFilterTest extends BaseTest
 {
     public static $tables = [
@@ -126,26 +129,14 @@ class CatalogFilterTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetAvailabilityOrderByValue
-     * @return array <pre><code>array<[mixed Исходное значение поля "Наличие", mixed Ожидаемое значение]></code></pre>
-     */
-    public function getAvailabilityOrderByValueDataProvider(): array
-    {
-        return [
-            [1, '1'],
-            [2, '1'],
-            [0, '0'],
-            ['', '0'],
-        ];
-    }
-
-
-    /**
      * Тест метода getAvailabilityOrderByValue
      * @param mixed $value Исходное значение поля "Наличие"
      * @param mixed $expected Ожидаемое значение
-     * @dataProvider getAvailabilityOrderByValueDataProvider
      */
+    #[TestWith([1, '1'])]
+    #[TestWith([2, '1'])]
+    #[TestWith([0, '0'])]
+    #[TestWith(['', '0'])]
     public function testGetAvailabilityOrderByValue($value, $expected)
     {
         $filter = new CatalogFilter(new Material_Type());
@@ -1931,7 +1922,7 @@ class CatalogFilterTest extends BaseTest
         $result = CatalogFilter::load(
             new Material_Type(4),
             false,
-            $this->getResourcesDir() . '/aaa.php'
+            static::getResourcesDir() . '/aaa.php'
         );
     }
 
@@ -2001,33 +1992,16 @@ class CatalogFilterTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testCount
-     * @return array<[
-     *             bool фильтр с учетом дочерних категорий
-     *             int ID# категории
-     *             bool счетчик с учетом дочерних категорий
-     *             int ожидаемое количество товаров
-     *         ]>
-     */
-    public function countDataProvider()
-    {
-        return [
-            [true, 17, true, 10],
-            [true, 17, false, 0],
-            [false, 17, true, 10],
-            [false, 17, false, 0],
-        ];
-    }
-
-
-    /**
      * Тест счетчика товаров
      * @param bool $filterWithChildren фильтр с учетом дочерних категорий
      * @param int $pageId ID# категории
      * @param bool $counterWithChildren счетчик с учетом дочерних категорий
      * @param int $expected ожидаемое количество товаров
-     * @dataProvider countDataProvider
      */
+    #[TestWith([true, 17, true, 10])]
+    #[TestWith([true, 17, false, 0])]
+    #[TestWith([false, 17, true, 10])]
+    #[TestWith([false, 17, false, 0])]
     public function testCount(
         $filterWithChildren,
         $pageId,

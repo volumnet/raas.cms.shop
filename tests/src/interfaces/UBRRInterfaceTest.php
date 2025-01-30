@@ -6,6 +6,9 @@ namespace RAAS\CMS\Shop;
 
 use Exception;
 use SimpleXMLElement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Frontend as ControllerFrontend;
@@ -16,8 +19,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест интерфейса Уральского банка реконструкции и развития
- * @covers RAAS\CMS\Shop\UBRRInterface
  */
+#[CoversClass(UBRRInterface::class)]
 class UBRRInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -45,24 +48,12 @@ class UBRRInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetURL
-     * @return array <pre><code>array<[bool Тестовый режим, string Ожидаемое значение]></code></pre>
-     */
-    public function getURLDataProvider()
-    {
-        return [
-            [true, 'https://91.208.121.69:7443/Exec'],
-            [false, 'https://twpg.ubrr.ru:8443/Exec'],
-        ];
-    }
-
-
-    /**
      * Тест метода getURL
      * @param bool $test Тестовый режим
      * @param string $expected Ожидаемое значение
-     * @dataProvider getURLDataProvider
      */
+    #[TestWith([true, 'https://91.208.121.69:7443/Exec'])]
+    #[TestWith([false, 'https://twpg.ubrr.ru:8443/Exec'])]
     public function testGetURL(bool $test, string $expected)
     {
         $interface = new UBRRInterface();
@@ -122,24 +113,12 @@ class UBRRInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetCurrency
-     * @return array <pre><code>array<[string Входная валюта, int Ожидаемое значение]></code></pre>
-     */
-    public function getCurrencyDataProvider()
-    {
-        return [
-            ['USD', 840],
-            ['RUB', 643],
-        ];
-    }
-
-
-    /**
      * Тест метода getCurrency()
      * @param string $currency Входная валюта
      * @param int $expected Ожидаемое значение
-     * @dataProvider getCurrencyDataProvider()
      */
+    #[TestWith(['USD', 840])]
+    #[TestWith(['RUB', 643])]
     public function testGetCurrency(string $currency, int $expected)
     {
         $interface = new UBRRInterface();
@@ -201,13 +180,14 @@ class UBRRInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(UBRRInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'user', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
 
         $result = $interface->exec('CreateOrder', ['aaa' => 'bbb'], true, 'pass');
 
-        $this->assertEquals(7, $result['errorCode']);
+        // $this->assertEquals(7, $result['errorCode']);
+        $this->assertEquals(28, $result['errorCode']); // 2025-01-17, AVS: код ошибки сменился на 28 - Timed out
         $this->assertStringContainsString('cURL error: Failed to connect', $result['errorMessage']);
     }
 
@@ -292,7 +272,7 @@ class UBRRInterfaceTest extends BaseTest
      */
     public function testRegisterOrderWithData()
     {
-        $interface = $this->getMockBuilder(UBRRInterface::class)->setMethods(['exec'])->getMock();
+        $interface = $this->getMockBuilder(UBRRInterface::class)->onlyMethods(['exec'])->getMock();
         $interface->expects($this->once())->method('exec')->with('CreateOrder', ['aaa'], false);
 
         $result = $interface->registerOrderWithData(new Order(), new Block_Cart(), new Page(), ['aaa']);
@@ -374,7 +354,7 @@ class UBRRInterfaceTest extends BaseTest
         $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd']);
         $block = new Block_Cart(['epay_pass1' => 'pass']);
         $interface = $this->getMockBuilder(UBRRInterface::class)
-            ->setMethods(['exec'])
+            ->onlyMethods(['exec'])
             ->getMock();
         $interface->expects($this->once())->method('exec')->with('GetOrderStatus', ['aaa'], false, 'pass');
 
@@ -408,7 +388,7 @@ class UBRRInterfaceTest extends BaseTest
         $page = new Page();
         $interface = $this->getMockBuilder(UBRRInterface::class)
             ->setConstructorArgs([null, null, [], [], [], ['ubrrSession' => 'session_id123']])
-            ->setMethods(['doLog', 'getOrderIsPaid', 'applyPaidStatus'])
+            ->onlyMethods(['doLog', 'getOrderIsPaid', 'applyPaidStatus'])
             ->getMock();
         $interface->expects($this->once())->method('doLog')->with('UBRR Session ID: session_id123');
         $interface->method('getOrderIsPaid')->willReturn(true);

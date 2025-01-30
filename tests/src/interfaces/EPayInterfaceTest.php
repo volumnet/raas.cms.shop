@@ -5,6 +5,9 @@
 namespace RAAS\CMS\Shop;
 
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Frontend as ControllerFrontend;
@@ -14,8 +17,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест интерфейса оплаты
- * @covers RAAS\CMS\Shop\EPayInterface
  */
+#[CoversClass(EPayInterface::class)]
 class EPayInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -199,7 +202,7 @@ class EPayInterfaceTest extends BaseTest
         $block = new Block_Cart(['cats' => [1], 'epay_interface_id' => $paymentInterface->id]); //
 
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['checkWebhook'])
+            ->onlyMethods(['checkWebhook'])
             ->setConstructorArgs([$block])
             ->getMock();
         $interface->expects($this->once())
@@ -229,7 +232,7 @@ class EPayInterfaceTest extends BaseTest
         $block = new Block_Cart(['cats' => [1], 'epay_interface_classname' => MockEPayInterface::class]); //
 
         $interface = $this->getMockBuilder(MockEPayInterface::class)
-            ->setMethods(['checkWebhook'])
+            ->onlyMethods(['checkWebhook'])
             ->setConstructorArgs([$block])
             ->getMock();
         $interface->expects($this->once())
@@ -254,7 +257,7 @@ class EPayInterfaceTest extends BaseTest
         $orderId = $order->id;
 
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['checkWebhook'])
+            ->onlyMethods(['checkWebhook'])
             ->getMock();
         $interface->expects($this->once())
             ->method('checkWebhook')
@@ -419,26 +422,14 @@ class EPayInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testIsSuccessfulStatus
-     * @return array <pre><code>array<[int Статус, bool Ожидаемое значение]></code></pre>
-     */
-    public function isSuccessfulStatusDataProvider()
-    {
-        return [
-            [SberbankInterface::REQUEST_STATUS_HOLD, true],
-            [SberbankInterface::REQUEST_STATUS_PAID, true],
-            [1234, false],
-            [4321, false],
-        ];
-    }
-
-
-    /**
      * Тест метода isSuccessfulStatus
      * @param int $status Статус
      * @param bool $expected Ожидаемое значение
-     * @dataProvider isSuccessfulStatusDataProvider
      */
+    #[TestWith([SberbankInterface::REQUEST_STATUS_HOLD, true])]
+    #[TestWith([SberbankInterface::REQUEST_STATUS_PAID, true])]
+    #[TestWith([1234, false])]
+    #[TestWith([4321, false])]
     public function testIsSuccessfulStatus(int $status, bool $expected)
     {
         $interface = new SberbankInterface();
@@ -482,7 +473,7 @@ class EPayInterfaceTest extends BaseTest
             'epay_test' => 1,
         ]);
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['doLog', 'logHistory'])
+            ->onlyMethods(['doLog', 'logHistory'])
             ->getMock();
         $interface->expects($this->once())->method('logHistory')->with(
             $order,
@@ -535,7 +526,7 @@ class EPayInterfaceTest extends BaseTest
     {
         $order = new Order(['id' => 123, 'payment_id' => 'aaaa-bbbb-cccc-dddd']);
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['logHistory'])
+            ->onlyMethods(['logHistory'])
             ->getMock();
         $interface->expects($this->once())->method('logHistory')->with(
             $order,
@@ -672,7 +663,7 @@ class EPayInterfaceTest extends BaseTest
         $block = new Block_Cart(['epay_login' => 'user', 'epay_pass1' => 'pass', 'epay_test' => 1]);
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods([
+            ->onlyMethods([
                 'getOrderStatusData',
                 'getOrderStatusWithData',
                 'parseOrderStatusResponse',
@@ -730,7 +721,7 @@ class EPayInterfaceTest extends BaseTest
         $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd']);
         $block = new Block_Cart(['epay_login' => 'user', 'epay_pass1' => 'pass', 'epay_test' => 1]);
         $page = new Page();
-        $interface = $this->getMockBuilder(SberbankInterface::class)->setMethods(['getOrderStatusWithData'])->getMock();
+        $interface = $this->getMockBuilder(SberbankInterface::class)->onlyMethods(['getOrderStatusWithData'])->getMock();
         $interface->expects($this->once())->method('getOrderStatusWithData')->willReturn([]);
 
         $result = $interface->getOrderIsPaid($order, $block, $page);
@@ -749,7 +740,7 @@ class EPayInterfaceTest extends BaseTest
         $block = new Block_Cart(['epay_login' => 'user', 'epay_pass1' => 'pass', 'epay_test' => 1]);
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['parseOrderStatusResponse', 'doLog', 'getOrderStatusWithData'])
+            ->onlyMethods(['parseOrderStatusResponse', 'doLog', 'getOrderStatusWithData'])
             ->getMock();
         $interface->expects($this->once())
             ->method('getOrderStatusWithData')
@@ -774,7 +765,7 @@ class EPayInterfaceTest extends BaseTest
         $block = new Block_Cart(['epay_login' => 'user', 'epay_pass1' => 'pass', 'epay_test' => 1]);
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['parseOrderStatusResponse', 'doLog', 'getOrderStatusWithData'])
+            ->onlyMethods(['parseOrderStatusResponse', 'doLog', 'getOrderStatusWithData'])
             ->getMock();
         $interface->expects($this->once())
             ->method('getOrderStatusWithData')
@@ -809,7 +800,7 @@ class EPayInterfaceTest extends BaseTest
         $block = new Block_Cart(['epay_login' => 'user', 'epay_pass1' => 'pass', 'epay_test' => 1]);
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['parseOrderStatusResponse', 'doLog', 'getOrderStatusWithData'])
+            ->onlyMethods(['parseOrderStatusResponse', 'doLog', 'getOrderStatusWithData'])
             ->getMock();
         $interface->expects($this->once())
             ->method('getOrderStatusWithData')
@@ -832,7 +823,7 @@ class EPayInterfaceTest extends BaseTest
         $block = new Block_Cart(['id' => 111, 'epay_login' => 'user', 'epay_pass1' => 'pass', 'epay_test' => 1]);
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['getOrderIsPaid', 'doLog', 'logHistory'])
+            ->onlyMethods(['getOrderIsPaid', 'doLog', 'logHistory'])
             ->getMock();
         $interface->expects($this->once())
             ->method('getOrderIsPaid')
@@ -862,7 +853,7 @@ class EPayInterfaceTest extends BaseTest
         $block = new Block_Cart(['id' => 111, 'epay_login' => 'user', 'epay_pass1' => 'pass', 'epay_test' => 1]);
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['getOrderIsPaid', 'doLog', 'logHistory'])
+            ->onlyMethods(['getOrderIsPaid', 'doLog', 'logHistory'])
             ->getMock();
         $interface->expects($this->once())
             ->method('getOrderIsPaid')
@@ -902,7 +893,7 @@ class EPayInterfaceTest extends BaseTest
         $mockRequestData = ['request' => 'requestData'];
         $mockResponseData = ['request' => 'requestData'];
         $interface = $this->getMockBuilder(SberbankInterface::class)
-            ->setMethods(['getRegisterOrderData', 'doLog', 'registerOrderWithData'])
+            ->onlyMethods(['getRegisterOrderData', 'doLog', 'registerOrderWithData'])
             ->getMock();
         $interface->expects($this->once())
             ->method('getRegisterOrderData')
@@ -940,7 +931,7 @@ class EPayInterfaceTest extends BaseTest
         $mockResponseData = ['ok' => true];
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block, $page, [], ['AJAX' => 1]])
-            ->setMethods(['registerOrder', 'parseInitResponse', 'doLog', 'logHistory'])
+            ->onlyMethods(['registerOrder', 'parseInitResponse', 'doLog', 'logHistory'])
             ->getMock();
         $interface->expects($this->once())
             ->method('registerOrder')
@@ -986,7 +977,7 @@ class EPayInterfaceTest extends BaseTest
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block, $page, [], ['AJAX' => 1]])
-            ->setMethods(['registerOrder', 'doLog', 'logHistory'])
+            ->onlyMethods(['registerOrder', 'doLog', 'logHistory'])
             ->getMock();
         $interface->expects($this->once())
             ->method('registerOrder')
@@ -1021,7 +1012,7 @@ class EPayInterfaceTest extends BaseTest
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block, $page, [], ['AJAX' => 1]])
-            ->setMethods(['registerOrder', 'parseInitResponse', 'doLog', 'logHistory'])
+            ->onlyMethods(['registerOrder', 'parseInitResponse', 'doLog', 'logHistory'])
             ->getMock();
         $interface->expects($this->once())
             ->method('registerOrder')
@@ -1059,7 +1050,7 @@ class EPayInterfaceTest extends BaseTest
         $page = new Page();
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block, $page, [], ['AJAX' => 1]])
-            ->setMethods(['registerOrder', 'doLog', 'logHistory'])
+            ->onlyMethods(['registerOrder', 'doLog', 'logHistory'])
             ->getMock();
         $interface->expects($this->once())
             ->method('registerOrder')
@@ -1099,7 +1090,7 @@ class EPayInterfaceTest extends BaseTest
 
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block, $page, [], ['epay' => 1]])
-            ->setMethods(['init'])
+            ->onlyMethods(['init'])
             ->getMock();
         $interface->expects($this->once())
             ->method('init')
@@ -1144,7 +1135,7 @@ class EPayInterfaceTest extends BaseTest
 
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block, $page, ['orderId' => 'aaaa-bbbb-cccc-dddd'], ['epay' => 1]])
-            ->setMethods(['result'])
+            ->onlyMethods(['result'])
             ->getMock();
         $interface->expects($this->once())
             ->method('result')
@@ -1216,7 +1207,7 @@ class EPayInterfaceTest extends BaseTest
 
         $interface = $this->getMockBuilder(SberbankInterface::class)
             ->setConstructorArgs([$block, $page, [], ['epay' => 1]])
-            ->setMethods(['result'])
+            ->onlyMethods(['result'])
             ->getMock();
         $interface->expects($this->once())
             ->method('result')

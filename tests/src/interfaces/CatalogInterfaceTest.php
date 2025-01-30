@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use SOME\Pages;
 use RAAS\Application;
@@ -18,8 +21,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Класс теста интерфейса каталога
- * @covers RAAS\CMS\Shop\CatalogInterface
  */
+#[CoversClass(CatalogInterface::class)]
 class CatalogInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -175,7 +178,7 @@ class CatalogInterfaceTest extends BaseTest
         $field->commit();
         $page = new Page(17);
         $materialType = new Material_Type(4);
-        $catalogFilter = CatalogFilter::loadOrBuild($materialType);
+        $catalogFilter = CatalogFilter::loadOrBuild($materialType, true); // 2025-01-17, AVS: добавил принудительное $withChildrenGoods, иначе в "Категория 11" товаров нет
         $catalogFilter->apply($page);
         $page->catalogFilter = $catalogFilter;
         $page->fields['testmaterial']->addValue(14); // Товар 5
@@ -190,8 +193,8 @@ class CatalogInterfaceTest extends BaseTest
 
         $this->assertEquals(10, $result['counter']);
         $this->assertEquals(0, $result['selfCounter']);
-        $this->assertEquals(5609, $result['price_from']);
-        $this->assertEquals(85812, $result['price_to']);
+        $this->assertEquals(5609, $result['price_from'] ?? null);
+        $this->assertEquals(85812, $result['price_to'] ?? null);
         $this->assertEquals('Товар 5', $result['testmaterial']);
 
         Page_Field::delete($field);
@@ -808,31 +811,17 @@ class CatalogInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testCommentsFilterFunction
-     * @return array <pre><code>array<[
-     *     Material Комментарий
-     *     Material Товар, по которому фильтруем
-     *     bool Ожидаемое значение
-     * ]></code></pre>
-     */
-    public function commentsFilterFunctionDataProvider(): array
-    {
-        return [
-            [new Material(23), new Material(12), true],
-            [new Material(24), new Material(10), false],
-        ];
-    }
-
-
-    /**
      * Проверка метода commentsFilterFunction
-     * @param Material $comment Комментарий
-     * @param Material $item Товар, по которому фильтруем
+     * @param int $commentId ID# Комментария
+     * @param int $itemId ID# Товара, по которому фильтруем
      * @param bool $expected Ожидаемое значение
-     * @dataProvider commentsFilterFunctionDataProvider
      */
-    public function testCommentsFilterFunction(Material $comment, Material $item, bool $expected)
+    #[TestWith([23, 12, true])]
+    #[TestWith([24, 10, false])]
+    public function testCommentsFilterFunction(int $commentId, int $itemId, bool $expected)
     {
+        $comment = new Material($commentId);
+        $item = new Material($itemId);
         $interface = new CatalogInterface();
 
         $result = $interface->commentsFilterFunction($comment, $item);

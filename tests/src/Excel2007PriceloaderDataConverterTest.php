@@ -7,12 +7,15 @@ namespace RAAS\CMS\Shop;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx as ReaderXlsx;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx as WriterXlsx;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 
 /**
  * Класс теста конвертера Excel 2007 для загрузчика прайсов
- * @covers RAAS\CMS\Shop\Excel2007PriceloaderDataConverter
  */
+#[CoversClass(Excel2007PriceloaderDataConverter::class)]
 class Excel2007PriceloaderDataConverterTest extends BaseTest
 {
     /**

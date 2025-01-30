@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Attachment;
 use RAAS\CMS\Page;
@@ -14,7 +17,6 @@ use RAAS\CMS\Field;
 
 /**
  * Класс теста массового удаления сущностей
- * @covers RAAS\CMS\Shop\BatchDeleteTrait
  */
 class BatchDeleteTraitTest extends BaseTest
 {
@@ -33,7 +35,9 @@ class BatchDeleteTraitTest extends BaseTest
      */
     public function testDeletePagesByIds()
     {
-        $trait = $this->getMockForTrait(BatchDeleteTrait::class);
+        $trait = new class {
+            use BatchDeleteTrait;
+        };
         $page = new Page(20);
 
         $this->assertEquals(20, $page->id);
@@ -51,7 +55,9 @@ class BatchDeleteTraitTest extends BaseTest
      */
     public function testDeleteAttachmentsByIds()
     {
-        $trait = $this->getMockForTrait(BatchDeleteTrait::class);
+        $trait = new class {
+            use BatchDeleteTrait;
+        };
         $att = new Attachment(58);
         $file = $att->file;
         touch($file);
@@ -73,7 +79,9 @@ class BatchDeleteTraitTest extends BaseTest
      */
     public function testDeleteMaterialsByIds()
     {
-        $trait = $this->getMockForTrait(BatchDeleteTrait::class);
+        $trait = new class {
+            use BatchDeleteTrait;
+        };
         $item = new Material(19);
 
         $this->assertEquals(19, $item->id);
@@ -91,7 +99,9 @@ class BatchDeleteTraitTest extends BaseTest
      */
     public function testFindMaterialsFieldsAndAttachmentsToClear()
     {
-        $trait = $this->getMockForTrait(BatchDeleteTrait::class);
+        $trait = new class {
+            use BatchDeleteTrait;
+        };
 
         $result = $trait->findMaterialsFieldsAndAttachmentsToClear(
             new Material_Type(4),
@@ -112,7 +122,9 @@ class BatchDeleteTraitTest extends BaseTest
      */
     public function testFindPagesFieldsAndAttachmentsToClear()
     {
-        $trait = $this->getMockForTrait(BatchDeleteTrait::class);
+        $trait = new class {
+            use BatchDeleteTrait;
+        };
 
         $result = $trait->findPagesFieldsAndAttachmentsToClear(new Page(15), [16, 17, 18, 19, 20, 21, 22, 23]);
 

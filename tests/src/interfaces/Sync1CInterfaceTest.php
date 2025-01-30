@@ -5,6 +5,9 @@
 namespace RAAS\CMS\Shop;
 
 use SimpleXMLElement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use SOME\SOME;
 use RAAS\Application;
@@ -17,8 +20,8 @@ use RAAS\CMS\Field;
 
 /**
  * Класс теста интерфейса синхронизации с 1С
- * @covers RAAS\CMS\Shop\Sync1CInterface
  */
+#[CoversClass(Sync1CInterface::class)]
 class Sync1CInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -133,10 +136,10 @@ class Sync1CInterfaceTest extends BaseTest
     public function testLoadData()
     {
         $interface = new Sync1CInterface();
-        $goodsFile = $this->getResourcesDir() . '/import0_1.update.xml';
-        $goodsXSLFile = $this->getResourcesDir() . '/import.xsl';
-        $offersFile = $this->getResourcesDir() . '/offers0_1.update.xml';
-        $offersXSLFile = $this->getResourcesDir() . '/offers.xsl';
+        $goodsFile = static::getResourcesDir() . '/import0_1.update.xml';
+        $goodsXSLFile = static::getResourcesDir() . '/import.xsl';
+        $offersFile = static::getResourcesDir() . '/offers0_1.update.xml';
+        $offersXSLFile = static::getResourcesDir() . '/offers.xsl';
 
         $result = $interface->loadData($goodsFile, $offersFile, $goodsXSLFile, $offersXSLFile);
 
@@ -175,7 +178,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             mixed Ожидаемый результат
      *         ]>
      */
-    public function isSpecialFieldDataProvider()
+    public static function isSpecialFieldDataProvider()
     {
         $materialData = [
             'id' => 'b323ca07-96e9-11e8-9a9f-6cf04909dac2',
@@ -215,8 +218,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param 'update'|'create'|'delete'|'map' $condition Настройка, которую проверяем
      * @param mixed $defaultValue Если настройка не задана, значение по умолчанию
      * @param mixed $expected Ожидаемый результат
-     * @dataProvider isSpecialFieldDataProvider
      */
+    #[DataProvider('isSpecialFieldDataProvider')]
     public function testIsSpecialField($data, $key, $condition, $defaultValue, $expected)
     {
         $interface = new Sync1CInterface();
@@ -228,48 +231,29 @@ class Sync1CInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для теста поиска сущности по полю
-     * @return array<[
-     *             string Класс сущности
-     *             string Наименование нативного поля
-     *             mixed Значение поля
-     *             array<string[] поле => mixed значение> Набор дополнительных условий для выборки
-     *             int ID# выбранной сущности
-     *         ]>
-     */
-    public function findEntityByFieldDataProvider()
-    {
-        static::installTables();
-        return [
-            [Material_Type::class, 'name', 'Особые товары', [], 5],
-            [Material_Type::class, 'name', 'Особые товары', ['pid' => 4], 5],
-            [Material_Type::class, 'name', 'Особые товары', ['pid' => 0], null],
-            [Page::class, 'name', 'Категория 111', [], 18],
-            [Page::class, 'name', 'Категория 111', ['pid' => 17], 18],
-            [Page::class, 'name', 'Категория 111', ['pid' => 1], null],
-            [Material::class, 'name', 'Товар 1', [], 10],
-            [Material::class, 'name', 'Товар 1', [
-                "SELECT COUNT(*) FROM cms_materials_pages_assoc WHERE id = Material.id AND pid = 18"
-            ], 10 ],
-            [Material::class, 'name', 'Товар 1', [
-                "SELECT COUNT(*) FROM cms_materials_pages_assoc WHERE id = Material.id AND pid = 17"
-            ], null],
-            [Material_Field::class, 'name', '', [], null],
-            [Material_Field::class, 'name', null, [], null],
-            [Material_Field::class, 'name', 'Особое поле', ['pid' => [4, 5]], 48],
-        ];
-    }
-
-
-    /**
      * Тест поиска сущности по полю
      * @param string $classname Класс сущности
      * @param string $fieldName Наименование нативного поля
      * @param mixed $value Значение поля
      * @param array<string[] поле => mixed значение> $context Набор дополнительных условий для выборки
      * @param int $expectedId ID# сущности
-     * @dataProvider findEntityByFieldDataProvider
      */
+    #[TestWith([Material_Type::class, 'name', 'Особые товары', [], 5])]
+    #[TestWith([Material_Type::class, 'name', 'Особые товары', ['pid' => 4], 5])]
+    #[TestWith([Material_Type::class, 'name', 'Особые товары', ['pid' => 0], null])]
+    #[TestWith([Page::class, 'name', 'Категория 111', [], 18])]
+    #[TestWith([Page::class, 'name', 'Категория 111', ['pid' => 17], 18])]
+    #[TestWith([Page::class, 'name', 'Категория 111', ['pid' => 1], null])]
+    #[TestWith([Material::class, 'name', 'Товар 1', [], 10])]
+    #[TestWith([Material::class, 'name', 'Товар 1', [
+        "SELECT COUNT(*) FROM cms_materials_pages_assoc WHERE id = Material.id AND pid = 18"
+    ], 10 ])]
+    #[TestWith([Material::class, 'name', 'Товар 1', [
+        "SELECT COUNT(*) FROM cms_materials_pages_assoc WHERE id = Material.id AND pid = 17"
+    ], null])]
+    #[TestWith([Material_Field::class, 'name', '', [], null])]
+    #[TestWith([Material_Field::class, 'name', null, [], null])]
+    #[TestWith([Material_Field::class, 'name', 'Особое поле', ['pid' => [4, 5]], 48])]
     public function testFindEntityByField($classname, $fieldName, $value, array $context, $expectedId)
     {
         $interface = new Sync1CInterface();
@@ -347,7 +331,7 @@ class Sync1CInterfaceTest extends BaseTest
         $interface = new Sync1CInterface();
         $mapping = ['aaa' => 'xxx', 'bbb' => 'yyy', 'ccc' => 'zzz'];
         $json = json_encode($mapping);
-        $filename = $this->getResourcesDir() . '/aaa.json';
+        $filename = static::getResourcesDir() . '/aaa.json';
         file_put_contents($filename, $json);
 
         $result = $interface->loadMapping($filename);
@@ -363,7 +347,7 @@ class Sync1CInterfaceTest extends BaseTest
     public function testLoadMappingWithNoFile()
     {
         $interface = new Sync1CInterface();
-        $filename = $this->getResourcesDir() . '/bbb.json';
+        $filename = static::getResourcesDir() . '/bbb.json';
 
         $result = $interface->loadMapping($filename);
 
@@ -378,7 +362,7 @@ class Sync1CInterfaceTest extends BaseTest
     {
         $interface = new Sync1CInterface();
         $mapping = ['aaa' => 'xxx', 'bbb' => 'yyy', 'ccc' => 'zzz'];
-        $filename = $this->getResourcesDir() . '/aaa.json';
+        $filename = static::getResourcesDir() . '/aaa.json';
 
         $interface->saveMapping($filename, $mapping);
         $result = (array)json_decode(file_get_contents($filename), true);
@@ -389,60 +373,41 @@ class Sync1CInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testFindEntityById
-     * @return array<[
-     *             string Класс сущности
-     *             array Набор данных
-     *             string Ключ, по значению которого ищем
-     *             array Полный маппинг по всем классам
-     *             int|null ID# объекта класса $classname, либо null, если не найден
-     *         ]>
-     */
-    public function findEntityByIdDataProvider()
-    {
-        static::installTables();
-        return [
-            [
-                Material_Type::class,
-                ['id' => 'sdklfjweiorjoisdmnfl', '@config' => ['map' => ['id' => true]]],
-                'id',
-                [Material_Type::class => ['sdklfjweiorjoisdmnfl' => 5]],
-                5
-            ],
-            [
-                Material_Type::class,
-                ['pid' => 4, '@config' => ['map' => ['pid' => false]]],
-                'pid',
-                [Page::class => ['sdklfjweiorjoisdmnfl' => 5]],
-                4
-            ],
-            [
-                Material_Type::class,
-                ['id' => 'zxjhcoihwoer', '@config' => ['map' => ['pid' => true]]],
-                'pid',
-                [Page::class => ['sdklfjweiorjoisdmnfl' => 5]],
-                null
-            ],
-            [
-                Material_Type::class,
-                ['id' => 'sdklfjweiorjoisdmnfl', '@config' => ['map' => ['id' => true]]],
-                'id',
-                [Material_Type::class => ['sdklfjweiorjoisdmnfl' => 999]],
-                null
-            ],
-        ];
-    }
-
-
-    /**
      * Тест Ищем сущность по ID# данных по маппингу
      * @param string $classname Класс сущности
      * @param array $data Набор данных
      * @param string $fieldName Ключ, по значению которого ищем
      * @param array $mapping Полный маппинг по всем классам
      * @param int|null $expectedId ID# объекта класса $classname, либо null, если не найден
-     * @dataProvider findEntityByIdDataProvider
      */
+    #[TestWith([
+        Material_Type::class,
+        ['id' => 'sdklfjweiorjoisdmnfl', '@config' => ['map' => ['id' => true]]],
+        'id',
+        [Material_Type::class => ['sdklfjweiorjoisdmnfl' => 5]],
+        5
+    ])]
+    #[TestWith([
+        Material_Type::class,
+        ['pid' => 4, '@config' => ['map' => ['pid' => false]]],
+        'pid',
+        [Page::class => ['sdklfjweiorjoisdmnfl' => 5]],
+        4
+    ])]
+    #[TestWith([
+        Material_Type::class,
+        ['id' => 'zxjhcoihwoer', '@config' => ['map' => ['pid' => true]]],
+        'pid',
+        [Page::class => ['sdklfjweiorjoisdmnfl' => 5]],
+        null
+    ])]
+    #[TestWith([
+        Material_Type::class,
+        ['id' => 'sdklfjweiorjoisdmnfl', '@config' => ['map' => ['id' => true]]],
+        'id',
+        [Material_Type::class => ['sdklfjweiorjoisdmnfl' => 999]],
+        null
+    ])]
     public function testFindEntityById($classname, array $data, $fieldName, array $mapping, $expectedId)
     {
         $interface = new Sync1CInterface();
@@ -471,7 +436,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array Массив проверки записей маппинга по данной сущности
      *         ]>
      */
-    public function findOrCreateEntityDataProvider()
+    public static function findOrCreateEntityDataProvider()
     {
         static::installTables();
         return [
@@ -572,8 +537,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param bool $withParentChildren Учитывать дочерние элементы для родительского, в качестве родительских
      * @param array<string[] => mixed> $expectedTest Массив проверки полей сущности
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по данной сущности
-     * @dataProvider findOrCreateEntityDataProvider
      */
+    #[DataProvider('findOrCreateEntityDataProvider')]
     public function testFindOrCreateEntity(
         $classname,
         array $data,
@@ -620,7 +585,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => mixed> Массив проверки полей сущности
      *         ]>
      */
-    public function updateEntityDataProvider()
+    public static function updateEntityDataProvider()
     {
         static::installTables();
         return [
@@ -752,8 +717,8 @@ class Sync1CInterfaceTest extends BaseTest
      *            string[] Значение уникального поля => int ID# сущности
      *        >> $mapping Полный маппинг по всем классам
      * @param array<string[] => mixed> $expectedTest Массив проверки полей сущности
-     * @dataProvider updateEntityDataProvider
      */
+    #[DataProvider('updateEntityDataProvider')]
     public function testUpdateEntity(SOME $entity, array $data, array $mapping, array $expectedTest)
     {
         $interface = new Sync1CInterface();
@@ -777,7 +742,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<int> Массив проверки ID# страниц
      *         ]>
      */
-    public function updatePagesDataProvider()
+    public static function updatePagesDataProvider()
     {
         static::installTables();
         return [
@@ -819,8 +784,8 @@ class Sync1CInterfaceTest extends BaseTest
      *        >> $mapping Полный маппинг по всем классам
      * @param array<int> $expectedTest Массив проверки ID# страниц
      * @param Page $defaultParent Родительская страница по умолчанию (если не найдены) - тогда материал устанавливается скрытым
-     * @dataProvider updatePagesDataProvider
      */
+    #[DataProvider('updatePagesDataProvider')]
     public function testUpdatePages(Material $entity, array $data, array $mapping, $expectedTest)
     {
         $interface = new Sync1CInterface();
@@ -887,11 +852,11 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string> Массив проверки значений
      *         ]>
      */
-    public function updateCustomFieldDataProvider()
+    public static function updateCustomFieldDataProvider()
     {
         static::installTables();
         $material = new Material(10);
-        $dir = $this->getResourcesDir() . '';
+        $dir = static::getResourcesDir() . '';
         return [
             [
                 $material->fields['price'],
@@ -950,8 +915,8 @@ class Sync1CInterfaceTest extends BaseTest
      *        >> $mapping Полный маппинг по всем классам
      * @param string $dir Путь к папке с файлами для медиа-полей
      * @param array<string[] => mixed> $expectedTest Массив проверки полей сущности
-     * @dataProvider updateCustomFieldDataProvider
      */
+    #[DataProvider('updateCustomFieldDataProvider')]
     public function testUpdateCustomField(Field $field, $fieldKey, array $data, array $mapping, $dir, array $expectedTest)
     {
         $t = $this;
@@ -987,10 +952,10 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => mixed> Массив проверки полей сущности через $entity->fields[$key]->getValues(true)
      *         ]>
      */
-    public function updateCustomFieldsDataProvider()
+    public static function updateCustomFieldsDataProvider()
     {
         static::installTables();
-        $dir = $this->getResourcesDir() . '';
+        $dir = static::getResourcesDir() . '';
         return [
             [
                 new Material(11),
@@ -1104,8 +1069,8 @@ class Sync1CInterfaceTest extends BaseTest
      *        >> $mapping Полный маппинг по всем классам
      * @param string $dir Путь к папке с файлами для медиа-полей
      * @param array<string[] => mixed> $expectedTest Массив проверки полей сущности через $entity->fields[$key]->getValues(true)
-     * @dataProvider updateCustomFieldsDataProvider
      */
+    #[DataProvider('updateCustomFieldsDataProvider')]
     public function testUpdateCustomFields(SOME $entity, $new, array $data, array $mapping, $dir, array $expectedTest)
     {
         $interface = new Sync1CInterface();
@@ -1137,7 +1102,7 @@ class Sync1CInterfaceTest extends BaseTest
     {
         $interface = new Sync1CInterface();
 
-        $result = $interface->updateCustomFields(new Material(12), false, ['price' => 'aaa'], [], $this->getResourcesDir());
+        $result = $interface->updateCustomFields(new Material(12), false, ['price' => 'aaa'], [], static::getResourcesDir());
 
         $this->assertFalse($result);
     }
@@ -1155,7 +1120,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => int> Массив проверки записей маппинга по типам материалов
      *         ]>
      */
-    public function findOrCreateMaterialTypeDataProvider()
+    public static function findOrCreateMaterialTypeDataProvider()
     {
         static::installTables();
         $materialType = new Material_Type(3);
@@ -1208,8 +1173,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param Material_Type $defaultParent Родительский тип материала по умолчанию для вновь создаваемых типов
      * @param array<string[] => mixed> $expectedTest Массив проверки полей типа материала
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по типам материалов
-     * @dataProvider findOrCreateMaterialTypeDataProvider
      */
+    #[DataProvider('findOrCreateMaterialTypeDataProvider')]
     public function testFindOrCreateMaterialType(
         array $data,
         array $mapping,
@@ -1242,7 +1207,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => int> Массив проверки записей маппинга по кастомным полям
      *         ]>
      */
-    public function findOrCreateFieldDataProvider()
+    public static function findOrCreateFieldDataProvider()
     {
         static::installTables();
         $materialType = new Material_Type(3);
@@ -1302,8 +1267,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param Material_Type $defaultParent Родительский тип материала по умолчанию для вновь создаваемых полей
      * @param array<string[] => mixed> $expectedTest Массив проверки полей кастомного поля
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по кастомным полям
-     * @dataProvider findOrCreateFieldDataProvider
      */
+    #[DataProvider('findOrCreateFieldDataProvider')]
     public function testFindOrCreateField(array $data, array $mapping, Material_Type $defaultParent, array $expectedTest, array $mappingTest)
     {
         $interface = new Sync1CInterface();
@@ -1331,7 +1296,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => int> Массив проверки записей маппинга по страницам
      *         ]>
      */
-    public function findOrCreatePageDataProvider()
+    public static function findOrCreatePageDataProvider()
     {
         static::installTables();
         $page = new Page(1);
@@ -1384,8 +1349,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param Page $defaultParent Родительская страница по умолчанию для вновь создаваемых типов
      * @param array<string[] => mixed> $expectedTest Массив проверки полей страницы
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по страницам
-     * @dataProvider findOrCreatePageDataProvider
      */
+    #[DataProvider('findOrCreatePageDataProvider')]
     public function testFindOrCreatePage(array $data, array $mapping, Page $defaultParent, array $expectedTest, array $mappingTest)
     {
         $interface = new Sync1CInterface();
@@ -1414,7 +1379,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => int> Массив проверки записей маппинга по материалам
      *         ]>
      */
-    public function findOrCreateMaterialDataProvider()
+    public static function findOrCreateMaterialDataProvider()
     {
         static::installTables();
         $materialType = new Material_Type(5);
@@ -1479,8 +1444,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param Material_Type $defaultParent Родительский тип материала по умолчанию для вновь создаваемых материалов
      * @param array<string[] => mixed> $expectedTest Массив проверки полей материала
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по материалам
-     * @dataProvider findOrCreateMaterialDataProvider
      */
+    #[DataProvider('findOrCreateMaterialDataProvider')]
     public function testFindOrCreateMaterial(array $data, array $articlesMapping, array $mapping, Material_Type $defaultParent, array $expectedTest, array $mappingTest)
     {
         $interface = new Sync1CInterface();
@@ -1508,7 +1473,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => int> Массив проверки записей маппинга по типам материалов
      *         ]>
      */
-    public function processMaterialTypeDataProvider()
+    public static function processMaterialTypeDataProvider()
     {
         static::installTables();
         $materialType = new Material_Type();
@@ -1596,8 +1561,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param Material_Type $defaultParent Родительский тип материала по умолчанию для вновь создаваемых типов
      * @param array<string[] => mixed> $expectedTest Массив проверки полей типа материала
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по типам материалов
-     * @dataProvider processMaterialTypeDataProvider
      */
+    #[DataProvider('processMaterialTypeDataProvider')]
     public function testProcessMaterialType(
         array $data,
         array $mapping,
@@ -1663,7 +1628,7 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => int> Массив проверки записей маппинга по кастомным полям
      *         ]>
      */
-    public function processFieldDataProvider()
+    public static function processFieldDataProvider()
     {
         static::installTables();
         $materialType = new Material_Type();
@@ -1764,8 +1729,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param Material_Type $defaultParent Родительский тип материала по умолчанию для вновь создаваемых полей
      * @param array<string[] => mixed> $expectedTest Массив проверки полей кастомного поля
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по кастомным полям
-     * @dataProvider processFieldDataProvider
      */
+    #[DataProvider('processFieldDataProvider')]
     public function testProcessField(
         array $data,
         array $mapping,
@@ -1860,11 +1825,11 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => int> Массив проверки записей маппинга по страницам
      *         ]>
      */
-    public function processPageDataProvider()
+    public static function processPageDataProvider()
     {
         static::installTables();
         $page = new Page(1);
-        $dir = $this->getResourcesDir() . '/';
+        $dir = static::getResourcesDir() . '/';
         return [
             [
                 [
@@ -1964,8 +1929,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param string $dir Путь к папке с файлами для медиа-полей
      * @param array<string[] => mixed> $expectedTest Массив проверки полей страницы
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по страницам
-     * @dataProvider processPageDataProvider
      */
+    #[DataProvider('processPageDataProvider')]
     public function testProcessPage(
         array $data,
         array $mapping,
@@ -2007,7 +1972,7 @@ class Sync1CInterfaceTest extends BaseTest
                 'create' => ['pid' => true, 'name' => true, 'urn' => true],
                 'update' => ['pid' => true, 'name' => false, 'urn' => true]
             ]
-        ], $mapping, new Page(1), $this->getResourcesDir() . '/');
+        ], $mapping, new Page(1), static::getResourcesDir() . '/');
 
         $this->assertEmpty($result->id);
         $this->assertEquals('Orphan page', $result->name);
@@ -2029,7 +1994,7 @@ class Sync1CInterfaceTest extends BaseTest
             ['id' => 32, '@delete' => true, '@config' => ['map' => ['id' => false]]],
             $mapping,
             new Page(),
-            $this->getResourcesDir() . '/'
+            static::getResourcesDir() . '/'
         );
 
         $this->assertInstanceOf(Page::class, $result);
@@ -2055,12 +2020,12 @@ class Sync1CInterfaceTest extends BaseTest
      *             array<string[] => int> Массив проверки записей маппинга по материалам
      *         ]>
      */
-    public function processMaterialDataProvider()
+    public static function processMaterialDataProvider()
     {
         static::installTables();
         $materialType = new Material_Type(4);
         $articlesMapping = ['6dd28e9b' => 13, 'f3b61b38' => 14];
-        $dir = $this->getResourcesDir() . '/';
+        $dir = static::getResourcesDir() . '/';
         $page = new Page(15);
         return [
             [
@@ -2226,8 +2191,8 @@ class Sync1CInterfaceTest extends BaseTest
      * @param Page $page Страница по умолчанию, в которую загружаем
      * @param array<string[] => mixed> $expectedTest Массив проверки полей материала
      * @param array<string[] => int> $mappingTest Массив проверки записей маппинга по материалам
-     * @dataProvider processMaterialDataProvider
      */
+    #[DataProvider('processMaterialDataProvider')]
     public function testProcessMaterial(
         array $data,
         array $articlesMapping,
@@ -2265,7 +2230,7 @@ class Sync1CInterfaceTest extends BaseTest
             [],
             $mapping,
             new Material_Type(),
-            $this->getResourcesDir() . '/',
+            static::getResourcesDir() . '/',
             new Page(1)
         );
 
@@ -2307,13 +2272,13 @@ class Sync1CInterfaceTest extends BaseTest
         ];
         $articlesMapping = ['aaa' => 'xxx', 'bbb' => 'yyy', 'ccc' => 'zzz'];
         $mapping = [Material::class => ['aaa' => 1]];
-        $dir = $this->getResourcesDir() . '';
+        $dir = static::getResourcesDir() . '';
         $mappingFile = $dir . '/mapping.json';
         $log = [];
         $materialType = new Material_Type(4);
         $page = new Page(15);
         $interface = $this->getMockBuilder(Sync1CInterface::class)
-            ->setMethods([
+            ->onlyMethods([
                 'loadMapping',
                 'processMaterialType',
                 'processField',
@@ -2322,61 +2287,129 @@ class Sync1CInterfaceTest extends BaseTest
                 'saveMapping'
             ])->getMock();
 
-        $interface->method('loadMapping')->willReturn($mapping);
-        $interface->expects($this->once())->method('loadMapping')->with($mappingFile);
-        $interface->method('processMaterialType')->will($this->onConsecutiveCalls(
-            new Material_Type(['id' => 1, 'name' => 'AAA']),
-            new Material_Type(['id' => 2, 'name' => 'BBB', 'new' => true])
-        ));
-        $interface->expects($this->exactly(2))->method('processMaterialType')->withConsecutive(
-            [['id' => 'aaa'], $mapping, $materialType],
-            [['id' => 'bbb'], $mapping, $materialType]
+        $interface->expects($this->once())->method('loadMapping')->with($mappingFile)->willReturn($mapping);
+
+        $matcherProcessMaterialType = $this->exactly(2);
+        $interface->expects($matcherProcessMaterialType)->method('processMaterialType')->willReturnCallback(
+            function (
+                array $data,
+                array &$mappingArg,
+                Material_Type $defaultParent
+            ) use (
+                $matcherProcessMaterialType,
+                $mapping,
+                $materialType
+            ) {
+                $this->assertSame($mapping, $mappingArg);
+                $this->assertSame($materialType, $defaultParent);
+                switch ($matcherProcessMaterialType->numberOfInvocations()) {
+                    case 1:
+                        $this->assertSame(['id' => 'aaa'], $data);
+                        return new Material_Type(['id' => 1, 'name' => 'AAA']);
+                        break;
+                    case 2:
+                        $this->assertSame(['id' => 'bbb'], $data);
+                        return new Material_Type(['id' => 2, 'name' => 'BBB', 'new' => true]);
+                        break;
+                }
+            }
         );
-        $interface->method('processField')->will($this->onConsecutiveCalls(
-            new Material_Field(['id' => 1, 'name' => 'AAA'])
-        ));
-        $interface->expects($this->once())->method('processField')->withConsecutive(
-            [['id' => 'ccc'], $mapping, $materialType]
+
+        $interface
+            ->expects($this->once())
+            ->method('processField')
+            ->with(['id' => 'ccc'], $mapping, $materialType)
+            ->willReturn(new Material_Field(['id' => 1, 'name' => 'AAA']));
+
+        $matcherProcessPage = $this->exactly(3);
+        $interface->expects($matcherProcessPage)->method('processPage')->willReturnCallback(
+            function (
+                array $data,
+                array &$mappingArg,
+                Page $defaultParent,
+                $dirArg
+            ) use (
+                $matcherProcessPage,
+                $mapping,
+                $page,
+                $dir
+            ) {
+                $this->assertSame($mapping, $mappingArg);
+                $this->assertSame($page, $defaultParent);
+                $this->assertSame($dir, $dirArg);
+                switch ($matcherProcessPage->numberOfInvocations()) {
+                    case 1:
+                        $this->assertSame(['id' => 'ddd'], $data);
+                        return new Page(['id' => 1, 'name' => 'AAA']);
+                        break;
+                    case 2:
+                        $this->assertSame(['id' => 'eee'], $data);
+                        return new Page(['id' => 2, 'name' => 'BBB', 'new' => true]);
+                        break;
+                    case 3:
+                        $this->assertSame(['id' => 'fff'], $data);
+                        return new Page(['id' => 3, 'name' => 'CCC', 'deleted' => true]);
+                        break;
+                }
+            }
         );
-        $interface->method('processPage')->will($this->onConsecutiveCalls(
-            new Page(['id' => 1, 'name' => 'AAA']),
-            new Page(['id' => 2, 'name' => 'BBB', 'new' => true]),
-            new Page(['id' => 3, 'name' => 'CCC', 'deleted' => true])
-        ));
-        $interface->expects($this->exactly(3))->method('processPage')->withConsecutive(
-            [['id' => 'ddd'], $mapping, $page, $dir],
-            [['id' => 'eee'], $mapping, $page, $dir],
-            [['id' => 'fff'], $mapping, $page, $dir]
+
+        $matcherProcessMaterial = $this->exactly(7);
+        $interface->expects($matcherProcessMaterial)->method('processMaterial')->willReturnCallback(
+            function (
+                array $data,
+                array $articlesMappingArg,
+                array &$mappingArg,
+                Material_Type $defaultParent,
+                $dirArg,
+                Page $pageArg
+            ) use (
+                $matcherProcessMaterial,
+                $articlesMapping,
+                $mapping,
+                $materialType,
+                $dir,
+                $page
+            ) {
+                $this->assertSame($articlesMapping, $articlesMappingArg);
+                $this->assertSame($mapping, $mappingArg);
+                $this->assertSame($materialType, $defaultParent);
+                $this->assertSame($dir, $dirArg);
+                $this->assertSame($page, $pageArg);
+                switch ($matcherProcessMaterial->numberOfInvocations()) {
+                    case 1:
+                        $this->assertSame(['id' => 'ggg'], $data);
+                        return new Material(['id' => 1, 'name' => 'AAA']);
+                        break;
+                    case 2:
+                        $this->assertSame(['id' => 'hhh'], $data);
+                        return new Material(['id' => 2, 'name' => 'BBB', 'new' => true]);
+                        break;
+                    case 3:
+                        $this->assertSame(['id' => 'iii'], $data);
+                        return new Material(['id' => 3, 'name' => 'CCC', 'deleted' => true]);
+                        break;
+                    case 4:
+                        $this->assertSame(['id' => 'jjj'], $data);
+                        return new Material(['id' => 4, 'name' => 'DDD']);
+                        break;
+                    case 5:
+                        $this->assertSame(['id' => 'kkk'], $data);
+                        return new Material(['id' => 5, 'name' => 'EEE', 'new' => true]);
+                        break;
+                    case 6:
+                        $this->assertSame(['id' => 'lll'], $data);
+                        return new Material(['id' => 6, 'name' => 'FFF', 'deleted' => true]);
+                        break;
+                    case 7:
+                        $this->assertSame(['id' => 'mmm'], $data);
+                        return new Material(['id' => 7, 'name' => 'GGG']);
+                        break;
+                }
+            }
         );
-        $interface->method('processMaterial')->will($this->onConsecutiveCalls(
-            new Material(['id' => 1, 'name' => 'AAA']),
-            new Material(['id' => 2, 'name' => 'BBB', 'new' => true]),
-            new Material(['id' => 3, 'name' => 'CCC', 'deleted' => true]),
-            new Material(['id' => 4, 'name' => 'DDD']),
-            new Material(['id' => 5, 'name' => 'EEE', 'new' => true]),
-            new Material(['id' => 6, 'name' => 'FFF', 'deleted' => true]),
-            new Material(['id' => 7, 'name' => 'GGG'])
-        ));
-        $interface->expects($this->exactly(7))->method('processMaterial')->withConsecutive(
-            [['id' => 'ggg'], $articlesMapping, $mapping, $materialType, $dir, $page],
-            [['id' => 'hhh'], $articlesMapping, $mapping, $materialType, $dir, $page],
-            [['id' => 'iii'], $articlesMapping, $mapping, $materialType, $dir, $page],
-            [['id' => 'jjj'], $articlesMapping, $mapping, $materialType, $dir, $page],
-            [['id' => 'kkk'], $articlesMapping, $mapping, $materialType, $dir, $page],
-            [['id' => 'lll'], $articlesMapping, $mapping, $materialType, $dir, $page],
-            [['id' => 'mmm'], $articlesMapping, $mapping, $materialType, $dir, $page]
-        );
-        $interface->expects($this->exactly(9))->method('saveMapping')->withConsecutive(
-            [$mappingFile, $mapping],
-            [$mappingFile, $mapping],
-            [$mappingFile, $mapping],
-            [$mappingFile, $mapping],
-            [$mappingFile, $mapping],
-            [$mappingFile, $mapping],
-            [$mappingFile, $mapping],
-            [$mappingFile, $mapping],
-            [$mappingFile, $mapping]
-        );
+        // $matcherSaveMapping = $this->exactly(9);
+        $interface->expects($this->exactly(9))->method('saveMapping')->with($mappingFile, $mapping);
 
         $result = $interface->processData(
             $page,
@@ -2444,7 +2477,7 @@ class Sync1CInterfaceTest extends BaseTest
             ],
         ];
         $articlesMapping = ['aaa' => 'xxx', 'bbb' => 'yyy', 'ccc' => 'zzz'];
-        $dir = $this->getResourcesDir() . '';
+        $dir = static::getResourcesDir() . '';
         $mappingFile = $dir . '/mapping.json';
         $log = [];
         $materialType = new Material_Type(4);
@@ -2497,7 +2530,7 @@ class Sync1CInterfaceTest extends BaseTest
             ],
         ];
         $articlesMapping = ['aaa' => 'xxx', 'bbb' => 'yyy', 'ccc' => 'zzz'];
-        $dir = $this->getResourcesDir() . '';
+        $dir = static::getResourcesDir() . '';
         $log = [];
         $materialType = new Material_Type(4);
         $page = new Page(15);
@@ -2587,7 +2620,7 @@ class Sync1CInterfaceTest extends BaseTest
         $affected = [Material::class => [1, 2, 3], Page::class => [10, 11, 12]];
         $articlesMapping = ['aaa' => 'xxx', 'bbb' => 'yyy', 'ccc' => 'zzz'];
         $mapping = [];
-        $dir = $this->getResourcesDir() . '';
+        $dir = static::getResourcesDir() . '';
         $log = [];
         $materialType = new Material_Type(4);
         $page = new Page(15);
@@ -2596,7 +2629,7 @@ class Sync1CInterfaceTest extends BaseTest
         };
         $clear = Sync1CInterface::DELETE_PREVIOUS_MATERIALS_MATERIALS_AND_PAGES;
         $interface = $this->getMockBuilder(Sync1CInterface::class)
-            ->setMethods(['clearMaterials', 'clearPages'])
+            ->onlyMethods(['clearMaterials', 'clearPages'])
             ->getMock();
 
         $interface->expects($this->once())->method('clearMaterials')->with($materialType, $page, [1, 2, 3], $logger);
@@ -2613,15 +2646,15 @@ class Sync1CInterfaceTest extends BaseTest
     {
         $page = new Page(15);
         $materialType = new Material_Type(4);
-        $goodsFile = $this->getResourcesDir() . '/import0_1.xml';
-        $offersFile = $this->getResourcesDir() . '/offers0_1.xml';
-        $goodsXSLFile = $this->getResourcesDir() . '/import.xsl';
-        $offersXSLFile = $this->getResourcesDir() . '/offers.xsl';
-        $mappingFile = $this->getResourcesDir() . '/mapping.json';
+        $goodsFile = static::getResourcesDir() . '/import0_1.xml';
+        $offersFile = static::getResourcesDir() . '/offers0_1.xml';
+        $goodsXSLFile = static::getResourcesDir() . '/import.xsl';
+        $offersXSLFile = static::getResourcesDir() . '/offers.xsl';
+        $mappingFile = static::getResourcesDir() . '/mapping.json';
         $logger = function ($x) {
         };
         $interface = $this->getMockBuilder(Sync1CInterface::class)
-            ->setMethods(['loadData', 'loadMapping', 'getArticlesMapping', 'processData', 'clear'])
+            ->onlyMethods(['loadData', 'loadMapping', 'getArticlesMapping', 'processData', 'clear'])
             ->getMock();
 
         $interface->method('loadData')->willReturn(['materials' => ['id' => 'aaa']]);
@@ -2638,7 +2671,7 @@ class Sync1CInterfaceTest extends BaseTest
             $materialType,
             ['materials' => ['id' => 'aaa']],
             ['asdjkfh' => 1],
-            $this->getResourcesDir(),
+            static::getResourcesDir(),
             $logger,
             $mappingFile,
             100
@@ -2653,7 +2686,7 @@ class Sync1CInterfaceTest extends BaseTest
             $offersXSLFile,
             $mappingFile,
             'article',
-            $this->getResourcesDir(),
+            static::getResourcesDir(),
             Sync1CInterface::DELETE_PREVIOUS_MATERIALS_MATERIALS_AND_PAGES,
             $logger,
             100

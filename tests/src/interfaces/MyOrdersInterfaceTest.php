@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Controller_Frontend;
 use RAAS\CMS\Block_PHP;
@@ -12,8 +15,8 @@ use RAAS\CMS\User;
 
 /**
  * Класс теста интерфейса сервиса "Мои заказы"
- * @covers RAAS\CMS\Shop\MyOrdersInterface
  */
+#[CoversClass(MyOrdersInterface::class)]
 class MyOrdersInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -285,7 +288,7 @@ class MyOrdersInterfaceTest extends BaseTest
             'post_date' => date('Y-m-d H:i:s'),
         ]);
         $interface = $this->getMockBuilder(MyOrdersInterface::class)
-            ->setMethods([
+            ->onlyMethods([
                 'getOrder',
                 'deleteOrder',
             ])
@@ -297,9 +300,7 @@ class MyOrdersInterfaceTest extends BaseTest
             ->getMock();
 
         $interface->method('getOrder')->willReturn($order);
-        $interface->expects($this->once())->method('deleteOrder')->withConsecutive(
-            [$order, 'history:back']
-        );
+        $interface->expects($this->once())->method('deleteOrder')->with($order, 'history:back');
         $result = $interface->process();
 
         Controller_Frontend::i()->user = new User();
@@ -320,7 +321,7 @@ class MyOrdersInterfaceTest extends BaseTest
             'post_date' => date('Y-m-d H:i:s'),
         ]);
         $interface = $this->getMockBuilder(MyOrdersInterface::class)
-            ->setMethods([
+            ->onlyMethods([
                 'getOrder',
                 'deleteOrder',
             ])
@@ -336,9 +337,7 @@ class MyOrdersInterfaceTest extends BaseTest
             ->getMock();
 
         $interface->method('getOrder')->willReturn($order);
-        $interface->expects($this->once())->method('deleteOrder')->withConsecutive(
-            [$order, '/my_orders/']
-        );
+        $interface->expects($this->once())->method('deleteOrder')->with($order, '/my_orders/');
         $result = $interface->process();
 
         Controller_Frontend::i()->user = new User();

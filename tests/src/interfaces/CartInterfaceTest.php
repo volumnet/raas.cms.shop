@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Frontend as ControllerFrontend;
@@ -18,8 +21,8 @@ use RAAS\CMS\Users\Module as UsersModule;
 
 /**
  * Класс теста стандартного интерфейса корзины
- * @covers RAAS\CMS\Shop\CartInterface
  */
+#[CoversClass(CartInterface::class)]
 class CartInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -503,33 +506,17 @@ class CartInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testFindUser()
-     * @return array <pre><code>[
-     *     array POST-данные
-     *     string[] Поля для нахождения пользователя
-     *     int|null Ожидаемый ID# пользователя
-     * ]</code></pre>
-     */
-    public function findUserDataProvider()
-    {
-        return [
-            [['email' => 'test@test.org', 'login' => 'test2'], ['email', 'login'], 1],
-            [['email' => 'test@test.org', 'login' => 'test2'], ['login', 'email'], 2],
-            [['phone' => '+7 999 000-00-00'], ['phone'], 1], // Найдется ID#1, поскольку сортируются по ID#
-            [['second_name' => 2], ['second_name'], 2],
-            [['second_name' => 'aaa'], ['second_name'], null],
-        ];
-    }
-
-
-    /**
      * Тест метода findUser()
      * @param array $post POST-данные
      * @param string[] $findBy Поля для нахождения пользователя
-     * @param int|null $expected Ожидаемый ID# пользователя
-     * @dataProvider findUserDataProvider
+     * @param ?int $expected Ожидаемый ID# пользователя
      */
-    public function testFindUser(array $post, array $findBy, int $expected = null)
+    #[TestWith([['email' => 'test@test.org', 'login' => 'test2'], ['email', 'login'], 1])]
+    #[TestWith([['email' => 'test@test.org', 'login' => 'test2'], ['login', 'email'], 2])]
+    #[TestWith([['phone' => '+7 999 000-00-00'], ['phone'], 1])] // Найдется ID#1, поскольку сортируются по ID#
+    #[TestWith([['second_name' => 2], ['second_name'], 2])]
+    #[TestWith([['second_name' => 'aaa'], ['second_name'], null])]
+    public function testFindUser(array $post, array $findBy, ?int $expected = null)
     {
         $interface = new CartInterface();
 
@@ -623,7 +610,7 @@ class CartInterfaceTest extends BaseTest
         $block = Block::spawn(38);
         $block->params = 'bindUserBy[]=phone&createUserBlockId=45';
         $interface = new CartInterface($block);
-        $interface->additionalsCallback = function (Cart $cart, array $post = [], User $user = null) {
+        $interface->additionalsCallback = function (Cart $cart, array $post = [], ?User $user = null) {
             return [
                 'items' => [new CartItem([
                     'name' => 'Доставка',
@@ -1087,7 +1074,7 @@ class CartInterfaceTest extends BaseTest
                 'action' => 'refresh',
             ]
         );
-        $interface->additionalsCallback = function (Cart $cart, array $post = [], User $user = null) {
+        $interface->additionalsCallback = function (Cart $cart, array $post = [], ?User $user = null) {
             return ['aaa' => ['bbb' => 'ccc']];
         };
 
@@ -1112,7 +1099,7 @@ class CartInterfaceTest extends BaseTest
     public function testGetAdditionals()
     {
         $interface = new CartInterface();
-        $interface->additionalsCallback = function (Cart $cart, array $post = [], User $user = null) {
+        $interface->additionalsCallback = function (Cart $cart, array $post = [], ?User $user = null) {
             return ['aaa' => ['bbb' => 'ccc']];
         };
         $cart = new Cart(new Cart_Type(1));

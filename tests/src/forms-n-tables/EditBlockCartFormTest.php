@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Field as RAASField;
@@ -15,8 +18,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест класса EditBlockCartForm
- * @covers RAAS\CMS\Shop\EditBlockCartForm
  */
+#[CoversClass(EditBlockCartForm::class)]
 class EditBlockCartFormTest extends BaseTest
 {
     public static $tables = [

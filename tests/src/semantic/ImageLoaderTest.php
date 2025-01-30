@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Page;
@@ -11,8 +14,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест класса ImageLoader
- * @covers RAAS\CMS\Shop\ImageLoader
  */
+#[CoversClass(ImageLoader::class)]
 class ImageLoaderTest extends BaseTest
 {
     public static $tables = [
@@ -79,14 +82,14 @@ class ImageLoaderTest extends BaseTest
         $loader->commit();
 
         $result = $loader->upload(
-            [['name' => 'test.xls', 'tmp_name' => $this->getResourcesDir() . '/test.xls']],
+            [['name' => 'test.xls', 'tmp_name' => static::getResourcesDir() . '/test.xls']],
             true,
             true
         );
 
         $this->assertEquals($loader, $result['Loader']);
         $this->assertEquals('test.xls', $result['files'][0]['name']);
-        $this->assertEquals($this->getResourcesDir() . '/test.xls', $result['files'][0]['tmp_name']);
+        $this->assertEquals(static::getResourcesDir() . '/test.xls', $result['files'][0]['tmp_name']);
         $this->assertTrue($result['test']);
         $this->assertTrue($result['clear']);
 
@@ -107,14 +110,14 @@ class ImageLoaderTest extends BaseTest
         $loader->commit();
 
         $result = $loader->upload(
-            [['name' => 'test.xls', 'tmp_name' => $this->getResourcesDir() . '/test.xls']],
+            [['name' => 'test.xls', 'tmp_name' => static::getResourcesDir() . '/test.xls']],
             true,
             true
         );
 
         $this->assertEquals($loader, $result['Loader']);
         $this->assertEquals('test.xls', $result['files'][0]['name']);
-        $this->assertEquals($this->getResourcesDir() . '/test.xls', $result['files'][0]['tmp_name']);
+        $this->assertEquals(static::getResourcesDir() . '/test.xls', $result['files'][0]['tmp_name']);
         $this->assertTrue($result['test']);
         $this->assertTrue($result['clear']);
 

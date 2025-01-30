@@ -63,8 +63,8 @@ $defaultSortVariant = $matchingVariants ? $matchingVariants[0] : $sortVariants[0
           class="catalog-controls__sort-inner catalog-controls-sort"
           data-vue-role="catalog-controls-sort"
           data-v-bind_source="<?php echo htmlspecialchars(json_encode($sortVariants))?>"
-          data-v-bind_value="vm.sort"
-          data-v-on_input="vm.changeSort($event); vm.update();"
+          data-v-bind_model-value="vm.sort"
+          data-v-on_update_model-value="vm.changeSort($event); vm.update();"
         >
           <button type="button" class="catalog-controls-sort__title_desktop">
             <?php echo htmlspecialchars($defaultSortVariant['name'])?>
@@ -86,7 +86,8 @@ $defaultSortVariant = $matchingVariants ? $matchingVariants[0] : $sortVariants[0
       type="checkbox"
       class="raas-field-checkbox"
       data-v-model="vm.query.available"
-      data-v-on_input="vm.update()"
+      data-v-on_update_model-value="vm.update()"
+      data-vue-aaa_bbb_ccc="ddd"
     >
     <?php echo AVAILABLE?>
   </label>
@@ -96,7 +97,7 @@ $defaultSortVariant = $matchingVariants ? $matchingVariants[0] : $sortVariants[0
       type="checkbox"
       class="raas-field-checkbox"
       data-v-model="vm.query.price_old_from"
-      data-v-on_input="vm.update()"
+      data-v-on_update:model-value="vm.update()"
     >
     <?php echo DISCOUNT?>
   </label>

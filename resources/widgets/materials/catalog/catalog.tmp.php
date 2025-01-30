@@ -459,10 +459,10 @@ if ($Item) {
                         itemprop="price"
                         content="<?php echo (float)$itemData['price']?>"
                         data-v-html="vm.formatPrice(vm.item.price * Math.max(vm.item.min || 1, vm.amount))"
-                      >
-                        <?php echo Text::formatPrice((float)$itemData['price'])?>
-                      </span>
-                      <span itemprop="priceCurrency" content="RUB" class="catalog-article__currency">₽</span>
+                      ><?php
+                        echo Text::formatPrice((float)$itemData['price'])
+                      ?></span><?php //nobr
+                      ?><span itemprop="priceCurrency" content="RUB" class="catalog-article__currency">₽</span>
                     </span>
                     <?php if ($itemData['unit'] && !stristr($itemData['unit'], 'шт')) { ?>
                         <span class="catalog-article__unit">

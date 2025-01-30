@@ -5,6 +5,9 @@
 namespace RAAS\CMS\Shop;
 
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Frontend as ControllerFrontend;
@@ -15,8 +18,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест интерфейса PayKeeper
- * @covers RAAS\CMS\Shop\PayKeeperInterface
  */
+#[CoversClass(PayKeeperInterface::class)]
 class PayKeeperInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -46,30 +49,14 @@ class PayKeeperInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetURL
-     * @return array <pre><code>array<[
-     *     bool Тестовый режим,
-     *     string Хост PayKeeper в явном виде
-     *     string Ожидаемое значение
-     * ]></code></pre>
-     */
-    public function getURLDataProvider()
-    {
-        return [
-            [true, '', 'https://demo.paykeeper.ru'],
-            [false, 'test123.paykeeper.ru', 'https://test123.paykeeper.ru'],
-            [false, '', 'https://test.server.paykeeper.ru'],
-        ];
-    }
-
-
-    /**
      * Тест метода getURL
      * @param bool $test Тестовый режим
      * @param string $payKeeperHost Хост PayKeeper в явном виде
      * @param string $expected Ожидаемое значение
-     * @dataProvider getURLDataProvider
      */
+    #[TestWith([true, '', 'https://demo.paykeeper.ru'])]
+    #[TestWith([false, 'test123.paykeeper.ru', 'https://test123.paykeeper.ru'])]
+    #[TestWith([false, '', 'https://test.server.paykeeper.ru'])]
     public function testGetURL(bool $test, string $payKeeperHost, string $expected)
     {
         $block = new Block_Cart();
@@ -147,12 +134,18 @@ class PayKeeperInterfaceTest extends BaseTest
                     'key' => $checkKey,
                 ]
             ])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
-        $interface->expects($this->exactly(2))->method('doLog')->withConsecutive(
-            ['checkKey ' . $checkKey . ' / ' . $checkKey],
-            ['returnHash OK ' . $returnHash]
-        );
+        $matcher = $this->exactly(2);
+        $interface
+            ->expects($matcher)
+            ->method('doLog')
+            ->willReturnCallback(function ($value) use ($matcher, $checkKey, $returnHash) {
+                match ($matcher->numberOfInvocations()) {
+                    1 =>  $this->assertEquals('checkKey ' . $checkKey . ' / ' . $checkKey, $value),
+                    2 =>  $this->assertEquals('returnHash OK ' . $returnHash, $value),
+                };
+            });
 
         ob_start();
         $interface->processWebhookResponse($order, $block, $page, $webhookResponse);
@@ -213,7 +206,7 @@ class PayKeeperInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(PayKeeperInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'user', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
 
@@ -230,7 +223,7 @@ class PayKeeperInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(PayKeeperInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'login', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->exactly(2))->method('doLog'); // Один на получение токена, один - на собственно запрос
         $result = $interface->exec('/change/invoice/preview/', ['aaa' => 'bbb'], true);
@@ -349,7 +342,7 @@ class PayKeeperInterfaceTest extends BaseTest
      */
     public function testRegisterOrderWithData()
     {
-        $interface = $this->getMockBuilder(PayKeeperInterface::class)->setMethods(['exec'])->getMock();
+        $interface = $this->getMockBuilder(PayKeeperInterface::class)->onlyMethods(['exec'])->getMock();
         $interface->expects($this->once())->method('exec')->with('/change/invoice/preview/', ['aaa'], false);
 
         $result = $interface->registerOrderWithData(new Order(), new Block_Cart(), new Page(), ['aaa']);
@@ -401,7 +394,7 @@ class PayKeeperInterfaceTest extends BaseTest
     {
         $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd']);
         $interface = $this->getMockBuilder(PayKeeperInterface::class)
-            ->setMethods(['exec'])
+            ->onlyMethods(['exec'])
             ->getMock();
         $interface->expects($this->once())->method('exec')->with(
             '/info/invoice/byid/?id=aaaa-bbbb-cccc-dddd',

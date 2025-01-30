@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\CMS\Form;
@@ -13,8 +16,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест класса Order
- * @covers RAAS\CMS\Shop\Order
  */
+#[CoversClass(Order::class)]
 class OrderTest extends BaseTest
 {
     public static $tables = [

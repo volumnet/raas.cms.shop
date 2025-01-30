@@ -5,6 +5,9 @@
 namespace RAAS\CMS\Shop;
 
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Frontend as ControllerFrontend;
@@ -15,8 +18,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест интерфейса PayMaster
- * @covers RAAS\CMS\Shop\PayMasterInterface
  */
+#[CoversClass(PayMasterInterface::class)]
 class PayMasterInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -46,24 +49,12 @@ class PayMasterInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetURL
-     * @return array <pre><code>array<[bool Тестовый режим, string Ожидаемое значение]></code></pre>
-     */
-    public function getURLDataProvider()
-    {
-        return [
-            [true, 'https://paymaster.ru/api/v2/'],
-            [false, 'https://paymaster.ru/api/v2/'],
-        ];
-    }
-
-
-    /**
      * Тест метода getURL
      * @param bool $test Тестовый режим
      * @param string $expected Ожидаемое значение
-     * @dataProvider getURLDataProvider
      */
+    #[TestWith([true, 'https://paymaster.ru/api/v2/'])]
+    #[TestWith([false, 'https://paymaster.ru/api/v2/'])]
     public function testGetURL(bool $test, string $expected)
     {
         $interface = new PayMasterInterface();
@@ -180,7 +171,7 @@ class PayMasterInterfaceTest extends BaseTest
     public function testExec()
     {
         $interface = $this->getMockBuilder(PayMasterInterface::class)
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
 
@@ -197,7 +188,7 @@ class PayMasterInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(PayMasterInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'login', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
         $result = $interface->exec('payments', ['aaa' => 'bbb'], true);
@@ -213,7 +204,7 @@ class PayMasterInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(PayMasterInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'login', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
         $result = $interface->exec('payments', ['aaa' => 'bbb'], true, true);
@@ -344,7 +335,7 @@ class PayMasterInterfaceTest extends BaseTest
     public function testRegisterOrderWithData()
     {
         $interface = $this->getMockBuilder(PayMasterInterface::class)
-            ->setMethods(['exec'])
+            ->onlyMethods(['exec'])
             ->getMock();
         $interface->expects($this->once())->method('exec')->with('payments', ['aaa'], false);
 
@@ -421,7 +412,7 @@ class PayMasterInterfaceTest extends BaseTest
     {
         $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd']);
         $interface = $this->getMockBuilder(PayMasterInterface::class)
-            ->setMethods(['exec'])
+            ->onlyMethods(['exec'])
             ->getMock();
         $interface->expects($this->once())->method('exec')->with('payments/aaaa-bbbb-cccc-dddd', [], false);
 

@@ -132,7 +132,7 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
             <?php } ?>
           </fieldset>
           <input type="hidden" name="agree" value="1">
-          <div class="feedback-modal__agree feedback__agree" v-html="">
+          <div class="feedback-modal__agree feedback__agree">
             <?php echo AGREE_BY_CLICKING_SEND?>
           </div>
           <div class="feedback__controls">

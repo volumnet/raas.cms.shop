@@ -4,14 +4,17 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use RAAS\CMS\Page;
 use SOME\BaseTest;
 use SOME\CSV;
 
 /**
  * Класс теста конвертера CSV для загрузчика прайсов
- * @covers RAAS\CMS\Shop\CSVPriceloaderDataConverter
  */
+#[CoversClass(CSVPriceloaderDataConverter::class)]
 class CSVPriceloaderDataConverterTest extends BaseTest
 {
     public static $tables = [

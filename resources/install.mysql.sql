@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_cart_types
 
   PRIMARY KEY (id),
   KEY (form_id)
-) COMMENT 'Cart types';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Cart types';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_cart_types_material_types_assoc (
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_cart_types
   KEY (ctype),
   KEY (mtype),
   KEY (price_id)
-) COMMENT 'Cart types to material types association';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Cart types to material types association';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_statuses (
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_sta
 
   PRIMARY KEY (id),
   INDEX (priority)
-) COMMENT 'Orders statuses';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Orders statuses';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders (
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders (
   INDEX (payment_interface_classname),
   KEY (payment_interface_id),
   INDEX (payment_id)
-) COMMENT 'Orders';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Orders';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_goods (
@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_goo
   KEY (material_id),
   KEY (meta),
   INDEX (priority)
-) COMMENT 'Orders goods';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Orders goods';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_history (
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_orders_his
   KEY (status_id),
   INDEX (paid),
   KEY (post_date)
-) COMMENT 'Orders history';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Orders history';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloaders (
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   KEY (interface_id),
   KEY (cat_id),
   INDEX (urn)
-) COMMENT 'Price loaders';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Price loaders';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloaders_columns (
@@ -142,7 +142,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   KEY (pid),
   KEY (fid),
   INDEX (priority)
-) COMMENT 'Price loaders columns';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Price loaders columns';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloaders (
@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_imageloade
   INDEX (interface_classname),
   KEY (interface_id),
   INDEX (urn)
-) COMMENT 'Image loaders';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Image loaders';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_cart (
@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_car
   KEY cart_type (cart_type),
   INDEX (epay_interface_classname),
   KEY (epay_interface_id)
-) COMMENT='Cart blocks';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Cart blocks';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml (
@@ -197,7 +197,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   pickup_options TEXT NULL DEFAULT NULL COMMENT 'Pickup options',
 
   PRIMARY KEY (id)
-) COMMENT='Yandex Market blocks';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Yandex Market blocks';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_pages_assoc (
@@ -207,7 +207,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   PRIMARY KEY (id, page_id),
   KEY (id),
   KEY (page_id)
-) COMMENT='YM blocks to pages association';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='YM blocks to pages association';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_material_types_assoc (
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   PRIMARY KEY (id, mtype),
   KEY (id),
   KEY (mtype)
-) COMMENT='YM blocks to material types association';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='YM blocks to material types association';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_currencies (
@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
 
   PRIMARY KEY (id, currency_name),
   INDEX(currency_name)
-) COMMENT='Currencies';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Currencies';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_fields (
@@ -247,7 +247,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   KEY (mtype),
   KEY (field_id),
   INDEX (field_name)
-) COMMENT='YM blocks to material types fields';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='YM blocks to material types fields';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_params (
@@ -264,7 +264,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   KEY (mtype),
   KEY (field_id),
   INDEX (param_name)
-) COMMENT='YM blocks to material types params';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='YM blocks to material types params';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml_ignored_fields (
@@ -276,7 +276,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_blocks_yml
   KEY (id),
   KEY (mtype),
   KEY (field_id)
-) COMMENT='YM blocks to material types params ignored fields';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='YM blocks to material types params ignored fields';
 
 
 CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_carts (
@@ -291,4 +291,4 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_carts (
     KEY (uid),
     KEY (material_id),
     KEY (meta)
-) COMMENT 'Cart sessions';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Cart sessions';

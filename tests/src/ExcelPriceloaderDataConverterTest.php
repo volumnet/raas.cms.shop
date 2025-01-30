@@ -7,14 +7,17 @@ namespace RAAS\CMS\Shop;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Cell\Datatype;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Exception;
 use RAAS\CMS\Page;
 
 /**
  * Класс теста конвертера Excel для загрузчика прайсов
- * @covers RAAS\CMS\Shop\ExcelPriceloaderDataConverter
  */
+#[CoversClass(ExcelPriceloaderDataConverter::class)]
 class ExcelPriceloaderDataConverterTest extends BaseTest
 {
     public static $tables = [
@@ -30,7 +33,7 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
     {
         $converter = ExcelPriceloaderDataConverter::spawn('xls');
         $sheet = $this->getMockBuilder(Worksheet::class)
-            ->setMethods([
+            ->onlyMethods([
                 'toArray',
             ])
             ->getMock();
@@ -56,7 +59,7 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
     {
         $converter = ExcelPriceloaderDataConverter::spawn('xls');
         $sheet = $this->getMockBuilder(Worksheet::class)
-            ->setMethods([
+            ->onlyMethods([
                 'toArray',
             ])
             ->getMock();

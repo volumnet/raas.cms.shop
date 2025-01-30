@@ -753,7 +753,7 @@ class CartInterface extends FormInterface
     public function getEmailOrderSubject(Order $order, $forAdmin = false): string
     {
         $host = $this->getCurrentHostName();
-        if (function_exists('idn_to_utf8')) {
+        if ($host && function_exists('idn_to_utf8')) {
             $host = idn_to_utf8($host);
         }
         $host = mb_strtoupper((string)$host);

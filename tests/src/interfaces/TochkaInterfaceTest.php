@@ -5,6 +5,9 @@
 namespace RAAS\CMS\Shop;
 
 use Exception;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Frontend as ControllerFrontend;
@@ -15,8 +18,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест интерфейса банка Точка
- * @covers RAAS\CMS\Shop\TochkaInterface
  */
+#[CoversClass(TochkaInterface::class)]
 class TochkaInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -27,9 +30,11 @@ class TochkaInterfaceTest extends BaseTest
         'cms_pages',
         'cms_shop_blocks_cart',
         'cms_shop_cart_types',
+        'cms_shop_imageloaders',
         'cms_shop_orders',
         'cms_shop_orders_goods',
         'cms_shop_orders_history',
+        'cms_shop_priceloaders',
         'cms_snippets',
     ];
 
@@ -44,27 +49,12 @@ class TochkaInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetURL
-     * @return array <pre><code>array<[
-     *     bool Тестовый режим,
-     *     string Ожидаемое значение
-     * ]></code></pre>
-     */
-    public function getURLDataProvider()
-    {
-        return [
-            [true, 'https://enter.tochka.com/sandbox/v2/acquiring/v1.0/'],
-            [false, 'https://enter.tochka.com/uapi/acquiring/v1.0/'],
-        ];
-    }
-
-
-    /**
      * Тест метода getURL
      * @param bool $test Тестовый режим
      * @param string $expected Ожидаемое значение
-     * @dataProvider getURLDataProvider
      */
+    #[TestWith([true, 'https://enter.tochka.com/sandbox/v2/acquiring/v1.0/'])]
+    #[TestWith([false, 'https://enter.tochka.com/uapi/acquiring/v1.0/'])]
     public function testGetURL(bool $test, string $expected)
     {
         $block = new Block_Cart();
@@ -164,7 +154,7 @@ class TochkaInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(TochkaInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'user', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
 
@@ -181,7 +171,7 @@ class TochkaInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(TochkaInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'login', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog'); // Один на получение токена, один - на собственно запрос
         $result = $interface->exec('payments', ['aaa' => 'bbb'], true);
@@ -198,7 +188,7 @@ class TochkaInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(TochkaInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'login', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
         $result = $interface->exec('payments', ['aaa' => 'bbb'], true, true);
@@ -308,7 +298,7 @@ class TochkaInterfaceTest extends BaseTest
      */
     public function testRegisterOrderWithData()
     {
-        $interface = $this->getMockBuilder(TochkaInterface::class)->setMethods(['exec'])->getMock();
+        $interface = $this->getMockBuilder(TochkaInterface::class)->onlyMethods(['exec'])->getMock();
         $interface->expects($this->once())->method('exec')->with('payments_with_receipt', ['aaa'], false);
 
         $result = $interface->registerOrderWithData(new Order(), new Block_Cart(), new Page(), ['aaa']);
@@ -398,7 +388,7 @@ class TochkaInterfaceTest extends BaseTest
     {
         $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd']);
         $interface = $this->getMockBuilder(TochkaInterface::class)
-            ->setMethods(['exec'])
+            ->onlyMethods(['exec'])
             ->getMock();
         $interface->expects($this->once())->method('exec')->with(
             'payments/aaaa-bbbb-cccc-dddd',

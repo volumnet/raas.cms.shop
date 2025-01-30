@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\CMS\Material_Type;
 use RAAS\CMS\Page;
@@ -11,8 +14,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест класса PriceLoader
- * @covers RAAS\CMS\Shop\PriceLoader
  */
+#[CoversClass(PriceLoader::class)]
 class PriceLoaderTest extends BaseTest
 {
     public static $tables = [
@@ -86,7 +89,7 @@ class PriceLoaderTest extends BaseTest
         $loader->commit();
 
         $result = $loader->upload(
-            ['name' => 'test.xls', 'tmp_name' => $this->getResourcesDir() . '/test.xls'],
+            ['name' => 'test.xls', 'tmp_name' => static::getResourcesDir() . '/test.xls'],
             null,
             true,
             1
@@ -94,7 +97,7 @@ class PriceLoaderTest extends BaseTest
 
         $this->assertEquals($loader, $result['Loader']);
         $this->assertEquals('test.xls', $result['file']['name']);
-        $this->assertEquals($this->getResourcesDir() . '/test.xls', $result['file']['tmp_name']);
+        $this->assertEquals(static::getResourcesDir() . '/test.xls', $result['file']['tmp_name']);
         $this->assertInstanceOf(Page::class, $result['Page']);
         $this->assertEquals(15, $result['Page']->id);
         $this->assertTrue($result['test']);
@@ -113,7 +116,7 @@ class PriceLoaderTest extends BaseTest
     public function testUploadWithInterfaceClassname()
     {
         $page = new Page(15); // Каталог продукции
-        $fileData = ['name' => 'test.xls', 'tmp_name' => $this->getResourcesDir() . '/test.xls'];
+        $fileData = ['name' => 'test.xls', 'tmp_name' => static::getResourcesDir() . '/test.xls'];
         $loader = new PriceLoader([
             'mtype' => 4, // Каталог продукции
             'cat_id' => $page->id,
@@ -126,7 +129,7 @@ class PriceLoaderTest extends BaseTest
         $result = $loader->upload($fileData, $page, true, 1);
 
         $this->assertEquals($loader, $result['Loader']);
-        $this->assertEquals($this->getResourcesDir() . '/test.xls', $result['file']);
+        $this->assertEquals(static::getResourcesDir() . '/test.xls', $result['file']);
         $this->assertInstanceOf(Page::class, $result['Page']);
         $this->assertEquals(15, $result['Page']->id);
         $this->assertTrue($result['test']);

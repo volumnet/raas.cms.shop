@@ -4,12 +4,14 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\CMS\Page;
 
 /**
  * Класс теста трейта наследования полей страницы
- * @covers RAAS\CMS\Shop\InheritPageTrait
  */
 class InheritPageTraitTest extends BaseTest
 {
@@ -72,7 +74,9 @@ class InheritPageTraitTest extends BaseTest
      */
     public function testInheritPageNativeFields()
     {
-        $trait = $this->getMockForTrait(InheritPageTrait::class);
+        $trait = new class {
+            use InheritPageTrait;
+        };
         $page = new Page(['pid' => 3]);
 
         $trait->inheritPageNativeFields($page);
@@ -89,7 +93,9 @@ class InheritPageTraitTest extends BaseTest
      */
     public function testInheritPageCustomFields()
     {
-        $trait = $this->getMockForTrait(InheritPageTrait::class);
+        $trait = new class {
+            use InheritPageTrait;
+        };
         $parentPage = new Page(['pid' => 1, 'name' => 'Test parent']);
         $parentPage->commit();
         $parentPage->fields['_description_']->addValue('Test description');

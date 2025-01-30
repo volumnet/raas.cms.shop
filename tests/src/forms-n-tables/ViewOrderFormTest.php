@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Field as RAASField;
@@ -14,8 +17,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест класса ViewOrderForm
- * @covers RAAS\CMS\Shop\ViewOrderForm
  */
+#[CoversClass(ViewOrderForm::class)]
 class ViewOrderFormTest extends BaseTest
 {
     public static $tables = [

@@ -6,6 +6,9 @@ namespace RAAS\CMS\Shop;
 
 use Exception;
 use SOME\BaseTest;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use RAAS\Application;
 use RAAS\Controller_Frontend as ControllerFrontend;
 use RAAS\CMS\Form_Field;
@@ -15,8 +18,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Тест интерфейса ЮКаssа
- * @covers RAAS\CMS\Shop\YooKassaInterface
  */
+#[CoversClass(YooKassaInterface::class)]
 class YooKassaInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -46,24 +49,12 @@ class YooKassaInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetURL
-     * @return array <pre><code>array<[bool Тестовый режим, string Ожидаемое значение]></code></pre>
-     */
-    public function getURLDataProvider()
-    {
-        return [
-            [true, 'https://api.yookassa.ru/v3/'],
-            [false, 'https://api.yookassa.ru/v3/'],
-        ];
-    }
-
-
-    /**
      * Тест метода getURL
      * @param bool $test Тестовый режим
      * @param string $expected Ожидаемое значение
-     * @dataProvider getURLDataProvider
      */
+    #[TestWith([true, 'https://api.yookassa.ru/v3/'])]
+    #[TestWith([false, 'https://api.yookassa.ru/v3/'])]
     public function testGetURL(bool $test, string $expected)
     {
         $interface = new YooKassaInterface();
@@ -199,7 +190,7 @@ class YooKassaInterfaceTest extends BaseTest
     public function testExec()
     {
         $interface = $this->getMockBuilder(YooKassaInterface::class)
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
         $result = $interface->exec('payments', [], true);
@@ -219,7 +210,7 @@ class YooKassaInterfaceTest extends BaseTest
     {
         $interface = $this->getMockBuilder(YooKassaInterface::class)
             ->setConstructorArgs([new Block_Cart(['epay_login' => 'login', 'epay_pass1' => 'pass'])])
-            ->setMethods(['doLog'])
+            ->onlyMethods(['doLog'])
             ->getMock();
         $interface->expects($this->once())->method('doLog');
         $result = $interface->exec('payments', ['aaa' => 'bbb'], true);
@@ -335,7 +326,7 @@ class YooKassaInterfaceTest extends BaseTest
     public function testRegisterOrderWithData()
     {
         $interface = $this->getMockBuilder(YooKassaInterface::class)
-            ->setMethods(['exec'])
+            ->onlyMethods(['exec'])
             ->getMock();
         $interface->expects($this->once())->method('exec')->with('payments', ['aaa'], false);
 
@@ -410,7 +401,7 @@ class YooKassaInterfaceTest extends BaseTest
     {
         $order = new Order(['payment_id' => 'aaaa-bbbb-cccc-dddd']);
         $interface = $this->getMockBuilder(YooKassaInterface::class)
-            ->setMethods(['exec'])
+            ->onlyMethods(['exec'])
             ->getMock();
         $interface->expects($this->once())->method('exec')->with('payments/aaaa-bbbb-cccc-dddd', [], false);
 

@@ -209,7 +209,7 @@ $static = (bool)(int)$Block->additionalParams['static'];
         data-v-bind_filter="vm.filter"
         data-v-bind_properties="vm.properties"
         data-v-bind_multiple="vm.multiple"
-        data-v-on_input="vm.change($event)"
+        data-v-on_update_model-value="vm.change($event)"
         data-v-on_setactiveelement="vm.setLastActiveElement($event)"
       >
         <?php if ($static) {

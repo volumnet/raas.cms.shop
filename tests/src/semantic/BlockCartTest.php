@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Frontend as ControllerFrontend;
@@ -11,8 +14,8 @@ use RAAS\CMS\Package;
 
 /**
  * Тест класса Block_Cart
- * @covers RAAS\CMS\Shop\Block_Cart
  */
+#[CoversClass(Block_Cart::class)]
 class BlockCartTest extends BaseTest
 {
     public static $tables = [

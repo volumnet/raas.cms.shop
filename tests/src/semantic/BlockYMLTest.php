@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\Application;
 use RAAS\Controller_Frontend as RAASControllerFrontend;
@@ -14,8 +17,8 @@ use RAAS\CMS\Page;
 
 /**
  * Тест класса Block_YML
- * @covers RAAS\CMS\Shop\Block_YML
  */
+#[CoversClass(Block_YML::class)]
 class BlockYMLTest extends BaseTest
 {
     public static $tables = [

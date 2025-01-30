@@ -4,6 +4,9 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use SOME\CSV;
 use RAAS\Attachment;
@@ -16,8 +19,8 @@ use RAAS\CMS\Snippet;
 
 /**
  * Класс теста интерфейса загрузчика прайсов
- * @covers RAAS\CMS\Shop\PriceloaderInterface
  */
+#[CoversClass(PriceloaderInterface::class)]
 class PriceloaderInterfaceTest extends BaseTest
 {
     public static $tables = [
@@ -158,32 +161,15 @@ class PriceloaderInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetUniqueColumnIndex
-     * @return array<[
-     *             string|null Установить уникальное поле с именем (для нативного)
-     *                         или ID (для кастомного) равным значению
-     *                         (null - не устанавливать)
-     *             int Ожидаемое значение индекса уникальной колонки
-     *         ]>
-     */
-    public function getUniqueColumnIndexDataProvider()
-    {
-        return [
-            [null, 0],
-            ['name', 1],
-            ['26', 6]
-        ];
-    }
-
-
-    /**
      * Тест получения номера уникальной колонки
      * @param string|null $setUFID Установить уникальное поле с именем (для нативного)
      *                             или ID (для кастомного) равным значению
      *                             (null - не устанавливать)
      * @param int $expectedUniqueColumnIndex Ожидаемое значение индекса уникальной колонки
-     * @dataProvider getUniqueColumnIndexDataProvider
      */
+    #[TestWith([null, 0])]
+    #[TestWith(['name', 1])]
+    #[TestWith(['26', 6])]
     public function testGetUniqueColumnIndex($setUFID, $expectedUniqueColumnIndex)
     {
         $interface = $this->getInterface();
@@ -277,7 +263,7 @@ class PriceloaderInterfaceTest extends BaseTest
      *             mixed Ожидаемое значение
      *         ]>
      */
-    public function convertCellDataProvider()
+    public static function convertCellDataProvider()
     {
         $customMaterialCol = new PriceLoader_Column(4);
         $customMaterialCol->callback = 'namespace RAAS\CMS;
@@ -297,8 +283,8 @@ class PriceloaderInterfaceTest extends BaseTest
      * @param PriceLoader_Column $col Колонка загрузчика прайсов
      * @param mixed $valueToConvert Значение для преобразования
      * @param mixed $expected Ожидаемое значение
-     * @dataProvider convertCellDataProvider
      */
+    #[DataProvider('convertCellDataProvider')]
     public function testConvertCell(PriceLoader_Column $col, $valueToConvert, $expected)
     {
         $interface = $this->getInterface();
@@ -344,35 +330,17 @@ class PriceloaderInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testGetItemsByUniqueField
-     * @return array<[
-     *             string|null Установить уникальное поле с именем (для нативного)
-     *                         или ID (для кастомного) равным значению
-     *                         (null - не устанавливать)
-     *             mixed Значение для поиска
-     *             mixed Ожидаемое значение
-     *         ]>
-     */
-    public function getItemsByUniqueFieldDataProvider()
-    {
-        return [
-            [null, '1ad5be0d', ['Товар 3']],
-            [32, 2, ['Товар 1', 'Товар 5', 'Товар 9']],
-            ['name', 'Товар 1', ['Товар 1']],
-            ['name', 'asweoisdjklfn', []],
-        ];
-    }
-
-
-    /**
      * Тест поиска товара по уникальному полю
      * @param string|null $setUFID Установить уникальное поле с именем (для нативного)
      *                             или ID (для кастомного) равным значению
      *                             (null - не устанавливать)
      * @param mixed $valueToFind Значение для поиска
      * @param mixed $expected Ожидаемое значение имени товара
-     * @dataProvider getItemsByUniqueFieldDataProvider
      */
+    #[TestWith([null, '1ad5be0d', ['Товар 3']])]
+    #[TestWith([32, 2, ['Товар 1', 'Товар 5', 'Товар 9']])]
+    #[TestWith(['name', 'Товар 1', ['Товар 1']])]
+    #[TestWith(['name', 'asweoisdjklfn', []])]
     public function testGetItemsByUniqueField($setUFID, $valueToFind, $expected)
     {
         $interface = $this->getInterface();
@@ -468,7 +436,7 @@ class PriceloaderInterfaceTest extends BaseTest
      *             array<string[] поле => mixed значение> Массив для проверки
      *         ]>
      */
-    public function applyNativeFieldDataProvider()
+    public static function applyNativeFieldDataProvider()
     {
         return [
             [
@@ -503,8 +471,8 @@ class PriceloaderInterfaceTest extends BaseTest
      * @param mixed $valueToSet Значение для установки
      * @param bool $isUnique Поле уникальное
      * @param array<string[] поле => mixed значение> $expected Массив для проверки
-     * @dataProvider applyNativeFieldDataProvider
      */
+    #[DataProvider('applyNativeFieldDataProvider')]
     public function testApplyNativeField(PriceLoader_Column $col, Material $material, $valueToSet, $isUnique, array $expected)
     {
         $interface = $this->getInterface();
@@ -533,36 +501,22 @@ class PriceloaderInterfaceTest extends BaseTest
 
 
     /**
-     * Провайдер данных для метода testCheckAssoc
-     * @return array<[
-     *             Material Материал для обработки
-     *             Page Страница, к которой привязываем (ранее ее не было)
-     *             bool Материал считается новым
-     *             bool Ожидается ли установка новой страницы
-     *         ]>
-     */
-    public function checkAssocDataProvider()
-    {
-        return [
-            [new Material(10), new Page(15), new Page(16), false, true], // Старый в новую страницу
-            [new Material(11), new Page(15), new Page(15), false, false], // Старый в корень каталога
-            [new Material(11), new Page(15), new Page(15), true, true], // Новый в корень каталога
-            [new Material(7), new Page(15), new Page(15), true, false], // Глобальный материал
-        ];
-    }
-
-
-    /**
      * Тест проверки и, при необходимости, размещения материала на странице
-     * @param Material $material Материал для обработки
-     * @param Page $root Корень каталога, куда загружаем
-     * @param Page $context Страница, к которой привязываем (ранее ее не было)
+     * @param int $materialId ID# Материала для обработки
+     * @param int $rootId ID# Корня каталога, куда загружаем
+     * @param int $contextId ID# Страницы, к которой привязываем (ранее ее не было)
      * @param bool $isNew Материал считается новым
      * @param bool $expectedContains Ожидается ли установка новой страницы
-     * @dataProvider checkAssocDataProvider
      */
-    public function testCheckAssoc(Material $material, Page $root, Page $context, $isNew, $expectedContains)
+    #[TestWith([10, 15, 16, false, true])] // Старый в новую страницу
+    #[TestWith([11, 15, 15, false, false])] // Старый в корень каталога
+    #[TestWith([11, 15, 15, true, true])] // Новый в корень каталога
+    #[TestWith([7, 15, 15, true, false])] // Глобальный материал
+    public function testCheckAssoc(int $materialId, int $rootId, int $contextId, $isNew, $expectedContains)
     {
+        $material = new Material($materialId);
+        $root = new Page($rootId);
+        $context = new Page($contextId);
         $interface = $this->getInterface();
 
         $this->assertNotContains($context->id, $material->pages_ids);
@@ -1075,7 +1029,7 @@ class PriceloaderInterfaceTest extends BaseTest
     {
         $interface = $this->getInterface();
 
-        $result = $interface->parse($this->getResourcesDir() . '/test.xls', 'xls');
+        $result = $interface->parse(static::getResourcesDir() . '/test.xls', 'xls');
 
         $this->assertEquals('Категория 1', $result[0][0]);
         $this->assertEquals('Категория 11', $result[1][1]);
@@ -1507,7 +1461,7 @@ class PriceloaderInterfaceTest extends BaseTest
         $log = [];
         $rawData = [];
         $converter = PriceloaderDataConverter::spawn('xls');
-        $data = $converter->load($this->getResourcesDir() . '/test.xls');
+        $data = $converter->load(static::getResourcesDir() . '/test.xls');
 
         Material::delete(new Material(18));
         Material::delete(new Material(19));
@@ -1817,7 +1771,7 @@ class PriceloaderInterfaceTest extends BaseTest
         $loader->create_pages = 1;
 
         $result = $interface->upload(
-            $this->getResourcesDir() . '/test.xls',
+            static::getResourcesDir() . '/test.xls',
             'xls',
             new Page(15),
             false,
@@ -1848,7 +1802,7 @@ class PriceloaderInterfaceTest extends BaseTest
         $loader->create_pages = 1;
 
         $result = $interface->upload(
-            $this->getResourcesDir() . '/aaa.xls',
+            static::getResourcesDir() . '/aaa.xls',
             'xls',
             new Page(15),
             false,
@@ -1870,7 +1824,7 @@ class PriceloaderInterfaceTest extends BaseTest
         $loader->create_pages = 1;
 
         $result = $interface->upload(
-            $this->getResourcesDir() . '/test.xls',
+            static::getResourcesDir() . '/test.xls',
             'csv',
             new Page(15),
             false,

@@ -4,12 +4,14 @@
  */
 namespace RAAS\CMS\Shop;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 use RAAS\CMS\Page;
 
 /**
  * Класс теста массового поиска сущностей
- * @covers RAAS\CMS\Shop\BatchFindTrait
  */
 class BatchFindTraitTest extends BaseTest
 {
@@ -30,7 +32,7 @@ class BatchFindTraitTest extends BaseTest
      *             mixed Ожидаемый результат
      *         >>
      */
-    public function getMaterialsIdsByTypeAndPageDataProvider()
+    public static function getMaterialsIdsByTypeAndPageDataProvider()
     {
         $page = new Page(15);
         return [
@@ -46,11 +48,13 @@ class BatchFindTraitTest extends BaseTest
      * @param array<int> $materialTypesIds ID# типов материалов
      * @param bool $isGlobal Глобальный ли тип материала
      * @param mixed $expected Ожидаемый результат
-     * @dataProvider getMaterialsIdsByTypeAndPageDataProvider
      */
+    #[DataProvider('getMaterialsIdsByTypeAndPageDataProvider')]
     public function testGetMaterialsIdsByTypeAndPage(Page $root, array $materialTypesIds, $isGlobal, $expected)
     {
-        $trait = $this->getMockForTrait(BatchFindTrait::class);
+        $trait = new class {
+            use BatchFindTrait;
+        };
 
         $result = $trait->getMaterialsIdsByTypeAndPage($root, $materialTypesIds, $isGlobal);
 
@@ -63,7 +67,9 @@ class BatchFindTraitTest extends BaseTest
      */
     public function testGetAttachmentFieldsIds()
     {
-        $trait = $this->getMockForTrait(BatchFindTrait::class);
+        $trait = new class {
+            use BatchFindTrait;
+        };
 
         $result = $trait->getAttachmentFieldsIds([4]);
 
@@ -76,7 +82,9 @@ class BatchFindTraitTest extends BaseTest
      */
     public function testGetAttachmentFieldsIdsWithEmptyMaterialTypesIds()
     {
-        $trait = $this->getMockForTrait(BatchFindTrait::class);
+        $trait = new class {
+            use BatchFindTrait;
+        };
 
         $result = $trait->getAttachmentFieldsIds([]);
 
@@ -89,7 +97,9 @@ class BatchFindTraitTest extends BaseTest
      */
     public function testGetAttachmentsIds()
     {
-        $trait = $this->getMockForTrait(BatchFindTrait::class);
+        $trait = new class {
+            use BatchFindTrait;
+        };
 
         $result = $trait->getAttachmentsIds([10, 11, 12], [27, 29]);
 
@@ -102,7 +112,9 @@ class BatchFindTraitTest extends BaseTest
      */
     public function testGetAttachmentsIdsWithEmptyMaterialsIdsAndFieldsIds()
     {
-        $trait = $this->getMockForTrait(BatchFindTrait::class);
+        $trait = new class {
+            use BatchFindTrait;
+        };
 
         $result = $trait->getAttachmentsIds([], []);
 

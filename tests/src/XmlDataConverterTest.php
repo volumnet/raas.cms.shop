@@ -5,12 +5,15 @@
 namespace RAAS\CMS\Shop;
 
 use SimpleXMLElement;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\TestWith;
 use SOME\BaseTest;
 
 /**
  * Класс теста конвертера данных XML
- * @covers RAAS\CMS\Shop\XmlDataConverter
  */
+#[CoversClass(XmlDataConverter::class)]
 class XmlDataConverterTest extends BaseTest
 {
     /**
@@ -153,7 +156,7 @@ class XmlDataConverterTest extends BaseTest
      */
     public function testParseXML()
     {
-        $sxe = new SimpleXMLElement($this->getResourcesDir() . '/1cresult.xml', 0, true);
+        $sxe = new SimpleXMLElement(static::getResourcesDir() . '/1cresult.xml', 0, true);
         $xdc = new XmlDataConverter();
 
         $result = $xdc->parseXML($sxe);
@@ -199,7 +202,7 @@ class XmlDataConverterTest extends BaseTest
                 ]
             ],
         ];
-        $sxe = new SimpleXMLElement($this->getResourcesDir() . '/1cresultoffers.xml', 0, true);
+        $sxe = new SimpleXMLElement(static::getResourcesDir() . '/1cresultoffers.xml', 0, true);
         $xdc = new XmlDataConverter();
 
         $result = $xdc->parseXML($sxe, $data);
@@ -219,8 +222,8 @@ class XmlDataConverterTest extends BaseTest
      */
     public function testApplyXSL()
     {
-        $xml = file_get_contents($this->getResourcesDir() . '/import0_1.update.xml');
-        $xsl = file_get_contents($this->getResourcesDir() . '/import.xsl');
+        $xml = file_get_contents(static::getResourcesDir() . '/import0_1.update.xml');
+        $xsl = file_get_contents(static::getResourcesDir() . '/import.xsl');
         $xdc = new XmlDataConverter();
 
         $result = $xdc->applyXSL($xml, $xsl);
@@ -237,8 +240,8 @@ class XmlDataConverterTest extends BaseTest
      */
     public function testLoadXML()
     {
-        $xmlFile = $this->getResourcesDir() . '/import0_1.update.xml';
-        $xslFile = $this->getResourcesDir() . '/import.xsl';
+        $xmlFile = static::getResourcesDir() . '/import0_1.update.xml';
+        $xslFile = static::getResourcesDir() . '/import.xsl';
         $xdc = new XmlDataConverter();
 
         $result = $xdc->loadXML($xmlFile, $xslFile);
@@ -254,8 +257,8 @@ class XmlDataConverterTest extends BaseTest
      */
     public function testProcess()
     {
-        $xmlFile = $this->getResourcesDir() . '/import0_1.update.xml';
-        $xslFile = $this->getResourcesDir() . '/import.xsl';
+        $xmlFile = static::getResourcesDir() . '/import0_1.update.xml';
+        $xslFile = static::getResourcesDir() . '/import.xsl';
         $xdc = new XmlDataConverter($xmlFile, $xslFile);
 
         $result = $xdc->process();
@@ -274,8 +277,8 @@ class XmlDataConverterTest extends BaseTest
      */
     public function testProcessWithOldData()
     {
-        $xmlFile = $this->getResourcesDir() . '/offers0_1.update.xml';
-        $xslFile = $this->getResourcesDir() . '/offers.xsl';
+        $xmlFile = static::getResourcesDir() . '/offers0_1.update.xml';
+        $xslFile = static::getResourcesDir() . '/offers.xsl';
         $data = [
             'pages' => [
                 'e7a0df87-96e8-11e8-9a9f-6cf04909dac2' => [
