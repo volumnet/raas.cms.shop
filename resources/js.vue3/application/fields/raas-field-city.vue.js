@@ -80,7 +80,7 @@ export default {
             this.pValue = city;
             this.useAutocompletion = false;
             this.pristine = true;
-            this.searchString = this.modelValue.name || '';
+            this.searchString = this.pValue.name || '';
             if (!outer) {
                 this.$emit('update:modelValue', city);
             }

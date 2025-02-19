@@ -79,7 +79,7 @@ export default {
             this.pValue = city;
             this.useAutocompletion = false;
             this.pristine = true;
-            this.searchString = this.value.name || '';
+            this.searchString = this.pValue.name || '';
             if (!outer) {
                 this.$emit('input', city);
             }

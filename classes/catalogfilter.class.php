@@ -846,8 +846,8 @@ class CatalogFilter
                 $filteredMapping[$propId] = $newMappingValues;
             } else {
                 $filteredMapping[$propId] = array_intersect_key(
-                    $propsMapping[$propId],
-                    array_flip($filterValues)
+                    (array)($propsMapping[$propId] ?? []),
+                    array_flip((array)$filterValues)
                 );
             }
         }

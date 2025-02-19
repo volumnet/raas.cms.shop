@@ -47,7 +47,7 @@ class CatalogInterface extends MaterialInterface
 
     public function process(): array
     {
-        $this->setCatalogFilter($this->block, $this->page, $this->get);
+        $this->setCatalogFilter($this->block, $this->page, $this->get); // 2025-02-12, AVS: нужно именно здесь (включая материал), чтобы была возможность вычислить prevNext
         $result = parent::process();
         return $result;
     }

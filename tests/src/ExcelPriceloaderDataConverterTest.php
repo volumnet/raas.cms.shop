@@ -148,10 +148,10 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
         $workbook = $reader->load($filename);
         $sheet = $workbook->setActiveSheetIndex(0);
 
-        $this->assertEquals('Данные 1', $sheet->getCellByColumnAndRow(1, 1)->getValue());
-        $this->assertFalse($sheet->getCellByColumnAndRow(1, 1)->getStyle()->getFont()->getBold());
-        $this->assertEquals('Данные 2', $sheet->getCellByColumnAndRow(2, 2)->getValue());
-        $this->assertTrue($sheet->getCellByColumnAndRow(2, 2)->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 1', $sheet->getCell('A1')->getValue());
+        $this->assertFalse($sheet->getCell('A1')->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 2', $sheet->getCell('B2')->getValue());
+        $this->assertTrue($sheet->getCell('B2')->getStyle()->getFont()->getBold());
 
         unlink($filename);
     }
@@ -179,10 +179,10 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
         $sheet = $workbook->setActiveSheetIndex(0);
 
         $this->assertEquals('Некоторое очень длинное назван', $sheet->getTitle());
-        $this->assertEquals('Данные 1', $sheet->getCellByColumnAndRow(1, 1)->getValue());
-        $this->assertTrue($sheet->getCellByColumnAndRow(1, 1)->getStyle()->getFont()->getBold());
-        $this->assertEquals('Данные 2', $sheet->getCellByColumnAndRow(2, 2)->getValue());
-        $this->assertFalse($sheet->getCellByColumnAndRow(2, 2)->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 1', $sheet->getCell('A1')->getValue());
+        $this->assertTrue($sheet->getCell('A1')->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 2', $sheet->getCell('B2')->getValue());
+        $this->assertFalse($sheet->getCell('B2')->getStyle()->getFont()->getBold());
 
         unlink($filename);
     }
@@ -197,14 +197,14 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
         $sheet = $workbook->setActiveSheetIndex(0);
         $converter = ExcelPriceloaderDataConverter::spawn('xls');
 
-        $sheet->getCellByColumnAndRow(1, 1)->setValue('Данные 1');
-        $sheet->getCellByColumnAndRow(2, 2)->setValue('Данные 2');
-        $sheet->getCellByColumnAndRow(3, 3)->setValue('Данные 3');
+        $sheet->getCell('A1')->setValue('Данные 1');
+        $sheet->getCell('B2')->setValue('Данные 2');
+        $sheet->getCell('C3')->setValue('Данные 3');
         $sheet = new Worksheet($workbook, 'Некоторый лист');
         $workbook->addSheet($sheet);
-        $sheet->getCellByColumnAndRow(1, 1)->setValue('Данные 1');
-        $sheet->getCellByColumnAndRow(2, 2)->setValue('Данные 2');
-        $sheet->getCellByColumnAndRow(3, 3)->setValue('Данные 3');
+        $sheet->getCell('A1')->setValue('Данные 1');
+        $sheet->getCell('B2')->setValue('Данные 2');
+        $sheet->getCell('C3')->setValue('Данные 3');
         $data = $converter->getDataFromExcelWorkbook($workbook);
 
         // 2020-03-05, AVS: исключили листы кроме первого
@@ -238,10 +238,10 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
 
         $this->assertCount(1, $workbook->getAllSheets());
         $this->assertEquals('Некоторое очень длинное назван', $sheet->getTitle());
-        $this->assertEquals('Данные 1', $sheet->getCellByColumnAndRow(1, 1)->getValue());
-        $this->assertTrue($sheet->getCellByColumnAndRow(1, 1)->getStyle()->getFont()->getBold());
-        $this->assertEquals('Данные 2', $sheet->getCellByColumnAndRow(2, 2)->getValue());
-        $this->assertFalse($sheet->getCellByColumnAndRow(2, 2)->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 1', $sheet->getCell('A1')->getValue());
+        $this->assertTrue($sheet->getCell('A1')->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 2', $sheet->getCell('B2')->getValue());
+        $this->assertFalse($sheet->getCell('B2')->getStyle()->getFont()->getBold());
     }
 
 
@@ -252,9 +252,9 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
     {
         $workbook = new Spreadsheet();
         $sheet = $workbook->setActiveSheetIndex(0);
-        $sheet->getCellByColumnAndRow(1, 1)->setValue('Данные 1');
-        $sheet->getCellByColumnAndRow(2, 2)->setValue('Данные 2');
-        $sheet->getCellByColumnAndRow(3, 3)->setValue('Данные 3');
+        $sheet->getCell('A1')->setValue('Данные 1');
+        $sheet->getCell('B2')->setValue('Данные 2');
+        $sheet->getCell('C3')->setValue('Данные 3');
         $converter = ExcelPriceloaderDataConverter::spawn('xls');
 
         $data = $converter->getDataFromExcelSheet($sheet);
@@ -286,13 +286,13 @@ class ExcelPriceloaderDataConverterTest extends BaseTest
         $converter->putDataToExcelSheet($sheet, $data, $page, 1, 0);
 
         $this->assertEquals('Некоторое очень длинное назван', $sheet->getTitle());
-        $this->assertEquals('Данные 1', $sheet->getCellByColumnAndRow(1, 1)->getValue());
-        $this->assertTrue($sheet->getCellByColumnAndRow(1, 1)->getStyle()->getFont()->getBold());
-        $this->assertEquals('Данные 2', $sheet->getCellByColumnAndRow(2, 2)->getValue());
-        $this->assertFalse($sheet->getCellByColumnAndRow(2, 2)->getStyle()->getFont()->getBold());
-        $this->assertEquals('Данные 3', $sheet->getCellByColumnAndRow(3, 3)->getValue());
-        $this->assertEquals(DataType::TYPE_STRING, $sheet->getCellByColumnAndRow(3, 3)->getDataType());
-        $this->assertEquals(3, $sheet->getCellByColumnAndRow(4, 3)->getValue());
-        $this->assertEquals(DataType::TYPE_NUMERIC, $sheet->getCellByColumnAndRow(4, 3)->getDataType());
+        $this->assertEquals('Данные 1', $sheet->getCell('A1')->getValue());
+        $this->assertTrue($sheet->getCell('A1')->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 2', $sheet->getCell('B2')->getValue());
+        $this->assertFalse($sheet->getCell('B2')->getStyle()->getFont()->getBold());
+        $this->assertEquals('Данные 3', $sheet->getCell('C3')->getValue());
+        $this->assertEquals(DataType::TYPE_STRING, $sheet->getCell('C3')->getDataType());
+        $this->assertEquals(3, $sheet->getCell('D3')->getValue());
+        $this->assertEquals(DataType::TYPE_NUMERIC, $sheet->getCell('D3')->getDataType());
     }
 }

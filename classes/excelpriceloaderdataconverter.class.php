@@ -168,7 +168,7 @@ abstract class ExcelPriceloaderDataConverter extends PriceloaderDataConverter
                 } else {
                     $type = DataType::TYPE_STRING;
                 }
-                $cell = $sheet->getCellByColumnAndRow($j + 1, $i + 1);
+                $cell = $sheet->getCell([$j + 1, $i + 1]);
                 $cell->setValueExplicit($val, $type);
             }
         }
