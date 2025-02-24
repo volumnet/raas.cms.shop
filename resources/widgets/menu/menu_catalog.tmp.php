@@ -33,6 +33,7 @@ $ajax = (bool)stristr($Page->url, '/ajax/') || (($_GET['AJAX'] ?? null) == $Bloc
  */
 $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
     static $level = 0;
+    $text = '';
     if ($node instanceof Menu) {
         $children = $node->visSubMenu;
         $rootName = $node->name;
@@ -40,9 +41,9 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
         $rootId = $node->page_id;
     } else {
         $children = (isset($node['children']) && is_array($node['children'])) ? $node['children'] : [];
-        $rootName = $node['name'];
-        $rootUrl = $node['url'];
-        $rootId = $node['page_id'];
+        $rootName = $node['name'] ?? '';
+        $rootUrl = $node['url'] ?? '';
+        $rootId = $node['page_id'] ?? 0;
     }
     $childrenText = '';
     for ($i = 0; $i < count($children); $i++) {
@@ -67,7 +68,7 @@ $showMenu = function($node, Page $current) use (&$showMenu, $ajax) {
             $url = '';
         }
         if (!$level) {
-            $image = $page->icon->id ? $page->icon : ($page->image->id ? $page->image : null);
+            $image = $page?->icon?->id ? $page->icon : ($page?->image?->id ? $page->image : null);
         }
         $active = $semiactive = false;
         // 2021-02-23, AVS: заменил HTTP::queryString('', true) на $current->url,

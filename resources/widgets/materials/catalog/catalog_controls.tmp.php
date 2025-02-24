@@ -107,7 +107,8 @@ $defaultSortVariant = $matchingVariants ? $matchingVariants[0] : $sortVariants[0
     </div>
     <div class="catalog-controls-view-list">
       <?php foreach ($viewVariants as $viewVariant) { ?>
-          <a
+          <button
+            type="button"
             class="
               catalog-controls-view-list__item
               catalog-controls-view-list__item_<?php echo htmlspecialchars($viewVariant['urn'])?>
@@ -117,10 +118,9 @@ $defaultSortVariant = $matchingVariants ? $matchingVariants[0] : $sortVariants[0
               'catalog-controls-view-list__item_active': vm.activeViewVariant == <?php echo htmlspecialchars(json_encode($viewVariant['urn']))?>,
               'catalog-controls-view-item_active': vm.activeViewVariant == <?php echo htmlspecialchars(json_encode($viewVariant['urn']))?>
             }"
-            href="#<?php echo htmlspecialchars($viewVariant['urn'])?>"
             title="<?php echo htmlspecialchars($viewVariant['name'])?>"
-            data-v-on_click.stop="vm.changeView(<?php echo htmlspecialchars(json_encode($viewVariant['urn']))?>)"
-          ></a>
+            data-v-on_click="vm.changeView(<?php echo htmlspecialchars(json_encode($viewVariant['urn']))?>)"
+          ></button>
       <?php } ?>
     </div>
   </div>

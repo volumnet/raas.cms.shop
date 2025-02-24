@@ -98,8 +98,9 @@ class CartInterface extends FormInterface
                     $items = [];
                     if (is_array($this->get['id'])) {
                         foreach ($this->get['id'] as $idMeta => $amount) {
-                            list($id, $meta) = explode('_', (string)$idMeta);
-                            $id = (int)$id;
+                            $idMetaArr = explode('_', (string)$idMeta);
+                            $id = (int)$idMetaArr[0];
+                            $meta = (string)($idMetaArr[1] ?? '');
                             $material = new Material((int)$id);
                             $amount = (int)$amount;
                             if ($action == 'delete') {

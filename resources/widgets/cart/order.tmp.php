@@ -8,6 +8,7 @@
  */
 namespace RAAS\CMS\Shop;
 
+use SOME\SOME;
 use SOME\Text;
 
 $getField = function($row) {
@@ -55,6 +56,8 @@ $getField = function($row) {
         default:
             if (!$row->multiple && ($row->datatype == 'checkbox')) {
                 $arr[$key] = $val ? _YES : _NO;
+            } elseif ($val instanceof SOME) {
+                $arr[$key] = nl2br(htmlspecialchars($val->name));
             } else {
                 $arr[$key] = nl2br(htmlspecialchars($val));
             }

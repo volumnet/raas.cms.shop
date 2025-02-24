@@ -31,7 +31,7 @@ $showLog = function (array $log) {
  * @param array $log Лог
  * @param int $rows Смещение по строкам
  */
-$showData = function (PriceLoader $loader, array $data, array $log = null, int $rows = 0) {
+$showData = function (PriceLoader $loader, array $data, ?array $log = null, int $rows = 0) {
     ?>
     <table class="table table-striped cms-shop-table-raw-data">
       <thead>

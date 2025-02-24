@@ -718,7 +718,7 @@ class CatalogFilter
         }
         $filter = [];
         foreach ($params as $key => $val) {
-            if (preg_match('/^(\\w+)_(from|to|like)$/umi', $key, $regs)) {
+            if (preg_match('/^(\\w+)_(from|to|like)$/umi', (string)$key, $regs)) {
                 $propKey = $regs[1];
                 $limitName = $regs[2];
                 $prop = $this->propertiesByURNs[$propKey];

@@ -428,8 +428,11 @@ class YMLInterface extends BlockInterface
             ($mtype->settings['param_exceptions'] ?? null)
         ) {
             foreach ((array)($mtype->settings['params'] ?? []) as $paramArr) {
-                $ignoredFields[] =  $paramArr['field']->id
-                                 ?: $paramArr['field_id'];
+                if (($paramAttrs['field'] ?? null) && $paramArr['field']->id) {
+                    $ignoredFields[] = $paramArr['field']->id;
+                } elseif ($paramArr['field_id'] ?? null) {
+                    $ignoredFields[] = $paramArr['field_id'];
+                }
             }
             if ((array)($mtype->settings['param_exceptions'] ?? null)) {
                 foreach ((array)($mtype->settings['ignored'] ?? []) as $ignored) {
