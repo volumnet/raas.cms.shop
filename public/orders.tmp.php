@@ -10,8 +10,20 @@
           <?php } ?>
       <?php } ?>
   <?php } ?>
-  <input type="datetime" name="from" style="width: 8em;" placeholder="<?php echo CMS\SHOW_FROM?>" value="<?php echo ($VIEW->nav['from'] ?? '')?>" />
-  <input type="datetime" name="to" style="width: 8em;" placeholder="<?php echo CMS\SHOW_TO?>" value="<?php echo ($VIEW->nav['to'] ?? '')?>" />
+  <raas-field-datetime
+    type="datetime-local"
+    name="from"
+    class="span2"
+    placeholder="<?php echo \CMS\SHOW_FROM?>"
+    model-value="<?php echo $VIEW->nav['from'] ?? ''?>"
+  ></raas-field-datetime>
+  <raas-field-datetime
+    type="datetime"
+    name="to"
+    class="span2"
+    placeholder="<?php echo \CMS\SHOW_TO?>"
+    model-value="<?php echo $VIEW->nav['to'] ?? ''?>"
+  ></raas-field-datetime>
   <select name="status_id" style="width: auto;">
     <option value=""<?php echo ((string)($VIEW->nav['status_id'] ?? '') === '') ? ' selected="selected"' : ''?>>
       <?php echo CMS\Shop\STATUS?>
@@ -37,7 +49,12 @@
     </option>
   </select>
   <div class="input-append">
-    <input type="search" class="span2 search-query" name="search_string" value="<?php echo htmlspecialchars($VIEW->nav['search_string'] ?? '')?>" />
+    <raas-field-text
+      type="search"
+      class="span2 search-query"
+      name="search_string"
+      model-value="<?php echo htmlspecialchars($VIEW->nav['search_string'] ?? '')?>"
+    ></raas-field-text>
     <button type="submit" class="btn"><i class="icon-search"></i></button>
   </div>
 </form>
