@@ -108,13 +108,14 @@ class Controller_Ajax extends Abstract_Controller
 
     protected function get_materials_by_field()
     {
+        $mtype = 0;
         if ((int)$this->id) {
             $Field = new Material_Field((int)$this->id);
             $Set = [];
             if ($Field->datatype == 'material') {
                 $mtype = (int)$Field->source;
             }
-        } elseif ((int)$this->nav['mtype']) {
+        } elseif ((int)($this->nav['mtype'] ?? 0)) {
             $mtype = (int)$this->nav['mtype'];
         }
         $cartType = new Cart_Type((int)$this->nav['cart_type']);
