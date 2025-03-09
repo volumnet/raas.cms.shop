@@ -28,6 +28,7 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
     echo json_encode($result);
     exit;
 } else { ?>
+    <!--raas-teleport-from#goods-faq-form-->
     <div class="goods-faq-form feedback feedback_standalone">
       <div class="goods-faq-form__title">
         <?php echo YOU_CAN_ASK_QUESTION_BY_FILLING_FORM_BELOW?>
@@ -148,5 +149,6 @@ if ($_POST['AJAX'] && ($Item instanceof Feedback)) {
         </div>
       </form>
     </div>
+    <!--/raas-teleport-from#goods-faq-form-->
     <?php
 }

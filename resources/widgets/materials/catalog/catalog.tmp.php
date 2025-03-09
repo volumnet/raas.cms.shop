@@ -596,7 +596,7 @@ if ($Item) {
                         <?php } ?>
                         <?php if ($commentFormBlock->id) { ?>
                             <div class="catalog-article__comments-form">
-                              <?php $commentFormBlock->process($Page)?>
+                              <!--raas-teleport-to#goods-comments-form-->
                             </div>
                         <?php } ?>
                     <?php }
@@ -610,7 +610,7 @@ if ($Item) {
                         <?php } ?>
                         <?php if ($faqFormBlock->id) { ?>
                             <div class="catalog-article__faq-form">
-                              <?php $faqFormBlock->process($Page)?>
+                              <!--raas-teleport-to#goods-faq-form-->
                             </div>
                         <?php } ?>
                     <?php }

@@ -155,4 +155,8 @@ $menuText = $showMenu($menuArr ?: $Item, $usePage);
     <?php echo $menuText?>
   </div>
 </nav>
-<?php AssetManager::requestJS('/js/menu-catalog.js');
+<?php
+if ($ajax) {
+    exit;
+}
+AssetManager::requestJS('/js/menu-catalog.js');

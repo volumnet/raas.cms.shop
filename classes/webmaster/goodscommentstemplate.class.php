@@ -6,6 +6,7 @@ namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
 use RAAS\Attachment;
+use RAAS\CMS\Block;
 use RAAS\CMS\Block_Form;
 use RAAS\CMS\Block_Material;
 use RAAS\CMS\FishRandomUserRetriever;
@@ -331,7 +332,8 @@ class GoodsCommentsTemplate extends MaterialTypeTemplate
     ) {
         if ($widget->id && $page->id) {
             $blockData = array_merge([
-                'vis' => 0,
+                'vis' => 1,
+                'vis_material' => Block::BYMATERIAL_WITH,
                 'form' => (int)$form->id,
                 'interface_classname' => FormInterface::class,
                 'widget_id' => (int)$widget->id,
