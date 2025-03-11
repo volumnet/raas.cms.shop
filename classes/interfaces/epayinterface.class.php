@@ -207,11 +207,12 @@ abstract class EPayInterface extends AbstractInterface
     public function getPositiveItems(Order $order)
     {
         // 1. Найдем общую сумму заказа, сумму без скидки и сумму скидки - в копейках
+        $originalItems = $order->items;
         $orderSumKop = floor($order->sum * 100); // floor - чтобы клиент не переплатил
         $sumWithoutDiscountKop = 0;
         $discountSumKop = 0;
         $positiveOrderItems = [];
-        foreach ($order->items as $item) {
+        foreach ($originalItems as $item) {
             $item->epayPriceKop = (float)($item->realprice * 100);
             if ($item->epayPriceKop > 0) {
                 $sumWithoutDiscountKop += round($item->epayPriceKop * $item->amount);
@@ -244,12 +245,13 @@ abstract class EPayInterface extends AbstractInterface
         if ($totalSumKop != $orderSumKop) {
             // 4. Выполним нормировку
             // 4.1. Отсортируем товары по убыванию количества
-            usort($positiveOrderItems, function ($a, $b) {
+            $positiveOrderItemsSorted = $positiveOrderItems;
+            usort($positiveOrderItemsSorted, function ($a, $b) {
                 return ($b->amount * 1000) - ($a->amount * 1000); // x1000 для точности
             });
             // 4.2. Нормируем товары
-            for ($i = 0; ($i < count($positiveOrderItems)) && (($delta = $orderSumKop - $totalSumKop) != 0); $i++) {
-                $item = $positiveOrderItems[$i];
+            for ($i = 0; ($i < count($positiveOrderItemsSorted)) && (($delta = $orderSumKop - $totalSumKop) != 0); $i++) {
+                $item = $positiveOrderItemsSorted[$i];
                 if ($item->amount <= $delta) {
                     // Нормируем только в случае, если количество товара меньше недостающих копеек, иначе переплатим
                     $addPrice = floor($delta / $item->amount);
@@ -263,12 +265,13 @@ abstract class EPayInterface extends AbstractInterface
 
 
         // 5. Отсортируем товары как в оригинальном заказе
-        $originalItems = $order->items;
-        usort($positiveOrderItems, function ($a, $b) use ($originalItems) {
-            $aIndex = array_search($a, $originalItems);
-            $bIndex = array_search($b, $originalItems);
-            return $aIndex - $bIndex;
-        });
+        // 2025-03-10, AVS: убрал, т.к. сортировку по количеству делаем в отдельной переменной
+        // Из-за ошибки Uncaught Error: Nesting level too deep - recursive dependency
+        // usort($positiveOrderItems, function ($a, $b) use ($originalItems) {
+        //     $aIndex = array_search($a, $originalItems);
+        //     $bIndex = array_search($b, $originalItems);
+        //     return $aIndex - $bIndex;
+        // });
 
         return ['items' => $positiveOrderItems, 'sum' => $totalSumKop];
     }

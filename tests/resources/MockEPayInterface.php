@@ -8,7 +8,7 @@ use RAAS\CMS\Page;
 
 class MockEPayInterface extends EPayInterface
 {
-    public function process(Order $order = null): array
+    public function process(?Order $order = null): array
     {
         $result = [];
         $result['success'][(string)$this->block->id] = true;
