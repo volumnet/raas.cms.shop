@@ -58,4 +58,5 @@
     <button type="submit" class="btn"><i class="icon-search"></i></button>
   </div>
 </form>
-<?php include \RAAS\CMS\Package::i()->view->tmp('multitable.tmp.php'); ?>
+<?php
+echo $Table->renderFull();

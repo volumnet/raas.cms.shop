@@ -41,21 +41,21 @@ class ProcessImageLoaderForm extends RAASForm
                     'caption' => $this->view->_('MATERIAL_TYPE'),
                     'export' => 'is_null',
                     'import' => 'is_null',
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                 ],
                 'image_field' => [
                     'name' => 'image_field',
                     'caption' => $this->view->_('IMAGE_FIELD'),
                     'export' => 'is_null',
                     'import' => 'is_null',
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                 ],
                 'filename_format' => [
                     'name' => 'filename_format',
                     'caption' => $this->view->_('FILENAME_FORMAT'),
                     'export' => 'is_null',
                     'import' => 'is_null',
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                 ],
                 'test' => [
                     'type' => 'checkbox',
@@ -76,7 +76,7 @@ class ProcessImageLoaderForm extends RAASForm
                     'class' => 'span3',
                     'multiple' => true,
                     'accept' => 'image/jpeg,image/png,image/gif,application/zip,application/x-compressed,application/x-zip-compressed,multipart/x-zip',
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                 ],
                 'show_log' => [
                     'type' => 'checkbox',

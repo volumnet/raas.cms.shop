@@ -7,7 +7,7 @@ namespace RAAS\CMS\Shop;
 use RAAS\Field as RAASField;
 
 
-$_RAASForm_Field = function(RAASField $field) use (&$_RAASForm_Control, &$_RAASForm_Options) {
+$_RAASForm_Field = function(RAASField $field) {
     $DATA = $field->Form->DATA;
     ?>
     <p><?php echo View_Web::i()->_('YOU_CAN_USE_FOLLOWING_PLACEHOLDERS')?>:</p>

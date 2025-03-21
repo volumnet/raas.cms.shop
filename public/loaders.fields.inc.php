@@ -7,22 +7,24 @@ namespace RAAS\CMS\Shop;
 use RAAS\Field as RAASField;
 use RAAS\FieldSet;
 
-include View_Web::i()->tmp('/field.inc.php');
-$_RAASForm_ControlOriginal = $_RAASForm_Control;
-
-$_RAASForm_FieldSet = function(FieldSet $fieldSet) use (&$_RAASForm_Form_Tabbed, &$_RAASForm_Form_Plain, &$_RAASForm_ControlOriginal) {
+/**
+ * Отображает группу полей
+ * @param fieldSet $fieldSet
+ */
+$_RAASForm_FieldSet = function(FieldSet $fieldSet) {
     $form = $fieldSet->Form;
     ?>
     <div class="control-group">
       <label class="control-label"><?php echo htmlspecialchars($fieldSet->caption)?>:</label>
       <div class="controls">
         <?php
-        $childrenArr = array_map(function ($f) use ($_RAASForm_ControlOriginal) {
+        $childrenArr = array_map(function ($f) {
             ob_start();
             ?>
             <label style="display: inline" for="<?php echo htmlspecialchars($f->name)?>">
-              <?php $_RAASForm_ControlOriginal($f)?> <?php echo htmlspecialchars($f->caption)
-            ?></label><?php
+              <?php echo $f->render() . ' ' . htmlspecialchars($f->caption)?>
+            </label>
+            <?php
             $result = ob_get_clean();
             return $result;
         }, (array)$fieldSet->children);
@@ -40,13 +42,11 @@ $_RAASForm_FieldSet = function(FieldSet $fieldSet) use (&$_RAASForm_Form_Tabbed,
     <?php
 };
 
-$_RAASForm_Control = function (RAASField $field) use (
-    &$_RAASForm_Attrs,
-    &$_RAASForm_Options,
-    &$_RAASForm_Checkbox,
-    &$_RAASForm_Control,
-    &$_RAASForm_ControlOriginal
-) {
+/**
+ * Отображает поле
+ * @param RAASField $field Поле
+ */
+$_RAASForm_Control = function (RAASField $field) {
     $form = $field->Form;
     $loader = $form->meta['loader'];
     switch ($field->name) {
@@ -54,7 +54,7 @@ $_RAASForm_Control = function (RAASField $field) use (
             echo htmlspecialchars($loader->Material_Type->name);
             break;
         case 'image_field':
-            echo htmlspecialchars($loader->Image_Field->name);
+            echo htmlspecialchars((string)$loader->Image_Field->name);
             break;
         case 'filename_format':
             $uniqueFieldName = '';
@@ -101,11 +101,11 @@ $_RAASForm_Control = function (RAASField $field) use (
             break;
         case 'file':
             ?>
-            <input<?php echo $_RAASForm_Attrs($field, [])?> />
+            <input<?php echo $field->getAttrsString()?> />
             <?php
             break;
         default:
-            $_RAASForm_ControlOriginal($field);
+            echo $field->render();
             break;
     }
 };

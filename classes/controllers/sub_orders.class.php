@@ -134,7 +134,7 @@ class Sub_Orders extends \RAAS\Abstract_Sub_Controller
         $form = new MoveOrderGoodsForm(array(
             'order' => $order,
             'goods' => $goods,
-            'new' => (bool)$_GET['new']
+            'new' => (bool)($_GET['new'] ?? false),
         ));
         $this->view->moveOrderGoods(array_merge($form->process(), array('Item' => $order)));
     }

@@ -5,16 +5,9 @@ use RAAS\CMS\Shop\Module;
 use RAAS\CMS\Shop\Sub_Orders;
 use RAAS\Form;
 
-include Application::i()->view->tmp('/form.inc.php');
 ?>
-<form<?php echo $_RAASForm_Attrs($Form)?>>
-  <?php
-  if (array_filter((array)$Form->children, function($x) { return $x instanceof \RAAS\FormTab; })) {
-      $_RAASForm_Form_Tabbed($Form->children);
-  } else {
-      $_RAASForm_Form_Plain($Form->children);
-  }
-  ?>
+<form<?php echo $Form->getAttrsString()?>>
+  <?php echo $Form->children->render(); ?>
   <div class="form-horizontal">
     <div class="control-group">
       <div class="controls">

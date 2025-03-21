@@ -149,7 +149,7 @@ class EditCartTypeForm extends RAASForm
                     },
                 ],
                 new FieldSet([
-                    'template' => 'dev_edit_cart_type.mtypes.php',
+                    'template' => 'dev_edit_cart_type.mtypes.inc.php',
                     'name' => 'mtypes',
                     'caption' => $view->_('MATERIAL_TYPES'),
                     'import' => function ($fieldSet) {

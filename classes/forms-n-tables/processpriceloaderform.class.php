@@ -43,14 +43,14 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                     'caption' => $this->view->_('MATERIAL_TYPE'),
                     'export' => 'is_null',
                     'import' => 'is_null',
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                 ],
                 'columns' => [
                     'name' => 'columns',
                     'caption' => $this->view->_('COLUMNS'),
                     'export' => 'is_null',
                     'import' => 'is_null',
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                 ],
                 'cat_id' => [
                     'type' => 'select',
@@ -63,7 +63,7 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                 'offset' => new FieldSet([
                     'name' => 'offset',
                     'caption' => $this->view->_('OFFSET'),
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                     'children' => [
                         'rows' => [
                             'type' => 'number',
@@ -114,12 +114,12 @@ class ProcessPriceLoaderForm extends \RAAS\Form
                     'type' => 'file',
                     'name' => 'file',
                     'caption' => $this->view->_('FILE_TO_UPLOAD'),
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                 ],
                 'show' => new FieldSet([
                     'name' => 'show',
                     'caption' => $this->view->_('SHOW'),
-                    'template' => 'cms/shop/loaders.fields.inc.tmp.php',
+                    'template' => 'cms/shop/loaders.fields.inc.php',
                     'children' => [
                         'show_log' => [
                             'type' => 'checkbox',

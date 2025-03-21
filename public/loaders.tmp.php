@@ -110,7 +110,7 @@ if ($localSuccess ?? null) { ?>
     </div>
 <?php }
 
-include $VIEW->tmp('/form.tmp.php');
+echo $Form->renderFull();
 
 if (($raw_data ?? null) || ($log ?? null)) { ?>
     <h2><?php echo $VIEW->context->_('LOADER_REPORT')?></h2>

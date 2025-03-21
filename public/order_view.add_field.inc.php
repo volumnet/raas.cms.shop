@@ -1,4 +1,7 @@
 <?php
+/**
+ * Отображение дополнительных полей заказа
+ */
 namespace RAAS\CMS\Shop;
 
 use SOME\Text;
@@ -6,14 +9,13 @@ use RAAS\Application;
 use RAAS\Field as RAASField;
 use RAAS\CMS\Sub_Dev as CMSSubDev;
 
-$_RAASForm_Control = function (RAASField $Field) use (
-    &$_RAASForm_Attrs,
-    &$_RAASForm_Options,
-    &$_RAASForm_Checkbox,
-    &$_RAASForm_Control
-) {
-    $Item = $Field->Form->Item;
-    switch ($Field->name) {
+/**
+ * Отображает поле
+ * @param RAASField $field Поле для отображения
+ */
+$_RAASForm_Control = function (RAASField $field) {
+    $Item = $field->Form->Item;
+    switch ($field->name) {
         case 'status_id':
             echo '<strong>' .
                     htmlspecialchars($Item->status->id ? $Item->status->name : Module::i()->view->_('ORDER_STATUS_NEW')) .

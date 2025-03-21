@@ -271,7 +271,7 @@ class EditPriceLoaderForm extends RAASForm
                     'default' => 0
                 ],
                 'columns' => new FieldSet([
-                    'template' => 'dev_edit_priceloader.columns.php',
+                    'template' => 'dev_edit_priceloader.columns.inc.php',
                     'caption' => $this->view->_('COLUMNS'),
                     'import' => function ($fieldSet) {
                         $DATA = [];

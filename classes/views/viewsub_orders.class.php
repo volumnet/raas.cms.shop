@@ -31,10 +31,6 @@ class ViewSub_Orders extends \RAAS\Abstract_Sub_View
         $this->title = $IN['Form']->caption;
         $this->path[] = array('name' => $this->_('ORDERS'), 'href' => $this->url);
         $this->path[] = array('name' => $IN['Item']->parent->name, 'href' => $this->url . '&id=' . $IN['Item']->pid);
-        // $this->path[] = array('href' => $v->url . '&action=edit_block&id=' . (int)$IN['Item']->id, 'name' => $IN['Item']->name . ' вЂ” ' . $this->_('EDITING_BLOCK'));
-        // $this->submenu = $v->pagesMenu(new Page(), $IN['Parent']);
-        $this->js[] = $this->publicURL . '/field.inc.js';
-        $this->js[] = $this->publicURL . '/edit_order.js';
         $this->contextmenu = $this->getOrderContextMenu($IN['Item']);
         $this->template = $IN['Form']->template;
     }
@@ -51,9 +47,6 @@ class ViewSub_Orders extends \RAAS\Abstract_Sub_View
         $this->path[] = array('name' => $this->_('ORDERS'), 'href' => $this->url);
         $this->path[] = array('name' => $IN['Item']->parent->name, 'href' => $this->url . '&id=' . $IN['Item']->pid);
         $this->path[] = array('name' => sprintf($this->_('ORDER_N'), $IN['Item']->id), 'href' => $this->url . '&action=edit&id=' . $IN['Item']->id);
-        // $this->js[] = $this->publicURL . '/field.inc.js';
-        // $this->js[] = $this->publicURL . '/edit_order.js';
-        // $this->contextmenu = $this->getOrderContextMenu($IN['Item']);
         $this->template = $IN['Form']->template;
     }
 
