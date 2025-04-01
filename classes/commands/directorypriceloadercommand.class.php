@@ -85,7 +85,7 @@ class DirectoryPriceLoaderCommand extends Command
             $priceloader = PriceLoader::importByURN($priceloaderURN);
             $this->controller->doLog('Priceloader "' . $priceloaderURN . '" started');
             $data = $priceloader->upload(['name' => basename($file), 'tmp_name' => $file]);
-            if ($data['localError']) {
+            if ($data['localError'] ?? null) {
                 foreach ($data['localError'] as $row) {
                     $this->controller->doLog($row['description']);
                 }

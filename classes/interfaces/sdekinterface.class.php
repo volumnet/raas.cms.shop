@@ -471,7 +471,9 @@ class SDEKInterface extends AbstractInterface
         $data = $get;
         if ($fromCart) {
             $cartGoodsCalculationCallback = $this->cartGoodsCalculationCallback;
-            if (preg_match('/^\\$this-\\>(\\w+)$/umis', $cartGoodsCalculationCallback, $regs)) {
+            if (is_string($cartGoodsCalculationCallback) &&
+                preg_match('/^\\$this-\\>(\\w+)$/umis', $cartGoodsCalculationCallback, $regs)
+            ) {
                 $cartGoodsCalculationCallback = [$this, $regs[1]];
             }
             $data['goods'] = $cartGoodsCalculationCallback();
