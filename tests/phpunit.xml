@@ -64,6 +64,9 @@
     <testsuite name="InheritPageTrait">
       <file>src/InheritPageTraitTest.php</file>
     </testsuite>
+    <testsuite name="AlfaBankInterface">
+      <file>src/interfaces/AlfaBankInterfaceTest.php</file>
+    </testsuite>
     <testsuite name="CartInterface">
       <file>src/interfaces/CartInterfaceTest.php</file>
     </testsuite>
@@ -87,6 +90,9 @@
     </testsuite>
     <testsuite name="PriceloaderInterface">
       <file>src/interfaces/PriceloaderInterfaceTest.php</file>
+    </testsuite>
+    <testsuite name="SberbankAlfaInterface">
+      <file>src/interfaces/SberbankInterfaceTest.php</file>
     </testsuite>
     <testsuite name="SberbankInterface">
       <file>src/interfaces/SberbankInterfaceTest.php</file>
