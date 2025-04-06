@@ -92,7 +92,7 @@
       <file>src/interfaces/PriceloaderInterfaceTest.php</file>
     </testsuite>
     <testsuite name="SberbankAlfaInterface">
-      <file>src/interfaces/SberbankInterfaceTest.php</file>
+      <file>src/interfaces/SberbankAlfaInterfaceTest.php</file>
     </testsuite>
     <testsuite name="SberbankInterface">
       <file>src/interfaces/SberbankInterfaceTest.php</file>

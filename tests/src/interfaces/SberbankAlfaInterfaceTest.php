@@ -20,7 +20,7 @@ use RAAS\CMS\Snippet;
  * Тест объединенного интерфейса Сбербанка и Альфа-Банка
  */
 #[CoversClass(SberbankAlfaInterface::class)]
-class SberbankInterfaceTest extends BaseTest
+class SberbankAlfaInterfaceTest extends BaseTest
 {
     public static $tables = [
         'cms_data',
