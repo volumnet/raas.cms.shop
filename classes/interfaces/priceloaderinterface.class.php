@@ -316,7 +316,7 @@ class PriceloaderInterface extends AbstractInterface
                 $data = array_slice($data, $rows);
             }
             $data = array_filter($data, function ($row) {
-                return count(array_filter($row, 'trim'));
+                return count(array_filter($row, fn($x) => trim((string)$x)));
             }); // Фильтруем пустые строки
         } else {
             $colcounter = max(array_map(function ($x) {
