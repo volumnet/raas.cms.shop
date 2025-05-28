@@ -636,9 +636,10 @@ class PriceloaderInterface extends AbstractInterface
                     return null;
                 }
                 if ($mediaAction == PriceLoader::MEDIA_FIELDS_REPLACE) {
-                    foreach ($oldVal as $att) {
-                        Attachment::delete($att);
-                    }
+                    // 2025-05-23, AVS: убрал удаление самих файлов - они будут удалены при обслуживании (возможно они шарятся с кем-то еще)
+                    // foreach ($oldVal as $att) {
+                    //     Attachment::delete($att);
+                    // }
                     $field->deleteValues();
                 }
 
@@ -675,6 +676,7 @@ class PriceloaderInterface extends AbstractInterface
      * @param array $addedAttachments Добавленные вложения
      * @param Snippet|string|null $preprocessor Сниппет или класс препроцессора поля
      * @param Snippet|string|null $postprocessor Сниппет или класс постпроцессора поля
+     * @return array Данные для вставки в cms_data
      */
     public function convertMediaData(
         array $data,
@@ -1681,7 +1683,6 @@ class PriceloaderInterface extends AbstractInterface
     {
         $st = microtime(true);
         // Загрузка прайса
-        $affectedPagesIds = $affectedMaterialsIds = $log = $rawData = [];
         if (!$file || !is_file($file)) {
             return ['localError' => [[
                 'name' => 'MISSING',
@@ -1968,7 +1969,7 @@ class PriceloaderInterface extends AbstractInterface
         $affectedMaterials = [];
         for ($i = $data['startRow']; $i < count($data['rows']); $i++) {
             $row =& $data['rows'][$i];
-            if (($row['type'] == 'material') && ($row['action'] == 'update') && ($row['entity'] ?? [])) {
+            if ((($row['type'] ?? null) == 'material') && (($row['action'] ?? null) == 'update') && ($row['entity'] ?? [])) {
                 for ($j = 0; $j < count($row['entity']); $j++) {
                     $affectedMaterialsIds[] = (int)$row['entity'][$j]['id'];
                 }
@@ -1990,10 +1991,20 @@ class PriceloaderInterface extends AbstractInterface
             if (($row['contextId'] ?? null) && ($pageMapping[$row['contextId']] ?? null)) {
                 $row['contextId'] = $pageMapping[$row['contextId']];
             }
-            if (($row['type'] == 'page') && ($row['action'] == 'create') && ($row['entity'][0]['id'] ?? null)) {
+            if ((($row['type'] ?? null) == 'page') && (($row['action'] ?? null) == 'create') && ($row['entity'][0]['id'] ?? null)) {
                 $page = $this->createPage($row['contextId'], ($row['entity'][0]['name'] ?? ''), false);
                 $pageMapping[$row['entity'][0]['id']] = (int)$page->id;
                 $row['entity'][0]['id'] = (int)$page->id;
+                $logEntry = [
+                    'text' => sprintf(
+                        Module::i()->view->_('LOG_PAGE_CREATED'),
+                        Package_Sub_Main::i()->url . '&action=edit_page&id=' . (int)$page->id,
+                        $page->name
+                    ),
+                    'row' => $i,
+                    'realrow' => $i,
+                ];
+                EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
             }
         }
 
@@ -2001,7 +2012,7 @@ class PriceloaderInterface extends AbstractInterface
         for ($i = $data['startRow']; $i < count($data['rows']); $i++) {
             $row =& $data['rows'][$i];
             $cells =& $row['cells'];
-            if (($row['type'] == 'material') && ($row['entity'] ?? [])) {
+            if ((($row['type'] ?? null) == 'material') && ($row['entity'] ?? [])) {
                 $itemsSet = [];
                 for ($j = 0; $j < count($row['entity']); $j++) {
                     if ($row['action'] == 'create') {
@@ -2046,6 +2057,17 @@ class PriceloaderInterface extends AbstractInterface
                     if ($row['action'] == 'create') {
                         $row['entity'][$j]['id'] = (int)$item->id;
                     }
+                    $logEntry = [
+                        'text' => sprintf(
+                            Module::i()->view->_('LOG_MATERIAL_' . (($row['action'] == 'create') ? 'CREATED' : 'UPDATED')),
+                            Package_Sub_Main::i()->url . '&action=edit_material&id=' . (int)$item->id,
+                            $item->name
+                        ),
+                        'row' => $i,
+                        'realrow' => $i,
+                    ];
+                    $log[] = $logEntry;
+                    EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
                 }
             }
         }

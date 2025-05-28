@@ -23,6 +23,7 @@ class InheritPageTraitTest extends BaseTest
         'cms_blocks_pages_assoc',
         'cms_blocks_search_pages_assoc',
         'cms_data',
+        'cms_fieldgroups',
         'cms_fields',
         'cms_material_types',
         'cms_material_types_affected_pages_for_materials_cache',

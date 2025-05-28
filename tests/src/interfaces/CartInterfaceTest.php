@@ -34,6 +34,7 @@ class CartInterfaceTest extends BaseTest
         'cms_blocks_material',
         'cms_blocks_pages_assoc',
         'cms_data',
+        'cms_fieldgroups',
         'cms_fields',
         'cms_forms',
         'cms_material_types',

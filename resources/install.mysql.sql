@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS {$DBPREFIX$}{$PACKAGENAME$}_{$MODULENAME$}_priceloade
   create_pages TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Allow to create pages',
   create_materials TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Allow to create materials',
   update_materials TINYINT(1) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Allow to update materials',
+  cats_usage TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Cats usage',
   catalog_offset INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Catalog offset',
   media_action TINYINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Media fields action',
   step_interface TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Step interface',

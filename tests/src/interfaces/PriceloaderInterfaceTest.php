@@ -38,6 +38,7 @@ class PriceloaderInterfaceTest extends BaseTest
         'cms_blocks_pages_assoc',
         'cms_blocks_search_pages_assoc',
         'cms_data',
+        'cms_fieldgroups',
         'cms_fields',
         'cms_forms',
         'cms_material_types',
@@ -642,8 +643,9 @@ class PriceloaderInterfaceTest extends BaseTest
         $sqlResult = Material::_SQL()->getcol([$sqlQuery, [16, 29]]);
 
         $this->assertEquals('files', $result);
-        $this->assertEmpty($att1->id);
-        $this->assertEmpty($att2->id);
+        // 2025-05-27, AVS: сделал, чтобы старые вложения не удалялись (возможно они используются где-то еще)
+        // $this->assertEmpty($att1->id);
+        // $this->assertEmpty($att2->id);
         $this->assertIsArray($sqlResult);
         $this->assertCount(1, $sqlResult);
         $this->assertEquals('{"vis":1,"name":"","description":"","attachment":999}', $sqlResult[0]);

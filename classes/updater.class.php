@@ -59,6 +59,10 @@ class Updater extends \RAAS\Updater
         if (!$cartTypes) {
             $w->createIShop();
         }
+        $v = (string)($this->Context->registryGet('baseVersion') ?? '');
+        if (version_compare($v, '4.5.14') < 0) {
+            $this->update20250520();
+        }
     }
 
 
@@ -306,6 +310,21 @@ class Updater extends \RAAS\Updater
         ) {
             $sqlQuery = "ALTER TABLE cms_shop_priceloaders
                            ADD step_interface TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Step interface'";
+            $this->SQL->query($sqlQuery);
+        }
+    }
+
+
+    /**
+     * Восстанавливаем забытое поле "Использование категорий"
+     */
+    public function update20250520()
+    {
+        if (in_array(SOME::_dbprefix() . "cms_shop_priceloaders", $this->tables) &&
+            !in_array('cats_usage', $this->columns(SOME::_dbprefix() . "cms_shop_priceloaders"))
+        ) {
+            $sqlQuery = "ALTER TABLE cms_shop_priceloaders
+                           ADD cats_usage TINYINT(1) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Cats usage' AFTER update_materials";
             $this->SQL->query($sqlQuery);
         }
     }

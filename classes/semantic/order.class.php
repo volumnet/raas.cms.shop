@@ -111,6 +111,11 @@ class Order extends Feedback
                 $result = $this->parent->getSizes($this->items);
                 return $result;
                 break;
+            case 'id':
+            case 'pid':
+            case 'parent':
+                return SOME::__get($var); // Чтобы не зацикливалось на Feedback
+                break;
             default:
                 return parent::__get($var);
                 break;
@@ -143,9 +148,11 @@ class Order extends Feedback
 
     protected function _fields()
     {
-        $temp = $this->parent->Form->fields;
+        $cartType = $this->parent;
+        $cartForm = $cartType->Form;
+        $fields = $cartForm->fields;
         $arr = [];
-        foreach ($temp as $row) {
+        foreach ($fields as $row) {
             $row->Owner = $this;
             $arr[$row->urn] = $row;
         }

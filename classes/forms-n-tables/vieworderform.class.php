@@ -6,12 +6,13 @@ declare(strict_types=1);
 
 namespace RAAS\CMS\Shop;
 
-use RAAS\Form as RAASForm;
-use RAAS\FormTab;
+use RAAS\Application;
 use RAAS\Field as RAASField;
 use RAAS\FieldSet;
+use RAAS\Form as RAASForm;
+use RAAS\FormTab;
+use RAAS\CMS\Feedback;
 use RAAS\CMS\ViewFeedbackForm;
-use RAAS\Application;
 
 /**
  * Форма просмотра заказа
@@ -33,14 +34,16 @@ class ViewOrderForm extends ViewFeedbackForm
 
     public function __construct(array $params = [])
     {
+        $item = $params['Item'] ?? new Order();
+        $params['Item'] ??= $item;
         parent::__construct($params);
-        $this->caption = sprintf($this->view->_('ORDER_N'), (int)($this->Item ? $this->Item->id : 0));
+        $this->caption = sprintf($this->view->_('ORDER_N'), (int)($item->id ?? 0));
     }
 
 
     protected function getParams(array $params = []): array
     {
-        $arr = parent::getParams();
+        $arr = parent::getParams($params);
         $arr['action'] = '#history';
         $arr['commit'] = function (RAASForm $Form) {
             $history = new Order_History();
@@ -62,26 +65,26 @@ class ViewOrderForm extends ViewFeedbackForm
     }
 
 
-    protected function getChildren(): array
+    protected function getChildren(Feedback $item): array
     {
-        return $this->getChildrenWithStatuses();
+        return $this->getChildrenWithStatuses($item);
     }
 
 
-    protected function getChildrenWithStatuses(): array
+    protected function getChildrenWithStatuses(Feedback $item): array
     {
         $arr = [];
         $arr['common'] = new FormTab([
             'name' => 'common',
             'caption' => $this->view->_('ORDER_DETAILS'),
-            'children' => $this->getDetails()
+            'children' => $this->getDetails($item)
         ]);
         $arr['history'] = new FormTab([
             'name' => 'history',
             'caption' => $this->view->_('ORDER_HISTORY'),
             'meta' => [
                 'Table' => new OrderHistoryTable([
-                    'Item' => $this->Item
+                    'Item' => $item
                 ])
             ],
             'template' => 'order_view.history.inc.php',
@@ -94,7 +97,7 @@ class ViewOrderForm extends ViewFeedbackForm
                     'caption' => $this->view->_('ORDER_STATUS'),
                     'placeholder' => $this->view->_('ORDER_STATUS_NEW'),
                     'children' => ['Set' => Order_Status::getSet()],
-                    'default' => $this->Item ? $this->Item->status_id : 0,
+                    'default' => $item ? $item->status_id : 0,
                 ],
                 // 2021-01-04, AVS: сделал выпадающее меню вместо галочки, чтобы
                 // не сбрасывался статус оплаты при сохранении, когда фоном
@@ -125,52 +128,90 @@ class ViewOrderForm extends ViewFeedbackForm
         return $arr;
     }
 
-
-    protected function getDetails(): array
+    /**
+     * Получает список дочерних узлов
+     * @param Feedback $item Заявка для получения
+     * @return array <pre><code>array<FormTab|FieldSet|RAASField></code></pre>
+     */
+    protected function getDetails(Feedback $item): array
     {
-        $arr = [];
-        $arr['post_date'] = $this->getFeedbackField([
-            'name' => 'post_date',
-            'caption' => $this->view->_('POST_DATE')
+        $fieldGroups = $item->parent->Form->fieldGroups;
+        $result = [];
+        $itemsFieldSet = new FieldSet([
+            'name' => 'items',
+            'template' => 'order_view.items.inc.php',
+            'caption' => (count($fieldGroups) > 1) ? $this->view->_('GOODS') : '',
+            'meta' => [
+                'Table' => new OrderItemsTable([
+                    'Item' => $item,
+                    'items' => $item->items ?? [],
+                ])
+            ]
         ]);
+        if (count($fieldGroups) > 1) {
+            foreach ($fieldGroups as $fieldGroupURN => $fieldGroup) {
+                $fieldSetURN = ($fieldGroupURN ? ('fieldset.' . $fieldGroupURN) : 'common');
+                $fieldSetData = [
+                    'name' => $fieldSetURN,
+                    'caption' => $fieldGroup->name ?: $this->view->_('GENERAL'),
+                    'children' => [],
+                ];
+                if (!$fieldGroupURN) {
+                    $fieldSetData['children'] = $this->getPreStat($item);
+                }
+                $fieldSetData['children'] = array_merge(
+                    $fieldSetData['children'],
+                    $this->getDetailsFields($item, $fieldGroup)
+                );
+                $result[$fieldSetURN] = new FieldSet($fieldSetData);
+            }
+            $result['items'] = $itemsFieldSet;
+            $result['stat'] = new FieldSet([
+                'name' => 'stat',
+                'caption' => $this->view->_('SERVICE'),
+                'children' => $this->getStat($item),
+            ]);
+        } else {
+            $result = array_merge(
+                $this->getPreStat($item),
+                $this->getDetailsFields($item),
+                ['items' => $itemsFieldSet],
+                $this->getStat($item),
+            );
+        }
+        return $result;
+    }
+
+
+    protected function getPreStat(Feedback $item): array
+    {
+        $result = parent::getPreStat($item);
         if (Order_Status::getSet()) {
-            $arr['status_id'] = [
+            $result['status_id'] = [
                 'name' => 'status_id',
                 'caption' => $this->view->_('ORDER_STATUS'),
                 'template' => 'order_view.add_field.inc.php'
             ];
-            $arr['paid'] = [
+            $result['paid'] = [
                 'name' => 'paid',
                 'caption' => $this->view->_('PAYMENT_STATUS'),
                 'template' => 'order_view.add_field.inc.php',
                 'import' => 'is_null',
             ];
         }
-        $arr = array_merge($arr, $this->getDetailsFields());
-        $arr['items'] = new FieldSet([
-            'name' => 'items',
-            'template' => 'order_view.items.inc.php',
-            'meta' => [
-                'Table' => new OrderItemsTable([
-                    'Item' => $this->Item,
-                    'items' => $this->meta['items'] ?? [],
-                ])
-            ]
-        ]);
+        return $result;
+    }
+
+
+    protected function getStat(Feedback $item): array
+    {
+        $arr = parent::getStat($item);
         $arr['pid'] = [
             'name' => 'pid',
             'caption' => $this->view->_('CART_TYPE'),
             'template' => 'order_view.add_field.inc.php'
         ];
-        $arr = array_merge($arr, $this->getStat());
-        return $arr;
-    }
-
-
-    protected function getStat(): array
-    {
-        $arr = parent::getStat();
-        if ($this->Item && $this->Item->paymentInterface && $this->Item->paymentInterface->id) {
+        if ($item && $item->paymentInterface && $item->paymentInterface->id) {
             $arr['payment_interface_id'] = [
                 'name' => 'payment_interface_id',
                 'caption' => $this->view->_('PAID_VIA'),

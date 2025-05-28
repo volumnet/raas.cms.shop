@@ -23,8 +23,10 @@ class ViewOrderFormTest extends BaseTest
 {
     public static $tables = [
         'cms_data',
+        'cms_fieldgroups',
         'cms_fields',
         'cms_forms',
+        'cms_materials',
         'cms_shop_cart_types',
         'cms_shop_imageloaders',
         'cms_shop_orders',
