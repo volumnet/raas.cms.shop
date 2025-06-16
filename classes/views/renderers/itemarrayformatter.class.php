@@ -53,7 +53,7 @@ class ItemArrayFormatter
         ];
 
         if ($this->usePropsCache) {
-            $propsCache = (array)json_decode($item->cache_shop_props, true);
+            $propsCache = (array)json_decode($this->item->cache_shop_props, true);
         }
 
         if ($this->usePropsCache && isset($propsCache['price']['values'][0])) {
