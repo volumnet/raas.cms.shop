@@ -160,7 +160,7 @@ class TochkaInterfaceTest extends BaseTest
 
         $result = $interface->exec('payments', [], true);
 
-        $this->assertEquals(400, $result['code']);
+        $this->assertEquals('The access token is missing', $result['message']);
     }
 
 
@@ -176,7 +176,7 @@ class TochkaInterfaceTest extends BaseTest
         $interface->expects($this->once())->method('doLog'); // Один на получение токена, один - на собственно запрос
         $result = $interface->exec('payments', ['aaa' => 'bbb'], true);
 
-        $this->assertEquals(400, $result['code']);
+        $this->assertEquals('The access token is missing', $result['message']);
     }
 
 
@@ -193,7 +193,7 @@ class TochkaInterfaceTest extends BaseTest
         $interface->expects($this->once())->method('doLog');
         $result = $interface->exec('payments', ['aaa' => 'bbb'], true, true);
 
-        $this->assertEquals([], $result);
+        $this->assertEquals(['message' => 'The access token is missing'], $result);
     }
 
 
