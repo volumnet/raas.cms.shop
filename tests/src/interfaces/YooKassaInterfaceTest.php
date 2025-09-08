@@ -217,9 +217,9 @@ class YooKassaInterfaceTest extends BaseTest
 
         $this->assertEquals('error', $result['type']);
         $this->assertNotEmpty($result['id']);
-        $this->assertEquals('invalid_request', $result['code']);
-        $this->assertEquals('Invalid request parameter', $result['description']);
-        $this->assertEquals('amount', $result['parameter']);
+        $this->assertEquals('invalid_credentials', $result['code']);
+        $this->assertEquals('Incorrect password format in the Authorization header. Use Secret key issued in Merchant Profile as the password', $result['description']);
+        $this->assertEquals('Authorization', $result['parameter']);
     }
 
 

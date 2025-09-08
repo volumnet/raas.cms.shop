@@ -92,7 +92,7 @@ class CartInterfaceExtended extends CartInterface
      */
     public function getCities()
     {
-        $cities = include Application::i()->baseDir . '/cities.brief.php';
+        $cities = @include Application::i()->baseDir . '/cities.brief.php';
         if ($cities) {
             $this->cities = $cities;
         }
@@ -711,7 +711,7 @@ class CartInterfaceExtended extends CartInterface
             $promoMaterialType = Material_Type::importByURN('discount');
             $sqlQuery = "SELECT pid FROM cms_data WHERE fid = ? AND value = ?";
             $sqlBind = [
-                (int)$promoMaterialType->fields['code']->id,
+                (int)($promoMaterialType->fields['code']->id ?? 0),
                 $post['promo'],
             ];
             $sqlResult = Material::_SQL()->getvalue([$sqlQuery, $sqlBind]);

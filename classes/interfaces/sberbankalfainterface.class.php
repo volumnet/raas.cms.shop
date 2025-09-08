@@ -84,7 +84,7 @@ abstract class SberbankAlfaInterface extends EPayInterface
         if ($isTest) {
             $this->doLogRequest($url, '', $result);
         }
-        $json = @json_decode($result, true);
+        $json = @json_decode((string)$result, true);
         $json = (array)$json;
         return $json;
     }
