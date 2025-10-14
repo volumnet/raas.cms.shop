@@ -494,12 +494,16 @@ abstract class EPayInterface extends AbstractInterface
     public function result(Order $order, Block_Cart $block, Page $page): array
     {
         if ($order->id) {
-            $orderIsPaid = $this->getOrderIsPaid($order, $block, $page);
-            if ($orderIsPaid) {
-                $this->applyPaidStatus($order);
-                $out['success'][(int)$block->id] = sprintf(ORDER_SUCCESSFULLY_PAID, $order->id);
-            } else {
-                $out['localError'] = ['order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)];
+            try {
+                $orderIsPaid = $this->getOrderIsPaid($order, $block, $page);
+                if ($orderIsPaid) {
+                    $this->applyPaidStatus($order);
+                    $out['success'][(int)$block->id] = sprintf(ORDER_SUCCESSFULLY_PAID, $order->id);
+                } else {
+                    $out['localError'] = ['order' => sprintf(ORDER_HAS_NOT_BEEN_PAID, $order->id)];
+                }
+            } catch (Exception $e) {
+                $out['localError'] = ['order' => $e->getMessage()];
             }
             if ($webhookData = $this->checkWebhook()) {
                 // @codeCoverageIgnoreStart

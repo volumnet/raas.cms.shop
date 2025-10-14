@@ -296,7 +296,7 @@ class YMLInterface extends BlockInterface
             $temp[] = $key . '="' . htmlspecialchars((string)$val) . '"';
         }
         $text = '<category ' . implode(' ', $temp) . '>'
-              .    htmlspecialchars(trim($page->name))
+              .    htmlspecialchars(trim((string)$page->name))
               . '</category>';
         return $text;
     }

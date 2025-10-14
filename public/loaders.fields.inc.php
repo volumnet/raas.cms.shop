@@ -60,8 +60,8 @@ $_RAASForm_Control = function (RAASField $field) {
             $uniqueFieldName = '';
             if (is_numeric($loader->ufid)) {
                 $uniqueFieldName = $loader->Unique_Field->name;
-            } elseif ($column->fid) {
-                $uniqueFieldName = View_Web::i()->context->_(mb_strtoupper($column->fid));
+            } elseif ($loader->ufid) {
+                $uniqueFieldName = View_Web::i()->context->_(mb_strtoupper($loader->ufid));
             }
             $fileFormat = '';
             if ($uniqueFieldName) {
