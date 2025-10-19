@@ -129,6 +129,7 @@ class RecalculatePriceCommand extends Command
         // var_dump($sqlArr); exit;
         if ($sqlArr) {
             Material::_SQL()->add('cms_data', $sqlArr);
+            Module::i()->registrySet('prices_recalculated', date('Y-m-d H:i:s'));
         }
     }
 
@@ -152,7 +153,7 @@ class RecalculatePriceCommand extends Command
         $sqlResult = Material::_SQL()->get([$sqlQuery, $sqlBind]);
         foreach ($sqlResult as $sqlRow) {
             if ($sqlRow['value']) {
-                $priceRatioMap[trim($sqlRow['pid'])] = (int)$sqlRow['value'];
+                $priceRatioMap[trim((string)$sqlRow['pid'])] = (int)$sqlRow['value'];
             }
         }
 
