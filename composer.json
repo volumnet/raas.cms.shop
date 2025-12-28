@@ -1,7 +1,7 @@
 {
   "name": "volumnet/raas.cms.shop",
   "description": "RAAS.CMS.Shop",
-  "version": "4.5.19",
+  "version": "4.5.20",
   "license": "GPL-3.0-or-later",
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -22,6 +22,8 @@
     }
   ],
   "autoload": {
-    "classmap": ["classes/"]
+    "classmap": [
+      "classes/"
+    ]
   }
 }

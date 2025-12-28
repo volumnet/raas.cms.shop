@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Файл стандартного интерфейса корзины
  */
@@ -86,8 +87,9 @@ class CartInterface extends FormInterface
         $result = [];
         $cartType = new Cart_Type((int)$this->block->cart_type);
         $user = RAASControllerFrontend::i()->user;
-        $cart =@ new Cart($cartType, $user); // Для подавления ошибки "...headers already sent"
+        $cart = @ new Cart($cartType, $user); // Для подавления ошибки "...headers already sent"
         $action = $this->get['action'] ?? '';
+        $form = $cartType->Form;
 
         switch ($action) {
             case 'set':
@@ -155,7 +157,6 @@ class CartInterface extends FormInterface
                         $orderToRepeat = $temp;
                     }
                 }
-                $form = $cartType->Form;
                 if (isset($this->post['amount'])) {
                     foreach ((array)$this->post['amount'] as $key => $val) {
                         list($id, $meta) = explode('_', $key);
@@ -203,8 +204,8 @@ class CartInterface extends FormInterface
                                 }
                                 if ($debug) {
                                     return ['redirectUrl' => $url];
-                                // @codeCoverageIgnoreStart
-                                // Не можем проверить редирект
+                                    // @codeCoverageIgnoreStart
+                                    // Не можем проверить редирект
                                 } else {
                                     new Redirector($url);
                                 }
@@ -235,7 +236,6 @@ class CartInterface extends FormInterface
                         $result['localError'] = [];
                     }
                 }
-                $result['Form'] = $form;
                 break;
         }
         if ((isset($this->get['back']) && $this->get['back']) ||
@@ -251,8 +251,8 @@ class CartInterface extends FormInterface
             }
             if ($debug) {
                 return ['redirectUrl' => $url];
-            // @codeCoverageIgnoreStart
-            // Не можем проверить редирект
+                // @codeCoverageIgnoreStart
+                // Не можем проверить редирект
             } else {
                 new Redirector($url);
             }
@@ -260,6 +260,7 @@ class CartInterface extends FormInterface
         }
 
         $result['Cart'] = $cart;
+        $result['Form'] = $form;
         $result['Cart_Type'] = $cartType;
         $result['convertMeta'] = [$this, 'convertMeta'];
         $result['interface'] = $this;
@@ -291,8 +292,8 @@ class CartInterface extends FormInterface
             if ($epayResult['success'][$this->block->id] ?? null) {
                 if ($debug) {
                     $result['@debug.action'] = '$cart->clear();';
-                // @codeCoverageIgnoreStart
-                // Не можем проверить установку корзины - Cannot modify header information - headers already sent
+                    // @codeCoverageIgnoreStart
+                    // Не можем проверить установку корзины - Cannot modify header information - headers already sent
                 } else {
                     $cart->clear();
                 }
@@ -680,8 +681,8 @@ class CartInterface extends FormInterface
                     'attachments' => $attachments,
                     'embedded' => $embedded,
                 ];
-            // @codeCoverageIgnoreStart
-            // Не можем проверить отправку
+                // @codeCoverageIgnoreStart
+                // Не можем проверить отправку
             } else {
                 Application::i()->sendmail(
                     $emails,
@@ -706,8 +707,8 @@ class CartInterface extends FormInterface
                     'from' => $fromName,
                     'fromEmail' => $fromEmail,
                 ];
-            // @codeCoverageIgnoreStart
-            // Не можем проверить отправку письма
+                // @codeCoverageIgnoreStart
+                // Не можем проверить отправку письма
             } else {
                 Application::i()->sendmail(
                     $smsEmails,
@@ -730,8 +731,8 @@ class CartInterface extends FormInterface
                 ]);
                 if ($debug || !Application::i()->prod) {
                     $debugMessages['smsPhones'][] = $url;
-                // Не можем проверить отправку SMS
-                // @codeCoverageIgnoreStart
+                    // Не можем проверить отправку SMS
+                    // @codeCoverageIgnoreStart
                 } else {
                     $result = file_get_contents($url);
                 }
