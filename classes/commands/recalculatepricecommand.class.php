@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Пересчет цен
  */
@@ -27,7 +28,7 @@ class RecalculatePriceCommand extends Command
 
     /**
      * Выполняет команду
-     * @param string materialTypeURN URN типа материалов каталога продукции
+     * @param string $materialTypeURN URN типа материалов каталога продукции
      * @param string $pageDiscountFieldURN URN поля страниц "Скидка"
      * @param string $priceFieldURN URN поля товаров "Цена"
      * @param string $basePriceFieldURN URN поля товаров "Базовая (старая) цена"
