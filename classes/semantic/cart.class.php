@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Корзина
  */
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
@@ -408,7 +410,7 @@ class Cart
         if ($fieldCallback) {
             $price = $fieldCallback($material);
         } else {
-            $price = number_format($material->{$priceURN}, 2, '.', '');
+            $price = number_format((float)$material->{$priceURN}, 2, '.', '');
         }
         return (float)$price;
     }
