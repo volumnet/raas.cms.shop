@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Форматтер массива для товара
  */
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\CMS\Material;
@@ -93,7 +95,7 @@ class ItemArrayFormatter
         }
 
         if ($this->usePropsCache && isset($propsCache['images']['values'][0])) {
-            $result['image'] = $propsCache['images']['values'][0]['smallURL'];
+            $result['image'] = '/' . $propsCache['images']['values'][0]['smallURL'];
         } elseif ($visImages = $this->item->visImages) {
             $result['image'] = '/' . $this->item->visImages[0]->smallURL;
         } else {
