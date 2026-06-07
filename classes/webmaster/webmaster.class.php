@@ -1,4 +1,5 @@
 <?php
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Attachment;
@@ -455,10 +456,10 @@ RAAS_CMS_SHOP_FIELDS_SOURCE_TMP;
                 'params' => 'cdek[authLogin]='
                     . '&cdek[secure]='
                     . '&cdek[senderCityId]=250'
-                    . '&cdek[pickupTariff]=136'
+                    . '&cdek[pickupTariff]=136' // https://apidoc.cdek.ru/#tag/common/Prilozheniya/Prilozhenie-4.-Tarify-SDEK
                     . '&cdek[deliveryTariff]=137'
                     . '&russianpost[senderIndex]='
-                    . '&russianpost[pickupTariff]=23030'
+                    . '&russianpost[pickupTariff]=23030' // https://tariff.pochta.ru/post-calculator-api.pdf
                     . '&russianpost[deliveryTariff]=23030'
                     . '&russianpost[services][]=41'
                     . '&russianpost[services][]=42'

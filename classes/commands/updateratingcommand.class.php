@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Команда обновления рейтинга товаров
  */
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Command;
@@ -197,7 +199,7 @@ class UpdateRatingCommand extends Command
             $lastModifiedPageTimestamp
         );
 
-        $cacheUpdated = strtotime(Module::i()->registryGet('rating_updated'));
+        $cacheUpdated = strtotime((string)Module::i()->registryGet('rating_updated'));
         return $lastModified > $cacheUpdated;
     }
 }

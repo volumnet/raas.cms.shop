@@ -1,7 +1,9 @@
 <?php
+
 /**
  * Файл класса команды обновления файла Яндекс-Маркета
  */
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
@@ -34,6 +36,7 @@ class UpdateYMLCommand extends Command
         $limit = 0
     ) {
         $t = $this;
+        $page = $block = null;
 
         if ($outputFile === null) {
             $outputFile = Application::i()->baseDir . '/yandex.market.xml';
@@ -98,8 +101,8 @@ class UpdateYMLCommand extends Command
         if ($https) {
             $_SERVER['HTTPS'] = 'on';
         }
-        $_SERVER['HTTP_HOST'] = parse_url($page->domain, PHP_URL_HOST);
-        if ($page->id && $block) {
+        if ($page && $page->id && $block) {
+            $_SERVER['HTTP_HOST'] = parse_url($page->domain, PHP_URL_HOST);
             $interface = new YMLInterface(
                 $block,
                 $page,
