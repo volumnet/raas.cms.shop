@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Стандартный интерфейс загрузчика прайсов
  *
@@ -74,13 +75,13 @@ class PriceloaderInterface extends AbstractInterface
      * Максимальное время загрузки прайса
      * @deprecated
      */
-    const UPLOAD_MAX_TIME = 3600;
+    public const UPLOAD_MAX_TIME = 3600;
 
     /**
      * Максимальное время выгрузки прайса
      * @deprecated
      */
-    const DOWNLOAD_MAX_TIME = 900;
+    public const DOWNLOAD_MAX_TIME = 900;
 
     /**
      * Загрузчик прайсов
@@ -277,7 +278,7 @@ class PriceloaderInterface extends AbstractInterface
         $text = $converter->export($data, $page, $rows, $cols, $encoding);
         if ($debug) {
             return $text;
-        // @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
         } else {
             while (ob_get_level()) {
                 ob_end_clean();
@@ -316,7 +317,7 @@ class PriceloaderInterface extends AbstractInterface
                 $data = array_slice($data, $rows);
             }
             $data = array_filter($data, function ($row) {
-                return count(array_filter($row, fn($x) => trim((string)$x)));
+                return count(array_filter($row, fn ($x) => trim((string)$x)));
             }); // Фильтруем пустые строки
         } else {
             $colcounter = max(array_map(function ($x) {
@@ -1146,6 +1147,13 @@ class PriceloaderInterface extends AbstractInterface
                 'realrow' => $i + $rows,
             ];
             $log[] = $logEntry;
+            if ($uniqueIndex !== null &&
+                isset($dataRow[$uniqueIndex]) &&
+                (!is_scalar($dataRow[$uniqueIndex]) || trim((string)$dataRow[$uniqueIndex])) &&
+                !in_array($item->id, $this->assoc[$dataRow[$uniqueIndex]] ?? [])
+            ) {
+                $this->assoc[$dataRow[$uniqueIndex]][] = $item->id;
+            }
             EventProcessor::emit('priceLoaderLog', $this, $logEntry, false);
             $item->rollback();
             unset($item);
@@ -1270,8 +1278,8 @@ class PriceloaderInterface extends AbstractInterface
         $backtrace = [];
         $context = $page;
         $virtualLevel = null; // При запрете создавать новые категории, сюда
-                              // устанавливается уровень не найденной категории
-                              // (чтобы игнорировать дочерние)
+        // устанавливается уровень не найденной категории
+        // (чтобы игнорировать дочерние)
 
         for ($i = 0; $i < count($data); $i++) {
             $dataRow = $data[$i];
@@ -1829,8 +1837,8 @@ class PriceloaderInterface extends AbstractInterface
         $backtrace = [];
         $contextId = $rootId;
         $virtualLevel = null; // При запрете создавать новые категории, сюда
-                              // устанавливается уровень не найденной категории
-                              // (чтобы игнорировать дочерние)
+        // устанавливается уровень не найденной категории
+        // (чтобы игнорировать дочерние)
         // Очистим шапку
         for ($i = 0; $i < $rows; $i++) {
             unset(
@@ -1840,6 +1848,7 @@ class PriceloaderInterface extends AbstractInterface
                 $data['rows'][$i]['entity']
             );
         }
+        $uniqueValuesToTmpItemsAssoc = [];
         for ($i = $rows; $i < count($data['rows']); $i++) {
             $dataRow = array_map(function ($x) {
                 return $x['rawValue'];
@@ -1868,6 +1877,13 @@ class PriceloaderInterface extends AbstractInterface
                 }
                 // Найдем соответствия
                 $itemSet = $this->getItems($this->loader, $dataRow, $uniqueIndex);
+                $uniqueValue = null;
+                if ($uniqueIndex !== null &&
+                    isset($dataRow[$uniqueIndex]) &&
+                    (!is_scalar($dataRow[$uniqueIndex]) || trim((string)$dataRow[$uniqueIndex]))
+                ) {
+                    $uniqueValue = $dataRow[$uniqueIndex];
+                }
                 if (($itemSet && $this->loader->update_materials) || (!$itemSet && $this->loader->create_materials)) {
                     $data['rows'][$i]['type'] = 'material';
                     if ($itemSet) {
@@ -1879,13 +1895,24 @@ class PriceloaderInterface extends AbstractInterface
                                 'level' => count($backtrace),
                             ];
                         }
+                    } elseif ($uniqueValue && isset($uniqueValuesToTmpItemsAssoc[$uniqueValue])) {
+                        $data['rows'][$i]['action'] = 'update';
+                        $data['rows'][$i]['entity'][] = $uniqueValuesToTmpItemsAssoc[$uniqueValue];
                     } else {
                         $data['rows'][$i]['action'] = 'create';
-                        $data['rows'][$i]['entity'][] = [
-                            'id' => 'tmp.' . uniqid(''),
+                        $tmpId = 'tmp.' . uniqid('');
+                        $tmpEntity = [
+                            'id' => $tmpId,
                             'name' => $name,
                             'level' => count($backtrace),
                         ];
+                        $data['rows'][$i]['entity'][] = $tmpEntity;
+                        if ($uniqueIndex !== null &&
+                            isset($dataRow[$uniqueIndex]) &&
+                            (!is_scalar($dataRow[$uniqueIndex]) || trim((string)$dataRow[$uniqueIndex]))
+                        ) {
+                            $uniqueValuesToTmpItemsAssoc[$uniqueValue] = $tmpEntity;
+                        }
                     }
                 }
             } elseif ($this->isPageDataRow($dataRow)) {
@@ -1957,7 +1984,7 @@ class PriceloaderInterface extends AbstractInterface
         $uniqueColumn = $this->loader->uniqueColumn;
         $uniqueIndex = null;
         for ($i = 0; $i < count($data['columns']); $i++) {
-            $dataColumn =& $data['columns'][$i];
+            $dataColumn = & $data['columns'][$i];
             $columns[$i] = $dataColumn['columnId'] ? (new PriceLoader_Column($dataColumn['columnId'])) : null;
             if ($dataColumn['columnId'] && ($dataColumn['columnId'] == $uniqueColumn->id)) {
                 $uniqueIndex = $i;
@@ -1968,7 +1995,7 @@ class PriceloaderInterface extends AbstractInterface
         $affectedMaterialsIds = [];
         $affectedMaterials = [];
         for ($i = $data['startRow']; $i < count($data['rows']); $i++) {
-            $row =& $data['rows'][$i];
+            $row = & $data['rows'][$i];
             if ((($row['type'] ?? null) == 'material') && (($row['action'] ?? null) == 'update') && ($row['entity'] ?? [])) {
                 for ($j = 0; $j < count($row['entity']); $j++) {
                     $affectedMaterialsIds[] = (int)$row['entity'][$j]['id'];
@@ -1987,7 +2014,7 @@ class PriceloaderInterface extends AbstractInterface
 
         // Создадим недостающие страницы
         for ($i = $data['startRow']; $i < count($data['rows']); $i++) {
-            $row =& $data['rows'][$i];
+            $row = & $data['rows'][$i];
             if (($row['contextId'] ?? null) && ($pageMapping[$row['contextId']] ?? null)) {
                 $row['contextId'] = $pageMapping[$row['contextId']];
             }
@@ -2010,13 +2037,15 @@ class PriceloaderInterface extends AbstractInterface
 
         // Обновим/создадим материалы
         for ($i = $data['startRow']; $i < count($data['rows']); $i++) {
-            $row =& $data['rows'][$i];
-            $cells =& $row['cells'];
+            $row = & $data['rows'][$i];
+            $cells = & $row['cells'];
             if ((($row['type'] ?? null) == 'material') && ($row['entity'] ?? [])) {
                 $itemsSet = [];
                 for ($j = 0; $j < count($row['entity']); $j++) {
                     if ($row['action'] == 'create') {
-                        $itemsSet[] = $this->createItem($this->loader);
+                        $createdItem = $this->createItem($this->loader);
+                        $itemsSet[] = $createdItem;
+                        $affectedMaterials[(string)$row['entity'][$j]['id']] = $createdItem;
                     } else {
                         $itemsSet[] = $affectedMaterials[(string)$row['entity'][$j]['id']];
                     }
@@ -2054,7 +2083,7 @@ class PriceloaderInterface extends AbstractInterface
                     }
                     // $item->rollback();
                     $row['entity'][$j]['name'] = $item->name;
-                    if ($row['action'] == 'create') {
+                    if (($row['action'] == 'create') || (($row['action'] == 'update') && stristr($row['entity'][$j]['id'], 'tmp.'))) {
                         $row['entity'][$j]['id'] = (int)$item->id;
                     }
                     $logEntry = [

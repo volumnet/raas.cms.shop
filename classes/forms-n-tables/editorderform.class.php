@@ -1,4 +1,5 @@
 <?php
+
 namespace RAAS\CMS\Shop;
 
 use RAAS\Application;
@@ -67,8 +68,8 @@ class EditOrderForm extends Form
                         }
                     }
 
-                    $itemsOld = Order::getItemsTextArr($Item->items);
-                    $itemsNew = Order::getItemsTextArr($Item->meta_items);
+                    $itemsOld = Order::getItemsTextArr((array)$Item->items);
+                    $itemsNew = Order::getItemsTextArr((array)$Item->meta_items);
                     if ($deletedItems = array_diff($itemsOld, $itemsNew)) {
                         $dataChanged[$view->_('DELETED_GOODS')] = implode("\n", $deletedItems);
                     }
@@ -157,7 +158,7 @@ class EditOrderForm extends Form
             'export' => function ($FieldSet) {
                 $Item = $FieldSet->Form->Item;
                 $items = [];
-                foreach ($_POST['material'] as $key => $val) {
+                foreach ((array)($_POST['material'] ?? []) as $key => $val) {
                     $row = new Material($val);
                     if (($_POST['amount'][$key] > 0)) {
                         $items[] = [
